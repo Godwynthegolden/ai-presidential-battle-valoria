@@ -1,0 +1,135 @@
+import { Candidate } from './candidate';
+
+export type GamePhase = 
+  | 'IDLE'             // Before starting
+  | 'CAMPAIGN'         // Round 1 speeches (11 candidates)
+  | 'ATTACK'           // Candidate attacks another
+  | 'VOTE_SECRET'      // Secret voting process
+  | 'VOTE_REVEAL'      // Dramatic reveal of votes
+  | 'ELIMINATION'      // Announcing eliminated candidate + last words
+  | 'FINAL_SPEECHES'   // Top 3 candidates final appeal
+  | 'FINAL_VOTE'       // All 11 candidates vote for the winner
+  | 'FINAL_REVEAL'     // Dramatic reveal of final jury votes
+  | 'WINNER';          // President declared + victory speech
+
+export interface SpeechEvent {
+  id: string;
+  candidateId: string;
+  phase: 'campaign' | 'final_speech' | 'victory' | 'exit';
+  round: number;
+  text: string;
+  timestamp: number;
+}
+
+export interface AttackEvent {
+  id: string;
+  round: number;
+  attackerId: string;
+  targetId: string;
+  text: string;
+  timestamp: number;
+}
+
+export interface VoteRecord {
+  voterId: string;
+  targetId: string;
+  reason?: string; // Private reasoning (hidden from audience during game)
+}
+
+export interface RoundVoteTally {
+  round: number;
+  votes: VoteRecord[];
+  tally: Record<string, number>;
+  eliminatedId: string | null;
+  tieBreakerOccurred?: boolean;
+}
+
+export interface EliminatedCandidateInfo {
+  candidateId: string;
+  eliminatedInRound: number;
+  voteCount: number;
+  exitWords: string;
+}
+
+export interface GameState {
+  phase: GamePhase;
+  round: number;
+  participatingCandidateIds: string[]; // Candidates chosen to participate in this election
+  activeCandidateIds: string[];        // Remaining alive candidates in current round
+  eliminatedCandidates: EliminatedCandidateInfo[];
+  currentSpeakerIndex: number;
+  
+  // History collections
+  campaignSpeeches: Record<string, string>; // candidateId -> text
+  finalSpeeches: Record<string, string>;    // candidateId -> text
+  attacksByRound: Record<number, AttackEvent[]>;
+  votesByRound: Record<number, RoundVoteTally>;
+  finalVoteTally: RoundVoteTally | null;
+  victorySpeech: string | null;
+  winnerId: string | null;
+  
+  // Active Stage Presentation
+  stage: {
+    speakerId: string | null;
+    targetId: string | null;
+    actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
+    headline: string;
+    content: string;
+    isLoading: boolean;
+    isRevealingVotes: boolean;
+    revealedVoteIndex: number;
+    error: string | null;
+  };
+  
+  // Control settings
+  playback: {
+    autoPlay: boolean;
+    speed: 'slow' | 'normal' | 'fast'; // slow: 4s, normal: 2.5s, fast: 1s
+    soundEnabled: boolean;
+    isPaused: boolean;
+  };
+  
+  // Live Event Log
+  tickerLog: Array<{
+    id: string;
+    type: 'speech' | 'attack' | 'vote' | 'elimination' | 'system' | 'winner';
+    message: string;
+    timestamp: number;
+  }>;
+}
+
+export type LLMActionType = 
+  | 'campaign_speech'
+  | 'attack'
+  | 'elimination_vote'
+  | 'exit_words'
+  | 'final_speech'
+  | 'final_vote'
+  | 'victory_speech';
+
+export interface LLMRequestPayload {
+  action: LLMActionType;
+  candidateId: string;
+  targetId?: string;
+  round: number;
+  activeCandidateIds: string[];
+  finalistIds?: string[];
+  historyContext: {
+    campaignSpeeches?: Record<string, string>;
+    recentAttacks?: Array<{ attackerName: string; targetName: string; text: string }>;
+    recentEliminations?: Array<{ candidateName: string; round: number }>;
+    previousVotesAgainstSelf?: number;
+  };
+  config?: {
+    baseUrl?: string;
+    apiKey?: string;
+    model?: string;
+  };
+}
+
+export interface LLMResponsePayload {
+  text: string;
+  voteTargetId?: string;
+  privateReason?: string;
+  modelUsed?: string;
+}
