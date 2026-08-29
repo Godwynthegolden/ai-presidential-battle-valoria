@@ -67,6 +67,27 @@ async function testEngine() {
   }
   console.log('Custom candidate profile & avatar Data URL validation PASSED!');
 
+  // Test resilient JSON extraction
+  const jsonWithMarkdown = '```json\n{\n  "name": "Evelyn Frost",\n  "titleRole": "Bio-Ethics Minister",\n  "slogan": "Protect Human Dignity",\n}\n```';
+  const parsedMarkdown = (nineRouterService as any).extractJson(jsonWithMarkdown);
+  if (!parsedMarkdown || parsedMarkdown.name !== 'Evelyn Frost') {
+    throw new Error('Failed to parse markdown-wrapped JSON with trailing commas');
+  }
+  console.log('Resilient JSON extraction from markdown fences with trailing commas PASSED!');
+
+  // Test heuristic profile extraction from plain text
+  const plainTextResponse = `Here is the profile:
+Name: Dr. Aris Thorne
+Title: Quantum Computing Minister
+Slogan: Compute Valoria's Quantum Future!
+Ideology: Direct algorithmic optimization of public resources.
+`;
+  const extractedProfile = (nineRouterService as any).extractCharacterProfile(plainTextResponse, 'Quantum computing scientist');
+  if (!extractedProfile || extractedProfile.name !== 'Dr. Aris Thorne' || !extractedProfile.titleRole) {
+    throw new Error('Failed to extract character profile from plain text output');
+  }
+  console.log('Heuristic character profile extraction from unformatted text PASSED!');
+
   console.log('\nTesting generate_character unconfigured error handling:');
   try {
     await nineRouterService.generateAgentAction(

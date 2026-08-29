@@ -142,6 +142,8 @@ export class NineRouterService {
 
     const { systemPrompt, userPrompt, isJsonExpected } = this.buildPrompt(candidate, payload);
 
+    const maxTokens = payload.action === 'generate_character' ? 2000 : 500;
+
     try {
       const rawText = await this.callChatCompletions(
         systemPrompt, 
@@ -149,7 +151,8 @@ export class NineRouterService {
         isJsonExpected, 
         baseUrl, 
         apiKey, 
-        model
+        model,
+        maxTokens
       );
 
       if (payload.action === 'elimination_vote' || payload.action === 'final_vote') {
@@ -191,42 +194,7 @@ export class NineRouterService {
       }
 
       if (payload.action === 'generate_character') {
-        const parsed = this.extractJson(rawText);
-        if (!parsed || !parsed.name) {
-          throw new Error('AI failed to return a valid candidate profile JSON.');
-        }
-        const id = (parsed.codename || parsed.name || 'custom').toLowerCase().replace(/[^a-z0-9_]/g, '_') + `_${Date.now().toString().slice(-4)}`;
-        const profile: Partial<Candidate> = {
-          id,
-          name: parsed.name || 'Custom Contender',
-          codename: id,
-          archetype: parsed.archetype || 'populist',
-          archetypeTitle: parsed.archetypeTitle || 'Independent Contender',
-          titleRole: parsed.titleRole || 'Presidential Candidate',
-          slogan: parsed.slogan || 'A Bold New Direction for Valoria',
-          ideology: parsed.ideology || 'Progressive modernization and strong governance.',
-          personality: parsed.personality || 'Strategic, charismatic, and resolute.',
-          speakingStyle: parsed.speakingStyle || 'Direct, persuasive, and sharp.',
-          motivations: parsed.motivations || 'To lead the Republic of Valoria into a new era.',
-          strengths: Array.isArray(parsed.strengths) ? parsed.strengths : ['Charismatic oratory', 'Strategic focus', 'Grassroots appeal'],
-          weaknesses: Array.isArray(parsed.weaknesses) ? parsed.weaknesses : ['Uncompromising temperament', 'High-risk bets'],
-          behavioralTendencies: Array.isArray(parsed.behavioralTendencies) ? parsed.behavioralTendencies : ['Strikes rivals decisively', 'Forms tactical alliances'],
-          rivalArchetypes: Array.isArray(parsed.rivalArchetypes) ? parsed.rivalArchetypes : ['careerist', 'capitalist'],
-          color: parsed.color || {
-            primary: '#3b82f6',
-            bg: 'rgba(59, 130, 246, 0.12)',
-            border: 'rgba(59, 130, 246, 0.5)',
-            text: '#60a5fa',
-            glow: 'rgba(59, 130, 246, 0.3)',
-            gradient: 'from-blue-600/20 to-slate-900',
-          },
-          avatar: {
-            icon: parsed.avatar?.icon || 'User',
-            svgType: parsed.avatar?.svgType || 'landmark',
-          },
-          systemPrompt: parsed.systemPrompt || `You are ${parsed.name}, ${parsed.titleRole || 'Presidential Candidate'} running for President of the Republic of Valoria. Slogan: "${parsed.slogan || 'For Valoria'}". Speak with authenticity, intelligence, and conviction.`,
-          isCustom: true,
-        };
+        const profile = this.extractCharacterProfile(rawText, payload.customPrompt || '');
 
         return {
           text: `Generated candidate: ${profile.name} (${profile.titleRole})`,
@@ -250,13 +218,17 @@ export class NineRouterService {
   /**
    * OpenAI-compatible POST to /chat/completions endpoint on 9router
    */
+  /**
+   * OpenAI-compatible POST to /chat/completions endpoint on 9router
+   */
   private async callChatCompletions(
     systemPrompt: string, 
     userPrompt: string, 
     isJsonExpected: boolean = false,
     baseUrl: string = this.defaultBaseUrl,
     apiKey: string = this.defaultApiKey,
-    model: string = this.defaultModel
+    model: string = this.defaultModel,
+    maxTokens: number = 500
   ): Promise<string> {
     let endpoint = baseUrl.trim();
     if (!endpoint.endsWith('/chat/completions')) {
@@ -280,7 +252,7 @@ export class NineRouterService {
         { role: 'user', content: userPrompt },
       ],
       temperature: 0.75,
-      max_tokens: 350,
+      max_tokens: maxTokens,
       stream: false,
     };
 
@@ -289,7 +261,7 @@ export class NineRouterService {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
 
     try {
       const response = await fetch(endpoint, {
@@ -357,7 +329,7 @@ export class NineRouterService {
     } catch (error: any) {
       clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
-        throw new Error(`9router request timed out after 35 seconds at ${endpoint}`);
+        throw new Error(`9router request timed out after 45 seconds at ${endpoint}`);
       }
       throw error;
     }
@@ -403,7 +375,8 @@ export class NineRouterService {
         true,
         baseUrl,
         apiKey,
-        model
+        model,
+        500
       );
       const retryParsed = this.extractJson(retryText);
 
@@ -426,19 +399,149 @@ export class NineRouterService {
   }
 
   private extractJson(text: string): any {
+    if (!text || typeof text !== 'string') return null;
+
+    // 1. Direct parse attempt
     try {
-      return JSON.parse(text);
-    } catch {
-      const match = text.match(/\{[\s\S]*\}/);
-      if (match) {
-        try {
-          return JSON.parse(match[0]);
-        } catch {
-          return null;
-        }
-      }
-      return null;
+      return JSON.parse(text.trim());
+    } catch {}
+
+    // 2. Strip markdown fences: ```json ... ``` or ``` ... ```
+    let cleaned = text.replace(/```(?:json)?\s*([\s\S]*?)\s*```/gi, '$1').trim();
+    try {
+      return JSON.parse(cleaned);
+    } catch {}
+
+    // 3. Extract substring between first '{' and last '}'
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      const jsonCandidate = cleaned.substring(firstBrace, lastBrace + 1);
+      try {
+        return JSON.parse(jsonCandidate);
+      } catch {}
+
+      // 4. Sanitize trailing commas before closing braces/brackets
+      const sanitized = jsonCandidate
+        .replace(/,\s*([}\]])/g, '$1')
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ') // Strip unprintable control characters
+        .replace(/\n/g, ' '); // Replace raw line breaks in strings
+      try {
+        return JSON.parse(sanitized);
+      } catch {}
     }
+
+    return null;
+  }
+
+  /**
+   * Resilient character profile extractor with fallback heuristic parser
+   */
+  private extractCharacterProfile(rawText: string, userConcept: string): Partial<Candidate> {
+    const parsed = this.extractJson(rawText);
+    
+    // Heuristic regex helper
+    const extractRegex = (pattern: RegExp): string | null => {
+      const match = rawText.match(pattern);
+      return match ? match[1].replace(/["']/g, '').trim() : null;
+    };
+
+    const name = parsed?.name || 
+                 extractRegex(/"name"\s*:\s*"([^"]+)"/) || 
+                 extractRegex(/Name:\s*([^\n\r,]+)/i) || 
+                 'Valoria Contender';
+
+    const codename = (parsed?.codename || 
+                     extractRegex(/"codename"\s*:\s*"([^"]+)"/) || 
+                     name).toLowerCase().replace(/[^a-z0-9_]/g, '_') + `_${Date.now().toString().slice(-4)}`;
+
+    const archetype = (parsed?.archetype || 
+                      extractRegex(/"archetype"\s*:\s*"([^"]+)"/) || 
+                      'populist') as any;
+
+    const archetypeTitle = parsed?.archetypeTitle || 
+                          extractRegex(/"archetypeTitle"\s*:\s*"([^"]+)"/) || 
+                          'Independent Contender';
+
+    const titleRole = parsed?.titleRole || 
+                      extractRegex(/"titleRole"\s*:\s*"([^"]+)"/) || 
+                      'Presidential Candidate';
+
+    const slogan = parsed?.slogan || 
+                   extractRegex(/"slogan"\s*:\s*"([^"]+)"/) || 
+                   'A Bold New Direction for Valoria';
+
+    const ideology = parsed?.ideology || 
+                     extractRegex(/"ideology"\s*:\s*"([^"]+)"/) || 
+                     (userConcept ? `Championing ${userConcept.slice(0, 80)}.` : 'Progressive governance and economic modernization.');
+
+    const personality = parsed?.personality || 
+                        extractRegex(/"personality"\s*:\s*"([^"]+)"/) || 
+                        'Strategic, charismatic, and resolute.';
+
+    const speakingStyle = parsed?.speakingStyle || 
+                          extractRegex(/"speakingStyle"\s*:\s*"([^"]+)"/) || 
+                          'Direct, persuasive, and sharp.';
+
+    const motivations = parsed?.motivations || 
+                        extractRegex(/"motivations"\s*:\s*"([^"]+)"/) || 
+                        'To lead the Republic of Valoria into a new era.';
+
+    const systemPrompt = parsed?.systemPrompt || 
+                         extractRegex(/"systemPrompt"\s*:\s*"([^"]+)"/) || 
+                         `You are ${name}, ${titleRole} running for President of the Republic of Valoria. Slogan: "${slogan}". Background: Candidate for the presidency. Speak with authenticity, intelligence, and conviction.`;
+
+    const strengths = Array.isArray(parsed?.strengths) && parsed.strengths.length > 0
+      ? parsed.strengths
+      : ['Charismatic oratory', 'Strategic focus', 'Grassroots appeal'];
+
+    const weaknesses = Array.isArray(parsed?.weaknesses) && parsed.weaknesses.length > 0
+      ? parsed.weaknesses
+      : ['Uncompromising temperament', 'High-risk bets'];
+
+    const behavioralTendencies = Array.isArray(parsed?.behavioralTendencies) && parsed.behavioralTendencies.length > 0
+      ? parsed.behavioralTendencies
+      : ['Strikes rivals decisively', 'Forms tactical alliances'];
+
+    const rivalArchetypes = Array.isArray(parsed?.rivalArchetypes) && parsed.rivalArchetypes.length > 0
+      ? parsed.rivalArchetypes
+      : ['careerist', 'capitalist'];
+
+    const color = parsed?.color || {
+      primary: '#3b82f6',
+      bg: 'rgba(59, 130, 246, 0.12)',
+      border: 'rgba(59, 130, 246, 0.5)',
+      text: '#60a5fa',
+      glow: 'rgba(59, 130, 246, 0.3)',
+      gradient: 'from-blue-600/20 to-slate-900',
+    };
+
+    const avatar = parsed?.avatar || {
+      icon: 'User',
+      svgType: 'landmark',
+    };
+
+    return {
+      id: codename,
+      name,
+      codename,
+      archetype,
+      archetypeTitle,
+      titleRole,
+      slogan,
+      ideology,
+      personality,
+      speakingStyle,
+      motivations,
+      strengths,
+      weaknesses,
+      behavioralTendencies,
+      rivalArchetypes,
+      color,
+      avatar,
+      systemPrompt,
+      isCustom: true,
+    };
   }
 
   /**
@@ -638,40 +741,52 @@ Stay completely in character as ${candidate.name}. Return clean speech text only
       case 'generate_character': {
         isJsonExpected = true;
         const userIdea = payload.customPrompt || 'A compelling, realistic presidential candidate running for President of the Republic of Valoria';
-        systemPrompt = `You are a master political worldbuilder and game writer for the Republic of Valoria, a high-stakes fictional modern republic with deep political factions, economic struggles, labor movements, tech oligarchs, military hawks, and populist movements. Return valid JSON only.`;
-        userPrompt = `Create a realistic, grounded, and dramatic political contender running for President of the Republic of Valoria based on this concept:
+        systemPrompt = `You are a master political writer for the Republic of Valoria (a fictional high-stakes modern presidential reality election).
+You MUST respond with a single, strictly valid JSON object.
+CRITICAL FORMATTING INSTRUCTIONS:
+- Return ONLY the raw JSON object starting with '{' and ending with '}'.
+- Do NOT wrap in markdown code fences (no \`\`\`json or \`\`\`).
+- Do NOT include any explanations, greetings, or conversational text.
+- Strictly escape all quotation marks inside strings.
+- Do NOT leave trailing commas before closing brackets or braces.`;
+
+        userPrompt = `Generate a realistic, grounded, and dramatic political contender running for President of the Republic of Valoria based on this concept:
 "${userIdea}"
 
-You MUST return a JSON object with this exact schema:
+Format your response strictly following this JSON template:
 {
-  "name": "Full Name (e.g. Victor Stone, Maya Lin)",
-  "codename": "Short lowercase ID (e.g. victor_stone)",
-  "archetype": "populist" | "technocrat" | "hawk" | "reformer" | "capitalist" | "socialist" | "environmentalist" | "conspiracy" | "careerist" | "traditionalist" | "wildcard",
-  "archetypeTitle": "Catchy Archetype Title (e.g. Digital Sovereignty Pioneer, Rust-Belt Champion)",
-  "titleRole": "Current or Former Government/Professional Title (e.g. Former Intelligence Chief, Biotech Founder)",
-  "slogan": "Powerful campaign slogan (max 10 words)",
-  "ideology": "1-sentence political philosophy",
-  "personality": "3-4 personality traits (e.g. Charismatic, ruthless, data-driven)",
-  "speakingStyle": "Speaking tone and rhetorical habits",
-  "motivations": "Core political ambitions and driving goal",
-  "strengths": ["Strength 1", "Strength 2", "Strength 3"],
-  "weaknesses": ["Weakness 1", "Weakness 2", "Weakness 3"],
-  "behavioralTendencies": ["Tendency 1", "Tendency 2"],
+  "name": "Marcus Vance",
+  "codename": "THE CLEAN REVOLUTIONARY",
+  "archetype": "environmentalist",
+  "archetypeTitle": "Green Grid Pioneer",
+  "titleRole": "Former Clean Energy Secretary",
+  "slogan": "Power Valoria with 100% Clean Energy Sovereignty!",
+  "ideology": "Rapid energy transition, public-private fusion investment, and green industrial jobs.",
+  "personality": "Visionary, analytical, persuasive, and fiercely committed to modernization.",
+  "speakingStyle": "Data-rich, inspiring, articulate, and sharp on economic accountability.",
+  "motivations": "To modernize Valoria into the global leader in sustainable energy and clean tech.",
+  "strengths": ["Deep energy expertise", "Inspiring rally speaker", "Strong business credibility"],
+  "weaknesses": ["Impatient with traditional lobbies", "High upfront capital costs"],
+  "behavioralTendencies": ["Attacks corporate polluters and old-money lobbyists", "Forms bold green alliances"],
   "rivalArchetypes": ["capitalist", "careerist"],
   "color": {
-    "primary": "#3b82f6",
-    "bg": "rgba(59, 130, 246, 0.12)",
-    "border": "rgba(59, 130, 246, 0.5)",
-    "text": "#60a5fa",
-    "glow": "rgba(59, 130, 246, 0.3)",
-    "gradient": "from-blue-600/20 to-slate-900"
+    "primary": "#10b981",
+    "bg": "rgba(16, 185, 129, 0.12)",
+    "border": "rgba(16, 185, 129, 0.5)",
+    "text": "#34d399",
+    "glow": "rgba(16, 185, 129, 0.3)",
+    "gradient": "from-emerald-600/20 to-slate-900"
   },
   "avatar": {
-    "icon": "User",
-    "svgType": "flame" | "cpu" | "shield" | "heart" | "dollar" | "leaf" | "eye" | "scale" | "landmark" | "building" | "users" | "award" | "zap" | "crown" | "globe" | "swords" | "hammer"
+    "icon": "leaf",
+    "svgType": "leaf"
   },
-  "systemPrompt": "You are [Full Name], [Title Role] running for President of the Republic of Valoria. [2-3 sentences of first-person political ideology, temperament, debate style, and psychological motivations. Speak with conviction and authority.]"
-}`;
+  "systemPrompt": "You are Marcus Vance, Green Grid Pioneer and Former Clean Energy Secretary running for President of the Republic of Valoria. Slogan: 'Power Valoria with 100% Clean Energy Sovereignty!'. Background: Elite clean energy pioneer and reformer who entered politics to dismantle corrupt fossil-fuel subsidies and rebuild Valoria's industrial towns with modern green factories. Speech style: Speak with passionate energy, sharp technical data, and unyielding conviction. Keep all debate speeches strictly under the specified word limit."
+}
+
+Rules for fields:
+1. "archetype" must be one of: "populist", "technocrat", "hawk", "reformer", "capitalist", "socialist", "environmentalist", "conspiracy", "careerist", "traditionalist", "wildcard".
+2. "svgType" must be one of: "landmark", "scale", "shield", "dollar", "cpu", "hammer", "leaf", "eye", "flame", "zap", "crown", "globe", "swords", "radio", "award", "activity", "star", "building", "users", "briefcase".`;
         break;
       }
     }
