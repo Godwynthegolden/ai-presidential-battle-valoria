@@ -20,6 +20,8 @@ import {
 interface ControlBarProps {
   gameState: GameState;
   nineRouterConfig: NineRouterConfigState;
+  lookaheadBufferCount?: number;
+  isBufferingLookahead?: boolean;
   onOpenSettings: () => void;
   onStartGame: () => void;
   onNextStep: () => void;
@@ -33,6 +35,8 @@ interface ControlBarProps {
 export const ControlBar: React.FC<ControlBarProps> = ({
   gameState,
   nineRouterConfig,
+  lookaheadBufferCount = 0,
+  isBufferingLookahead = false,
   onOpenSettings,
   onStartGame,
   onNextStep,
@@ -159,6 +163,18 @@ export const ControlBar: React.FC<ControlBarProps> = ({
           {playback.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
         </button>
       </div>
+
+      {/* Center-Right: 2-Step Lookahead Neural Pipeline Monitor */}
+      {!isIdle && (
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/90 border border-purple-500/30 text-xs font-mono shadow-inner">
+          <span className={`w-2 h-2 rounded-full ${isBufferingLookahead ? 'bg-amber-400 animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
+          <span className="text-[11px] font-bold text-slate-300">2-Step Pipeline:</span>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-purple-950/80 border border-purple-500/40 text-purple-300 flex items-center gap-1">
+            <Zap className="w-3 h-3 text-cyan-400" />
+            {isBufferingLookahead ? 'Buffering LLM+TTS...' : `${Math.max(lookaheadBufferCount, 2)}/2 Ready (LLM ✓ | TTS 🎙️)`}
+          </span>
+        </div>
+      )}
 
       {/* Right: 9router Model Configuration & Status Button */}
       <button

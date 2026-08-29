@@ -102,6 +102,9 @@ export default function AIPlaygroundPage() {
     isSpeakingAudio,
     playSpeechAudio,
     stopSpeechAudio,
+    isBufferingLookahead,
+    bufferingStatus,
+    lookaheadBufferCount,
     startGame,
     nextStep,
     toggleAutoPlay,
@@ -295,6 +298,8 @@ export default function AIPlaygroundPage() {
               <ControlBar
                 gameState={state}
                 nineRouterConfig={nineRouterConfig}
+                lookaheadBufferCount={lookaheadBufferCount}
+                isBufferingLookahead={isBufferingLookahead}
                 onOpenSettings={() => setIsSettingsOpen(true)}
                 onStartGame={startGame}
                 onNextStep={nextStep}
@@ -328,6 +333,9 @@ export default function AIPlaygroundPage() {
                 onSelectCCTVFeed={selectCCTVFeed}
                 onPlaySpeechAudio={playSpeechAudio}
                 isSpeakingAudio={isSpeakingAudio}
+                isBufferingLookahead={isBufferingLookahead}
+                bufferingStatus={bufferingStatus}
+                lookaheadBufferCount={lookaheadBufferCount}
               />
             </div>
 

@@ -24,7 +24,8 @@ import {
   Target,
   Volume2,
   Mic,
-  RotateCcw
+  RotateCcw,
+  Zap
 } from 'lucide-react';
 
 interface DebateArenaProps {
@@ -34,6 +35,9 @@ interface DebateArenaProps {
   onSelectCCTVFeed?: (feedIndex: number) => void;
   onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string) => void;
   isSpeakingAudio?: boolean;
+  isBufferingLookahead?: boolean;
+  bufferingStatus?: string;
+  lookaheadBufferCount?: number;
 }
 
 export const DebateArena: React.FC<DebateArenaProps> = ({
@@ -43,6 +47,9 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   onSelectCCTVFeed,
   onPlaySpeechAudio,
   isSpeakingAudio = false,
+  isBufferingLookahead = false,
+  bufferingStatus = '',
+  lookaheadBufferCount = 0,
 }) => {
   const { stage, phase, round, votesByRound, pactsByRound, finalVoteTally, winnerId, eliminatedCandidates } = gameState;
 
@@ -171,6 +178,29 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
 
       {/* Main Arena Visual Area */}
       <div className="flex-1 flex flex-col justify-start items-center p-4 sm:p-6 md:p-8 relative min-h-0 overflow-y-auto custom-scrollbar">
+        {/* 2-Step Lookahead Neural Pre-buffering Overlay */}
+        {isBufferingLookahead && (
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center animate-step-transition">
+            <div className="w-16 h-16 rounded-2xl bg-purple-500/15 border-2 border-purple-500/50 flex items-center justify-center text-purple-400 mb-4 shadow-xl shadow-purple-500/20">
+              <Zap className="w-8 h-8 text-cyan-400 animate-pulse" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-tight">
+              2-Step Neural Pipeline
+            </h3>
+            <p className="text-xs font-mono text-cyan-300 mt-2 mb-5 max-w-md leading-relaxed">
+              {bufferingStatus || 'Pre-buffering Step 1 & Step 2 (AI Dialogue & Neural Voices)...'}
+            </p>
+            <div className="flex items-center gap-3 text-xs font-mono bg-slate-900/90 border border-purple-500/30 px-5 py-2.5 rounded-2xl text-slate-300 shadow-xl">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+              <span>LLM Synthesis:</span>
+              <span className="text-emerald-400 font-bold">Concurrent</span>
+              <span className="text-slate-600">|</span>
+              <span>Fish.Audio TTS:</span>
+              <span className="text-purple-400 font-bold">Buffering Audio Streams</span>
+            </div>
+          </div>
+        )}
+
         <div className="w-full flex flex-col items-center max-w-3xl my-auto">
         {/* If Error Occurred */}
         {stage.error ? (
@@ -193,7 +223,10 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
           </div>
         ) : stage.actionType === 'attack' && speaker && target ? (
           /* Attack Showdown View: Attacker vs Target */
-          <div className="w-full flex flex-col items-center gap-6 max-w-3xl animate-fade-in">
+          <div 
+            key={`attack-${speaker.id}-${target.id}-${gameState.currentSpeakerIndex}-${gameState.round}`}
+            className="w-full flex flex-col items-center gap-6 max-w-3xl animate-step-transition animate-attack-sweep"
+          >
             <div className="flex items-center justify-between w-full max-w-xl px-4 pt-3">
               {/* Attacker Podium */}
               <div className="flex flex-col items-center gap-2.5">
@@ -280,7 +313,10 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
           </div>
         ) : speaker ? (
           /* Single Speaker Podium View (Campaign, Final Speech, Elimination) */
-          <div className="w-full flex flex-col items-center gap-6 max-w-3xl animate-fade-in">
+          <div 
+            key={`speaker-${speaker.id}-${gameState.currentSpeakerIndex}-${gameState.phase}`}
+            className="w-full flex flex-col items-center gap-6 max-w-3xl animate-step-transition"
+          >
             {/* Speaker Podium Header Card */}
             <div className="flex flex-col items-center gap-3">
               <CandidateAvatar

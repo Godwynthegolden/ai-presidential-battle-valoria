@@ -25,6 +25,33 @@ const LOCATIONS = [
   'West Wing Corridor 3',
 ];
 
+export interface PreparedStep {
+  stepKey: string;
+  phase: GamePhase;
+  round: number;
+  speakerId: string | null;
+  targetId: string | null;
+  actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
+  headline: string;
+  content: string;
+  audioBlobUrl: string | null;
+  audioBlob: Blob | null;
+  isReady: boolean;
+  error?: string | null;
+  payload?: any;
+}
+
+export interface StepDescriptor {
+  stepKey: string;
+  phase: GamePhase;
+  round: number;
+  speakerId: string | null;
+  targetId: string | null;
+  actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
+  headline: string;
+  llmPayload?: LLMRequestPayload;
+}
+
 const CREATE_INITIAL_STATE = (selectedIds: string[] = []): GameState => ({
   phase: 'IDLE',
   round: 1,
@@ -103,6 +130,16 @@ export function useGameEngine(
   const [isSpeakingAudio, setIsSpeakingAudio] = useState(false);
   const activeTtsAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  // -----------------------------------------------------------------
+  // ⚡ 2-Step Lookahead Execution Pipeline Buffer
+  // -----------------------------------------------------------------
+  const [isBufferingLookahead, setIsBufferingLookahead] = useState(false);
+  const [bufferingStatus, setBufferingStatus] = useState('');
+  const [lookaheadBufferCount, setLookaheadBufferCount] = useState(0);
+
+  const lookaheadBufferRef = useRef<Map<string, Promise<PreparedStep>>>(new Map());
+  const preparedStepsRef = useRef<Map<string, PreparedStep>>(new Map());
+
   const stopSpeechAudio = useCallback(() => {
     if (activeTtsAudioRef.current) {
       activeTtsAudioRef.current.pause();
@@ -110,6 +147,70 @@ export function useGameEngine(
     }
     setIsSpeakingAudio(false);
   }, []);
+
+  const synthesizeSpeechAudio = useCallback(async (
+    text: string, 
+    voiceId?: string, 
+    speakerCandidateId?: string
+  ): Promise<{ audioBlobUrl: string | null; audioBlob: Blob | null }> => {
+    if (!text || !text.trim()) return { audioBlobUrl: null, audioBlob: null };
+    const config = configRef.current;
+    if (config?.fishAudioEnabled === false) {
+      return { audioBlobUrl: null, audioBlob: null };
+    }
+
+    let targetVoiceId = voiceId;
+    if (!targetVoiceId && speakerCandidateId) {
+      const candidate = CANDIDATE_MAP.get(speakerCandidateId);
+      targetVoiceId = candidate?.voice?.voiceId;
+    }
+
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          voiceId: targetVoiceId,
+          apiKey: config?.fishAudioApiKey,
+          model: config?.fishAudioModel,
+        }),
+      });
+
+      if (!res.ok) return { audioBlobUrl: null, audioBlob: null };
+      const blob = await res.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      return { audioBlobUrl: audioUrl, audioBlob: blob };
+    } catch (e) {
+      console.warn('[TTS synthesizeSpeechAudio error]:', e);
+      return { audioBlobUrl: null, audioBlob: null };
+    }
+  }, []);
+
+  const playAudioUrl = useCallback((audioUrl: string | null) => {
+    if (!audioUrl || !state.playback.soundEnabled) return;
+    stopSpeechAudio();
+
+    try {
+      setIsSpeakingAudio(true);
+      const audio = new Audio(audioUrl);
+      activeTtsAudioRef.current = audio;
+
+      audio.onended = () => {
+        setIsSpeakingAudio(false);
+        activeTtsAudioRef.current = null;
+      };
+      audio.onerror = () => {
+        setIsSpeakingAudio(false);
+        activeTtsAudioRef.current = null;
+      };
+      audio.play().catch(() => {
+        setIsSpeakingAudio(false);
+      });
+    } catch (e) {
+      setIsSpeakingAudio(false);
+    }
+  }, [state.playback.soundEnabled, stopSpeechAudio]);
 
   const playSpeechAudio = useCallback(async (text: string, voiceId?: string, speakerCandidateId?: string) => {
     if (!text || !text.trim()) return;
@@ -122,59 +223,24 @@ export function useGameEngine(
       return;
     }
 
-    let targetVoiceId = voiceId;
-    if (!targetVoiceId && speakerCandidateId) {
-      const candidate = CANDIDATE_MAP.get(speakerCandidateId);
-      targetVoiceId = candidate?.voice?.voiceId;
+    const res = await synthesizeSpeechAudio(text, voiceId, speakerCandidateId);
+    if (res.audioBlobUrl) {
+      playAudioUrl(res.audioBlobUrl);
     }
+  }, [state.playback.soundEnabled, stopSpeechAudio, synthesizeSpeechAudio, playAudioUrl]);
 
-    try {
-      setIsSpeakingAudio(true);
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text,
-          voiceId: targetVoiceId,
-          apiKey: config?.fishAudioApiKey,
-          model: config?.fishAudioModel,
-        }),
-      });
-
-      if (!res.ok) {
-        setIsSpeakingAudio(false);
-        return;
-      }
-
-      const blob = await res.blob();
-      const audioUrl = URL.createObjectURL(blob);
-      const audio = new Audio(audioUrl);
-      activeTtsAudioRef.current = audio;
-
-      audio.onended = () => {
-        setIsSpeakingAudio(false);
-        activeTtsAudioRef.current = null;
-      };
-
-      audio.onerror = () => {
-        setIsSpeakingAudio(false);
-        activeTtsAudioRef.current = null;
-      };
-
-      await audio.play();
-    } catch (e) {
-      console.warn('[useGameEngine TTS playback error]:', e);
-      setIsSpeakingAudio(false);
-    }
-  }, [state.playback.soundEnabled, stopSpeechAudio]);
-
-  // Cleanup speech audio on unmount
+  // Cleanup speech audio and preloaded Object URLs on unmount
   useEffect(() => {
     return () => {
       if (activeTtsAudioRef.current) {
         activeTtsAudioRef.current.pause();
         activeTtsAudioRef.current = null;
       }
+      preparedStepsRef.current.forEach(step => {
+        if (step.audioBlobUrl) {
+          try { URL.revokeObjectURL(step.audioBlobUrl); } catch {}
+        }
+      });
     };
   }, []);
 
@@ -354,6 +420,371 @@ export function useGameEngine(
 
     setSelectedCandidateIds(selected);
   };
+
+  // -----------------------------------------------------------------
+  // ⚡ 2-Step Lookahead Execution Pipeline Helpers
+  // -----------------------------------------------------------------
+  const preloadStep = useCallback(async (descriptor: {
+    stepKey: string;
+    phase: GamePhase;
+    round: number;
+    speakerId: string | null;
+    targetId: string | null;
+    actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
+    headline: string;
+    llmPayload?: LLMRequestPayload;
+  }): Promise<{
+    stepKey: string;
+    phase: GamePhase;
+    round: number;
+    speakerId: string | null;
+    targetId: string | null;
+    actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
+    headline: string;
+    content: string;
+    audioBlobUrl: string | null;
+    audioBlob: Blob | null;
+    isReady: boolean;
+    error?: string | null;
+  }> => {
+    const { stepKey } = descriptor;
+    if (lookaheadBufferRef.current.has(stepKey)) {
+      return lookaheadBufferRef.current.get(stepKey)!;
+    }
+
+    const promise = (async () => {
+      try {
+        let content = '';
+        if (descriptor.llmPayload) {
+          const res = await callLLM(descriptor.llmPayload);
+          content = typeof res === 'object' && res.text ? res.text : (typeof res === 'string' ? res : '');
+        }
+
+        let audioBlobUrl: string | null = null;
+        let audioBlob: Blob | null = null;
+
+        if (content && descriptor.speakerId) {
+          const candidate = CANDIDATE_MAP.get(descriptor.speakerId);
+          const ttsRes = await synthesizeSpeechAudio(content, candidate?.voice?.voiceId, descriptor.speakerId);
+          audioBlobUrl = ttsRes.audioBlobUrl;
+          audioBlob = ttsRes.audioBlob;
+        }
+
+        const prepared = {
+          stepKey,
+          phase: descriptor.phase,
+          round: descriptor.round,
+          speakerId: descriptor.speakerId,
+          targetId: descriptor.targetId,
+          actionType: descriptor.actionType,
+          headline: descriptor.headline,
+          content,
+          audioBlobUrl,
+          audioBlob,
+          isReady: true,
+        };
+
+        preparedStepsRef.current.set(stepKey, prepared);
+        setLookaheadBufferCount(preparedStepsRef.current.size);
+        return prepared;
+      } catch (err: any) {
+        console.warn(`[Preload Warning for ${stepKey}]:`, err);
+        const fallback = {
+          stepKey,
+          phase: descriptor.phase,
+          round: descriptor.round,
+          speakerId: descriptor.speakerId,
+          targetId: descriptor.targetId,
+          actionType: descriptor.actionType,
+          headline: descriptor.headline,
+          content: 'Delivering address...',
+          audioBlobUrl: null,
+          audioBlob: null,
+          isReady: false,
+          error: err.message,
+        };
+        preparedStepsRef.current.set(stepKey, fallback);
+        return fallback;
+      }
+    })();
+
+    lookaheadBufferRef.current.set(stepKey, promise);
+    return promise;
+  }, [callLLM, synthesizeSpeechAudio]);
+
+  const computeNextSteps = useCallback((currentState: GameState) => {
+    const { phase, round, currentSpeakerIndex, activeCandidateIds } = currentState;
+    const steps: Array<{
+      stepKey: string;
+      phase: GamePhase;
+      round: number;
+      speakerId: string | null;
+      targetId: string | null;
+      actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
+      headline: string;
+      llmPayload?: LLMRequestPayload;
+    }> = [];
+
+    if (phase === 'IDLE') {
+      if (activeCandidateIds.length > 0) {
+        const c0 = CANDIDATE_MAP.get(activeCandidateIds[0])!;
+        steps.push({
+          stepKey: `campaign-0-${c0.id}`,
+          phase: 'CAMPAIGN',
+          round: 1,
+          speakerId: c0.id,
+          targetId: null,
+          actionType: 'speech',
+          headline: `ROUND 1: OPENING CAMPAIGN ADDRESS — ${c0.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'campaign_speech',
+            candidateId: c0.id,
+            round: 1,
+            activeCandidateIds,
+            historyContext: {},
+          }
+        });
+      }
+      if (activeCandidateIds.length > 1) {
+        const c1 = CANDIDATE_MAP.get(activeCandidateIds[1])!;
+        steps.push({
+          stepKey: `campaign-1-${c1.id}`,
+          phase: 'CAMPAIGN',
+          round: 1,
+          speakerId: c1.id,
+          targetId: null,
+          actionType: 'speech',
+          headline: `ROUND 1: CAMPAIGN ADDRESS — ${c1.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'campaign_speech',
+            candidateId: c1.id,
+            round: 1,
+            activeCandidateIds,
+            historyContext: {},
+          }
+        });
+      }
+      return steps;
+    }
+
+    if (phase === 'CAMPAIGN') {
+      const nextIdx1 = currentSpeakerIndex + 1;
+      const nextIdx2 = currentSpeakerIndex + 2;
+
+      // Next step
+      if (nextIdx1 < activeCandidateIds.length) {
+        const c = CANDIDATE_MAP.get(activeCandidateIds[nextIdx1])!;
+        steps.push({
+          stepKey: `campaign-${nextIdx1}-${c.id}`,
+          phase: 'CAMPAIGN',
+          round: 1,
+          speakerId: c.id,
+          targetId: null,
+          actionType: 'speech',
+          headline: `ROUND 1: CAMPAIGN ADDRESS — ${c.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'campaign_speech',
+            candidateId: c.id,
+            round: 1,
+            activeCandidateIds,
+            historyContext: {},
+          }
+        });
+      } else {
+        const firstAttacker = CANDIDATE_MAP.get(activeCandidateIds[0])!;
+        const possibleTargets = activeCandidateIds.filter(id => id !== firstAttacker.id);
+        const preferredTargetId = possibleTargets.find(id => {
+          const targetCand = CANDIDATE_MAP.get(id);
+          return targetCand && firstAttacker.rivalArchetypes.includes(targetCand.archetype);
+        }) || possibleTargets[0];
+
+        steps.push({
+          stepKey: `attack-r1-0-${firstAttacker.id}`,
+          phase: 'ATTACK',
+          round: 1,
+          speakerId: firstAttacker.id,
+          targetId: preferredTargetId,
+          actionType: 'attack',
+          headline: `ROUND 1: LIVE ATTACK ROUND — ${firstAttacker.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'attack',
+            candidateId: firstAttacker.id,
+            targetId: preferredTargetId,
+            round: 1,
+            activeCandidateIds,
+            historyContext: { campaignSpeeches: currentState.campaignSpeeches },
+          }
+        });
+      }
+
+      // Step + 2
+      if (nextIdx2 < activeCandidateIds.length) {
+        const c2 = CANDIDATE_MAP.get(activeCandidateIds[nextIdx2])!;
+        steps.push({
+          stepKey: `campaign-${nextIdx2}-${c2.id}`,
+          phase: 'CAMPAIGN',
+          round: 1,
+          speakerId: c2.id,
+          targetId: null,
+          actionType: 'speech',
+          headline: `ROUND 1: CAMPAIGN ADDRESS — ${c2.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'campaign_speech',
+            candidateId: c2.id,
+            round: 1,
+            activeCandidateIds,
+            historyContext: {},
+          }
+        });
+      } else if (nextIdx1 < activeCandidateIds.length) {
+        const firstAttacker = CANDIDATE_MAP.get(activeCandidateIds[0])!;
+        const possibleTargets = activeCandidateIds.filter(id => id !== firstAttacker.id);
+        const preferredTargetId = possibleTargets.find(id => {
+          const targetCand = CANDIDATE_MAP.get(id);
+          return targetCand && firstAttacker.rivalArchetypes.includes(targetCand.archetype);
+        }) || possibleTargets[0];
+
+        steps.push({
+          stepKey: `attack-r1-0-${firstAttacker.id}`,
+          phase: 'ATTACK',
+          round: 1,
+          speakerId: firstAttacker.id,
+          targetId: preferredTargetId,
+          actionType: 'attack',
+          headline: `ROUND 1: LIVE ATTACK ROUND — ${firstAttacker.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'attack',
+            candidateId: firstAttacker.id,
+            targetId: preferredTargetId,
+            round: 1,
+            activeCandidateIds,
+            historyContext: { campaignSpeeches: currentState.campaignSpeeches },
+          }
+        });
+      }
+
+      return steps;
+    }
+
+    if (phase === 'ATTACK') {
+      const nextIdx1 = currentSpeakerIndex + 1;
+      const nextIdx2 = currentSpeakerIndex + 2;
+
+      if (nextIdx1 < activeCandidateIds.length) {
+        const attacker = CANDIDATE_MAP.get(activeCandidateIds[nextIdx1])!;
+        const possibleTargets = activeCandidateIds.filter(id => id !== attacker.id);
+        const preferredTargetId = possibleTargets.find(id => {
+          const targetCand = CANDIDATE_MAP.get(id);
+          return targetCand && attacker.rivalArchetypes.includes(targetCand.archetype);
+        }) || possibleTargets[0];
+
+        steps.push({
+          stepKey: `attack-r${round}-${nextIdx1}-${attacker.id}`,
+          phase: 'ATTACK',
+          round,
+          speakerId: attacker.id,
+          targetId: preferredTargetId,
+          actionType: 'attack',
+          headline: `ROUND ${round}: LIVE ATTACK ROUND — ${attacker.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'attack',
+            candidateId: attacker.id,
+            targetId: preferredTargetId,
+            round,
+            activeCandidateIds,
+            historyContext: { campaignSpeeches: currentState.campaignSpeeches },
+          }
+        });
+      }
+
+      if (nextIdx2 < activeCandidateIds.length) {
+        const attacker2 = CANDIDATE_MAP.get(activeCandidateIds[nextIdx2])!;
+        const possibleTargets2 = activeCandidateIds.filter(id => id !== attacker2.id);
+        const preferredTargetId2 = possibleTargets2.find(id => {
+          const targetCand = CANDIDATE_MAP.get(id);
+          return targetCand && attacker2.rivalArchetypes.includes(targetCand.archetype);
+        }) || possibleTargets2[0];
+
+        steps.push({
+          stepKey: `attack-r${round}-${nextIdx2}-${attacker2.id}`,
+          phase: 'ATTACK',
+          round,
+          speakerId: attacker2.id,
+          targetId: preferredTargetId2,
+          actionType: 'attack',
+          headline: `ROUND ${round}: LIVE ATTACK ROUND — ${attacker2.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'attack',
+            candidateId: attacker2.id,
+            targetId: preferredTargetId2,
+            round,
+            activeCandidateIds,
+            historyContext: { campaignSpeeches: currentState.campaignSpeeches },
+          }
+        });
+      }
+
+      return steps;
+    }
+
+    if (phase === 'FINAL_SPEECHES') {
+      const nextIdx1 = currentSpeakerIndex + 1;
+      const nextIdx2 = currentSpeakerIndex + 2;
+
+      if (nextIdx1 < activeCandidateIds.length) {
+        const finalist = CANDIDATE_MAP.get(activeCandidateIds[nextIdx1])!;
+        steps.push({
+          stepKey: `final_speech-${nextIdx1}-${finalist.id}`,
+          phase: 'FINAL_SPEECHES',
+          round,
+          speakerId: finalist.id,
+          targetId: null,
+          actionType: 'speech',
+          headline: `THE FINAL 3 SHOWDOWN: CLOSING ARGUMENT — ${finalist.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'final_speech',
+            candidateId: finalist.id,
+            round,
+            activeCandidateIds,
+            finalistIds: activeCandidateIds,
+            historyContext: {},
+          }
+        });
+      }
+
+      if (nextIdx2 < activeCandidateIds.length) {
+        const finalist2 = CANDIDATE_MAP.get(activeCandidateIds[nextIdx2])!;
+        steps.push({
+          stepKey: `final_speech-${nextIdx2}-${finalist2.id}`,
+          phase: 'FINAL_SPEECHES',
+          round,
+          speakerId: finalist2.id,
+          targetId: null,
+          actionType: 'speech',
+          headline: `THE FINAL 3 SHOWDOWN: CLOSING ARGUMENT — ${finalist2.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'final_speech',
+            candidateId: finalist2.id,
+            round,
+            activeCandidateIds,
+            finalistIds: activeCandidateIds,
+            historyContext: {},
+          }
+        });
+      }
+
+      return steps;
+    }
+
+    return steps;
+  }, []);
+
+  const dispatchBackgroundPreload = useCallback((currentState: GameState) => {
+    const nextSteps = computeNextSteps(currentState);
+    nextSteps.forEach(step => {
+      preloadStep(step);
+    });
+  }, [computeNextSteps, preloadStep]);
 
   /**
    * Main state machine step executor
@@ -1539,7 +1970,52 @@ export function useGameEngine(
     };
   }, [state.playback.autoPlay, state.playback.isPaused, state.playback.speed, state.stage.isLoading, state.stage.error, state.phase, executeNextStep]);
 
-  const startGame = () => {
+  const startGame = async () => {
+    if (state.activeCandidateIds.length < 4) {
+      setState(prev => ({
+        ...prev,
+        stage: {
+          ...prev.stage,
+          error: 'Please select at least 4 candidates before starting the presidential election.',
+        },
+      }));
+      return;
+    }
+
+    const activeConfig = configRef.current;
+    if (!activeConfig?.baseUrl || !activeConfig?.apiKey) {
+      if (onRequireConfig) onRequireConfig();
+      setState(prev => ({
+        ...prev,
+        stage: {
+          ...prev.stage,
+          error: '9router is not configured. Please enter your 9router Endpoint, API Key, and Model in Settings.',
+        },
+      }));
+      return;
+    }
+
+    setIsBufferingLookahead(true);
+    setBufferingStatus('⚡ Initializing 2-Step Lookahead Pipeline (Buffering Step 1 & Step 2 Dialogue and Neural Voices)...');
+
+    const nextSteps = computeNextSteps(state);
+    if (nextSteps.length >= 2) {
+      try {
+        await Promise.all([
+          preloadStep(nextSteps[0]),
+          preloadStep(nextSteps[1])
+        ]);
+      } catch (e) {
+        console.warn('Initial pre-buffer error:', e);
+      }
+    } else if (nextSteps.length === 1) {
+      try {
+        await preloadStep(nextSteps[0]);
+      } catch (e) {}
+    }
+
+    setIsBufferingLookahead(false);
+    setBufferingStatus('');
     executeNextStep();
   };
 
@@ -1577,6 +2053,16 @@ export function useGameEngine(
   const restartGame = () => {
     if (autoPlayTimer.current) clearTimeout(autoPlayTimer.current);
     stopSpeechAudio();
+    preparedStepsRef.current.forEach(step => {
+      if (step.audioBlobUrl) {
+        try { URL.revokeObjectURL(step.audioBlobUrl); } catch {}
+      }
+    });
+    preparedStepsRef.current.clear();
+    lookaheadBufferRef.current.clear();
+    setLookaheadBufferCount(0);
+    setIsBufferingLookahead(false);
+    setBufferingStatus('');
     isExecutingStep.current = false;
     setState(CREATE_INITIAL_STATE(state.participatingCandidateIds));
   };
@@ -1611,6 +2097,9 @@ export function useGameEngine(
     isSpeakingAudio,
     playSpeechAudio,
     stopSpeechAudio,
+    isBufferingLookahead,
+    bufferingStatus,
+    lookaheadBufferCount,
     startGame,
     nextStep,
     toggleAutoPlay,
