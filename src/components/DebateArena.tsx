@@ -144,9 +144,9 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
     <div className="flex-1 flex flex-col relative rounded-3xl bg-gradient-to-b from-[#0e1424] via-[#090d17] to-[#06080d] border border-slate-700/60 shadow-2xl overflow-hidden backdrop-blur-2xl h-full min-h-0">
       {/* Dynamic Background Stage Ambient Spotlight */}
       <div 
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-80 blur-[100px] opacity-25 pointer-events-none transition-all duration-700 -z-10"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-80 blur-[100px] opacity-20 pointer-events-none transition-all duration-700 -z-10"
         style={{
-          backgroundColor: speaker?.color.primary || (stage.actionType === 'attack' ? '#ef4444' : '#06b6d4'),
+          backgroundColor: speaker?.color.primary || '#06b6d4',
         }}
       />
 
@@ -239,7 +239,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
           /* Attack Showdown View: Attacker vs Target */
           <div 
             key={`attack-${speaker.id}-${target.id}-${gameState.currentSpeakerIndex}-${gameState.round}`}
-            className="w-full flex flex-col items-center gap-6 max-w-3xl animate-step-transition animate-attack-sweep"
+            className="w-full flex flex-col items-center gap-6 max-w-3xl animate-step-transition"
           >
             <div className="flex items-center justify-between w-full max-w-xl px-4 pt-3">
               {/* Attacker Podium */}
@@ -289,7 +289,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             </div>
 
             {/* Attack Speech Box */}
-            <div className="w-full relative rounded-3xl bg-slate-950/90 border border-slate-750 p-6 md:p-8 shadow-2xl shadow-black/80 backdrop-blur-xl">
+            <div className="w-full relative rounded-3xl bg-slate-950/95 border-2 border-red-500/80 p-6 md:p-8 shadow-2xl shadow-red-950/70 backdrop-blur-xl">
               <div className="flex items-center justify-between absolute -top-3.5 left-6 right-6">
                 <div className="px-3.5 py-1 rounded-md bg-red-600 text-white text-xs font-display font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5">
                   <Flame className="w-3.5 h-3.5" /> Public Denunciation
@@ -317,8 +317,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
                 </div>
               ) : (
                 <div className="relative">
-                  <Quote className="absolute -top-3 -left-2 w-8 h-8 text-slate-750/40 -z-0 pointer-events-none" />
-                  <p className="text-lg sm:text-xl md:text-2xl font-sans font-semibold text-white leading-relaxed relative z-10 italic">
+                  <p className="text-lg sm:text-xl md:text-2xl font-sans font-semibold text-white leading-relaxed italic">
                     &ldquo;{stage.content}&rdquo;
                   </p>
                 </div>
