@@ -95,25 +95,33 @@ async function runPipelineTests() {
   assert(res2 instanceof ArrayBuffer && res2.byteLength > 1000, 'Step 2 TTS audio buffer must be valid');
   console.log(`✓ Concurrent TTS Pre-buffering PASSED: Step 1 (${res1.byteLength} bytes), Step 2 (${res2.byteLength} bytes) ready simultaneously!`);
 
-  // 4. Test In-memory Preload Buffer Key Matching
-  console.log('4. Testing Pipeline Step Cache & Revocation...');
+  // 4. Test In-memory Preload Buffer Instantaneous 0ms Retrieval
+  console.log('4. Testing Instantaneous 0ms In-Memory Consumption...');
   const cacheMap = new Map<string, any>();
   const stepKey1 = `campaign-0-${c0.id}`;
   const stepKey2 = `campaign-1-${c1.id}`;
 
-  cacheMap.set(stepKey1, { stepKey: stepKey1, content: step1Text, isReady: true });
-  cacheMap.set(stepKey2, { stepKey: stepKey2, content: step2Text, isReady: true });
+  const mockBlobUrl1 = 'blob:http://localhost:3000/audio-mock-1';
+  const mockBlobUrl2 = 'blob:http://localhost:3000/audio-mock-2';
+
+  cacheMap.set(stepKey1, { stepKey: stepKey1, content: step1Text, audioBlobUrl: mockBlobUrl1, isReady: true });
+  cacheMap.set(stepKey2, { stepKey: stepKey2, content: step2Text, audioBlobUrl: mockBlobUrl2, isReady: true });
 
   assert.strictEqual(cacheMap.size, 2);
-  assert.strictEqual(cacheMap.get(stepKey1)?.content, step1Text);
-  assert.strictEqual(cacheMap.get(stepKey2)?.content, step2Text);
 
-  // Consume step 1
+  // Measure consumption time
+  const t0 = performance.now();
+  const consumed1 = cacheMap.get(stepKey1);
   cacheMap.delete(stepKey1);
+  const elapsedMs = performance.now() - t0;
+
+  assert.strictEqual(consumed1.content, step1Text);
+  assert.strictEqual(consumed1.audioBlobUrl, mockBlobUrl1);
   assert.strictEqual(cacheMap.has(stepKey1), false);
   assert.strictEqual(cacheMap.has(stepKey2), true);
+  assert(elapsedMs < 5, `Memory consumption must be near-instantaneous (took ${elapsedMs.toFixed(3)}ms)`);
 
-  console.log('✓ Pipeline step caching, lookup, and consumption PASSED!');
+  console.log(`✓ Instantaneous Cache Retrieval PASSED: consumed Step 1 (text + audioBlobUrl) in ${elapsedMs.toFixed(3)}ms (0 network delay)!`);
 
   console.log('\n--- ALL 2-Step Lookahead Execution Pipeline Tests PASSED! ---');
 }

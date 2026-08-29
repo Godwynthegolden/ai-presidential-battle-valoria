@@ -512,6 +512,44 @@ export function useGameEngine(
     return promise;
   }, [callLLM, synthesizeSpeechAudio]);
 
+  const fetchOrConsumeStep = useCallback(async (descriptor: {
+    stepKey: string;
+    phase: GamePhase;
+    round: number;
+    speakerId: string | null;
+    targetId: string | null;
+    actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
+    headline: string;
+    llmPayload?: LLMRequestPayload;
+  }): Promise<{ content: string; audioBlobUrl: string | null }> => {
+    const { stepKey } = descriptor;
+
+    // 1. Instant Memory Cache Hit (0ms)
+    if (preparedStepsRef.current.has(stepKey)) {
+      const prep = preparedStepsRef.current.get(stepKey)!;
+      preparedStepsRef.current.delete(stepKey);
+      lookaheadBufferRef.current.delete(stepKey);
+      setLookaheadBufferCount(preparedStepsRef.current.size);
+      return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
+    }
+
+    // 2. Pending In-Flight Preload Promise (user clicked rapidly)
+    if (lookaheadBufferRef.current.has(stepKey)) {
+      const prep = await lookaheadBufferRef.current.get(stepKey)!;
+      preparedStepsRef.current.delete(stepKey);
+      lookaheadBufferRef.current.delete(stepKey);
+      setLookaheadBufferCount(preparedStepsRef.current.size);
+      return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
+    }
+
+    // 3. Fallback: Preload right now and await both LLM and TTS concurrently
+    const prep = await preloadStep(descriptor);
+    preparedStepsRef.current.delete(stepKey);
+    lookaheadBufferRef.current.delete(stepKey);
+    setLookaheadBufferCount(preparedStepsRef.current.size);
+    return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
+  }, [preloadStep]);
+
   const computeNextSteps = useCallback((currentState: GameState) => {
     const { phase, round, currentSpeakerIndex, activeCandidateIds } = currentState;
     const steps: Array<{
@@ -776,6 +814,30 @@ export function useGameEngine(
       return steps;
     }
 
+    if (phase === 'FINAL_VOTE' || phase === 'FINAL_REVEAL') {
+      const winnerId = currentState.winnerId || activeCandidateIds[0];
+      const winner = CANDIDATE_MAP.get(winnerId);
+      if (winner) {
+        steps.push({
+          stepKey: `winner-${winner.id}`,
+          phase: 'WINNER',
+          round: 100,
+          speakerId: winner.id,
+          targetId: null,
+          actionType: 'winner',
+          headline: `PRESIDENT OF THE REPUBLIC OF VALORIA: ${winner.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'victory_speech',
+            candidateId: winner.id,
+            round: 100,
+            activeCandidateIds: [winner.id],
+            historyContext: {},
+          }
+        });
+      }
+      return steps;
+    }
+
     return steps;
   }, []);
 
@@ -868,35 +930,58 @@ export function useGameEngine(
           ]
         }));
 
-        const result = await callLLM({
-          action: 'campaign_speech',
-          candidateId: firstCandidate.id,
+        const stepDescriptor = {
+          stepKey: `campaign-0-${firstCandidate.id}`,
+          phase: 'CAMPAIGN' as GamePhase,
           round: 1,
-          activeCandidateIds,
-          historyContext: {},
-        });
+          speakerId: firstCandidate.id,
+          targetId: null,
+          actionType: 'speech' as const,
+          headline: `ROUND 1: OPENING CAMPAIGN ADDRESS — ${firstCandidate.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'campaign_speech' as const,
+            candidateId: firstCandidate.id,
+            round: 1,
+            activeCandidateIds,
+            historyContext: {},
+          }
+        };
+
+        const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
         sounds.playSpeechBeep();
-        playSpeechAudio(result.text, firstCandidate.voice?.voiceId, firstCandidate.id);
+        if (audioBlobUrl) {
+          playAudioUrl(audioBlobUrl);
+        } else {
+          playSpeechAudio(content, firstCandidate.voice?.voiceId, firstCandidate.id);
+        }
 
+        const updatedSpeeches = { ...state.campaignSpeeches, [firstCandidate.id]: content };
         setState(prev => ({
           ...prev,
-          campaignSpeeches: { ...prev.campaignSpeeches, [firstCandidate.id]: result.text },
+          campaignSpeeches: updatedSpeeches,
           stage: {
             ...prev.stage,
-            content: result.text,
+            content,
             isLoading: false,
           },
           tickerLog: [
             {
               id: `tick-${Date.now()}`,
               type: 'speech',
-              message: `${firstCandidate.name}: "${result.text.slice(0, 90)}..."`,
+              message: `${firstCandidate.name}: "${content.slice(0, 90)}..."`,
               timestamp: Date.now(),
             },
             ...prev.tickerLog,
           ]
         }));
+
+        dispatchBackgroundPreload({
+          ...state,
+          phase: 'CAMPAIGN',
+          currentSpeakerIndex: 0,
+          campaignSpeeches: updatedSpeeches,
+        });
 
         isExecutingStep.current = false;
         return;
@@ -928,35 +1013,58 @@ export function useGameEngine(
             },
           }));
 
-          const result = await callLLM({
-            action: 'campaign_speech',
-            candidateId: speaker.id,
+          const stepDescriptor = {
+            stepKey: `campaign-${nextIndex}-${speaker.id}`,
+            phase: 'CAMPAIGN' as GamePhase,
             round: 1,
-            activeCandidateIds,
-            historyContext: {},
-          });
+            speakerId: speaker.id,
+            targetId: null,
+            actionType: 'speech' as const,
+            headline: `ROUND 1: CAMPAIGN ADDRESS — ${speaker.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'campaign_speech' as const,
+              candidateId: speaker.id,
+              round: 1,
+              activeCandidateIds,
+              historyContext: {},
+            }
+          };
+
+          const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
           sounds.playSpeechBeep();
-          playSpeechAudio(result.text, speaker.voice?.voiceId, speaker.id);
+          if (audioBlobUrl) {
+            playAudioUrl(audioBlobUrl);
+          } else {
+            playSpeechAudio(content, speaker.voice?.voiceId, speaker.id);
+          }
 
+          const updatedSpeeches = { ...state.campaignSpeeches, [speaker.id]: content };
           setState(prev => ({
             ...prev,
-            campaignSpeeches: { ...prev.campaignSpeeches, [speaker.id]: result.text },
+            campaignSpeeches: updatedSpeeches,
             stage: {
               ...prev.stage,
-              content: result.text,
+              content,
               isLoading: false,
             },
             tickerLog: [
               {
                 id: `tick-${Date.now()}`,
                 type: 'speech',
-                message: `${speaker.name}: "${result.text.slice(0, 90)}..."`,
+                message: `${speaker.name}: "${content.slice(0, 90)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
             ]
           }));
+
+          dispatchBackgroundPreload({
+            ...state,
+            phase: 'CAMPAIGN',
+            currentSpeakerIndex: nextIndex,
+            campaignSpeeches: updatedSpeeches,
+          });
         } else {
           // All active candidates have given campaign speeches! Transition to Round 1 ATTACK phase
           sounds.playGavel();
@@ -994,27 +1102,42 @@ export function useGameEngine(
             ]
           }));
 
-          const result = await callLLM({
-            action: 'attack',
-            candidateId: firstAttacker.id,
+          const stepDescriptor = {
+            stepKey: `attack-r1-0-${firstAttacker.id}`,
+            phase: 'ATTACK' as GamePhase,
+            round: 1,
+            speakerId: firstAttacker.id,
             targetId: preferredTargetId,
-            round,
-            activeCandidateIds,
-            historyContext: {
-              campaignSpeeches: state.campaignSpeeches,
-              recentAttacks: [],
-            },
-          });
+            actionType: 'attack' as const,
+            headline: `ROUND 1: LIVE ATTACK ROUND — ${firstAttacker.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'attack' as const,
+              candidateId: firstAttacker.id,
+              targetId: preferredTargetId,
+              round: 1,
+              activeCandidateIds,
+              historyContext: {
+                campaignSpeeches: state.campaignSpeeches,
+                recentAttacks: [],
+              },
+            }
+          };
+
+          const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
           sounds.playAttackSting();
-          playSpeechAudio(result.text, firstAttacker.voice?.voiceId, firstAttacker.id);
+          if (audioBlobUrl) {
+            playAudioUrl(audioBlobUrl);
+          } else {
+            playSpeechAudio(content, firstAttacker.voice?.voiceId, firstAttacker.id);
+          }
 
           const attackEvent: AttackEvent = {
             id: `atk-${Date.now()}`,
-            round,
+            round: 1,
             attackerId: firstAttacker.id,
             targetId: preferredTargetId,
-            text: result.text,
+            text: content,
             timestamp: Date.now(),
           };
 
@@ -1022,23 +1145,33 @@ export function useGameEngine(
             ...prev,
             attacksByRound: {
               ...prev.attacksByRound,
-              [round]: [...(prev.attacksByRound[round] || []), attackEvent],
+              [1]: [...(prev.attacksByRound[1] || []), attackEvent],
             },
             stage: {
               ...prev.stage,
-              content: result.text,
+              content,
               isLoading: false,
             },
             tickerLog: [
               {
                 id: `tick-${Date.now()}`,
                 type: 'attack',
-                message: `💥 ${firstAttacker.name} challenged ${CANDIDATE_MAP.get(preferredTargetId)?.name}: "${result.text.slice(0, 80)}..."`,
+                message: `💥 ${firstAttacker.name} attacked ${CANDIDATE_MAP.get(preferredTargetId)?.name}: "${content.slice(0, 80)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
             ]
           }));
+
+          dispatchBackgroundPreload({
+            ...state,
+            phase: 'ATTACK',
+            currentSpeakerIndex: 0,
+            attacksByRound: {
+              ...state.attacksByRound,
+              [1]: [attackEvent],
+            }
+          });
         }
 
         isExecutingStep.current = false;
@@ -1046,7 +1179,7 @@ export function useGameEngine(
       }
 
       // -------------------------------------------------------------
-      // 3. ATTACK PHASE
+      // 3. ATTACK PHASE (Subsequent Attackers)
       // -------------------------------------------------------------
       if (phase === 'ATTACK') {
         const nextIndex = currentSpeakerIndex + 1;
@@ -1087,51 +1220,78 @@ export function useGameEngine(
             text: a.text,
           }));
 
-          const result = await callLLM({
-            action: 'attack',
-            candidateId: attacker.id,
-            targetId: preferredTargetId,
+          const stepDescriptor = {
+            stepKey: `attack-r${round}-${nextIndex}-${attacker.id}`,
+            phase: 'ATTACK' as GamePhase,
             round,
-            activeCandidateIds,
-            historyContext: {
-              campaignSpeeches: state.campaignSpeeches,
-              recentAttacks: recentAttackContext,
-            },
-          });
+            speakerId: attacker.id,
+            targetId: preferredTargetId,
+            actionType: 'attack' as const,
+            headline: `ROUND ${round}: LIVE ATTACK ROUND — ${attacker.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'attack' as const,
+              candidateId: attacker.id,
+              targetId: preferredTargetId,
+              round,
+              activeCandidateIds,
+              historyContext: {
+                campaignSpeeches: state.campaignSpeeches,
+                recentAttacks: recentAttackContext,
+              },
+            }
+          };
+
+          const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
           sounds.playAttackSting();
-          playSpeechAudio(result.text, attacker.voice?.voiceId, attacker.id);
+          if (audioBlobUrl) {
+            playAudioUrl(audioBlobUrl);
+          } else {
+            playSpeechAudio(content, attacker.voice?.voiceId, attacker.id);
+          }
 
           const attackEvent: AttackEvent = {
             id: `atk-${Date.now()}`,
             round,
             attackerId: attacker.id,
             targetId: preferredTargetId,
-            text: result.text,
+            text: content,
             timestamp: Date.now(),
           };
+
+          const updatedAttacks = [...(state.attacksByRound[round] || []), attackEvent];
 
           setState(prev => ({
             ...prev,
             attacksByRound: {
               ...prev.attacksByRound,
-              [round]: [...(prev.attacksByRound[round] || []), attackEvent],
+              [round]: updatedAttacks,
             },
             stage: {
               ...prev.stage,
-              content: result.text,
+              content,
               isLoading: false,
             },
             tickerLog: [
               {
                 id: `tick-${Date.now()}`,
                 type: 'attack',
-                message: `💥 ${attacker.name} challenged ${CANDIDATE_MAP.get(preferredTargetId)?.name}: "${result.text.slice(0, 80)}..."`,
+                message: `💥 ${attacker.name} challenged ${CANDIDATE_MAP.get(preferredTargetId)?.name}: "${content.slice(0, 80)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
             ]
           }));
+
+          dispatchBackgroundPreload({
+            ...state,
+            phase: 'ATTACK',
+            currentSpeakerIndex: nextIndex,
+            attacksByRound: {
+              ...state.attacksByRound,
+              [round]: updatedAttacks,
+            }
+          });
         } else {
           // All active candidates attacked! Transition to CCTV_BACKROOM (Leaked private pacts)
           sounds.playCCTVBeep();
@@ -1656,36 +1816,59 @@ export function useGameEngine(
             ]
           }));
 
-          const result = await callLLM({
-            action: 'final_speech',
-            candidateId: firstFinalist.id,
+          const stepDescriptor = {
+            stepKey: `final_speech-0-${firstFinalist.id}`,
+            phase: 'FINAL_SPEECHES' as GamePhase,
             round,
-            activeCandidateIds,
-            finalistIds: activeCandidateIds,
-            historyContext: {},
-          });
+            speakerId: firstFinalist.id,
+            targetId: null,
+            actionType: 'speech' as const,
+            headline: `THE FINAL 3 SHOWDOWN: CLOSING ARGUMENT — ${firstFinalist.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'final_speech' as const,
+              candidateId: firstFinalist.id,
+              round,
+              activeCandidateIds,
+              finalistIds: activeCandidateIds,
+              historyContext: {},
+            }
+          };
+
+          const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
           sounds.playSpeechBeep();
-          playSpeechAudio(result.text, firstFinalist.voice?.voiceId, firstFinalist.id);
+          if (audioBlobUrl) {
+            playAudioUrl(audioBlobUrl);
+          } else {
+            playSpeechAudio(content, firstFinalist.voice?.voiceId, firstFinalist.id);
+          }
 
+          const updatedFinalSpeeches = { ...state.finalSpeeches, [firstFinalist.id]: content };
           setState(prev => ({
             ...prev,
-            finalSpeeches: { ...prev.finalSpeeches, [firstFinalist.id]: result.text },
+            finalSpeeches: updatedFinalSpeeches,
             stage: {
               ...prev.stage,
-              content: result.text,
+              content,
               isLoading: false,
             },
             tickerLog: [
               {
                 id: `tick-${Date.now()}`,
                 type: 'speech',
-                message: `👑 ${firstFinalist.name} Final Appeal: "${result.text.slice(0, 80)}..."`,
+                message: `👑 ${firstFinalist.name} Final Appeal: "${content.slice(0, 80)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
             ]
           }));
+
+          dispatchBackgroundPreload({
+            ...state,
+            phase: 'FINAL_SPEECHES',
+            currentSpeakerIndex: 0,
+            finalSpeeches: updatedFinalSpeeches,
+          });
         }
 
         isExecutingStep.current = false;
@@ -1717,36 +1900,59 @@ export function useGameEngine(
             },
           }));
 
-          const result = await callLLM({
-            action: 'final_speech',
-            candidateId: finalist.id,
+          const stepDescriptor = {
+            stepKey: `final_speech-${nextIndex}-${finalist.id}`,
+            phase: 'FINAL_SPEECHES' as GamePhase,
             round,
-            activeCandidateIds,
-            finalistIds: activeCandidateIds,
-            historyContext: {},
-          });
+            speakerId: finalist.id,
+            targetId: null,
+            actionType: 'speech' as const,
+            headline: `THE FINAL 3 SHOWDOWN: CLOSING ARGUMENT — ${finalist.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'final_speech' as const,
+              candidateId: finalist.id,
+              round,
+              activeCandidateIds,
+              finalistIds: activeCandidateIds,
+              historyContext: {},
+            }
+          };
+
+          const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
           sounds.playSpeechBeep();
-          playSpeechAudio(result.text, finalist.voice?.voiceId, finalist.id);
+          if (audioBlobUrl) {
+            playAudioUrl(audioBlobUrl);
+          } else {
+            playSpeechAudio(content, finalist.voice?.voiceId, finalist.id);
+          }
 
+          const updatedFinalSpeeches = { ...state.finalSpeeches, [finalist.id]: content };
           setState(prev => ({
             ...prev,
-            finalSpeeches: { ...prev.finalSpeeches, [finalist.id]: result.text },
+            finalSpeeches: updatedFinalSpeeches,
             stage: {
               ...prev.stage,
-              content: result.text,
+              content,
               isLoading: false,
             },
             tickerLog: [
               {
                 id: `tick-${Date.now()}`,
                 type: 'speech',
-                message: `👑 ${finalist.name} Final Appeal: "${result.text.slice(0, 80)}..."`,
+                message: `👑 ${finalist.name} Final Appeal: "${content.slice(0, 80)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
             ]
           }));
+
+          dispatchBackgroundPreload({
+            ...state,
+            phase: 'FINAL_SPEECHES',
+            currentSpeakerIndex: nextIndex,
+            finalSpeeches: updatedFinalSpeeches,
+          });
         } else {
           // All 3 finalists delivered speeches! Transition to FINAL GRAND JURY VOTE
           sounds.playGavel();
@@ -1889,29 +2095,44 @@ export function useGameEngine(
           ]
         }));
 
-        const result = await callLLM({
-          action: 'victory_speech',
-          candidateId: winner.id,
+        const stepDescriptor = {
+          stepKey: `winner-${winner.id}`,
+          phase: 'WINNER' as GamePhase,
           round: 100,
-          activeCandidateIds: [winner.id],
-          historyContext: {},
-        });
+          speakerId: winner.id,
+          targetId: null,
+          actionType: 'winner' as const,
+          headline: `PRESIDENT OF THE REPUBLIC OF VALORIA: ${winner.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'victory_speech' as const,
+            candidateId: winner.id,
+            round: 100,
+            activeCandidateIds: [winner.id],
+            historyContext: {},
+          }
+        };
 
-        playSpeechAudio(result.text, winner.voice?.voiceId, winner.id);
+        const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
+
+        if (audioBlobUrl) {
+          playAudioUrl(audioBlobUrl);
+        } else {
+          playSpeechAudio(content, winner.voice?.voiceId, winner.id);
+        }
 
         setState(prev => ({
           ...prev,
-          victorySpeech: result.text,
+          victorySpeech: content,
           stage: {
             ...prev.stage,
-            content: result.text,
+            content,
             isLoading: false,
           },
           tickerLog: [
             {
               id: `tick-${Date.now()}`,
               type: 'speech',
-              message: `🏛️ PRESIDENT ${winner.name}: "${result.text}"`,
+              message: `🏛️ PRESIDENT ${winner.name}: "${content}"`,
               timestamp: Date.now(),
             },
             ...prev.tickerLog,
