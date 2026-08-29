@@ -557,7 +557,7 @@ export class NineRouterService {
   }
 
   /**
-   * Construct tailored system & user prompts maintaining character & memory
+   * Construct tailored system & user prompts maintaining character & deep debate memory
    */
   private buildPrompt(
     candidate: Candidate, 
@@ -567,46 +567,82 @@ export class NineRouterService {
     let userPrompt = '';
     let isJsonExpected = false;
 
+    const ctx = payload.historyContext || {};
+    const electionTopic = ctx.electionTopic || 'The Industrial Stagnation & Cost of Living Crisis in the Republic of Valoria';
+
     switch (payload.action) {
       case 'campaign_speech': {
-        userPrompt = `You are on the national debate stage for Round 1 Presidential Campaign Speeches in the Republic of Valoria.
-The electorate and your fellow candidates are listening.
-In MAXIMUM 40 WORDS:
-1. Introduce your background and core platform.
-2. Explain why you must be elected President of the Republic of Valoria.
-3. Persuade the audience to vote for your vision.
+        const preceding = ctx.precedingSpeeches || [];
+        
+        if (preceding.length === 0) {
+          // First speaker: Sets the national debate agenda with explosive opening thesis
+          userPrompt = `ROUND 1: OPENING PRESIDENTIAL CAMPAIGN ADDRESS.
+NATIONAL CRISIS FOCUS: "${electionTopic}"
+You are the FIRST candidate to take the microphone on live national television. The electorate and all rival contenders are watching.
 
-Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle} - ${candidate.titleRole}). Return clean speech text only, strictly under 40 words.`;
+In MAXIMUM 40 WORDS:
+- Confront this crisis immediately with your boldest presidential thesis.
+- Frame the election on your terms and challenge the failed status quo.
+- Do NOT use generic opening greetings ("Fellow citizens", "I stand before you"). Jump straight into your argument with fierce conviction.
+- Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle} - ${candidate.titleRole}).
+- Return clean speech text only, strictly under 40 words.`;
+        } else {
+          // Subsequent speakers: Must directly react to, contrast with, or dismantle preceding speeches!
+          const recentPreceding = preceding.slice(-3);
+          const precedingSnippet = recentPreceding
+            .map(p => `- ${p.candidateName} (${p.titleRole}): "${p.speech}"`)
+            .join('\n');
+          const lastSpeaker = recentPreceding[recentPreceding.length - 1];
+
+          userPrompt = `ROUND 1: PRESIDENTIAL CAMPAIGN ADDRESS.
+NATIONAL CRISIS FOCUS: "${electionTopic}"
+You are taking the microphone after hearing your rivals speak on stage.
+
+PREVIOUS STATEMENTS ON STAGE:
+${precedingSnippet}
+
+In MAXIMUM 40 WORDS:
+- Directly REACT TO, REBUT, or CONTRAST yourself against the statement just made by ${lastSpeaker?.candidateName || 'your rival'} or earlier speakers.
+- Pivot sharply to why YOUR leadership is the only real answer to this national crisis.
+- Do NOT repeat canned biographical bullet points. Engage directly with the live debate.
+- Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle} - ${candidate.titleRole}).
+- Return clean speech text only, strictly under 40 words.`;
+        }
         break;
       }
 
       case 'attack': {
         const targetCandidate = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
-        const targetDesc = targetCandidate 
-          ? `${targetCandidate.name} (${targetCandidate.archetypeTitle} - ${targetCandidate.titleRole}, Slogan: "${targetCandidate.slogan}")`
-          : 'an opponent';
+        const targetName = targetCandidate ? targetCandidate.name : 'your opponent';
+        const targetRole = targetCandidate ? `${targetCandidate.archetypeTitle} (${targetCandidate.titleRole})` : 'an opponent';
+        const targetSlogan = targetCandidate ? targetCandidate.slogan : '';
+        const targetQuote = ctx.targetSpeechQuote || '';
+        const targetWeaknesses = ctx.targetWeaknesses || targetCandidate?.weaknesses || [];
 
         let contextSnippet = '';
-        if (payload.historyContext.recentAttacks && payload.historyContext.recentAttacks.length > 0) {
-          contextSnippet = `\nRecent Attacks in the debate:\n` + payload.historyContext.recentAttacks
+        if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
+          contextSnippet = `\nRecent Clashes in this round:\n` + ctx.recentAttacks
             .slice(-4)
             .map(a => `- ${a.attackerName} attacked ${a.targetName}: "${a.text}"`)
             .join('\n');
         }
 
         userPrompt = `Round ${payload.round}: LIVE ATTACK ROUND.
-You must publicly ATTACK your opponent: ${targetDesc}.
-${contextSnippet}
+You must publicly ATTACK your rival: ${targetName} — ${targetRole}.
+Slogan: "${targetSlogan}"
+${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
 
-In MAXIMUM 30 WORDS, ruthlessly attack their economic policies, scandals, donor ties, voting record, or fitness to lead the Republic of Valoria.
-Stay completely in character as ${candidate.name}. Return clean attack speech text only, strictly under 30 words.`;
+In MAXIMUM 30 WORDS:
+- Ruthlessly attack ${targetName}'s exact words, economic hypocrisy, scandalous donor ties, or fitness to lead Valoria.
+- Tear down their credibility before the voters with razor-sharp, authentic rhetoric.
+- Stay completely in character as ${candidate.name}. Return clean attack speech text only, strictly under 30 words.`;
         break;
       }
 
       case 'backroom_pact': {
         isJsonExpected = true;
         const receiver = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
-        const receiverName = receiver ? `${receiver.name} (${receiver.archetypeTitle})` : 'your ally';
+        const receiverName = receiver ? `${receiver.name} (${receiver.archetypeTitle})` : 'your potential ally';
         const allowedTargets = payload.activeCandidateIds
           .filter(id => id !== candidate.id && id !== payload.targetId)
           .map(id => {
@@ -616,19 +652,21 @@ Stay completely in character as ${candidate.name}. Return clean attack speech te
           .join(', ');
 
         let contextSnippet = '';
-        if (payload.historyContext.recentAttacks && payload.historyContext.recentAttacks.length > 0) {
-          contextSnippet = `\nRecent Clashes:\n` + payload.historyContext.recentAttacks
+        if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
+          contextSnippet = `\nRecent Debate Clashes:\n` + ctx.recentAttacks
             .slice(-3)
-            .map(a => `- ${a.attackerName} attacked ${a.targetName}`)
+            .map(a => `- ${a.attackerName} targeted ${a.targetName}`)
             .join('\n');
         }
 
-        userPrompt = `Round ${payload.round}: SECRET BACKROOM DEAL / LEAKED CCTV CONSPIRACY.
-You are privately whispering to ${receiverName} behind closed doors in a shadowy Capitol hallway.
-You want to propose a secret tactical alliance, vote pact, or bribe to coordinate your votes to eliminate ONE target: [${allowedTargets}].
+        userPrompt = `Round ${payload.round}: SECRET BACKROOM DEAL / LEAKED CAPITOL CCTV FEED.
+You are privately whispering to ${receiverName} behind closed doors in a shadowy Capitol corridor.
+You want to propose a secret tactical alliance, vote trade, or mutual defense pact to coordinate your elimination votes against ONE target: [${allowedTargets}].
 ${contextSnippet}
 
-In MAXIMUM 25 WORDS, deliver your whispered proposal or bribe in character.
+In MAXIMUM 25 WORDS:
+- Deliver a tense, high-stakes whispered proposal offering mutual benefit (e.g. policy concession, cabinet leverage, neutralizing a mutual threat).
+- Stay completely in character as ${candidate.name}.
 
 You MUST return a JSON object with this exact schema:
 {
@@ -649,47 +687,58 @@ You MUST return a JSON object with this exact schema:
           .join(', ');
 
         let contextSnippet = '';
-        if (payload.historyContext.recentAttacks && payload.historyContext.recentAttacks.length > 0) {
-          contextSnippet = `\nDebate context so far:\n` + payload.historyContext.recentAttacks
+        if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
+          contextSnippet = `\nDebate clashes so far:\n` + ctx.recentAttacks
             .slice(-4)
-            .map(a => `- ${a.attackerName} attacked ${a.targetName}`)
+            .map(a => `- ${a.attackerName} attacked ${a.targetName}: "${a.text}"`)
             .join('\n');
         }
 
         let pactContext = '';
-        if (payload.historyContext.activePact) {
-          const ally = CANDIDATE_MAP.get(payload.historyContext.activePact.allyId);
-          const agreedTarget = CANDIDATE_MAP.get(payload.historyContext.activePact.agreedTargetId);
+        if (ctx.activePact) {
+          const ally = CANDIDATE_MAP.get(ctx.activePact.allyId);
+          const agreedTarget = CANDIDATE_MAP.get(ctx.activePact.agreedTargetId);
           pactContext = `
-SECRET BACKROOM DEAL & STRATEGIC BETRAYAL DILEMMA:
-In the shadowy Capitol cloakroom, you shook hands with ${ally?.name} (${ally?.titleRole}) to coordinate your votes against "${agreedTarget?.id}" (${agreedTarget?.name}).
-However, Valorian politics is ruthless and cutthroat:
-- OPTION A (HONOR PACT): Vote for "${agreedTarget?.id}" as promised.
-- OPTION B (TACTICAL BETRAYAL): If ${ally?.name} is a dangerous rival, if you distrust them, if eliminating ${ally?.name} or another heavyweight improves your own presidential survival, or if your character is calculating/opportunistic, you CAN STAB ${ally?.name} IN THE BACK and vote for "${ally?.id}" or another candidate.
-Weigh your candidate's loyalty vs ruthless ambition!
+SECRET BACKROOM PACT & TACTICAL BETRAYAL DILEMMA:
+In the Capitol cloakroom, you shook hands with ${ally?.name} (${ally?.titleRole}) to coordinate votes against "${agreedTarget?.id}" (${agreedTarget?.name}).
+However, Valorian politics is ruthless:
+- OPTION A (HONOR PACT): Vote for "${agreedTarget?.id}" as promised to build trust.
+- OPTION B (TACTICAL BETRAYAL): If ${ally?.name} is a dangerous long-term threat, or if you suspect they might betray you, you CAN STAB ${ally?.name} IN THE BACK and vote for "${ally?.id}" or another heavyweight.
+Weigh loyalty vs cutthroat ambition!
 `;
         }
 
-        userPrompt = `Round ${payload.round}: SECRET ELIMINATION BALLOT.
+        userPrompt = `Round ${payload.round}: CONFIDENTIAL ELIMINATION BALLOT.
 You must secretly vote to ELIMINATE ONE candidate from the presidential race.
 Rules:
 1. You CANNOT vote for yourself (${candidate.id}).
-2. You MUST pick exactly ONE ID from this list: [${candidatesToVote}].
+2. You MUST pick exactly ONE ID from: [${candidatesToVote}].
 3. Vote based on political survival, rival threats, backroom pacts, or tactical betrayals.
 ${pactContext}${contextSnippet}
 
 You MUST return a JSON object with this exact schema:
 {
   "vote": "candidate_id",
-  "reason": "brief private political calculation (max 20 words)"
+  "reason": "sharp, authentic private political calculation (max 20 words)"
 }`;
         break;
       }
 
       case 'exit_words': {
-        userPrompt = `You have just been ELIMINATED from the Presidential Race in Round ${payload.round}!
-In MAXIMUM 30 WORDS, deliver your dramatic concession statement or parting words to Valoria's voters.
-Stay in character as ${candidate.name}. Return clean text only, strictly under 30 words.`;
+        const betrayal = ctx.betrayalContext;
+        let betrayalSnippet = '';
+        if (betrayal && betrayal.wasBetrayed) {
+          betrayalSnippet = `\n⚠️ BACKROOM BETRAYAL: Your supposed ally ${betrayal.betrayedByCandidateName || 'an ally'} stabbed you in the back and cast the deciding vote against you!`;
+        }
+        const voteCountText = betrayal?.voteCountAgainstSelf ? `with ${betrayal.voteCountAgainstSelf} elimination votes` : '';
+
+        userPrompt = `You have just been ELIMINATED from the Presidential Race in Round ${payload.round} ${voteCountText}!
+${betrayalSnippet}
+
+In MAXIMUM 30 WORDS:
+- Deliver your dramatic, authentic concession statement or parting words to Valoria's voters.
+- Reflect your archetype: bitter defiance, righteous warning of the Republic's doom, rallying your supporters, or graceful statesmanship.
+- Stay in character as ${candidate.name}. Return clean text only, strictly under 30 words.`;
         break;
       }
 
@@ -698,18 +747,27 @@ Stay in character as ${candidate.name}. Return clean text only, strictly under 3
           .filter(id => id !== candidate.id)
           .map(id => {
             const c = CANDIDATE_MAP.get(id);
-            return `${c?.name} (${c?.archetypeTitle})`;
+            return `${c?.name} (${c?.archetypeTitle} - ${c?.titleRole})`;
           })
           .join(' and ');
 
+        let eliminatedSummary = '';
+        if (ctx.eliminatedCandidatesSummary && ctx.eliminatedCandidatesSummary.length > 0) {
+          eliminatedSummary = `\nEliminated along the way: ` + ctx.eliminatedCandidatesSummary
+            .map(e => e.candidateName)
+            .join(', ');
+        }
+
         userPrompt = `THE FINAL PRESIDENTIAL SHOWDOWN (Top 3 Finalists).
-You are delivering your FINAL APPEAL to the Grand Jury of all participating candidates and the nation.
-Your opponents are: ${finalistsList}.
+You are delivering your CLOSING ARGUMENT to the Grand Jury of all participating candidates and the nation.
+Your surviving rivals on stage: ${finalistsList}.${eliminatedSummary}
+NATIONAL CRISIS MANDATE: "${electionTopic}"
 
-In MAXIMUM 50 WORDS, answer:
-"Why should YOU become President of the Republic of Valoria, and why are the other two candidates dangerous or unfit choices?"
-
-Deliver a compelling, presidential closing argument. Return clean speech text only, strictly under 50 words.`;
+In MAXIMUM 50 WORDS:
+- Explain why YOU must be inaugurated President of the Republic of Valoria.
+- Directly contrast your vision against the other two surviving finalists and explain why their plans are dangerous or bankrupt.
+- Demand the Grand Jury's vote with presidential gravitas.
+- Stay in character as ${candidate.name}. Return clean speech text only, strictly under 50 words.`;
         break;
       }
 
@@ -725,28 +783,37 @@ Deliver a compelling, presidential closing argument. Return clean speech text on
 
         const isEliminated = !payload.activeCandidateIds.includes(candidate.id);
         const juryStatus = isEliminated 
-          ? 'You were eliminated earlier and are now voting as a Grand Juror.'
-          : 'You are one of the finalists voting for your peer.';
+          ? 'You were eliminated earlier in the debates and are now casting your vote as a Grand Juror.'
+          : 'You are one of the 3 finalists voting for your peer.';
+
+        let historyMemories = '';
+        if (ctx.allClashesSummary && ctx.allClashesSummary.length > 0) {
+          historyMemories = `\nKey Debate Memory:\n` + ctx.allClashesSummary.slice(-5).join('\n');
+        }
 
         userPrompt = `GRAND JURY PRESIDENTIAL ELECTION VOTE.
 ${juryStatus}
-You must cast your FINAL VOTE to elect the President of the Republic of Valoria from: [${finalistsDesc}].
+Candidates on the presidential ballot: [${finalistsDesc}].${historyMemories}
 Rules:
 1. You CANNOT vote for yourself.
-2. Vote for the candidate whose leadership, policies, or character you support most.
+2. Cast your vote based on who earned your respect, shared your policy goals, or vote against whoever betrayed/insulted you during the election.
 
 Return a JSON object:
 {
   "vote": "finalist_id",
-  "reason": "brief private jury reasoning"
+  "reason": "sharp private jury reasoning (max 20 words)"
 }`;
         break;
       }
 
       case 'victory_speech': {
         userPrompt = `CONGRATULATIONS! You have won the election and are officially inaugurated as PRESIDENT OF THE REPUBLIC OF VALORIA!
-Deliver your triumphant inaugural presidential victory address to the nation in MAXIMUM 50 WORDS.
-Stay completely in character as ${candidate.name}. Return clean speech text only, strictly under 50 words.`;
+NATIONAL CRISIS MANDATE: "${electionTopic}"
+
+In MAXIMUM 50 WORDS:
+- Deliver your triumphant, commanding inaugural presidential victory address to the nation and the Grand Jury.
+- Acknowledge the grueling battle, address your defeated opponents, and proclaim your first executive decree.
+- Stay completely in character as ${candidate.name}. Return clean speech text only, strictly under 50 words.`;
         break;
       }
 
@@ -793,7 +860,7 @@ Format your response strictly following this JSON template:
     "icon": "leaf",
     "svgType": "leaf"
   },
-  "systemPrompt": "You are Marcus Vance, Green Grid Pioneer and Former Clean Energy Secretary running for President of the Republic of Valoria. Slogan: 'Power Valoria with 100% Clean Energy Sovereignty!'. Background: Elite clean energy pioneer and reformer who entered politics to dismantle corrupt fossil-fuel subsidies and rebuild Valoria's industrial towns with modern green factories. Speech style: Speak with passionate energy, sharp technical data, and unyielding conviction. Keep all debate speeches strictly under the specified word limit."
+  "systemPrompt": "You are Marcus Vance, Green Grid Pioneer and Former Clean Energy Secretary running for President of the Republic of Valoria. Slogan: 'Power Valoria with 100% Clean Energy Sovereignty!'. CORE IDENTITY: Elite clean energy pioneer who entered politics to dismantle fossil-fuel subsidies and rebuild industrial towns with modern green factories. RHETORICAL VOICE: Passionate energy, sharp technical data, unyielding conviction. ANTI-CLICHÉ: Avoid generic filler. Keep speeches strictly under the specified word limit."
 }
 
 Rules for fields:

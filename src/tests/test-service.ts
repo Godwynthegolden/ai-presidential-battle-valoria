@@ -145,7 +145,98 @@ Ideology: Direct algorithmic optimization of public resources.
     console.log('Dynamic custom candidate properly resolved in generateAgentAction PASSED!');
   }
 
-  console.log('\nAll unit tests for AI Custom Character Generator & Parameter Editor PASSED successfully!');
+  // Test Valoria Debate Topics catalog
+  console.log('Testing Valoria Debate Topics catalog:');
+  const { VALORIA_DEBATE_TOPICS, getRandomDebateTopic } = await import('../data/candidates');
+  if (!VALORIA_DEBATE_TOPICS || VALORIA_DEBATE_TOPICS.length < 8) {
+    throw new Error(`Expected at least 8 debate crisis topics, got ${VALORIA_DEBATE_TOPICS?.length}`);
+  }
+  for (const topic of VALORIA_DEBATE_TOPICS) {
+    if (!topic.id || !topic.title || !topic.category || !topic.crisisSummary || !topic.moderatorQuestion) {
+      throw new Error(`Topic ${topic.id} missing required fields`);
+    }
+  }
+  const randomTopic = getRandomDebateTopic();
+  if (!randomTopic || !randomTopic.title) {
+    throw new Error('getRandomDebateTopic() returned invalid topic');
+  }
+  console.log(`Verified ${VALORIA_DEBATE_TOPICS.length} Valoria crisis debate topics. Sample topic: "${randomTopic.title}" PASSED!`);
+
+  // Test prompt builder with preceding speeches & reactive context
+  const testCandidate = CANDIDATES[0];
+  const openingPrompt = (nineRouterService as any).buildPrompt(testCandidate, {
+    action: 'campaign_speech',
+    candidateId: testCandidate.id,
+    round: 1,
+    activeCandidateIds: [testCandidate.id, CANDIDATES[1].id],
+    historyContext: {
+      electionTopic: randomTopic.title,
+      precedingSpeeches: [],
+    },
+  });
+  if (!openingPrompt.userPrompt.includes('FIRST candidate') || !openingPrompt.userPrompt.includes(randomTopic.title)) {
+    throw new Error('Opening campaign prompt failed to inject opening stance and crisis topic');
+  }
+
+  const reactivePrompt = (nineRouterService as any).buildPrompt(CANDIDATES[1], {
+    action: 'campaign_speech',
+    candidateId: CANDIDATES[1].id,
+    round: 1,
+    activeCandidateIds: [testCandidate.id, CANDIDATES[1].id],
+    historyContext: {
+      electionTopic: randomTopic.title,
+      precedingSpeeches: [
+        {
+          candidateId: testCandidate.id,
+          candidateName: testCandidate.name,
+          titleRole: testCandidate.titleRole,
+          speech: 'I will balance the budget and freeze taxes.',
+        }
+      ],
+    },
+  });
+  if (!reactivePrompt.userPrompt.includes('REBUT') || !reactivePrompt.userPrompt.includes(testCandidate.name)) {
+    throw new Error('Subsequent campaign prompt failed to inject reactive rebuttal and preceding candidate speech');
+  }
+  console.log('Reactive debate prompt construction with multi-candidate contextual awareness PASSED!');
+
+  // Test attack prompt with spoken quote and vulnerabilities
+  const attackPrompt = (nineRouterService as any).buildPrompt(testCandidate, {
+    action: 'attack',
+    candidateId: testCandidate.id,
+    targetId: CANDIDATES[1].id,
+    round: 1,
+    activeCandidateIds: [testCandidate.id, CANDIDATES[1].id],
+    historyContext: {
+      targetSpeechQuote: 'I will balance the budget and freeze taxes.',
+      targetWeaknesses: CANDIDATES[1].weaknesses,
+    },
+  });
+  if (!attackPrompt.userPrompt.includes("TARGET'S SPOKEN QUOTE") || !attackPrompt.userPrompt.includes(CANDIDATES[1].weaknesses[0])) {
+    throw new Error('Attack prompt failed to inject target quote and vulnerability points');
+  }
+  console.log('Context-aware target quote and vulnerability attack prompt PASSED!');
+
+  // Test exit words prompt with betrayal context
+  const exitPrompt = (nineRouterService as any).buildPrompt(testCandidate, {
+    action: 'exit_words',
+    candidateId: testCandidate.id,
+    round: 2,
+    activeCandidateIds: [testCandidate.id],
+    historyContext: {
+      betrayalContext: {
+        wasBetrayed: true,
+        betrayedByCandidateName: 'Dominic Sterling',
+        voteCountAgainstSelf: 4,
+      },
+    },
+  });
+  if (!exitPrompt.userPrompt.includes('Dominic Sterling') || !exitPrompt.userPrompt.includes('4 elimination votes')) {
+    throw new Error('Concession exit words prompt failed to inject betrayal perpetrator');
+  }
+  console.log('Concession prompt with backroom betrayal context PASSED!');
+
+  console.log('\nAll unit tests for AI Candidate Intelligence, Crisis Topics & Prompt Engine PASSED successfully!');
 }
 
 testEngine().catch(err => {

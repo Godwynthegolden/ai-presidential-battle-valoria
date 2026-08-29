@@ -7,6 +7,8 @@ import {
   CANDIDATES, 
   CANDIDATE_MAP, 
   DEFAULT_CANDIDATES, 
+  VALORIA_DEBATE_TOPICS,
+  getRandomDebateTopic,
   getStoredCandidates, 
   saveStoredCandidates, 
   resetStoredCandidates,
@@ -41,9 +43,12 @@ export interface PreparedStep {
   payload?: any;
 }
 
-const CREATE_INITIAL_STATE = (selectedIds: string[] = []): GameState => ({
+const DEFAULT_TOPIC = `${VALORIA_DEBATE_TOPICS[0].title}: ${VALORIA_DEBATE_TOPICS[0].crisisSummary}`;
+
+const CREATE_INITIAL_STATE = (selectedIds: string[] = [], topic: string = DEFAULT_TOPIC): GameState => ({
   phase: 'IDLE',
   round: 1,
+  electionTopic: topic,
   participatingCandidateIds: [...selectedIds],
   activeCandidateIds: [...selectedIds],
   eliminatedCandidates: [],
@@ -77,7 +82,7 @@ const CREATE_INITIAL_STATE = (selectedIds: string[] = []): GameState => ({
     {
       id: 'init-1',
       type: 'system',
-      message: `National Election Commission: ${selectedIds.length} candidates registered for the Republic of Valoria presidential election.`,
+      message: `National Election Commission: ${selectedIds.length} candidates registered. National Crisis: "${topic.slice(0, 100)}..."`,
       timestamp: Date.now(),
     }
   ],
@@ -525,6 +530,8 @@ export function useGameEngine(
     const activeCandidateIds = [...currentState.activeCandidateIds];
     if (activeCandidateIds.length === 0) return steps;
 
+    const electionTopic = currentState.electionTopic || DEFAULT_TOPIC;
+
     // Simulate step progression from currentState
     let simPhase: GamePhase = currentState.phase;
     let simRound: number = currentState.round;
@@ -537,6 +544,16 @@ export function useGameEngine(
         const nextIdx = steps.length;
         if (nextIdx < simActiveIds.length) {
           const cand = CANDIDATE_MAP.get(simActiveIds[nextIdx])!;
+          const preceding = simActiveIds.slice(0, nextIdx).map(id => {
+            const c = CANDIDATE_MAP.get(id);
+            return {
+              candidateId: id,
+              candidateName: c?.name || id,
+              titleRole: c?.titleRole || 'Candidate',
+              speech: currentState.campaignSpeeches[id] || (c ? `${c.slogan}` : 'My presidential platform'),
+            };
+          });
+
           steps.push({
             stepKey: `campaign-${nextIdx}-${cand.id}`,
             phase: 'CAMPAIGN',
@@ -552,7 +569,11 @@ export function useGameEngine(
               candidateId: cand.id,
               round: 1,
               activeCandidateIds: simActiveIds,
-              historyContext: {},
+              historyContext: {
+                electionTopic,
+                campaignSpeeches: currentState.campaignSpeeches,
+                precedingSpeeches: preceding,
+              },
             }
           });
         } else {
@@ -564,6 +585,16 @@ export function useGameEngine(
         simSpeakerIndex += 1;
         if (simSpeakerIndex < simActiveIds.length) {
           const cand = CANDIDATE_MAP.get(simActiveIds[simSpeakerIndex])!;
+          const preceding = simActiveIds.slice(0, simSpeakerIndex).map(id => {
+            const c = CANDIDATE_MAP.get(id);
+            return {
+              candidateId: id,
+              candidateName: c?.name || id,
+              titleRole: c?.titleRole || 'Candidate',
+              speech: currentState.campaignSpeeches[id] || (c ? `${c.slogan}` : 'My presidential platform'),
+            };
+          });
+
           steps.push({
             stepKey: `campaign-${simSpeakerIndex}-${cand.id}`,
             phase: 'CAMPAIGN',
@@ -577,7 +608,11 @@ export function useGameEngine(
               candidateId: cand.id,
               round: 1,
               activeCandidateIds: simActiveIds,
-              historyContext: {},
+              historyContext: {
+                electionTopic,
+                campaignSpeeches: currentState.campaignSpeeches,
+                precedingSpeeches: preceding,
+              },
             }
           });
         } else {
@@ -595,6 +630,13 @@ export function useGameEngine(
             const c = CANDIDATE_MAP.get(id);
             return c && attacker.rivalArchetypes.includes(c.archetype);
           }) || possibleTargets[0];
+          const targetCand = CANDIDATE_MAP.get(preferredTargetId);
+
+          const recentAttackContext = (currentState.attacksByRound[simRound] || []).map(a => ({
+            attackerName: CANDIDATE_MAP.get(a.attackerId)?.name || a.attackerId,
+            targetName: CANDIDATE_MAP.get(a.targetId)?.name || a.targetId,
+            text: a.text,
+          }));
 
           steps.push({
             stepKey: `attack-r${simRound}-${simSpeakerIndex}-${attacker.id}`,
@@ -610,7 +652,13 @@ export function useGameEngine(
               targetId: preferredTargetId,
               round: simRound,
               activeCandidateIds: simActiveIds,
-              historyContext: { campaignSpeeches: currentState.campaignSpeeches },
+              historyContext: { 
+                electionTopic,
+                campaignSpeeches: currentState.campaignSpeeches,
+                targetSpeechQuote: currentState.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
+                targetWeaknesses: targetCand?.weaknesses,
+                recentAttacks: recentAttackContext,
+              },
             }
           });
         } else {
@@ -629,6 +677,12 @@ export function useGameEngine(
             ? (CANDIDATE_MAP.get(simActiveIds[1]) || CANDIDATE_MAP.get(simActiveIds[1])!)
             : (CANDIDATE_MAP.get(simActiveIds[3]) || CANDIDATE_MAP.get(simActiveIds[1])!);
 
+          const recentAttackContext = (currentState.attacksByRound[simRound] || []).map(a => ({
+            attackerName: CANDIDATE_MAP.get(a.attackerId)?.name || a.attackerId,
+            targetName: CANDIDATE_MAP.get(a.targetId)?.name || a.targetId,
+            text: a.text,
+          }));
+
           steps.push({
             stepKey: `cctv-r${simRound}-${simSpeakerIndex}-${p1.id}`,
             phase: 'CCTV_BACKROOM',
@@ -643,7 +697,10 @@ export function useGameEngine(
               targetId: p2.id,
               round: simRound,
               activeCandidateIds: simActiveIds,
-              historyContext: {},
+              historyContext: {
+                electionTopic,
+                recentAttacks: recentAttackContext,
+              },
             }
           });
         } else {
@@ -667,6 +724,9 @@ export function useGameEngine(
           ? actualElimId
           : simActiveIds[simActiveIds.length - 1];
         const elimCand = CANDIDATE_MAP.get(elimCandidateId)!;
+        const wasBetrayed = Boolean(currentState.votesByRound[simRound]?.votes.some(v => v.targetId === elimCandidateId && v.isBetrayal));
+        const betrayerId = currentState.votesByRound[simRound]?.votes.find(v => v.targetId === elimCandidateId && v.isBetrayal)?.voterId;
+
         steps.push({
           stepKey: `elimination-r${simRound}-${elimCand.id}`,
           phase: 'ELIMINATION',
@@ -680,7 +740,14 @@ export function useGameEngine(
             candidateId: elimCand.id,
             round: simRound,
             activeCandidateIds: simActiveIds,
-            historyContext: {},
+            historyContext: {
+              electionTopic,
+              betrayalContext: {
+                wasBetrayed,
+                betrayedByCandidateName: betrayerId ? CANDIDATE_MAP.get(betrayerId)?.name : undefined,
+                voteCountAgainstSelf: currentState.votesByRound[simRound]?.tally[elimCandidateId] || 0,
+              },
+            },
           }
         });
         const remainingAfterElim = simActiveIds.filter(id => id !== elimCandidateId);
@@ -707,6 +774,13 @@ export function useGameEngine(
         simSpeakerIndex += 1;
         if (simSpeakerIndex < simActiveIds.length && simSpeakerIndex < 3) {
           const finalist = CANDIDATE_MAP.get(simActiveIds[simSpeakerIndex])!;
+          const elimSummary = currentState.eliminatedCandidates.map(e => ({
+            candidateName: CANDIDATE_MAP.get(e.candidateId)?.name || e.candidateId,
+            candidateId: e.candidateId,
+            round: e.eliminatedInRound,
+            exitWords: e.exitWords,
+          }));
+
           steps.push({
             stepKey: `final_speech-${simSpeakerIndex}-${finalist.id}`,
             phase: 'FINAL_SPEECHES',
@@ -721,7 +795,11 @@ export function useGameEngine(
               round: simRound,
               activeCandidateIds: simActiveIds,
               finalistIds: simActiveIds,
-              historyContext: {},
+              historyContext: {
+                electionTopic,
+                campaignSpeeches: currentState.campaignSpeeches,
+                eliminatedCandidatesSummary: elimSummary,
+              },
             }
           });
         } else {
@@ -742,7 +820,9 @@ export function useGameEngine(
             candidateId: winner.id,
             round: 100,
             activeCandidateIds: [winner.id],
-            historyContext: {},
+            historyContext: {
+              electionTopic,
+            },
           }
         });
         break;
@@ -844,6 +924,8 @@ export function useGameEngine(
           ]
         }));
 
+        const electionTopic = state.electionTopic || DEFAULT_TOPIC;
+
         const stepDescriptor = {
           stepKey: `campaign-0-${firstCandidate.id}`,
           phase: 'CAMPAIGN' as GamePhase,
@@ -857,7 +939,11 @@ export function useGameEngine(
             candidateId: firstCandidate.id,
             round: 1,
             activeCandidateIds,
-            historyContext: {},
+            historyContext: {
+              electionTopic,
+              campaignSpeeches: {},
+              precedingSpeeches: [],
+            },
           }
         };
 
@@ -910,7 +996,8 @@ export function useGameEngine(
         if (nextIndex < activeCandidateIds.length) {
           const speakerId = activeCandidateIds[nextIndex];
           const speaker = CANDIDATE_MAP.get(speakerId)!;
-          
+          const electionTopic = state.electionTopic || DEFAULT_TOPIC;
+
           setState(prev => ({
             ...prev,
             currentSpeakerIndex: nextIndex,
@@ -927,6 +1014,16 @@ export function useGameEngine(
             },
           }));
 
+          const preceding = activeCandidateIds.slice(0, nextIndex).map(id => {
+            const c = CANDIDATE_MAP.get(id);
+            return {
+              candidateId: id,
+              candidateName: c?.name || id,
+              titleRole: c?.titleRole || 'Candidate',
+              speech: state.campaignSpeeches[id] || (c ? `${c.slogan}` : 'My presidential platform'),
+            };
+          });
+
           const stepDescriptor = {
             stepKey: `campaign-${nextIndex}-${speaker.id}`,
             phase: 'CAMPAIGN' as GamePhase,
@@ -940,7 +1037,11 @@ export function useGameEngine(
               candidateId: speaker.id,
               round: 1,
               activeCandidateIds,
-              historyContext: {},
+              historyContext: {
+                electionTopic,
+                campaignSpeeches: state.campaignSpeeches,
+                precedingSpeeches: preceding,
+              },
             }
           };
 
@@ -989,6 +1090,7 @@ export function useGameEngine(
             const c = CANDIDATE_MAP.get(id);
             return c && firstAttacker.rivalArchetypes.includes(c.archetype);
           }) || possibleTargets[0];
+          const targetCand = CANDIDATE_MAP.get(preferredTargetId);
 
           setState(prev => ({
             ...prev,
@@ -1031,7 +1133,10 @@ export function useGameEngine(
               round: 1,
               activeCandidateIds,
               historyContext: {
+                electionTopic: state.electionTopic || DEFAULT_TOPIC,
                 campaignSpeeches: state.campaignSpeeches,
+                targetSpeechQuote: state.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
+                targetWeaknesses: targetCand?.weaknesses,
                 recentAttacks: [],
               },
             }
@@ -1111,6 +1216,7 @@ export function useGameEngine(
                 const c = CANDIDATE_MAP.get(id);
                 return c && attacker.rivalArchetypes.includes(c.archetype);
               }) || possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+          const targetCand = CANDIDATE_MAP.get(preferredTargetId);
 
           setState(prev => ({
             ...prev,
@@ -1149,7 +1255,10 @@ export function useGameEngine(
               round,
               activeCandidateIds,
               historyContext: {
+                electionTopic: state.electionTopic || DEFAULT_TOPIC,
                 campaignSpeeches: state.campaignSpeeches,
+                targetSpeechQuote: state.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
+                targetWeaknesses: targetCand?.weaknesses,
                 recentAttacks: recentAttackContext,
               },
             }
@@ -1261,6 +1370,7 @@ export function useGameEngine(
               round,
               activeCandidateIds,
               historyContext: {
+                electionTopic: state.electionTopic || DEFAULT_TOPIC,
                 recentAttacks: recentAttackContext,
               },
             }
@@ -1303,6 +1413,7 @@ export function useGameEngine(
                   round,
                   activeCandidateIds,
                   historyContext: {
+                    electionTopic: state.electionTopic || DEFAULT_TOPIC,
                     recentAttacks: recentAttackContext,
                   },
                 }
@@ -1471,6 +1582,7 @@ export function useGameEngine(
             round,
             activeCandidateIds,
             historyContext: {
+              electionTopic: state.electionTopic || DEFAULT_TOPIC,
               recentAttacks: recentAttacksContext,
               activePact: (allyId && agreedTargetId) ? { allyId, agreedTargetId } : undefined,
             },
@@ -1631,6 +1743,11 @@ export function useGameEngine(
           ]
         }));
 
+        const wasBetrayed = Boolean(roundTally?.votes.some(v => v.targetId === eliminatedId && v.isBetrayal));
+        const betrayingVoter = roundTally?.votes.find(v => v.targetId === eliminatedId && v.isBetrayal)?.voterId;
+        const betrayerName = betrayingVoter ? CANDIDATE_MAP.get(betrayingVoter)?.name : undefined;
+        const voteCountAgainst = roundTally?.tally[eliminatedId] || 0;
+
         const stepDescriptor = {
           stepKey: `elimination-r${round}-${eliminatedCandidate.id}`,
           phase: 'ELIMINATION' as GamePhase,
@@ -1644,7 +1761,14 @@ export function useGameEngine(
             candidateId: eliminatedCandidate.id,
             round,
             activeCandidateIds,
-            historyContext: {},
+            historyContext: {
+              electionTopic: state.electionTopic || DEFAULT_TOPIC,
+              betrayalContext: {
+                wasBetrayed,
+                betrayedByCandidateName: betrayerName,
+                voteCountAgainstSelf: voteCountAgainst,
+              },
+            },
           }
         };
 
@@ -1705,6 +1829,7 @@ export function useGameEngine(
           const firstAttacker = CANDIDATE_MAP.get(activeCandidateIds[0])!;
           const possibleTargets = activeCandidateIds.filter(id => id !== firstAttacker.id);
           const preferredTargetId = possibleTargets[0];
+          const targetCand = CANDIDATE_MAP.get(preferredTargetId);
 
           setState(prev => ({
             ...prev,
@@ -1740,7 +1865,10 @@ export function useGameEngine(
             round: nextRound,
             activeCandidateIds,
             historyContext: {
+              electionTopic: state.electionTopic || DEFAULT_TOPIC,
               campaignSpeeches: state.campaignSpeeches,
+              targetSpeechQuote: state.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
+              targetWeaknesses: targetCand?.weaknesses,
               recentAttacks: [],
             },
           });
@@ -1781,6 +1909,12 @@ export function useGameEngine(
           // Exactly 3 candidates remain -> FINAL PRESIDENTIAL SPEECHES!
           sounds.playGavel();
           const firstFinalist = CANDIDATE_MAP.get(activeCandidateIds[0])!;
+          const elimSummary = state.eliminatedCandidates.map(e => ({
+            candidateName: CANDIDATE_MAP.get(e.candidateId)?.name || e.candidateId,
+            candidateId: e.candidateId,
+            round: e.eliminatedInRound,
+            exitWords: e.exitWords,
+          }));
 
           setState(prev => ({
             ...prev,
@@ -1822,7 +1956,11 @@ export function useGameEngine(
               round,
               activeCandidateIds,
               finalistIds: activeCandidateIds,
-              historyContext: {},
+              historyContext: {
+                electionTopic: state.electionTopic || DEFAULT_TOPIC,
+                campaignSpeeches: state.campaignSpeeches,
+                eliminatedCandidatesSummary: elimSummary,
+              },
             }
           };
 
@@ -1875,6 +2013,12 @@ export function useGameEngine(
 
         if (nextIndex < activeCandidateIds.length) {
           const finalist = CANDIDATE_MAP.get(activeCandidateIds[nextIndex])!;
+          const elimSummary = state.eliminatedCandidates.map(e => ({
+            candidateName: CANDIDATE_MAP.get(e.candidateId)?.name || e.candidateId,
+            candidateId: e.candidateId,
+            round: e.eliminatedInRound,
+            exitWords: e.exitWords,
+          }));
 
           setState(prev => ({
             ...prev,
@@ -1906,7 +2050,11 @@ export function useGameEngine(
               round,
               activeCandidateIds,
               finalistIds: activeCandidateIds,
-              historyContext: {},
+              historyContext: {
+                electionTopic: state.electionTopic || DEFAULT_TOPIC,
+                campaignSpeeches: state.campaignSpeeches,
+                eliminatedCandidatesSummary: elimSummary,
+              },
             }
           };
 
@@ -1974,6 +2122,10 @@ export function useGameEngine(
             ]
           }));
 
+          const allClashesSummary = Object.entries(state.attacksByRound).flatMap(([r, atks]) => 
+            atks.map(a => `${CANDIDATE_MAP.get(a.attackerId)?.name} attacked ${CANDIDATE_MAP.get(a.targetId)?.name}: "${a.text}"`)
+          );
+
           // Gather final votes from all participating candidates
           const votePromises = participatingCandidateIds.map(async (voterId) => {
             const voteRes = await callLLM({
@@ -1982,7 +2134,10 @@ export function useGameEngine(
               round: 99,
               activeCandidateIds,
               finalistIds: activeCandidateIds,
-              historyContext: {},
+              historyContext: {
+                electionTopic: state.electionTopic || DEFAULT_TOPIC,
+                allClashesSummary,
+              },
             });
 
             return {
@@ -2100,7 +2255,9 @@ export function useGameEngine(
             candidateId: winner.id,
             round: 100,
             activeCandidateIds: [winner.id],
-            historyContext: {},
+            historyContext: {
+              electionTopic: state.electionTopic || DEFAULT_TOPIC,
+            },
           }
         };
 
@@ -2208,11 +2365,20 @@ export function useGameEngine(
       return;
     }
 
+    const selectedTopicObj = getRandomDebateTopic();
+    const freshTopic = `${selectedTopicObj.title}: ${selectedTopicObj.crisisSummary}`;
+
+    const startingState: GameState = {
+      ...state,
+      electionTopic: freshTopic,
+    };
+    setState(startingState);
+
     const depth = activeConfig?.lookaheadDepth || 2;
     setIsBufferingLookahead(true);
-    setBufferingStatus(`⚡ Initializing ${depth}-Step Lookahead Pipeline (Buffering ${depth} Steps of Dialogue and Neural Voices)...`);
+    setBufferingStatus(`⚡ Initializing ${depth}-Step Lookahead Pipeline on Crisis: "${selectedTopicObj.title}"...`);
 
-    const nextSteps = computeNextSteps(state, depth);
+    const nextSteps = computeNextSteps(startingState, depth);
     if (nextSteps.length > 0) {
       try {
         await Promise.all(nextSteps.slice(0, depth).map(step => preloadStep(step)));

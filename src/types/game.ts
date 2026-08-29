@@ -81,6 +81,8 @@ export interface GameState {
   eliminatedCandidates: EliminatedCandidateInfo[];
   currentSpeakerIndex: number;
   
+  electionTopic?: string;              // Current national debate crisis/question for this election
+
   // History collections
   campaignSpeeches: Record<string, string>; // candidateId -> text
   finalSpeeches: Record<string, string>;    // candidateId -> text
@@ -132,6 +134,13 @@ export type LLMActionType =
   | 'victory_speech'
   | 'generate_character';
 
+export interface PrecedingSpeechContext {
+  candidateId: string;
+  candidateName: string;
+  titleRole: string;
+  speech: string;
+}
+
 export interface LLMRequestPayload {
   action: LLMActionType;
   candidateId: string;
@@ -143,10 +152,31 @@ export interface LLMRequestPayload {
   finalistIds?: string[];
   customPrompt?: string; // Optional custom character prompt description
   historyContext: {
+    electionTopic?: string;
     campaignSpeeches?: Record<string, string>;
+    precedingSpeeches?: PrecedingSpeechContext[];
+    targetSpeechQuote?: string;
+    targetWeaknesses?: string[];
+    targetRole?: string;
+    targetSlogan?: string;
     recentAttacks?: Array<{ attackerName: string; targetName: string; text: string }>;
     recentEliminations?: Array<{ candidateName: string; round: number }>;
+    eliminatedCandidatesSummary?: Array<{ candidateName: string; candidateId: string; round: number; exitWords?: string }>;
     activePact?: { allyId: string; agreedTargetId: string };
+    betrayalContext?: { 
+      wasBetrayed: boolean; 
+      betrayedByCandidateName?: string; 
+      brokenPactTargetName?: string;
+      voteCountAgainstSelf?: number;
+    };
+    finalistRecords?: Array<{ 
+      candidateName: string; 
+      candidateId: string; 
+      titleRole: string; 
+      ideology: string; 
+      speechSummary?: string; 
+    }>;
+    allClashesSummary?: string[];
     previousVotesAgainstSelf?: number;
   };
   config?: {
