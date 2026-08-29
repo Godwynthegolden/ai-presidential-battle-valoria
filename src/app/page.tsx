@@ -270,7 +270,7 @@ export default function AIPlaygroundPage() {
         />
       ) : (
         /* Main Broadcast Workspace */
-        <div className={`flex-1 flex flex-col ${isCleanView ? 'p-2 md:p-3 gap-2' : 'p-3 md:p-4 gap-3'} max-w-[1750px] w-full mx-auto`}>
+        <div className={`flex-1 flex flex-col ${isCleanView ? 'p-2 md:p-3 gap-2' : 'p-3 md:p-4 gap-3'} max-w-[1750px] w-full mx-auto min-h-0`}>
           {/* Top Controls Bar (Hidden in Clean View) */}
           {!isCleanView && (
             <ControlBar
@@ -288,9 +288,9 @@ export default function AIPlaygroundPage() {
           )}
 
           {/* 3-Column Layout: Left (Candidates) - Center (Debate Arena) - Right (Live Battle Timeline) */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3.5 min-h-[580px]">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3.5 min-h-[580px] lg:min-h-0">
             {/* Left Column: Candidate Roster (3 Cols) */}
-            <div className="lg:col-span-3 h-full">
+            <div className="lg:col-span-3 h-full min-h-0 flex flex-col">
               <CandidateRoster
                 gameState={state}
                 candidates={candidates}
@@ -300,7 +300,7 @@ export default function AIPlaygroundPage() {
             </div>
 
             {/* Center Column: Live Debate Arena (6 Cols) */}
-            <div className="lg:col-span-6 flex flex-col h-full">
+            <div className="lg:col-span-6 h-full min-h-0 flex flex-col">
               <DebateArena
                 gameState={state}
                 onRetry={retryCurrentStep}
@@ -310,7 +310,7 @@ export default function AIPlaygroundPage() {
             </div>
 
             {/* Right Column: Live Battle Timeline (3 Cols) */}
-            <div className="lg:col-span-3 flex flex-col gap-3 h-full">
+            <div className="lg:col-span-3 h-full min-h-0 flex flex-col">
               <BroadcastTimeline
                 gameState={state}
                 onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}

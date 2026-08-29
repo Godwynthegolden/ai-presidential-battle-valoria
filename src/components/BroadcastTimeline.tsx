@@ -163,7 +163,7 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
       });
 
   return (
-    <div className="flex-1 flex flex-col rounded-3xl bg-[#0b0f19] border border-slate-750 p-4 md:p-5 backdrop-blur-2xl shadow-xl h-full overflow-hidden">
+    <div className="flex-1 flex flex-col rounded-3xl bg-[#0b0f19] border border-slate-750 p-4 md:p-5 backdrop-blur-2xl shadow-xl h-full min-h-0 overflow-hidden">
       {/* Timeline Header */}
       <div className="flex items-center justify-between pb-3.5 border-b border-slate-800 shrink-0">
         <div className="flex items-center gap-2.5">
@@ -214,7 +214,7 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
       {/* Events Feed */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto pr-1 py-1 flex flex-col gap-3 custom-scrollbar"
+        className="flex-1 min-h-0 overflow-y-auto pr-1 py-1 flex flex-col gap-3 custom-scrollbar"
       >
         {filteredEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center text-slate-400 text-xs font-mono gap-2">

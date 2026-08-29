@@ -38,9 +38,9 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
   );
 
   return (
-    <div className="flex flex-col gap-3 h-full">
+    <div className="flex flex-col gap-3 h-full min-h-0">
       {/* Roster Header */}
-      <div className="flex flex-col gap-2.5 p-3.5 bg-[#0b0f19] border border-slate-700/80 rounded-2xl shadow-lg">
+      <div className="flex flex-col gap-2.5 p-3.5 bg-[#0b0f19] border border-slate-700/80 rounded-2xl shadow-lg shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-cyan-400" />
@@ -66,7 +66,7 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
       </div>
 
       {/* Candidate List Grid */}
-      <div className="grid grid-cols-1 gap-2.5 overflow-y-auto pr-1 max-h-[calc(100vh-280px)] custom-scrollbar">
+      <div className="flex-1 min-h-0 flex flex-col gap-2.5 overflow-y-auto pr-1 custom-scrollbar">
         {participatingCandidates.map((candidate) => {
           const isAlive = activeCandidateIds.includes(candidate.id);
           const isSpeaking = stage.speakerId === candidate.id;

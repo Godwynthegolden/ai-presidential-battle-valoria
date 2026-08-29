@@ -49,7 +49,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
     const activePact = pactsThisRound[activeFeedIndex] || pactsThisRound[0] || null;
 
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 h-full">
+      <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
         <CCTVBackroomView
           pact={activePact}
           allPactsThisRound={pactsThisRound}
@@ -65,7 +65,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   // Render Special Phases (Vote Reveal & Winner)
   if (phase === 'VOTE_REVEAL' && votesByRound[round]) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
         <VoteRevealBoard 
           tally={votesByRound[round]} 
           isFinalVote={false} 
@@ -77,7 +77,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
 
   if (phase === 'FINAL_REVEAL' && finalVoteTally) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
         <VoteRevealBoard 
           tally={finalVoteTally} 
           isFinalVote={true} 
@@ -91,7 +91,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   if (phase === 'WINNER' && winnerId) {
     const winningCandidate = CANDIDATE_MAP.get(winnerId)!;
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
         <WinnerPodium 
           winner={winningCandidate}
           victorySpeech={gameState.victorySpeech || stage.content}
@@ -105,7 +105,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
 
   // Standard Stage Presentation (Campaign, Attack, Elimination, Final Speeches)
   return (
-    <div className="flex-1 flex flex-col relative rounded-3xl bg-gradient-to-b from-[#0e1424] via-[#090d17] to-[#06080d] border border-slate-700/60 shadow-2xl overflow-hidden backdrop-blur-2xl">
+    <div className="flex-1 flex flex-col relative rounded-3xl bg-gradient-to-b from-[#0e1424] via-[#090d17] to-[#06080d] border border-slate-700/60 shadow-2xl overflow-hidden backdrop-blur-2xl h-full min-h-0">
       {/* Dynamic Background Stage Ambient Spotlight */}
       <div 
         className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-80 blur-[100px] opacity-25 pointer-events-none transition-all duration-700 -z-10"
@@ -115,7 +115,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
       />
 
       {/* Stage Header Banner */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/80 bg-slate-950/60 backdrop-blur-md">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/80 bg-slate-950/60 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
           <div className="relative flex items-center justify-center">
             <span className="w-3 h-3 rounded-full bg-red-500 animate-ping absolute opacity-75" />
@@ -155,7 +155,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
       </div>
 
       {/* Main Arena Visual Area */}
-      <div className="flex-1 flex flex-col justify-center items-center p-5 sm:p-8 md:p-10 relative">
+      <div className="flex-1 flex flex-col justify-center items-center p-4 sm:p-6 md:p-8 relative min-h-0 overflow-y-auto custom-scrollbar">
         {/* If Error Occurred */}
         {stage.error ? (
           <div className="flex flex-col items-center justify-center text-center max-w-md p-8 rounded-3xl bg-red-950/50 border-2 border-red-600/80 shadow-2xl shadow-red-950/80 backdrop-blur-xl">
