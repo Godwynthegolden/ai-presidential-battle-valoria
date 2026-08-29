@@ -175,7 +175,14 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
 
     try {
       const res = await fetch(`/api/models?baseUrl=${encodeURIComponent(nineRouterConfig.baseUrl)}&apiKey=${encodeURIComponent(nineRouterConfig.apiKey || '')}`);
-      const data = await res.json();
+      const rawText = await res.text();
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        throw new Error(`Invalid response from /api/models: ${rawText.slice(0, 100)}`);
+      }
+
       if (data.models && Array.isArray(data.models) && data.models.length > 0) {
         setAvailableModels(data.models);
         if (!selectedModel || !data.models.includes(selectedModel)) {
@@ -224,23 +231,25 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
         }),
       });
 
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({ error: 'Unknown server error' }));
-        throw new Error(errJson.error || `HTTP ${res.status}`);
+      const rawText = await res.text();
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        throw new Error(`Invalid response from AI generation server: ${rawText.slice(0, 100)}`);
       }
 
-      const data = await res.json();
-      if (data.candidateProfile) {
-        setForm(prev => ({
-          ...prev,
-          ...data.candidateProfile,
-          id: prev.isCustom ? prev.id : data.candidateProfile.id,
-          isCustom: true,
-        }));
-        setActiveTab('editor');
-      } else {
-        throw new Error('AI returned incomplete candidate profile.');
+      if (!res.ok || !data.candidateProfile) {
+        throw new Error(data.error || `HTTP ${res.status}: Failed to generate candidate.`);
       }
+
+      setForm(prev => ({
+        ...prev,
+        ...data.candidateProfile,
+        id: prev.isCustom ? prev.id : data.candidateProfile.id,
+        isCustom: true,
+      }));
+      setActiveTab('editor');
     } catch (err: any) {
       setGenerateError(err.message || 'Failed to generate character with AI');
     } finally {
