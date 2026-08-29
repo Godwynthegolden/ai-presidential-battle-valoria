@@ -131,7 +131,7 @@ export default function AIPlaygroundPage() {
   const isConfigured = Boolean(nineRouterConfig.baseUrl && nineRouterConfig.apiKey);
 
   return (
-    <main className="min-h-screen flex flex-col bg-[#07090e] cyber-grid relative overflow-hidden" suppressHydrationWarning>
+    <main className="h-screen max-h-screen flex flex-col bg-[#07090e] cyber-grid relative overflow-hidden" suppressHydrationWarning>
       {/* Dynamic Ambient Background Glow */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -152,7 +152,7 @@ export default function AIPlaygroundPage() {
 
       {/* Top Broadcast Banner (Hidden in Clean View) */}
       {!isCleanView && (
-        <header className="px-4 md:px-6 py-3 bg-[#06080d]/95 border-b border-slate-750 backdrop-blur-xl flex flex-wrap items-center justify-between gap-3 z-10 transition-all">
+        <header className="px-4 md:px-6 py-3 bg-[#06080d]/95 border-b border-slate-750 backdrop-blur-xl flex flex-wrap items-center justify-between gap-3 z-10 transition-all shrink-0">
           <div className="flex items-center gap-3.5">
             <div className="flex items-center justify-center p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-700 shadow-lg shadow-cyan-500/25">
               <Landmark className="w-5 h-5 text-white" />
@@ -254,43 +254,47 @@ export default function AIPlaygroundPage() {
 
       {/* Main View: Characters Manager OR Election Arena */}
       {activeView === 'characters' ? (
-        <CharactersManagerView
-          candidates={candidates}
-          selectedCandidateIds={state.participatingCandidateIds || state.activeCandidateIds}
-          onToggleCandidate={toggleCandidateSelection}
-          onSetPresetRoster={setPresetRoster}
-          onSaveCandidate={saveCandidate}
-          onDeleteCandidate={deleteCandidate}
-          onResetCandidateToDefault={resetCandidateToDefault}
-          onResetAllToDefault={resetAllCandidatesToDefault}
-          onBackToArena={() => setActiveView('arena')}
-          nineRouterConfig={nineRouterConfig}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          isGameInProgress={state.phase !== 'IDLE'}
-        />
+        <div className="flex-1 h-full min-h-0 overflow-y-auto custom-scrollbar">
+          <CharactersManagerView
+            candidates={candidates}
+            selectedCandidateIds={state.participatingCandidateIds || state.activeCandidateIds}
+            onToggleCandidate={toggleCandidateSelection}
+            onSetPresetRoster={setPresetRoster}
+            onSaveCandidate={saveCandidate}
+            onDeleteCandidate={deleteCandidate}
+            onResetCandidateToDefault={resetCandidateToDefault}
+            onResetAllToDefault={resetAllCandidatesToDefault}
+            onBackToArena={() => setActiveView('arena')}
+            nineRouterConfig={nineRouterConfig}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+            isGameInProgress={state.phase !== 'IDLE'}
+          />
+        </div>
       ) : (
         /* Main Broadcast Workspace */
-        <div className={`flex-1 flex flex-col ${isCleanView ? 'p-2 md:p-3 gap-2' : 'p-3 md:p-4 gap-3'} max-w-[1750px] w-full mx-auto min-h-0`}>
+        <div className={`flex-1 flex flex-col ${isCleanView ? 'p-2 md:p-3 gap-2' : 'p-3 md:p-4 gap-3'} max-w-[1750px] w-full mx-auto h-full min-h-0 overflow-hidden`}>
           {/* Top Controls Bar (Hidden in Clean View) */}
           {!isCleanView && (
-            <ControlBar
-              gameState={state}
-              nineRouterConfig={nineRouterConfig}
-              onOpenSettings={() => setIsSettingsOpen(true)}
-              onStartGame={startGame}
-              onNextStep={nextStep}
-              onToggleAutoPlay={toggleAutoPlay}
-              onSetSpeed={setSpeed}
-              onToggleSound={toggleSound}
-              onRestart={restartGame}
-              onRetry={retryCurrentStep}
-            />
+            <div className="shrink-0">
+              <ControlBar
+                gameState={state}
+                nineRouterConfig={nineRouterConfig}
+                onOpenSettings={() => setIsSettingsOpen(true)}
+                onStartGame={startGame}
+                onNextStep={nextStep}
+                onToggleAutoPlay={toggleAutoPlay}
+                onSetSpeed={setSpeed}
+                onToggleSound={toggleSound}
+                onRestart={restartGame}
+                onRetry={retryCurrentStep}
+              />
+            </div>
           )}
 
           {/* 3-Column Layout: Left (Candidates) - Center (Debate Arena) - Right (Live Battle Timeline) */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3.5 min-h-[580px] lg:min-h-0">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3.5 h-full min-h-0 overflow-hidden">
             {/* Left Column: Candidate Roster (3 Cols) */}
-            <div className="lg:col-span-3 h-full min-h-0 flex flex-col">
+            <div className="lg:col-span-3 h-full min-h-0 flex flex-col overflow-hidden">
               <CandidateRoster
                 gameState={state}
                 candidates={candidates}
@@ -300,7 +304,7 @@ export default function AIPlaygroundPage() {
             </div>
 
             {/* Center Column: Live Debate Arena (6 Cols) */}
-            <div className="lg:col-span-6 h-full min-h-0 flex flex-col">
+            <div className="lg:col-span-6 h-full min-h-0 flex flex-col overflow-hidden">
               <DebateArena
                 gameState={state}
                 onRetry={retryCurrentStep}
@@ -310,7 +314,7 @@ export default function AIPlaygroundPage() {
             </div>
 
             {/* Right Column: Live Battle Timeline (3 Cols) */}
-            <div className="lg:col-span-3 h-full min-h-0 flex flex-col">
+            <div className="lg:col-span-3 h-full min-h-0 flex flex-col overflow-hidden">
               <BroadcastTimeline
                 gameState={state}
                 onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
@@ -320,10 +324,12 @@ export default function AIPlaygroundPage() {
 
           {/* Bottom Live Wire News Flash Ticker (Hidden in Clean View) */}
           {!isCleanView && (
-            <EventTicker
-              gameState={state}
-              onOpenTranscript={() => setIsTranscriptOpen(true)}
-            />
+            <div className="shrink-0">
+              <EventTicker
+                gameState={state}
+                onOpenTranscript={() => setIsTranscriptOpen(true)}
+              />
+            </div>
           )}
         </div>
       )}

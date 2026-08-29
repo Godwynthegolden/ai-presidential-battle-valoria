@@ -31,8 +31,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${fontSans.variable} ${fontDisplay.variable} ${fontMono.variable}`}>
-      <body className="antialiased min-h-screen bg-[#06080d] text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
+    <html lang="en" className={`dark ${fontSans.variable} ${fontDisplay.variable} ${fontMono.variable} h-full overflow-hidden`}>
+      <body className="antialiased h-screen max-h-screen overflow-hidden bg-[#06080d] text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
         {children}
       </body>
     </html>
