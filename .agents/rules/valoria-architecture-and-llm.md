@@ -21,3 +21,9 @@ globs: ["src/**/*", "app/**/*"]
 ## 4. UI Architecture & View Isolation
 - Character creation, parameter customization, avatar cropping, and election lineup selection belong exclusively in `CharactersManagerView.tsx`.
 - `CandidateRoster.tsx` and `DebateArena.tsx` must display only participating contenders and live debate statuses without inline configuration clutter.
+
+## 5. Post-Change Automated Git Commit & Push
+- After completing verified code modifications or feature additions in this project:
+  1. Verify with tests (`npx.cmd tsx src/tests/test-service.ts`) and build (`npm.cmd run build`).
+  2. Stage and commit changes: `git add .` && `git commit -m "<Description>"`.
+  3. Push immediately to repository: `git push origin main`.
