@@ -4,7 +4,6 @@ import React from 'react';
 import { Candidate } from '@/types/candidate';
 import { GameState } from '@/types/game';
 import { CandidateAvatar } from './CandidateAvatar';
-import { CANDIDATES } from '@/data/candidates';
 import { 
   Shield, 
   Sparkles, 
@@ -15,23 +14,30 @@ import {
   CheckSquare2, 
   Square, 
   Users,
-  CheckCheck
+  Plus,
+  Edit3
 } from 'lucide-react';
 
 interface CandidateRosterProps {
   gameState: GameState;
+  candidates: Candidate[];
   onSelectCandidate: (candidate: Candidate) => void;
+  onEditCandidate?: (candidate: Candidate) => void;
+  onCreateCandidate?: () => void;
   onToggleCandidate?: (candidateId: string) => void;
   onSetPresetRoster?: (preset: 'all' | 'top8' | 'top6' | 'quick4') => void;
 }
 
 export const CandidateRoster: React.FC<CandidateRosterProps> = ({
   gameState,
+  candidates,
   onSelectCandidate,
+  onEditCandidate,
+  onCreateCandidate,
   onToggleCandidate,
   onSetPresetRoster,
 }) => {
-  const { activeCandidateIds, participatingCandidateIds, eliminatedCandidates, stage, winnerId, phase } = gameState;
+  const { activeCandidateIds, eliminatedCandidates, stage, winnerId, phase } = gameState;
   const isPreGame = phase === 'IDLE';
 
   return (
@@ -42,11 +48,24 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-cyan-400" />
             <span className="text-xs font-bold tracking-wider text-slate-200 uppercase">
-              {isPreGame ? 'Election Roster Setup' : 'Active Contenders'}
+              {isPreGame ? 'Election Lineup' : 'Active Contenders'}
             </span>
           </div>
-          <div className="text-[11px] font-mono text-cyan-400 font-bold px-2 py-0.5 rounded bg-slate-950 border border-slate-800">
-            {activeCandidateIds.length} / 11 {isPreGame ? 'Selected' : 'Alive'}
+
+          <div className="flex items-center gap-1.5">
+            {onCreateCandidate && (
+              <button
+                onClick={onCreateCandidate}
+                className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[10px] font-mono font-bold transition shadow-sm"
+                title="Create a new custom candidate or generate with AI"
+              >
+                <Plus className="w-3 h-3" /> Create AI
+              </button>
+            )}
+
+            <div className="text-[11px] font-mono text-cyan-400 font-bold px-2 py-0.5 rounded bg-slate-950 border border-slate-800">
+              {activeCandidateIds.length} / {candidates.length} {isPreGame ? 'Selected' : 'Alive'}
+            </div>
           </div>
         </div>
 
@@ -60,9 +79,9 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
               <button
                 onClick={() => onSetPresetRoster('all')}
                 className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition"
-                title="Select all 11 candidates"
+                title={`Select all ${candidates.length} candidates`}
               >
-                All 11
+                All {candidates.length}
               </button>
               <button
                 onClick={() => onSetPresetRoster('top8')}
@@ -92,7 +111,7 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
 
       {/* Candidate List Grid */}
       <div className="grid grid-cols-1 gap-2 overflow-y-auto pr-1 max-h-[calc(100vh-280px)] custom-scrollbar">
-        {CANDIDATES.map((candidate) => {
+        {candidates.map((candidate) => {
           const isSelected = activeCandidateIds.includes(candidate.id);
           const isSpeaking = stage.speakerId === candidate.id;
           const isAttacking = stage.actionType === 'attack' && stage.speakerId === candidate.id;
@@ -147,7 +166,7 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                 />
               )}
 
-              {/* Avatar Icon */}
+              {/* Avatar Icon / Custom Image */}
               <CandidateAvatar
                 candidate={candidate}
                 size="md"
@@ -162,9 +181,16 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
               {/* Info Column */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-1">
-                  <span className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-stone-400'}`}>
-                    {candidate.name}
-                  </span>
+                  <div className="flex items-center gap-1.5 truncate">
+                    <span className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-stone-400'}`}>
+                      {candidate.name}
+                    </span>
+                    {candidate.isCustom && (
+                      <span className="text-[8px] font-mono font-bold uppercase px-1 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-800">
+                        Custom
+                      </span>
+                    )}
+                  </div>
                   
                   {/* Status Badge */}
                   {isPresident ? (
@@ -198,16 +224,32 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                   <span className="truncate" style={{ color: isSelected ? candidate.color.primary : undefined }}>
                     {candidate.titleRole}
                   </span>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectCandidate(candidate);
-                    }}
-                    title="View Dossier"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-slate-400 hover:text-cyan-400"
-                  >
-                    <Info className="w-3.5 h-3.5" />
-                  </button>
+
+                  {/* Edit & Info Actions */}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {onEditCandidate && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditCandidate(candidate);
+                        }}
+                        title="Edit Character Parameters & Avatar"
+                        className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                      </button>
+                    )}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectCandidate(candidate);
+                      }}
+                      title="View Full Dossier"
+                      className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition"
+                    >
+                      <Info className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

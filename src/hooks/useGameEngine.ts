@@ -2,11 +2,17 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GameState, GamePhase, LLMRequestPayload, RoundVoteTally, VoteRecord, AttackEvent, BackroomPact } from '@/types/game';
-import { CANDIDATES, CANDIDATE_MAP } from '@/data/candidates';
+import { Candidate } from '@/types/candidate';
+import { 
+  CANDIDATES, 
+  CANDIDATE_MAP, 
+  DEFAULT_CANDIDATES, 
+  getStoredCandidates, 
+  saveStoredCandidates, 
+  resetStoredCandidates 
+} from '@/data/candidates';
 import { sounds } from '@/utils/audio';
 import { NineRouterConfigState } from '@/components/NineRouterSettingsModal';
-
-const ALL_CANDIDATE_IDS = CANDIDATES.map(c => c.id);
 
 const LOCATIONS = [
   'Capitol Cloakroom Cam 04',
@@ -17,7 +23,7 @@ const LOCATIONS = [
   'West Wing Corridor 3',
 ];
 
-const CREATE_INITIAL_STATE = (selectedIds: string[] = ALL_CANDIDATE_IDS): GameState => ({
+const CREATE_INITIAL_STATE = (selectedIds: string[] = []): GameState => ({
   phase: 'IDLE',
   round: 1,
   participatingCandidateIds: [...selectedIds],
@@ -61,10 +67,21 @@ const CREATE_INITIAL_STATE = (selectedIds: string[] = ALL_CANDIDATE_IDS): GameSt
 
 export function useGameEngine(
   nineRouterConfig?: NineRouterConfigState,
-  onRequireConfig?: () => void,
-  initialCandidateIds: string[] = ALL_CANDIDATE_IDS
+  onRequireConfig?: () => void
 ) {
-  const [state, setState] = useState<GameState>(() => CREATE_INITIAL_STATE(initialCandidateIds));
+  // Dynamic candidates state with localStorage sync
+  const [candidates, setCandidates] = useState<Candidate[]>(() => {
+    const stored = getStoredCandidates();
+    stored.forEach(c => CANDIDATE_MAP.set(c.id, c));
+    return stored;
+  });
+
+  const [state, setState] = useState<GameState>(() => {
+    const stored = getStoredCandidates();
+    const ids = stored.map(c => c.id);
+    return CREATE_INITIAL_STATE(ids);
+  });
+
   const isExecutingStep = useRef(false);
   const autoPlayTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -103,6 +120,90 @@ export function useGameEngine(
     }
 
     return res.json();
+  };
+
+  /**
+   * Candidate Management (Add, Edit, Delete, Reset)
+   */
+  const saveCandidate = (updated: Candidate) => {
+    setCandidates(prev => {
+      const existingIndex = prev.findIndex(c => c.id === updated.id);
+      let nextList: Candidate[];
+      if (existingIndex >= 0) {
+        nextList = [...prev];
+        nextList[existingIndex] = updated;
+      } else {
+        nextList = [...prev, updated];
+      }
+      saveStoredCandidates(nextList);
+      return nextList;
+    });
+
+    CANDIDATE_MAP.set(updated.id, updated);
+
+    setState(prev => {
+      const isSelected = prev.activeCandidateIds.includes(updated.id);
+      const nextActive = (prev.phase === 'IDLE' && !isSelected)
+        ? [...prev.activeCandidateIds, updated.id]
+        : prev.activeCandidateIds;
+
+      return {
+        ...prev,
+        participatingCandidateIds: nextActive,
+        activeCandidateIds: nextActive,
+        tickerLog: [
+          {
+            id: `tick-${Date.now()}`,
+            type: 'system',
+            message: `⚙️ Candidate Saved: ${updated.name} (${updated.titleRole}) updated in election registry.`,
+            timestamp: Date.now(),
+          },
+          ...prev.tickerLog,
+        ]
+      };
+    });
+  };
+
+  const createCandidate = (newCand: Candidate) => {
+    saveCandidate(newCand);
+  };
+
+  const deleteCandidate = (candId: string) => {
+    setCandidates(prev => {
+      const nextList = prev.filter(c => c.id !== candId);
+      saveStoredCandidates(nextList);
+      return nextList;
+    });
+
+    CANDIDATE_MAP.delete(candId);
+
+    setState(prev => ({
+      ...prev,
+      participatingCandidateIds: prev.participatingCandidateIds.filter(id => id !== candId),
+      activeCandidateIds: prev.activeCandidateIds.filter(id => id !== candId),
+      tickerLog: [
+        {
+          id: `tick-${Date.now()}`,
+          type: 'system',
+          message: `🗑️ Candidate Removed from election lineup.`,
+          timestamp: Date.now(),
+        },
+        ...prev.tickerLog,
+      ]
+    }));
+  };
+
+  const resetCandidateToDefault = (candId: string) => {
+    const defaultCand = DEFAULT_CANDIDATES.find(c => c.id === candId);
+    if (defaultCand) {
+      saveCandidate(defaultCand);
+    }
+  };
+
+  const resetAllCandidatesToDefault = () => {
+    const defaults = resetStoredCandidates();
+    setCandidates(defaults);
+    setState(CREATE_INITIAL_STATE(defaults.map(c => c.id)));
   };
 
   /**
@@ -151,21 +252,22 @@ export function useGameEngine(
 
   const setPresetRoster = (preset: 'all' | 'top8' | 'top6' | 'quick4') => {
     if (state.phase !== 'IDLE') return;
+    const currentIds = candidates.map(c => c.id);
     let selected: string[] = [];
 
     switch (preset) {
       case 'quick4':
-        selected = ALL_CANDIDATE_IDS.slice(0, 4);
+        selected = currentIds.slice(0, 4);
         break;
       case 'top6':
-        selected = ALL_CANDIDATE_IDS.slice(0, 6);
+        selected = currentIds.slice(0, 6);
         break;
       case 'top8':
-        selected = ALL_CANDIDATE_IDS.slice(0, 8);
+        selected = currentIds.slice(0, 8);
         break;
       case 'all':
       default:
-        selected = [...ALL_CANDIDATE_IDS];
+        selected = [...currentIds];
         break;
     }
 
@@ -1413,6 +1515,7 @@ export function useGameEngine(
 
   return {
     state,
+    candidates,
     startGame,
     nextStep,
     toggleAutoPlay,
@@ -1424,5 +1527,10 @@ export function useGameEngine(
     setSelectedCandidateIds,
     setPresetRoster,
     selectCCTVFeed,
+    saveCandidate,
+    createCandidate,
+    deleteCandidate,
+    resetCandidateToDefault,
+    resetAllCandidatesToDefault,
   };
 }

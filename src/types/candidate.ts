@@ -11,6 +11,31 @@ export type Archetype =
   | 'traditionalist'
   | 'wildcard';
 
+export type CandidateSvgIcon = 
+  | 'flame' 
+  | 'cpu' 
+  | 'shield' 
+  | 'heart' 
+  | 'dollar' 
+  | 'leaf' 
+  | 'eye' 
+  | 'scale' 
+  | 'scroll' 
+  | 'dice' 
+  | 'briefcase' 
+  | 'landmark' 
+  | 'building' 
+  | 'users' 
+  | 'award'
+  | 'zap'
+  | 'crown'
+  | 'globe'
+  | 'swords'
+  | 'radio'
+  | 'activity'
+  | 'star'
+  | 'hammer';
+
 export interface Candidate {
   id: string;
   name: string;
@@ -37,7 +62,9 @@ export interface Candidate {
   };
   avatar: {
     icon: string;
-    svgType: 'flame' | 'cpu' | 'shield' | 'heart' | 'dollar' | 'leaf' | 'eye' | 'scale' | 'scroll' | 'dice' | 'briefcase' | 'landmark' | 'building' | 'users' | 'award';
+    svgType: CandidateSvgIcon;
   };
+  customAvatarUrl?: string; // Cropped custom uploaded photo / avatar
+  isCustom?: boolean;       // Flag if created by user
   systemPrompt: string;
 }

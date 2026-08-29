@@ -128,7 +128,8 @@ export type LLMActionType =
   | 'exit_words'
   | 'final_speech'
   | 'final_vote'
-  | 'victory_speech';
+  | 'victory_speech'
+  | 'generate_character';
 
 export interface LLMRequestPayload {
   action: LLMActionType;
@@ -137,6 +138,7 @@ export interface LLMRequestPayload {
   round: number;
   activeCandidateIds: string[];
   finalistIds?: string[];
+  customPrompt?: string; // Optional custom character prompt description
   historyContext: {
     campaignSpeeches?: Record<string, string>;
     recentAttacks?: Array<{ attackerName: string; targetName: string; text: string }>;
@@ -157,5 +159,6 @@ export interface LLMResponsePayload {
   agreedTargetId?: string;
   whisperText?: string;
   privateReason?: string;
+  candidateProfile?: Partial<Candidate>;
   modelUsed?: string;
 }

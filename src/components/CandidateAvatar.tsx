@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Candidate } from '@/types/candidate';
 import { 
@@ -13,7 +15,19 @@ import {
   Dices,
   Crown,
   Skull,
-  Landmark
+  Landmark,
+  Hammer,
+  Zap,
+  Globe,
+  Swords,
+  Radio,
+  Award,
+  Activity,
+  Star,
+  Building2,
+  Users,
+  Shield,
+  Briefcase
 } from 'lucide-react';
 
 interface CandidateAvatarProps {
@@ -48,31 +62,57 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
 
   const renderIcon = () => {
     const iconSize = currentSize.icon;
+    const colorClass = isEliminated ? 'text-stone-500' : candidate.color.text;
+
     switch (candidate.avatar.svgType) {
       case 'landmark':
-        return <Landmark size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <Landmark size={iconSize} className={colorClass} />;
       case 'flame':
-        return <Flame size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <Flame size={iconSize} className={colorClass} />;
       case 'cpu':
-        return <Cpu size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <Cpu size={iconSize} className={colorClass} />;
       case 'shield':
-        return <ShieldAlert size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <ShieldAlert size={iconSize} className={colorClass} />;
       case 'heart':
-        return <HeartHandshake size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <HeartHandshake size={iconSize} className={colorClass} />;
       case 'dollar':
-        return <DollarSign size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <DollarSign size={iconSize} className={colorClass} />;
       case 'leaf':
-        return <Sprout size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <Sprout size={iconSize} className={colorClass} />;
       case 'eye':
-        return <Eye size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <Eye size={iconSize} className={colorClass} />;
       case 'scale':
-        return <Scale size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <Scale size={iconSize} className={colorClass} />;
       case 'scroll':
-        return <Scroll size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <Scroll size={iconSize} className={colorClass} />;
       case 'dice':
-        return <Dices size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <Dices size={iconSize} className={colorClass} />;
+      case 'hammer':
+        return <Hammer size={iconSize} className={colorClass} />;
+      case 'zap':
+        return <Zap size={iconSize} className={colorClass} />;
+      case 'crown':
+        return <Crown size={iconSize} className={colorClass} />;
+      case 'globe':
+        return <Globe size={iconSize} className={colorClass} />;
+      case 'swords':
+        return <Swords size={iconSize} className={colorClass} />;
+      case 'radio':
+        return <Radio size={iconSize} className={colorClass} />;
+      case 'award':
+        return <Award size={iconSize} className={colorClass} />;
+      case 'activity':
+        return <Activity size={iconSize} className={colorClass} />;
+      case 'star':
+        return <Star size={iconSize} className={colorClass} />;
+      case 'building':
+        return <Building2 size={iconSize} className={colorClass} />;
+      case 'users':
+        return <Users size={iconSize} className={colorClass} />;
+      case 'briefcase':
+        return <Briefcase size={iconSize} className={colorClass} />;
       default:
-        return <Flame size={iconSize} className={isEliminated ? 'text-stone-500' : candidate.color.text} />;
+        return <Flame size={iconSize} className={colorClass} />;
     }
   };
 
@@ -93,11 +133,11 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
 
       {/* Main Avatar Body */}
       <div 
-        className={`relative flex items-center justify-center rounded-2xl border transition-all duration-300 ${currentSize.box} ${
+        className={`relative flex items-center justify-center rounded-2xl border overflow-hidden transition-all duration-300 ${currentSize.box} ${
           isEliminated
             ? 'bg-stone-900/90 border-stone-800 opacity-60 grayscale'
             : isSpeaking
-            ? `bg-slate-900 border-2 ${candidate.color.border} shadow-lg shadow-${candidate.color.primary}/30 scale-105`
+            ? `bg-slate-900 border-2 ${candidate.color.border} shadow-lg scale-105`
             : isPresident
             ? 'bg-amber-950/80 border-2 border-amber-400 shadow-xl shadow-amber-500/40'
             : 'bg-slate-900/80 border-slate-700/60 hover:border-slate-500'
@@ -107,30 +147,38 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
         }}
       >
         {/* Background Cyber Pattern */}
-        <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.06),transparent_70%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.06),transparent_70%)] pointer-events-none" />
 
-        {/* Icon */}
-        <div className="relative z-10">
-          {renderIcon()}
-        </div>
+        {/* Custom Image or SVG Icon */}
+        {candidate.customAvatarUrl ? (
+          <img 
+            src={candidate.customAvatarUrl} 
+            alt={candidate.name} 
+            className={`w-full h-full object-cover rounded-2xl ${isEliminated ? 'grayscale opacity-50' : ''}`} 
+          />
+        ) : (
+          <div className="relative z-10">
+            {renderIcon()}
+          </div>
+        )}
 
         {/* Eliminated Overlay */}
         {isEliminated && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-2xl backdrop-blur-xs">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-2xl backdrop-blur-xs z-20">
             <Skull className="text-red-500/80" size={currentSize.icon * 0.9} />
           </div>
         )}
 
         {/* President Crown Top Badge */}
         {isPresident && (
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 p-1 rounded-full shadow-lg shadow-amber-500/50 animate-bounce">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 p-1 rounded-full shadow-lg shadow-amber-500/50 animate-bounce z-30">
             <Crown size={size === 'xl' ? 24 : 14} />
           </div>
         )}
 
         {/* Attack Crosshair Marker */}
         {isAttacking && (
-          <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-md animate-pulse">
+          <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-md animate-pulse z-30">
             ATTACK
           </div>
         )}
@@ -139,7 +187,7 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
       {/* Archetype Bottom Badge */}
       {showBadge && size !== 'sm' && (
         <div 
-          className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase whitespace-nowrap border shadow-sm ${
+          className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase whitespace-nowrap border shadow-sm z-30 ${
             isEliminated 
               ? 'bg-stone-900 text-stone-500 border-stone-800' 
               : 'bg-slate-950/90 text-slate-300 border-slate-700'

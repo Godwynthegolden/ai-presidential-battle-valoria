@@ -410,6 +410,49 @@ Speech style: Witty, sharp, fast, humorous, futuristic. Mock obsolete bureaucrac
   }
 ];
 
+export const DEFAULT_CANDIDATES = CANDIDATES;
+
+export const CANDIDATE_STORAGE_KEY = 'valoria_custom_candidates_v2';
+
+export function getStoredCandidates(): Candidate[] {
+  if (typeof window === 'undefined') return DEFAULT_CANDIDATES;
+  try {
+    const raw = localStorage.getItem(CANDIDATE_STORAGE_KEY);
+    if (!raw) return DEFAULT_CANDIDATES;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+  } catch (err) {
+    console.warn('[Error loading custom candidates from storage]:', err);
+  }
+  return DEFAULT_CANDIDATES;
+}
+
+export function saveStoredCandidates(list: Candidate[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(CANDIDATE_STORAGE_KEY, JSON.stringify(list));
+    // Update global map
+    list.forEach(c => {
+      CANDIDATE_MAP.set(c.id, c);
+    });
+  } catch (err) {
+    console.warn('[Error saving custom candidates to storage]:', err);
+  }
+}
+
+export function resetStoredCandidates(): Candidate[] {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(CANDIDATE_STORAGE_KEY);
+    } catch {}
+  }
+  CANDIDATE_MAP.clear();
+  DEFAULT_CANDIDATES.forEach(c => CANDIDATE_MAP.set(c.id, c));
+  return DEFAULT_CANDIDATES;
+}
+
 export const CANDIDATE_MAP = new Map<string, Candidate>(
   CANDIDATES.map(c => [c.id, c])
 );

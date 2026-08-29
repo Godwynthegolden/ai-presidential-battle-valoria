@@ -1,5 +1,6 @@
 import { nineRouterService } from '../services/nineRouter';
 import { CANDIDATES, CANDIDATE_MAP } from '../data/candidates';
+import { Candidate } from '../types/candidate';
 
 async function testEngine() {
   console.log('Testing 11 Republic of Valoria Candidates loaded:', CANDIDATES.length);
@@ -27,25 +28,64 @@ async function testEngine() {
   const preset11 = CANDIDATES.map(c => c.id);
   console.log(`Verified custom roster presets: Quick4 (${preset4.length}), Top6 (${preset6.length}), Top8 (${preset8.length}), All11 (${preset11.length})`);
 
-  console.log('\nTesting backroom_pact error handling when unconfigured:');
+  // Test custom candidate profile structure
+  const customCandidate: Candidate = {
+    id: 'custom_victor_stone',
+    name: 'Victor Stone',
+    codename: 'THE CYBER HAWK',
+    archetype: 'technocrat',
+    archetypeTitle: 'Cyber Warfare Architect',
+    titleRole: 'Former Defense Cyber Director',
+    slogan: 'Fortify Valoria Against Foreign Cyber Threat!',
+    ideology: 'National cyber sovereignty, AI defense grid, technological supremacy.',
+    personality: 'Hyper-focused, analytical, intense, commanding.',
+    speakingStyle: 'Precise, authoritative, rapid-fire technical arguments.',
+    motivations: 'To protect Valoria from foreign espionage and cyber warfare.',
+    strengths: ['Technical mastery', 'Crisis management'],
+    weaknesses: ['Distrustful of civilian politicians'],
+    behavioralTendencies: ['Strikes corruption leaks'],
+    rivalArchetypes: ['wildcard', 'conspiracy'],
+    color: {
+      primary: '#3b82f6',
+      bg: 'rgba(59, 130, 246, 0.12)',
+      border: 'rgba(59, 130, 246, 0.5)',
+      text: '#60a5fa',
+      glow: 'rgba(59, 130, 246, 0.3)',
+      gradient: 'from-blue-600/20 to-slate-900',
+    },
+    avatar: {
+      icon: 'Shield',
+      svgType: 'shield',
+    },
+    customAvatarUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    isCustom: true,
+    systemPrompt: 'You are Victor Stone, Cyber Warfare Architect running for President of the Republic of Valoria.',
+  };
+
+  if (!customCandidate.customAvatarUrl || !customCandidate.isCustom) {
+    throw new Error('Custom candidate structure validation failed.');
+  }
+  console.log('Custom candidate profile & avatar Data URL validation PASSED!');
+
+  console.log('\nTesting generate_character unconfigured error handling:');
   try {
     await nineRouterService.generateAgentAction(
       {
-        action: 'backroom_pact',
-        candidateId: CANDIDATES[0].id,
-        targetId: CANDIDATES[1].id,
+        action: 'generate_character',
+        candidateId: 'test_generator',
         round: 1,
-        activeCandidateIds: preset4,
+        activeCandidateIds: [],
+        customPrompt: 'A charismatic solar energy billionaire',
         historyContext: {},
       },
       { baseUrl: '', apiKey: '' }
     );
     throw new Error('Expected generateAgentAction to throw when unconfigured, but it succeeded.');
   } catch (err: any) {
-    console.log('Successfully caught unconfigured error for backroom_pact:', err.message);
+    console.log('Successfully caught unconfigured error for generate_character:', err.message);
   }
 
-  console.log('\nAll unit tests for CCTV Leaked Backroom Deals & Betrayals PASSED successfully!');
+  console.log('\nAll unit tests for AI Custom Character Generator & Parameter Editor PASSED successfully!');
 }
 
 testEngine().catch(err => {

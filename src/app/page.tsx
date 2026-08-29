@@ -9,6 +9,7 @@ import { EventTicker } from '@/components/EventTicker';
 import { CandidateDossierModal } from '@/components/CandidateDossierModal';
 import { TranscriptDrawer } from '@/components/TranscriptDrawer';
 import { NineRouterSettingsModal, NineRouterConfigState } from '@/components/NineRouterSettingsModal';
+import { CharacterEditorModal } from '@/components/CharacterEditorModal';
 import { Candidate } from '@/types/candidate';
 import { CANDIDATE_MAP } from '@/data/candidates';
 import { 
@@ -18,7 +19,8 @@ import {
   Settings,
   Cpu,
   Landmark,
-  Radio
+  Radio,
+  UserPlus
 } from 'lucide-react';
 
 const STORAGE_KEY = 'ai_politics_9router_config';
@@ -33,6 +35,8 @@ export default function AIPlaygroundPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [candidateToEdit, setCandidateToEdit] = useState<Candidate | null>(null);
 
   // Load config from localStorage or fallback to server env
   useEffect(() => {
@@ -69,6 +73,7 @@ export default function AIPlaygroundPage() {
 
   const {
     state,
+    candidates,
     startGame,
     nextStep,
     toggleAutoPlay,
@@ -79,6 +84,10 @@ export default function AIPlaygroundPage() {
     toggleCandidateSelection,
     setPresetRoster,
     selectCCTVFeed,
+    saveCandidate,
+    createCandidate,
+    deleteCandidate,
+    resetCandidateToDefault,
   } = useGameEngine(nineRouterConfig, () => setIsSettingsOpen(true));
 
   const isConfigured = Boolean(nineRouterConfig.baseUrl && nineRouterConfig.apiKey);
@@ -151,7 +160,16 @@ export default function AIPlaygroundPage() {
           <div className="lg:col-span-3 h-full">
             <CandidateRoster
               gameState={state}
+              candidates={candidates}
               onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
+              onEditCandidate={(candidate) => {
+                setCandidateToEdit(candidate);
+                setIsEditorOpen(true);
+              }}
+              onCreateCandidate={() => {
+                setCandidateToEdit(null);
+                setIsEditorOpen(true);
+              }}
               onToggleCandidate={toggleCandidateSelection}
               onSetPresetRoster={setPresetRoster}
             />
@@ -323,6 +341,21 @@ export default function AIPlaygroundPage() {
       <CandidateDossierModal
         candidate={selectedCandidate}
         onClose={() => setSelectedCandidate(null)}
+        onEditCandidate={(candidate) => {
+          setCandidateToEdit(candidate);
+          setIsEditorOpen(true);
+        }}
+      />
+
+      {/* Character Editor & AI Generator Modal */}
+      <CharacterEditorModal
+        isOpen={isEditorOpen}
+        onClose={() => setIsEditorOpen(false)}
+        candidateToEdit={candidateToEdit}
+        onSaveCandidate={saveCandidate}
+        onDeleteCandidate={deleteCandidate}
+        onResetCandidateToDefault={resetCandidateToDefault}
+        nineRouterConfig={nineRouterConfig}
       />
 
       {/* Full Transcript Drawer */}

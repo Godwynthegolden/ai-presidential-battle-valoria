@@ -12,17 +12,20 @@ import {
   AlertTriangle, 
   Sparkles, 
   MessageSquareQuote,
-  Quote
+  Quote,
+  Edit3
 } from 'lucide-react';
 
 interface CandidateDossierModalProps {
   candidate: Candidate | null;
   onClose: () => void;
+  onEditCandidate?: (candidate: Candidate) => void;
 }
 
 export const CandidateDossierModal: React.FC<CandidateDossierModalProps> = ({
   candidate,
   onClose,
+  onEditCandidate,
 }) => {
   if (!candidate) return null;
 
@@ -32,13 +35,26 @@ export const CandidateDossierModal: React.FC<CandidateDossierModalProps> = ({
         className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-slate-950 border-2 border-slate-800 p-6 md:p-8 shadow-2xl custom-scrollbar"
         style={{ borderColor: `${candidate.color.primary}80` }}
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl bg-slate-900 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700 transition"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Header Actions */}
+        <div className="absolute top-5 right-5 flex items-center gap-2">
+          {onEditCandidate && (
+            <button
+              onClick={() => {
+                onEditCandidate(candidate);
+                onClose();
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-400 hover:text-white border border-slate-800 text-xs font-mono font-bold transition"
+            >
+              <Edit3 className="w-3.5 h-3.5" /> Edit Parameters
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700 transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 pb-6 border-b border-slate-800/80">
