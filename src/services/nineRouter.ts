@@ -188,15 +188,17 @@ export class NineRouterService {
 
       if (payload.action === 'backroom_pact') {
         const ctx = payload.historyContext || {};
-        const parsed = this.extractJson(rawText);
+        const parsed = this.extractAndRepairJson(rawText);
         const validTargets = payload.activeCandidateIds.filter(id => id !== candidate.id && id !== payload.targetId);
-        const agreedTarget = (parsed?.targetId && validTargets.includes(parsed.targetId)) 
-          ? parsed.targetId 
-          : (validTargets[0] || payload.activeCandidateIds.filter(id => id !== candidate.id)[0]);
+        const healedTarget = parsed?.targetId ? this.resolveCandidateIdFromNameOrAlias(parsed.targetId, validTargets) : null;
+        const agreedTarget = healedTarget || validTargets[0] || payload.activeCandidateIds.filter(id => id !== candidate.id)[0];
         
-        const whisper = parsed?.whisper 
+        let whisper = parsed?.whisper 
           ? parsed.whisper.replace(/^["']|["']$/g, '').trim()
           : (rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim() || `Let's coordinate our votes and eliminate ${CANDIDATE_MAP.get(agreedTarget)?.name || agreedTarget}.`);
+
+        // Sanitize any accidental speaker prefix
+        whisper = whisper.replace(/^[^:]+:\s*/, '').replace(/^["']|["']$/g, '').trim();
 
         const proposerBudget = ctx.proposerBudget ?? 100;
         const receiver = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
@@ -393,12 +395,28 @@ export class NineRouterService {
     const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
 
     try {
-      const response = await fetch(endpoint, {
+      let response = await fetch(endpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
         signal: controller.signal,
       });
+
+      // If response_format caused 400 on unsupported open-source model, auto-retry without response_format
+      if (!response.ok && response.status === 400 && isJsonExpected) {
+        const errorProbe = await response.clone().text().catch(() => '');
+        if (errorProbe.toLowerCase().includes('response_format') || errorProbe.toLowerCase().includes('json_object') || errorProbe.toLowerCase().includes('schema')) {
+          console.warn('[9router]: response_format not supported by model. Retrying without response_format flag...');
+          const fallbackBody = { ...body };
+          delete fallbackBody.response_format;
+          response = await fetch(endpoint, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(fallbackBody),
+            signal: controller.signal,
+          });
+        }
+      }
 
       clearTimeout(timeoutId);
 
@@ -465,6 +483,42 @@ export class NineRouterService {
   }
 
   /**
+   * Fuzzy matches and heals candidate identifiers (handles names, codenames, aliases, full titles, hyphen/underscore normalization)
+   */
+  public resolveCandidateIdFromNameOrAlias(input: string, validCandidateIds: string[]): string | null {
+    if (!input || typeof input !== 'string') return null;
+    const clean = input.trim().toLowerCase().replace(/['"]/g, '');
+    const normalizedClean = clean.replace(/_/g, '-');
+    
+    // 1. Direct ID match or normalized ID match
+    if (validCandidateIds.includes(clean)) return clean;
+    const exactId = validCandidateIds.find(id => id.toLowerCase() === clean || id.toLowerCase().replace(/_/g, '-') === normalizedClean);
+    if (exactId) return exactId;
+
+    // 2. Match by Candidate Name, Codename, or Title
+    for (const id of validCandidateIds) {
+      const cand = CANDIDATE_MAP.get(id) || CANDIDATES.find(c => c.id === id || c.id.replace(/_/g, '-') === id.replace(/_/g, '-'));
+      if (!cand) continue;
+
+      const candName = cand.name.toLowerCase();
+      const candCodename = cand.codename.toLowerCase();
+      
+      if (clean === candName || clean === candCodename) return id;
+      if (candName.includes(clean) || clean.includes(candName)) return id;
+      
+      // Match individual name parts (e.g. "Alvarez", "Rostova", "Vance", "Voronin", "Sterling", "Jax")
+      const nameParts = candName.replace(/["']/g, '').split(/\s+/).filter(p => p.length >= 3);
+      if (nameParts.some(part => clean.includes(part.toLowerCase()) || part.toLowerCase().includes(clean))) return id;
+
+      // Check codename parts
+      const codeParts = candCodename.split(/\s+/).filter(p => p.length >= 3);
+      if (codeParts.some(part => clean.includes(part.toLowerCase()))) return id;
+    }
+
+    return null;
+  }
+
+  /**
    * Parse & validate voting JSON with automatic corrective retry against 9router
    */
   private async parseAndValidateVote(
@@ -481,14 +535,16 @@ export class NineRouterService {
       ? (payload.finalistIds || []).filter(id => id !== candidate.id)
       : payload.activeCandidateIds.filter(id => id !== candidate.id);
 
-    // Try parsing initial response
-    let parsed = this.extractJson(rawText);
+    // Try parsing initial response with multi-stage repair
+    let parsed = this.extractAndRepairJson(rawText);
 
-    // Validate vote candidate ID
-    if (parsed && parsed.vote && validTargets.includes(parsed.vote)) {
+    // Validate and heal vote candidate ID
+    let resolvedVote = parsed?.vote ? this.resolveCandidateIdFromNameOrAlias(parsed.vote, validTargets) : null;
+
+    if (resolvedVote) {
       return {
-        vote: parsed.vote,
-        reason: parsed.reason || 'Strategic determination',
+        vote: resolvedVote,
+        reason: parsed.reason ? String(parsed.reason).replace(/^["']|["']$/g, '').trim() : 'Strategic determination',
       };
     }
 
@@ -507,12 +563,13 @@ export class NineRouterService {
         model,
         500
       );
-      const retryParsed = this.extractJson(retryText);
+      const retryParsed = this.extractAndRepairJson(retryText);
+      const retryVote = retryParsed?.vote ? this.resolveCandidateIdFromNameOrAlias(retryParsed.vote, validTargets) : null;
 
-      if (retryParsed && retryParsed.vote && validTargets.includes(retryParsed.vote)) {
+      if (retryVote) {
         return {
-          vote: retryParsed.vote,
-          reason: retryParsed.reason || 'Strategic recalculation',
+          vote: retryVote,
+          reason: retryParsed.reason ? String(retryParsed.reason).replace(/^["']|["']$/g, '').trim() : 'Strategic recalculation',
         };
       }
     } catch (retryErr) {
@@ -527,7 +584,10 @@ export class NineRouterService {
     };
   }
 
-  private extractJson(text: string): any {
+  /**
+   * Universal Industrial-Strength JSON Extractor & Syntax Auto-Repair Engine
+   */
+  public extractAndRepairJson<T = any>(text: string): T | null {
     if (!text || typeof text !== 'string') return null;
 
     // 1. Direct parse attempt
@@ -535,32 +595,65 @@ export class NineRouterService {
       return JSON.parse(text.trim());
     } catch {}
 
-    // 2. Strip markdown fences: ```json ... ``` or ``` ... ```
-    let cleaned = text.replace(/```(?:json)?\s*([\s\S]*?)\s*```/gi, '$1').trim();
+    // 2. Strip markdown code fences (```json ... ```, ```javascript ... ```, ``` ... ```)
+    let cleaned = text.replace(/```(?:json|javascript|js)?\s*([\s\S]*?)\s*```/gi, '$1').trim();
     try {
       return JSON.parse(cleaned);
     } catch {}
 
-    // 3. Extract substring between first '{' and last '}'
+    // 3. Extract substring between outermost '{' and '}' or '[' and ']'
     const firstBrace = cleaned.indexOf('{');
     const lastBrace = cleaned.lastIndexOf('}');
+    const firstBracket = cleaned.indexOf('[');
+    const lastBracket = cleaned.lastIndexOf(']');
+
+    let jsonCandidate: string | null = null;
     if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      const jsonCandidate = cleaned.substring(firstBrace, lastBrace + 1);
+      jsonCandidate = cleaned.substring(firstBrace, lastBrace + 1);
+    } else if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+      jsonCandidate = cleaned.substring(firstBracket, lastBracket + 1);
+    }
+
+    if (jsonCandidate) {
       try {
         return JSON.parse(jsonCandidate);
       } catch {}
 
-      // 4. Sanitize trailing commas before closing braces/brackets
-      const sanitized = jsonCandidate
+      // 4. Multi-pass Syntax Auto-Repair
+      let repaired = jsonCandidate
+        // Remove single-line JS comments (// ...)
+        .replace(/(^|[^\\])\/\/.*$/gm, '$1')
+        // Remove multi-line comments (/* ... */)
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        // Sanitize trailing commas before closing braces/brackets
         .replace(/,\s*([}\]])/g, '$1')
-        .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ') // Strip unprintable control characters
-        .replace(/\n/g, ' '); // Replace raw line breaks in strings
+        // Fix single-quoted property keys: {'key': -> {"key":
+        .replace(/'([a-zA-Z0-9_$-]+)'\s*:/g, '"$1":')
+        // Fix unquoted property keys: { key: -> { "key":
+        .replace(/([{,]\s*)([a-zA-Z0-9_$-]+)\s*:/g, '$1"$2":')
+        // Fix single-quoted values: : 'value' -> : "value"
+        .replace(/:\s*'([^']*)'/g, ': "$1"')
+        // Strip unprintable control characters and zero-width spaces
+        .replace(/[\u0000-\u001F\u007F-\u009F\uFEFF\u200B-\u200D]/g, ' ')
+        // Remove raw non-escaped newlines inside strings
+        .replace(/\r?\n/g, ' ');
+
       try {
-        return JSON.parse(sanitized);
+        return JSON.parse(repaired);
+      } catch {}
+
+      // Secondary repair: attempt aggressive trailing comma removal
+      try {
+        const secondary = repaired.replace(/,\s*([}\]])/g, '$1');
+        return JSON.parse(secondary);
       } catch {}
     }
 
     return null;
+  }
+
+  private extractJson(text: string): any {
+    return this.extractAndRepairJson(text);
   }
 
   /**

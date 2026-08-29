@@ -24,7 +24,10 @@ import {
   CheckSquare2,
   Square,
   Vote,
-  Tv
+  Tv,
+  ChevronUp,
+  ChevronDown,
+  ArrowUpDown
 } from 'lucide-react';
 
 interface CharactersManagerViewProps {
@@ -37,6 +40,8 @@ interface CharactersManagerViewProps {
   onResetCandidateToDefault: (candidateId: string) => void;
   onResetAllToDefault: () => void;
   onBackToArena: () => void;
+  onMoveCandidate?: (candidateId: string, direction: 'up' | 'down') => void;
+  onReorderCandidates?: (newOrder: Candidate[]) => void;
   nineRouterConfig?: NineRouterConfigState;
   onOpenSettings?: () => void;
   isGameInProgress?: boolean;
@@ -52,6 +57,8 @@ export const CharactersManagerView: React.FC<CharactersManagerViewProps> = ({
   onResetCandidateToDefault,
   onResetAllToDefault,
   onBackToArena,
+  onMoveCandidate,
+  onReorderCandidates,
   nineRouterConfig,
   onOpenSettings,
   isGameInProgress = false,
@@ -259,6 +266,9 @@ export const CharactersManagerView: React.FC<CharactersManagerViewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredCandidates.map((candidate) => {
           const isSelectedForElection = selectedCandidateIds.includes(candidate.id);
+          const candidateIndex = candidates.findIndex(c => c.id === candidate.id);
+          const isFirst = candidateIndex === 0;
+          const isLast = candidateIndex === candidates.length - 1;
 
           return (
             <div
@@ -282,19 +292,59 @@ export const CharactersManagerView: React.FC<CharactersManagerViewProps> = ({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-slate-950 text-slate-300 border border-slate-800">
-                      {candidate.codename}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span 
+                        className="text-[10px] font-mono font-black px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/80 shadow-sm"
+                        title={`Candidate #${candidateIndex + 1} in Election Lineup Order`}
+                      >
+                        #{candidateIndex + 1}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-slate-950 text-slate-300 border border-slate-800">
+                        {candidate.codename}
+                      </span>
+                    </div>
 
-                    {candidate.isCustom ? (
-                      <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700 shadow-sm">
-                        Custom AI
-                      </span>
-                    ) : (
-                      <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">
-                        Valoria 11
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {/* Reorder Buttons (Move Up / Move Down) */}
+                      {onMoveCandidate && (
+                        <div className="flex items-center bg-slate-950/90 rounded-lg border border-slate-800 p-0.5">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onMoveCandidate(candidate.id, 'up');
+                            }}
+                            disabled={isFirst || isGameInProgress}
+                            className="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-slate-800 disabled:opacity-30 disabled:hover:text-slate-400 disabled:hover:bg-transparent transition cursor-pointer disabled:cursor-not-allowed"
+                            title={isFirst ? 'Candidate is first in order' : 'Move candidate earlier in election order'}
+                          >
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onMoveCandidate(candidate.id, 'down');
+                            }}
+                            disabled={isLast || isGameInProgress}
+                            className="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-slate-800 disabled:opacity-30 disabled:hover:text-slate-400 disabled:hover:bg-transparent transition cursor-pointer disabled:cursor-not-allowed"
+                            title={isLast ? 'Candidate is last in order' : 'Move candidate later in election order'}
+                          >
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+
+                      {candidate.isCustom ? (
+                        <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700 shadow-sm">
+                          Custom AI
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">
+                          Valoria 11
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <h3 className="text-base font-black text-white mt-1 truncate">

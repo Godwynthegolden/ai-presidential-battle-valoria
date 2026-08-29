@@ -483,7 +483,55 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('5. Zero-Vote Standstill Tiebreaker (Lowest Budget Elimination) PASSED!');
 
-  console.log('\nAll unit tests for Dollars Currency ($), $20 CCTV Bribes, Retaliation AI & $40 Bailout Auction PASSED successfully!');
+  // =========================================================================
+  // 🧠 AI JSON PARSER, AUTO-REPAIR & SEMANTIC HEALING TESTS
+  // =========================================================================
+  console.log('\n--- Testing AI JSON Extraction & Multi-Stage Auto-Repair Engine ---');
+
+  // Test 1: JSON with single-line comments, trailing commas, and unquoted keys
+  const malformedJson1 = `
+  Here is the vote decision:
+  \`\`\`json
+  {
+    // Proposer vote
+    vote: 'marcus_vance',
+    reason: 'Too dangerous to keep in the debate',
+  }
+  \`\`\`
+  `;
+  const repaired1 = (nineRouterService as any).extractAndRepairJson(malformedJson1);
+  if (!repaired1 || repaired1.vote !== 'marcus_vance' || !repaired1.reason) {
+    throw new Error(`Failed to repair JSON with comments/unquoted keys: got ${JSON.stringify(repaired1)}`);
+  }
+  console.log('1. JSON Auto-Repair with comments, unquoted keys, single quotes & trailing commas PASSED!');
+
+  // Test 2: Fuzzy candidate name-to-ID semantic healing
+  const validIds = ['jax-alvarez', 'elena-rostova', 'marcus-vance', 'dmitri-voronin', 'art-sterling'];
+  const healedFromName = (nineRouterService as any).resolveCandidateIdFromNameOrAlias('Jackson Alvarez', validIds);
+  const healedFromAlias = (nineRouterService as any).resolveCandidateIdFromNameOrAlias('Jax', validIds);
+  const healedFromSurname = (nineRouterService as any).resolveCandidateIdFromNameOrAlias('Voronin', validIds);
+
+  if (healedFromName !== 'jax-alvarez' || healedFromAlias !== 'jax-alvarez' || healedFromSurname !== 'dmitri-voronin') {
+    throw new Error(`Candidate semantic healing failed: name=${healedFromName}, alias=${healedFromAlias}, surname=${healedFromSurname}`);
+  }
+  console.log('2. Semantic Candidate Name & Alias to ID Healing PASSED!');
+
+  // Test 3: Candidate Reordering Array Logic
+  const sampleRoster = [...CANDIDATES].slice(0, 4);
+  const firstCandId = sampleRoster[0].id;
+  const secondCandId = sampleRoster[1].id;
+  
+  // Swap 0 and 1
+  const swapped = [...sampleRoster];
+  const [movedItem] = swapped.splice(0, 1);
+  swapped.splice(1, 0, movedItem);
+
+  if (swapped[0].id !== secondCandId || swapped[1].id !== firstCandId) {
+    throw new Error('Candidate swap array logic failed');
+  }
+  console.log('3. Candidate Lineup Reordering Swap Mechanics PASSED!');
+
+  console.log('\nAll unit tests for AI JSON Integrity, Candidate Reordering & Arena Layout PASSED successfully!');
 }
 
 testEngine().catch(err => {

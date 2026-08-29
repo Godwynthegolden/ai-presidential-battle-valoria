@@ -116,10 +116,11 @@ export default function AIPlaygroundPage() {
     setPresetRoster,
     selectCCTVFeed,
     saveCandidate,
-    createCandidate,
     deleteCandidate,
     resetCandidateToDefault,
     resetAllCandidatesToDefault,
+    reorderCandidates,
+    moveCandidate,
   } = useGameEngine(nineRouterConfig, () => setIsSettingsOpen(true));
 
   // Global hotkeys: 'H' for Clean View, ArrowRight / ArrowDown / Enter for Start & Next Step
@@ -283,6 +284,8 @@ export default function AIPlaygroundPage() {
             onDeleteCandidate={deleteCandidate}
             onResetCandidateToDefault={resetCandidateToDefault}
             onResetAllToDefault={resetAllCandidatesToDefault}
+            onMoveCandidate={moveCandidate}
+            onReorderCandidates={reorderCandidates}
             onBackToArena={() => setActiveView('arena')}
             nineRouterConfig={nineRouterConfig}
             onOpenSettings={() => setIsSettingsOpen(true)}

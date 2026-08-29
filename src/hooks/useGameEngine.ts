@@ -516,6 +516,40 @@ export function useGameEngine(
     setState(CREATE_INITIAL_STATE(defIds));
   };
 
+  const reorderCandidates = (newOrder: Candidate[]) => {
+    setCandidates(newOrder);
+    saveStoredCandidates(newOrder);
+
+    // Keep CANDIDATE_MAP in sync
+    newOrder.forEach(c => CANDIDATE_MAP.set(c.id, c));
+
+    // If IDLE, reorder active & participating candidates preserving new sequence
+    if (state.phase === 'IDLE') {
+      const activeSet = new Set(state.activeCandidateIds);
+      const reorderedActive = newOrder.map(c => c.id).filter(id => activeSet.has(id));
+      saveStoredSelectedCandidateIds(reorderedActive);
+      setState(prev => ({
+        ...prev,
+        participatingCandidateIds: reorderedActive,
+        activeCandidateIds: reorderedActive,
+      }));
+    }
+  };
+
+  const moveCandidate = (candidateId: string, direction: 'up' | 'down') => {
+    const idx = candidates.findIndex(c => c.id === candidateId);
+    if (idx === -1) return;
+    if (direction === 'up' && idx === 0) return;
+    if (direction === 'down' && idx === candidates.length - 1) return;
+
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    const nextList = [...candidates];
+    const [moved] = nextList.splice(idx, 1);
+    nextList.splice(targetIdx, 0, moved);
+
+    reorderCandidates(nextList);
+  };
+
   /**
    * Candidate Selection Handlers (Available during IDLE phase)
    */
@@ -2777,5 +2811,7 @@ export function useGameEngine(
     deleteCandidate,
     resetCandidateToDefault,
     resetAllCandidatesToDefault,
+    reorderCandidates,
+    moveCandidate,
   };
 }

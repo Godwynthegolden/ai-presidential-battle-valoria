@@ -203,7 +203,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
           </div>
         )}
 
-        <div className="w-full flex flex-col items-center max-w-3xl my-auto">
+        <div className="w-full flex flex-col items-center max-w-3xl my-auto lg:-translate-x-6 transition-transform duration-300">
         {/* If Error Occurred */}
         {stage.error ? (
           <div className="flex flex-col items-center justify-center text-center max-w-md p-8 rounded-3xl bg-red-950/50 border-2 border-red-600/80 shadow-2xl shadow-red-950/80 backdrop-blur-xl">
