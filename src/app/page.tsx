@@ -9,6 +9,8 @@ import { EventTicker } from '@/components/EventTicker';
 import { CandidateDossierModal } from '@/components/CandidateDossierModal';
 import { TranscriptDrawer } from '@/components/TranscriptDrawer';
 import { NineRouterSettingsModal, NineRouterConfigState } from '@/components/NineRouterSettingsModal';
+import { ElectionIntelModal } from '@/components/ElectionIntelModal';
+import { BroadcastTimeline } from '@/components/BroadcastTimeline';
 import { CharactersManagerView } from '@/components/CharactersManagerView';
 import { Candidate } from '@/types/candidate';
 import { CANDIDATE_MAP } from '@/data/candidates';
@@ -21,7 +23,9 @@ import {
   Landmark,
   Radio,
   Users,
-  Tv
+  Tv,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 const STORAGE_KEY = 'ai_politics_9router_config';
@@ -35,8 +39,26 @@ export default function AIPlaygroundPage() {
 
   const [activeView, setActiveView] = useState<'arena' | 'characters'>('arena');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isIntelOpen, setIsIntelOpen] = useState(false);
+  const [isCleanView, setIsCleanView] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
+
+  // Global hotkey 'H' for Streamer Clean Broadcast View
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return;
+      }
+      if (e.key === 'h' || e.key === 'H') {
+        setIsCleanView(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Load config from localStorage or fallback to server env
   useEffect(() => {
@@ -99,81 +121,118 @@ export default function AIPlaygroundPage() {
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
-      {/* Top Broadcast Banner */}
-      <header className="px-4 md:px-6 py-3 bg-[#06080d]/95 border-b border-slate-750 backdrop-blur-xl flex flex-wrap items-center justify-between gap-3 z-10">
-        <div className="flex items-center gap-3.5">
-          <div className="flex items-center justify-center p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-700 shadow-lg shadow-cyan-500/25">
-            <Landmark className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-sm sm:text-base md:text-lg font-display font-black tracking-wider text-white uppercase flex items-center gap-2">
-              Republic of Valoria <span className="text-cyan-400 font-normal">Presidential Battle</span>
-              <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-xs">
-                9router Live AI
-              </span>
-            </h1>
-            <p className="text-xs text-slate-400 font-mono hidden sm:block">
-              {candidates.length} Autonomous Candidates &bull; Elimination Reality Format &bull; High-Stakes AI Diplomacy
-            </p>
-          </div>
-        </div>
-
-        {/* View Switcher, Round Indicator & Settings */}
-        <div className="flex items-center gap-2.5">
-          {/* Main Navigation Tab Switcher */}
-          <div className="flex items-center bg-[#0b0f19] p-1 rounded-2xl border border-slate-750 text-xs font-display font-bold">
-            <button
-              onClick={() => setActiveView('arena')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
-                activeView === 'arena'
-                  ? 'bg-cyan-500 text-slate-950 shadow-md font-black'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Tv className="w-4 h-4" /> Election Arena
-            </button>
-            <button
-              onClick={() => setActiveView('characters')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
-                activeView === 'characters'
-                  ? 'bg-cyan-500 text-slate-950 shadow-md font-black'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Users className="w-4 h-4" /> Candidates ({candidates.length})
-              <span className={`text-[10px] px-2 py-0.2 rounded-full font-mono font-bold ${
-                activeView === 'characters'
-                  ? 'bg-slate-950 text-cyan-300'
-                  : 'bg-slate-900 text-cyan-400 border border-cyan-500/30'
-              }`}>
-                {state.participatingCandidateIds?.length || state.activeCandidateIds.length} Active
-              </span>
-            </button>
-          </div>
-
-          {activeView === 'arena' && (
-            <>
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0b0f19] border border-slate-750 text-xs font-mono">
-                <span className="text-slate-400">PHASE:</span>
-                <span className="font-bold text-cyan-300 uppercase">{state.phase.replace('_', ' ')}</span>
-              </div>
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0b0f19] border border-slate-750 text-xs font-mono">
-                <span className="text-slate-400">ROUND:</span>
-                <span className="font-black text-amber-300">{state.round}</span>
-              </div>
-            </>
-          )}
-
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0b0f19] hover:bg-slate-800 border border-slate-750 hover:border-cyan-400 text-xs font-mono text-cyan-300 transition cursor-pointer shadow-sm"
-            title="Configure 9router API & Model"
+      {/* Floating Clean Broadcast View Badge Indicator */}
+      {isCleanView && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-2 rounded-2xl bg-black/90 border border-slate-750 text-xs font-mono text-slate-200 backdrop-blur-2xl shadow-2xl animate-fade-in">
+          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-sm shadow-cyan-400" />
+          <span>Clean Broadcast Mode &bull; Press <strong className="text-cyan-300 font-bold px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700">H</strong> to restore UI</span>
+          <button 
+            onClick={() => setIsCleanView(false)}
+            className="ml-1 text-xs font-sans font-bold text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
           >
-            <Settings className="w-4 h-4 text-cyan-400" />
-            <span className="hidden md:inline font-bold">9router Settings</span>
+            Show All
           </button>
         </div>
-      </header>
+      )}
+
+      {/* Top Broadcast Banner (Hidden in Clean View) */}
+      {!isCleanView && (
+        <header className="px-4 md:px-6 py-3 bg-[#06080d]/95 border-b border-slate-750 backdrop-blur-xl flex flex-wrap items-center justify-between gap-3 z-10 transition-all">
+          <div className="flex items-center gap-3.5">
+            <div className="flex items-center justify-center p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-700 shadow-lg shadow-cyan-500/25">
+              <Landmark className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-sm sm:text-base md:text-lg font-display font-black tracking-wider text-white uppercase flex items-center gap-2">
+                Republic of Valoria <span className="text-cyan-400 font-normal">Presidential Battle</span>
+                <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-xs">
+                  9router Live AI
+                </span>
+              </h1>
+              <p className="text-xs text-slate-400 font-mono hidden sm:block">
+                {candidates.length} Autonomous Candidates &bull; Elimination Reality Format &bull; High-Stakes AI Diplomacy
+              </p>
+            </div>
+          </div>
+
+          {/* View Switcher, Round Indicator & Settings */}
+          <div className="flex items-center gap-2.5">
+            {/* Main Navigation Tab Switcher */}
+            <div className="flex items-center bg-[#0b0f19] p-1 rounded-2xl border border-slate-750 text-xs font-display font-bold">
+              <button
+                onClick={() => setActiveView('arena')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
+                  activeView === 'arena'
+                    ? 'bg-cyan-500 text-black shadow-md font-black'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Tv className="w-4 h-4" /> Election Arena
+              </button>
+              <button
+                onClick={() => setActiveView('characters')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
+                  activeView === 'characters'
+                    ? 'bg-cyan-500 text-black shadow-md font-black'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Users className="w-4 h-4" /> Candidates ({candidates.length})
+                <span className={`text-[10px] px-2 py-0.2 rounded-full font-mono font-bold ${
+                  activeView === 'characters'
+                    ? 'bg-slate-950 text-cyan-300'
+                    : 'bg-slate-900 text-cyan-400 border border-cyan-500/30'
+                }`}>
+                  {state.participatingCandidateIds?.length || state.activeCandidateIds.length} Active
+                </span>
+              </button>
+            </div>
+
+            {activeView === 'arena' && (
+              <>
+                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0b0f19] border border-slate-750 text-xs font-mono">
+                  <span className="text-slate-400">PHASE:</span>
+                  <span className="font-bold text-cyan-300 uppercase">{state.phase.replace('_', ' ')}</span>
+                </div>
+                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0b0f19] border border-slate-750 text-xs font-mono">
+                  <span className="text-slate-400">ROUND:</span>
+                  <span className="font-black text-amber-300">{state.round}</span>
+                </div>
+              </>
+            )}
+
+            {/* Election Intel Button */}
+            <button
+              onClick={() => setIsIntelOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0b0f19] hover:bg-slate-800 border border-slate-750 hover:border-amber-400 text-xs font-display font-bold text-amber-300 transition cursor-pointer shadow-sm"
+              title="Open Republic of Valoria Election Intel & Rules"
+            >
+              <Flame className="w-4 h-4 text-amber-400" />
+              <span className="hidden md:inline">Election Intel</span>
+            </button>
+
+            {/* Clean View Toggle Button */}
+            <button
+              onClick={() => setIsCleanView(prev => !prev)}
+              className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0b0f19] hover:bg-slate-800 border border-slate-750 hover:border-cyan-400 text-xs font-mono text-slate-300 transition cursor-pointer shadow-sm"
+              title="Toggle Clean Broadcast View for YouTube / OBS (Shortcut: H)"
+            >
+              <span className="px-1.5 py-0.2 rounded bg-slate-900 border border-slate-700 text-cyan-300 font-bold text-[10px]">H</span>
+              <span className="hidden xl:inline">Clean View</span>
+            </button>
+
+            {/* 9router Settings Button */}
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0b0f19] hover:bg-slate-800 border border-slate-750 hover:border-cyan-400 text-xs font-mono text-cyan-300 transition cursor-pointer shadow-sm"
+              title="Configure 9router API & Model"
+            >
+              <Settings className="w-4 h-4 text-cyan-400" />
+              <span className="hidden md:inline font-bold">9router</span>
+            </button>
+          </div>
+        </header>
+      )}
 
       {/* Main View: Characters Manager OR Election Arena */}
       {activeView === 'characters' ? (
@@ -193,22 +252,24 @@ export default function AIPlaygroundPage() {
         />
       ) : (
         /* Main Broadcast Workspace */
-        <div className="flex-1 flex flex-col p-3 md:p-4 gap-3 max-w-[1750px] w-full mx-auto">
-          {/* Top Controls Bar */}
-          <ControlBar
-            gameState={state}
-            nineRouterConfig={nineRouterConfig}
-            onOpenSettings={() => setIsSettingsOpen(true)}
-            onStartGame={startGame}
-            onNextStep={nextStep}
-            onToggleAutoPlay={toggleAutoPlay}
-            onSetSpeed={setSpeed}
-            onToggleSound={toggleSound}
-            onRestart={restartGame}
-            onRetry={retryCurrentStep}
-          />
+        <div className={`flex-1 flex flex-col ${isCleanView ? 'p-2 md:p-3 gap-2' : 'p-3 md:p-4 gap-3'} max-w-[1750px] w-full mx-auto`}>
+          {/* Top Controls Bar (Hidden in Clean View) */}
+          {!isCleanView && (
+            <ControlBar
+              gameState={state}
+              nineRouterConfig={nineRouterConfig}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+              onStartGame={startGame}
+              onNextStep={nextStep}
+              onToggleAutoPlay={toggleAutoPlay}
+              onSetSpeed={setSpeed}
+              onToggleSound={toggleSound}
+              onRestart={restartGame}
+              onRetry={retryCurrentStep}
+            />
+          )}
 
-          {/* 3-Column Layout: Left (Candidates) - Center (Debate Arena) - Right (Intel & Stats) */}
+          {/* 3-Column Layout: Left (Candidates) - Center (Debate Arena) - Right (Live Battle Timeline) */}
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3.5 min-h-[580px]">
             {/* Left Column: Candidate Roster (3 Cols) */}
             <div className="lg:col-span-3 h-full">
@@ -230,150 +291,34 @@ export default function AIPlaygroundPage() {
               />
             </div>
 
-            {/* Right Column: Battle Intelligence & History (3 Cols) */}
+            {/* Right Column: Live Battle Timeline (3 Cols) */}
             <div className="lg:col-span-3 flex flex-col gap-3 h-full">
-              {/* Quick Intel Card */}
-              <div className="flex-1 flex flex-col rounded-2xl bg-[#0b0f19] border border-slate-750 p-4 backdrop-blur-2xl overflow-hidden shadow-lg">
-                <div className="flex items-center justify-between pb-3.5 border-b border-slate-800">
-                  <span className="text-xs font-display font-black text-slate-100 uppercase tracking-wider flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-amber-400" /> Election Intel
-                  </span>
-                  <button
-                    onClick={() => setIsTranscriptOpen(true)}
-                    className="text-xs font-mono font-bold text-cyan-300 hover:text-cyan-200 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 hover:border-cyan-500/40 transition cursor-pointer"
-                  >
-                    <History className="w-3.5 h-3.5" /> Full Log
-                  </button>
-                </div>
-
-                {/* Status breakdown */}
-                <div className="flex-1 overflow-y-auto pr-1 py-3 flex flex-col gap-3 custom-scrollbar">
-                  {/* 9router Status Card */}
-                  <div 
-                    onClick={() => setIsSettingsOpen(true)}
-                    className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition flex flex-col gap-1.5 shadow-sm group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono text-slate-300 uppercase font-bold flex items-center gap-1.5">
-                        <Cpu className="w-3.5 h-3.5 text-cyan-400 group-hover:rotate-45 transition-transform" /> 9router Engine
-                      </span>
-                      <span 
-                        className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full ${
-                          isConfigured 
-                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-600/80 shadow-xs' 
-                            : 'bg-amber-950 text-amber-300 border border-amber-600/80 animate-pulse'
-                        }`}
-                      >
-                        {isConfigured ? 'Ready' : 'Configure'}
-                      </span>
-                    </div>
-                    <div className="text-xs font-mono text-cyan-300 truncate font-bold mt-0.5">
-                      {nineRouterConfig.model || 'No model selected'}
-                    </div>
-                    <div className="text-[11px] font-mono text-slate-400 truncate">
-                      {nineRouterConfig.baseUrl}
-                    </div>
-                  </div>
-
-                  {/* Active Contenders */}
-                  <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-sm">
-                    <span className="text-xs font-mono text-slate-200 uppercase font-bold block mb-2">
-                      Active Contenders ({state.activeCandidateIds.length})
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {state.activeCandidateIds.map(id => {
-                        const c = CANDIDATE_MAP.get(id);
-                        if (!c) return null;
-                        return (
-                          <button
-                            key={id}
-                            onClick={() => setSelectedCandidate(c)}
-                            className="px-2.5 py-1 rounded-lg text-xs font-sans font-semibold border bg-slate-900 hover:scale-105 transition cursor-pointer"
-                            style={{ borderColor: `${c.color.primary}70`, color: c.color.primary }}
-                          >
-                            {c.name.split(' ')[0]}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Elimination History */}
-                  <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-sm">
-                    <span className="text-xs font-mono text-slate-200 uppercase font-bold block mb-1">
-                      Elimination History ({state.eliminatedCandidates.length})
-                    </span>
-                    {state.eliminatedCandidates.length === 0 ? (
-                      <p className="text-xs text-slate-400 font-mono mt-1 italic">
-                        No candidates eliminated yet.
-                      </p>
-                    ) : (
-                      <div className="flex flex-col gap-2 mt-2">
-                        {state.eliminatedCandidates.map((e, idx) => {
-                          const c = CANDIDATE_MAP.get(e.candidateId);
-                          return (
-                            <div
-                              key={idx}
-                              onClick={() => c && setSelectedCandidate(c)}
-                              className="flex items-center justify-between p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-xs cursor-pointer hover:border-slate-700 transition"
-                            >
-                              <span className="text-stone-300 font-medium line-through">
-                                {c?.name}
-                              </span>
-                              <span className="text-xs font-mono font-bold text-red-400">
-                                R{e.eliminatedInRound} ({e.voteCount} votes)
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Game Flow Legend */}
-                  <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-sm">
-                    <span className="text-xs font-mono text-slate-200 uppercase font-bold block mb-2">
-                      Valoria Election Protocol
-                    </span>
-                    <div className="flex flex-col gap-2 text-xs text-slate-300 font-sans">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0 shadow-xs shadow-cyan-400" />
-                        <span>1. Campaign Speeches (Broadcast Address)</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-red-400 shrink-0 shadow-xs shadow-red-400" />
-                        <span>2. 1v1 Public Attacks (Denunciations)</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs shadow-emerald-400" />
-                        <span>3. Leaked Backroom Alliances (CCTV Whispers)</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-purple-400 shrink-0 shadow-xs shadow-purple-400" />
-                        <span>4. Secret Ballots &amp; Betrayal Reveals</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0 shadow-xs shadow-amber-400" />
-                        <span>5. Elimination Cycle (Top 3 Advance)</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-yellow-400 shrink-0 shadow-xs shadow-yellow-400" />
-                        <span>6. Grand Jury Presidential Inauguration</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <BroadcastTimeline
+                gameState={state}
+                onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
+              />
             </div>
           </div>
 
-          {/* Bottom Live Wire News Flash Ticker */}
-          <EventTicker
-            gameState={state}
-            onOpenTranscript={() => setIsTranscriptOpen(true)}
-          />
+          {/* Bottom Live Wire News Flash Ticker (Hidden in Clean View) */}
+          {!isCleanView && (
+            <EventTicker
+              gameState={state}
+              onOpenTranscript={() => setIsTranscriptOpen(true)}
+            />
+          )}
         </div>
       )}
+
+      {/* Election Intel Modal */}
+      <ElectionIntelModal
+        isOpen={isIntelOpen}
+        gameState={state}
+        nineRouterConfig={nineRouterConfig}
+        onClose={() => setIsIntelOpen(false)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
+      />
 
       {/* 9router Settings Modal */}
       <NineRouterSettingsModal
@@ -398,3 +343,4 @@ export default function AIPlaygroundPage() {
     </main>
   );
 }
+

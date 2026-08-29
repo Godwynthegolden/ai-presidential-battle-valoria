@@ -32,7 +32,7 @@ import {
 
 interface CandidateAvatarProps {
   candidate: Candidate;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   isSpeaking?: boolean;
   isAttacking?: boolean;
   isTarget?: boolean;
@@ -52,6 +52,7 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
   showBadge = true,
 }) => {
   const sizeMap = {
+    xs: { box: 'w-6 h-6', icon: 12, text: 'text-[9px]' },
     sm: { box: 'w-10 h-10', icon: 18, text: 'text-xs' },
     md: { box: 'w-14 h-14', icon: 24, text: 'text-sm' },
     lg: { box: 'w-24 h-24', icon: 40, text: 'text-lg' },

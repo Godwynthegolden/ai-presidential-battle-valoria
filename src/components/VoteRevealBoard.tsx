@@ -142,6 +142,58 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                   style={{ width: `${Math.max(percentage, 6)}%` }}
                 />
               </div>
+
+              {/* Voter Icons Tray */}
+              {(() => {
+                const votesForCandidate = tally.votes.filter(v => v.targetId === candId);
+                if (votesForCandidate.length === 0) return null;
+
+                return (
+                  <div className="flex items-center flex-wrap gap-2 pt-2 mt-1 border-t border-slate-800/80">
+                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 shrink-0">
+                      {isFinalVote ? 'Mandate Cast By:' : 'Ballots Cast By:'}
+                    </span>
+                    <div className="flex items-center flex-wrap gap-1.5">
+                      {votesForCandidate.map((v, vIdx) => {
+                        const voter = CANDIDATE_MAP.get(v.voterId);
+                        if (!voter) return null;
+                        return (
+                          <div
+                            key={vIdx}
+                            className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-xs font-sans font-bold shadow-xs transition-transform hover:scale-105 ${
+                              v.isBetrayal
+                                ? 'bg-red-950 border-red-600 text-red-200 animate-pulse'
+                                : v.isHonoredPact
+                                ? 'bg-emerald-950 border-emerald-600 text-emerald-200'
+                                : 'bg-slate-900 border-slate-750 text-slate-200'
+                            }`}
+                            title={
+                              v.isBetrayal
+                                ? `${voter.name} (BETRAYED PACT!)`
+                                : v.isHonoredPact
+                                ? `${voter.name} (Kept secret alliance)`
+                                : `${voter.name} cast ballot`
+                            }
+                          >
+                            <CandidateAvatar candidate={voter} size="xs" showBadge={false} />
+                            <span>{voter.name.split(' ')[0]}</span>
+                            {v.isBetrayal && (
+                              <span className="flex items-center text-[10px] font-mono font-black text-red-300 uppercase bg-red-900 px-1.5 py-0.2 rounded-md">
+                                <Swords className="w-2.5 h-2.5 mr-0.5 text-red-300" /> Betrayed
+                              </span>
+                            )}
+                            {v.isHonoredPact && (
+                              <span className="flex items-center text-[10px] font-mono font-bold text-emerald-300 uppercase bg-emerald-900 px-1.5 py-0.2 rounded-md">
+                                <ShieldCheck className="w-2.5 h-2.5 mr-0.5 text-emerald-300" /> Pact
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           );
         })}
