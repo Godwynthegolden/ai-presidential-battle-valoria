@@ -141,12 +141,12 @@ export default function AIPlaygroundPage() {
               }`}
             >
               <Users className="w-3.5 h-3.5" /> Characters Management
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
                 activeView === 'characters'
                   ? 'bg-slate-950 text-cyan-300'
-                  : 'bg-slate-800 text-slate-300'
+                  : 'bg-slate-800 text-cyan-400'
               }`}>
-                {candidates.length}
+                {state.participatingCandidateIds?.length || state.activeCandidateIds.length} / {candidates.length}
               </span>
             </button>
           </div>
@@ -179,6 +179,9 @@ export default function AIPlaygroundPage() {
       {activeView === 'characters' ? (
         <CharactersManagerView
           candidates={candidates}
+          selectedCandidateIds={state.participatingCandidateIds || state.activeCandidateIds}
+          onToggleCandidate={toggleCandidateSelection}
+          onSetPresetRoster={setPresetRoster}
           onSaveCandidate={saveCandidate}
           onDeleteCandidate={deleteCandidate}
           onResetCandidateToDefault={resetCandidateToDefault}
@@ -186,6 +189,7 @@ export default function AIPlaygroundPage() {
           onBackToArena={() => setActiveView('arena')}
           nineRouterConfig={nineRouterConfig}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          isGameInProgress={state.phase !== 'IDLE'}
         />
       ) : (
         /* Main Broadcast Workspace */
@@ -212,8 +216,7 @@ export default function AIPlaygroundPage() {
                 gameState={state}
                 candidates={candidates}
                 onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
-                onToggleCandidate={toggleCandidateSelection}
-                onSetPresetRoster={setPresetRoster}
+                onOpenCharactersManager={() => setActiveView('characters')}
               />
             </div>
 
