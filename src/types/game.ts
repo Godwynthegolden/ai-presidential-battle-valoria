@@ -134,6 +134,8 @@ export type LLMActionType =
 export interface LLMRequestPayload {
   action: LLMActionType;
   candidateId: string;
+  candidate?: Candidate; // Full candidate object if custom/dynamic
+  allCandidates?: Candidate[]; // All dynamic election candidates
   targetId?: string;
   round: number;
   activeCandidateIds: string[];

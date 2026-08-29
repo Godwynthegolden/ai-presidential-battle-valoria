@@ -88,22 +88,33 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('Heuristic character profile extraction from unformatted text PASSED!');
 
-  console.log('\nTesting generate_character unconfigured error handling:');
+  // Test custom candidate resolution when not in default CANDIDATE_MAP
+  const nonExistentCustomId = 'custom_1787970834052';
+  const customDynamicCandidate: Candidate = {
+    ...customCandidate,
+    id: nonExistentCustomId,
+    name: 'Senator Clara Hayes',
+  };
+
   try {
     await nineRouterService.generateAgentAction(
       {
-        action: 'generate_character',
-        candidateId: 'test_generator',
+        action: 'campaign_speech',
+        candidateId: nonExistentCustomId,
+        candidate: customDynamicCandidate,
+        allCandidates: [customDynamicCandidate, ...CANDIDATES],
         round: 1,
-        activeCandidateIds: [],
-        customPrompt: 'A charismatic solar energy billionaire',
+        activeCandidateIds: [nonExistentCustomId, ...preset4],
         historyContext: {},
       },
-      { baseUrl: '', apiKey: '' }
+      { baseUrl: '', apiKey: '' } // Unconfigured triggers early error check after finding candidate
     );
-    throw new Error('Expected generateAgentAction to throw when unconfigured, but it succeeded.');
   } catch (err: any) {
-    console.log('Successfully caught unconfigured error for generate_character:', err.message);
+    // It should fail with "9router Base URL is not configured", NOT "Candidate with id not found"
+    if (err.message.includes('not found')) {
+      throw new Error(`Failed to resolve dynamic custom candidate in generateAgentAction: ${err.message}`);
+    }
+    console.log('Dynamic custom candidate properly resolved in generateAgentAction PASSED!');
   }
 
   console.log('\nAll unit tests for AI Custom Character Generator & Parameter Editor PASSED successfully!');

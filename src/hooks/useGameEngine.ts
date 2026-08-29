@@ -99,8 +99,12 @@ export function useGameEngine(
   // Call the server API for LLM generation with active 9router config
   const callLLM = async (payload: LLMRequestPayload) => {
     const activeConfig = configRef.current;
+    const currentCandidate = payload.candidate || CANDIDATE_MAP.get(payload.candidateId) || candidates.find(c => c.id === payload.candidateId);
+
     const requestPayload: LLMRequestPayload = {
       ...payload,
+      candidate: currentCandidate,
+      allCandidates: candidates,
       config: activeConfig ? {
         baseUrl: activeConfig.baseUrl,
         apiKey: activeConfig.apiKey,

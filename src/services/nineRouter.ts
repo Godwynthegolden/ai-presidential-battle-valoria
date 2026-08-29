@@ -119,7 +119,19 @@ export class NineRouterService {
     payload: LLMRequestPayload,
     config?: NineRouterConfig
   ): Promise<LLMResponsePayload> {
-    let candidate = CANDIDATE_MAP.get(payload.candidateId);
+    // Register dynamic candidates passed from client into map
+    if (payload.allCandidates && Array.isArray(payload.allCandidates)) {
+      for (const c of payload.allCandidates) {
+        if (c && c.id) {
+          CANDIDATE_MAP.set(c.id, c);
+        }
+      }
+    }
+    if (payload.candidate && payload.candidate.id) {
+      CANDIDATE_MAP.set(payload.candidate.id, payload.candidate);
+    }
+
+    let candidate = payload.candidate || CANDIDATE_MAP.get(payload.candidateId);
     if (!candidate) {
       if (payload.action === 'generate_character') {
         candidate = DEFAULT_CANDIDATES[0];
