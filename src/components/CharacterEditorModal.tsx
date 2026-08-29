@@ -22,7 +22,8 @@ import {
   Loader2,
   RefreshCw,
   Image as ImageIcon,
-  Cpu
+  Cpu,
+  Pipette
 } from 'lucide-react';
 
 const SVG_ICONS: Array<{ type: CandidateSvgIcon; label: string }> = [
@@ -48,15 +49,107 @@ const SVG_ICONS: Array<{ type: CandidateSvgIcon; label: string }> = [
   { type: 'briefcase', label: 'Briefcase' },
 ];
 
-const COLOR_PRESETS = [
-  { name: 'Azure Blue', primary: '#3b82f6', bg: 'rgba(59, 130, 246, 0.12)', border: 'rgba(59, 130, 246, 0.5)', text: '#60a5fa', glow: 'rgba(59, 130, 246, 0.3)', gradient: 'from-blue-600/20 to-slate-900' },
-  { name: 'Emerald Green', primary: '#10b981', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(16, 185, 129, 0.5)', text: '#34d399', glow: 'rgba(16, 185, 129, 0.3)', gradient: 'from-emerald-600/20 to-slate-900' },
-  { name: 'Crimson Red', primary: '#ef4444', bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(239, 68, 68, 0.5)', text: '#f87171', glow: 'rgba(239, 68, 68, 0.3)', gradient: 'from-red-600/20 to-slate-900' },
-  { name: 'Royal Purple', primary: '#a855f7', bg: 'rgba(168, 85, 247, 0.12)', border: 'rgba(168, 85, 247, 0.5)', text: '#c084fc', glow: 'rgba(168, 85, 247, 0.3)', gradient: 'from-purple-600/20 to-slate-900' },
-  { name: 'Amber Gold', primary: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.5)', text: '#fbbf24', glow: 'rgba(245, 158, 11, 0.3)', gradient: 'from-amber-600/20 to-slate-900' },
-  { name: 'Cyber Cyan', primary: '#06b6d4', bg: 'rgba(6, 182, 212, 0.12)', border: 'rgba(6, 182, 212, 0.5)', text: '#22d3ee', glow: 'rgba(6, 182, 212, 0.3)', gradient: 'from-cyan-600/20 to-slate-900' },
-  { name: 'Rose Pink', primary: '#f43f5e', bg: 'rgba(244, 63, 94, 0.12)', border: 'rgba(244, 63, 94, 0.5)', text: '#fb7185', glow: 'rgba(244, 63, 94, 0.3)', gradient: 'from-rose-600/20 to-slate-900' },
-  { name: 'Obsidian Slate', primary: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)', border: 'rgba(148, 163, 184, 0.5)', text: '#cbd5e1', glow: 'rgba(148, 163, 184, 0.3)', gradient: 'from-slate-600/20 to-slate-900' },
+export interface ColorPreset {
+  name: string;
+  category: 'neon' | 'presidential' | 'warm' | 'earth' | 'noir';
+  primary: string;
+  bg: string;
+  border: string;
+  text: string;
+  glow: string;
+  gradient: string;
+}
+
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  let cleaned = hex.replace('#', '').trim();
+  if (cleaned.length === 3) {
+    cleaned = cleaned.split('').map(c => c + c).join('');
+  }
+  const num = parseInt(cleaned, 16);
+  if (isNaN(num)) return { r: 59, g: 130, b: 246 };
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255,
+  };
+}
+
+export function createColorTheme(
+  hex: string, 
+  name: string = 'Custom Color', 
+  category: 'neon' | 'presidential' | 'warm' | 'earth' | 'noir' = 'neon'
+): ColorPreset {
+  const { r, g, b } = hexToRgb(hex);
+  return {
+    name,
+    category,
+    primary: hex,
+    bg: `rgba(${r}, ${g}, ${b}, 0.14)`,
+    border: `rgba(${r}, ${g}, ${b}, 0.55)`,
+    text: hex,
+    glow: `rgba(${r}, ${g}, ${b}, 0.35)`,
+    gradient: 'from-slate-900 via-slate-950 to-slate-950',
+  };
+}
+
+export const COLOR_PRESETS: ColorPreset[] = [
+  // 1. Cyber & Neons (12)
+  createColorTheme('#06b6d4', 'Cyber Cyan', 'neon'),
+  createColorTheme('#00f0ff', 'Laser Cyan', 'neon'),
+  createColorTheme('#3b82f6', 'Electric Azure', 'neon'),
+  createColorTheme('#38bdf8', 'Neon Sky', 'neon'),
+  createColorTheme('#84cc16', 'Neon Lime', 'neon'),
+  createColorTheme('#10b981', 'Matrix Emerald', 'neon'),
+  createColorTheme('#22c55e', 'Toxic Green', 'neon'),
+  createColorTheme('#d946ef', 'Synthwave Fuchsia', 'neon'),
+  createColorTheme('#ec4899', 'Hot Magenta', 'neon'),
+  createColorTheme('#f43f5e', 'Pulse Coral', 'neon'),
+  createColorTheme('#8b5cf6', 'Hyper Violet', 'neon'),
+  createColorTheme('#eab308', 'Solar Yellow', 'neon'),
+
+  // 2. Presidential & Diplomatic (10)
+  createColorTheme('#1d4ed8', 'Capitol Navy', 'presidential'),
+  createColorTheme('#2563eb', 'Diplomatic Cobalt', 'presidential'),
+  createColorTheme('#1e3a8a', 'Midnight Senate', 'presidential'),
+  createColorTheme('#9333ea', 'Imperial Purple', 'presidential'),
+  createColorTheme('#7c3aed', 'Supreme Violet', 'presidential'),
+  createColorTheme('#dc2626', 'Cardinal Red', 'presidential'),
+  createColorTheme('#f59e0b', 'Sovereign Amber', 'presidential'),
+  createColorTheme('#0d9488', 'Statehouse Teal', 'presidential'),
+  createColorTheme('#475569', 'Executive Slate', 'presidential'),
+  createColorTheme('#94a3b8', 'Titanium Silver', 'presidential'),
+
+  // 3. Passionate, Militant & Revolutionary (10)
+  createColorTheme('#ef4444', 'Crimson Flame', 'warm'),
+  createColorTheme('#b91c1c', 'Guerilla Crimson', 'warm'),
+  createColorTheme('#ea580c', 'Blood Orange', 'warm'),
+  createColorTheme('#f97316', 'Sunset Tangerine', 'warm'),
+  createColorTheme('#fb923c', 'Molten Amber', 'warm'),
+  createColorTheme('#e11d48', 'Radical Scarlet', 'warm'),
+  createColorTheme('#c2410c', 'Rust Terracotta', 'warm'),
+  createColorTheme('#9f1239', 'Deep Burgundy', 'warm'),
+  createColorTheme('#881337', 'Midnight Wine', 'warm'),
+  createColorTheme('#be123c', 'Ruby Blaze', 'warm'),
+
+  // 4. Nature, Ecological & Earth (10)
+  createColorTheme('#15803d', 'Forest Pine', 'earth'),
+  createColorTheme('#059669', 'Boreal Green', 'earth'),
+  createColorTheme('#14b8a6', 'Jade Mint', 'earth'),
+  createColorTheme('#0ea5e9', 'Arctic Ice', 'earth'),
+  createColorTheme('#0284c7', 'Glacial Ocean', 'earth'),
+  createColorTheme('#65a30d', 'Tactical Olive', 'earth'),
+  createColorTheme('#4d7c0f', 'Moss Khaki', 'earth'),
+  createColorTheme('#b45309', 'Desert Bronze', 'earth'),
+  createColorTheme('#a16207', 'Earth Ochre', 'earth'),
+  createColorTheme('#78350f', 'Roasted Umber', 'earth'),
+
+  // 5. Cyber Noir & Velvet Shadow (6)
+  createColorTheme('#334155', 'Obsidian Gunmetal', 'noir'),
+  createColorTheme('#1e293b', 'Shadow Slate', 'noir'),
+  createColorTheme('#7e22ce', 'Deep Amethyst', 'noir'),
+  createColorTheme('#581c87', 'Velvet Plum', 'noir'),
+  createColorTheme('#6366f1', 'Electric Indigo', 'noir'),
+  createColorTheme('#4c1d95', 'Abyssal Violet', 'noir'),
 ];
 
 const ARCHETYPES: Array<{ id: Archetype; label: string }> = [
@@ -104,6 +197,10 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
 
+  // Color Filter & Custom Picker state
+  const [colorCategory, setColorCategory] = useState<'all' | 'neon' | 'presidential' | 'warm' | 'earth' | 'noir'>('all');
+  const [customColorHex, setCustomColorHex] = useState('#3b82f6');
+
   // Candidate Form State
   const [form, setForm] = useState<Candidate>(() => candidateToEdit || {
     id: `custom_${Date.now()}`,
@@ -134,6 +231,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
   useEffect(() => {
     if (candidateToEdit) {
       setForm(candidateToEdit);
+      setCustomColorHex(candidateToEdit.color.primary || '#3b82f6');
     } else {
       setForm({
         id: `custom_${Date.now()}`,
@@ -159,9 +257,18 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
         systemPrompt: 'You are a bold presidential contender in the Republic of Valoria. Speak with authenticity, intelligence, and conviction.',
         isCustom: true,
       });
+      setCustomColorHex(COLOR_PRESETS[0].primary);
       setActiveTab('ai_generate');
     }
   }, [candidateToEdit, isOpen]);
+
+  const handleCustomColorChange = (hex: string) => {
+    setCustomColorHex(hex);
+    if (/^#[0-9A-Fa-f]{6}$/.test(hex) || /^#[0-9A-Fa-f]{3}$/.test(hex)) {
+      const generated = createColorTheme(hex, 'Custom Theme');
+      setForm(prev => ({ ...prev, color: generated }));
+    }
+  };
 
   // Fetch available models from 9router
   const fetchModels = async () => {
@@ -512,30 +619,98 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
               </div>
             </div>
 
-            {/* Color Palette Presets */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-mono font-bold text-slate-400">
-                Color Theme:
-              </label>
-              <div className="grid grid-cols-4 gap-1.5">
-                {COLOR_PRESETS.map((preset, idx) => (
+            {/* Color Palette Presets & Custom Picker */}
+            <div className="flex flex-col gap-2 p-3 rounded-2xl bg-slate-950/70 border border-slate-850">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-mono font-bold text-slate-300 flex items-center gap-1.5">
+                  <Palette className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Color Theme ({COLOR_PRESETS.length} Colors):</span>
+                </label>
+                <div 
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] font-mono font-bold" 
+                  style={{ color: form.color.primary }}
+                >
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: form.color.primary }} />
+                  <span className="truncate max-w-[120px]">{form.color.name || form.color.primary}</span>
+                </div>
+              </div>
+
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-1 overflow-x-auto text-[10px] font-mono py-0.5 custom-scrollbar">
+                {[
+                  { id: 'all', label: `All (${COLOR_PRESETS.length})` },
+                  { id: 'neon', label: '⚡ Neons' },
+                  { id: 'presidential', label: '🏛️ Presidential' },
+                  { id: 'warm', label: '🔥 Warm & Red' },
+                  { id: 'earth', label: '🌿 Earth & Green' },
+                  { id: 'noir', label: '🌌 Cyber Noir' },
+                ].map(cat => (
                   <button
-                    key={idx}
+                    key={cat.id}
                     type="button"
-                    onClick={() => setForm(prev => ({ ...prev, color: preset }))}
-                    className={`h-7 rounded-lg transition border flex items-center justify-center ${
-                      form.color.primary === preset.primary
-                        ? 'border-white ring-2 ring-cyan-400 scale-105'
-                        : 'border-slate-800'
+                    onClick={() => setColorCategory(cat.id as any)}
+                    className={`px-2 py-0.5 rounded-md transition whitespace-nowrap ${
+                      colorCategory === cat.id
+                        ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
+                        : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
                     }`}
-                    style={{ backgroundColor: preset.primary }}
-                    title={preset.name}
                   >
-                    {form.color.primary === preset.primary && (
-                      <Check className="w-3.5 h-3.5 text-white drop-shadow" />
-                    )}
+                    {cat.label}
                   </button>
                 ))}
+              </div>
+
+              {/* Grid of Color Swatches */}
+              <div className="grid grid-cols-6 sm:grid-cols-8 gap-1.5 max-h-36 overflow-y-auto p-1.5 bg-slate-950/90 rounded-xl border border-slate-800/80 custom-scrollbar">
+                {(colorCategory === 'all' ? COLOR_PRESETS : COLOR_PRESETS.filter(p => p.category === colorCategory)).map((preset, idx) => {
+                  const isSelected = form.color.primary?.toLowerCase() === preset.primary.toLowerCase();
+                  return (
+                    <button
+                      key={preset.primary + idx}
+                      type="button"
+                      onClick={() => {
+                        setForm(prev => ({ ...prev, color: preset }));
+                        setCustomColorHex(preset.primary);
+                      }}
+                      className={`h-7 rounded-lg transition-all border flex items-center justify-center relative hover:scale-110 active:scale-95 ${
+                        isSelected
+                          ? 'border-white ring-2 ring-cyan-400 scale-105 z-10'
+                          : 'border-slate-800/80 hover:border-slate-500'
+                      }`}
+                      style={{ backgroundColor: preset.primary }}
+                      title={`${preset.name} (${preset.primary})`}
+                    >
+                      {isSelected && (
+                        <Check className="w-3.5 h-3.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom Color Input / Droplet Picker */}
+              <div className="flex items-center gap-2 pt-1.5 border-t border-slate-900">
+                <label className="text-[10px] font-mono text-slate-400 flex items-center gap-1 shrink-0">
+                  <Pipette className="w-3 h-3 text-cyan-400" /> Custom Hex:
+                </label>
+                <div className="flex items-center gap-1.5 flex-1">
+                  <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-slate-700 shrink-0 cursor-pointer shadow-sm">
+                    <input
+                      type="color"
+                      value={form.color.primary?.startsWith('#') ? form.color.primary : '#3b82f6'}
+                      onChange={(e) => handleCustomColorChange(e.target.value)}
+                      className="absolute -top-2 -left-2 w-12 h-12 cursor-pointer border-0 p-0"
+                      title="Choose custom color from wheel"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    value={customColorHex}
+                    onChange={(e) => handleCustomColorChange(e.target.value)}
+                    placeholder="#3b82f6"
+                    className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 uppercase"
+                  />
+                </div>
               </div>
             </div>
           </div>

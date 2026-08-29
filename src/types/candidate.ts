@@ -53,6 +53,7 @@ export interface Candidate {
   behavioralTendencies: string[];
   rivalArchetypes: Archetype[];
   color: {
+    name?: string;
     primary: string;
     bg: string;
     border: string;

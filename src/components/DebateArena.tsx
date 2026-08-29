@@ -263,8 +263,13 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
               className={`w-full relative rounded-2xl p-6 md:p-8 shadow-2xl backdrop-blur-md transition-all duration-300 ${
                 stage.actionType === 'eliminated'
                   ? 'bg-red-950/40 border-2 border-red-700/80 shadow-red-950/80'
-                  : `bg-slate-900/90 border-2 ${speaker.color.border} shadow-slate-950/80`
+                  : `bg-slate-900/90 border-2 ${speaker.color.border?.startsWith('border-') ? speaker.color.border : ''} shadow-slate-950/80`
               }`}
+              style={{
+                borderColor: stage.actionType !== 'eliminated' && !speaker.color.border?.startsWith('border-')
+                  ? (speaker.color.primary || speaker.color.border)
+                  : undefined,
+              }}
             >
               {stage.isLoading ? (
                 <div className="flex items-center justify-center py-8 gap-3 text-cyan-400">

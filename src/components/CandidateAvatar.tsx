@@ -62,57 +62,60 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
 
   const renderIcon = () => {
     const iconSize = currentSize.icon;
-    const colorClass = isEliminated ? 'text-stone-500' : candidate.color.text;
+    const isTailwindClass = candidate.color.text?.startsWith('text-');
+    const colorClass = isEliminated ? 'text-stone-500' : (isTailwindClass ? candidate.color.text : undefined);
+    const customColor = !isEliminated && !isTailwindClass ? (candidate.color.primary || candidate.color.text) : undefined;
+    const iconStyle = customColor ? { color: customColor } : undefined;
 
     switch (candidate.avatar.svgType) {
       case 'landmark':
-        return <Landmark size={iconSize} className={colorClass} />;
+        return <Landmark size={iconSize} className={colorClass} style={iconStyle} />;
       case 'flame':
-        return <Flame size={iconSize} className={colorClass} />;
+        return <Flame size={iconSize} className={colorClass} style={iconStyle} />;
       case 'cpu':
-        return <Cpu size={iconSize} className={colorClass} />;
+        return <Cpu size={iconSize} className={colorClass} style={iconStyle} />;
       case 'shield':
-        return <ShieldAlert size={iconSize} className={colorClass} />;
+        return <ShieldAlert size={iconSize} className={colorClass} style={iconStyle} />;
       case 'heart':
-        return <HeartHandshake size={iconSize} className={colorClass} />;
+        return <HeartHandshake size={iconSize} className={colorClass} style={iconStyle} />;
       case 'dollar':
-        return <DollarSign size={iconSize} className={colorClass} />;
+        return <DollarSign size={iconSize} className={colorClass} style={iconStyle} />;
       case 'leaf':
-        return <Sprout size={iconSize} className={colorClass} />;
+        return <Sprout size={iconSize} className={colorClass} style={iconStyle} />;
       case 'eye':
-        return <Eye size={iconSize} className={colorClass} />;
+        return <Eye size={iconSize} className={colorClass} style={iconStyle} />;
       case 'scale':
-        return <Scale size={iconSize} className={colorClass} />;
+        return <Scale size={iconSize} className={colorClass} style={iconStyle} />;
       case 'scroll':
-        return <Scroll size={iconSize} className={colorClass} />;
+        return <Scroll size={iconSize} className={colorClass} style={iconStyle} />;
       case 'dice':
-        return <Dices size={iconSize} className={colorClass} />;
+        return <Dices size={iconSize} className={colorClass} style={iconStyle} />;
       case 'hammer':
-        return <Hammer size={iconSize} className={colorClass} />;
+        return <Hammer size={iconSize} className={colorClass} style={iconStyle} />;
       case 'zap':
-        return <Zap size={iconSize} className={colorClass} />;
+        return <Zap size={iconSize} className={colorClass} style={iconStyle} />;
       case 'crown':
-        return <Crown size={iconSize} className={colorClass} />;
+        return <Crown size={iconSize} className={colorClass} style={iconStyle} />;
       case 'globe':
-        return <Globe size={iconSize} className={colorClass} />;
+        return <Globe size={iconSize} className={colorClass} style={iconStyle} />;
       case 'swords':
-        return <Swords size={iconSize} className={colorClass} />;
+        return <Swords size={iconSize} className={colorClass} style={iconStyle} />;
       case 'radio':
-        return <Radio size={iconSize} className={colorClass} />;
+        return <Radio size={iconSize} className={colorClass} style={iconStyle} />;
       case 'award':
-        return <Award size={iconSize} className={colorClass} />;
+        return <Award size={iconSize} className={colorClass} style={iconStyle} />;
       case 'activity':
-        return <Activity size={iconSize} className={colorClass} />;
+        return <Activity size={iconSize} className={colorClass} style={iconStyle} />;
       case 'star':
-        return <Star size={iconSize} className={colorClass} />;
+        return <Star size={iconSize} className={colorClass} style={iconStyle} />;
       case 'building':
-        return <Building2 size={iconSize} className={colorClass} />;
+        return <Building2 size={iconSize} className={colorClass} style={iconStyle} />;
       case 'users':
-        return <Users size={iconSize} className={colorClass} />;
+        return <Users size={iconSize} className={colorClass} style={iconStyle} />;
       case 'briefcase':
-        return <Briefcase size={iconSize} className={colorClass} />;
+        return <Briefcase size={iconSize} className={colorClass} style={iconStyle} />;
       default:
-        return <Flame size={iconSize} className={colorClass} />;
+        return <Flame size={iconSize} className={colorClass} style={iconStyle} />;
     }
   };
 
@@ -137,13 +140,14 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
           isEliminated
             ? 'bg-stone-900/90 border-stone-800 opacity-60 grayscale'
             : isSpeaking
-            ? `bg-slate-900 border-2 ${candidate.color.border} shadow-lg scale-105`
+            ? `bg-slate-900 border-2 ${candidate.color.border?.startsWith('border-') ? candidate.color.border : ''} shadow-lg scale-105`
             : isPresident
             ? 'bg-amber-950/80 border-2 border-amber-400 shadow-xl shadow-amber-500/40'
             : 'bg-slate-900/80 border-slate-700/60 hover:border-slate-500'
         }`}
         style={{
           boxShadow: isSpeaking ? `0 0 20px ${candidate.color.primary}44` : undefined,
+          borderColor: isSpeaking && !candidate.color.border?.startsWith('border-') ? candidate.color.primary : undefined,
         }}
       >
         {/* Background Cyber Pattern */}

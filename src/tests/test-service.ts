@@ -1,6 +1,7 @@
 import { nineRouterService } from '../services/nineRouter';
 import { CANDIDATES, CANDIDATE_MAP } from '../data/candidates';
 import { Candidate } from '../types/candidate';
+import { COLOR_PRESETS, createColorTheme, hexToRgb } from '../components/CharacterEditorModal';
 
 async function testEngine() {
   console.log('Testing 11 Republic of Valoria Candidates loaded:', CANDIDATES.length);
@@ -27,6 +28,21 @@ async function testEngine() {
   const preset8 = CANDIDATES.slice(0, 8).map(c => c.id);
   const preset11 = CANDIDATES.map(c => c.id);
   console.log(`Verified custom roster presets: Quick4 (${preset4.length}), Top6 (${preset6.length}), Top8 (${preset8.length}), All11 (${preset11.length})`);
+
+  // Test expanded color themes
+  console.log('Testing expanded character color presets: count =', COLOR_PRESETS.length);
+  if (COLOR_PRESETS.length < 25) {
+    throw new Error(`Expected at least 25 color presets, got ${COLOR_PRESETS.length}`);
+  }
+  const customGenerated = createColorTheme('#ff0055', 'Laser Neon');
+  if (!customGenerated.bg.includes('rgba(255, 0, 85,') || customGenerated.primary !== '#ff0055') {
+    throw new Error('createColorTheme failed to compute proper rgba values');
+  }
+  const rgb = hexToRgb('#06b6d4');
+  if (rgb.r !== 6 || rgb.g !== 182 || rgb.b !== 212) {
+    throw new Error('hexToRgb failed');
+  }
+  console.log(`Expanded color palette (${COLOR_PRESETS.length} presets across 5 categories) & custom color generation PASSED!`);
 
   // Test custom candidate profile structure
   const customCandidate: Candidate = {
