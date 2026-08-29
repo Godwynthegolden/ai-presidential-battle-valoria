@@ -11,7 +11,8 @@ import {
   Volume2,
   FileWarning,
   Video,
-  ChevronRight
+  ChevronRight,
+  ShieldAlert
 } from 'lucide-react';
 
 interface CCTVBackroomViewProps {
@@ -52,12 +53,12 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
 
   if (!displayedPact) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-black/90 rounded-2xl border border-emerald-900/50">
-        <Radio className="w-12 h-12 text-emerald-500 animate-pulse mb-3" />
-        <h3 className="text-lg font-mono font-bold text-emerald-400 uppercase tracking-wider">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-black/90 rounded-3xl border border-emerald-900/50">
+        <Radio className="w-12 h-12 text-emerald-400 animate-pulse mb-3" />
+        <h3 className="text-xl font-display font-bold text-emerald-300 uppercase tracking-wider">
           Intercepting Capitol Surveillance Feeds...
         </h3>
-        <p className="text-xs text-slate-400 font-mono mt-1">
+        <p className="text-sm text-slate-300 font-mono mt-2 max-w-md">
           Scanning unmonitored hallways and private cloakrooms for backroom conspiracies...
         </p>
       </div>
@@ -70,26 +71,26 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
   const totalFeeds = allPactsThisRound.length;
 
   return (
-    <div className="w-full flex-1 flex flex-col rounded-3xl bg-[#050b07] border-2 border-emerald-500/60 shadow-[0_0_40px_rgba(16,185,129,0.2)] overflow-hidden relative backdrop-blur-2xl animate-fade-in">
+    <div className="w-full flex-1 flex flex-col rounded-3xl bg-[#040805] border-2 border-emerald-500/70 shadow-[0_0_50px_rgba(16,185,129,0.25)] overflow-hidden relative backdrop-blur-2xl animate-fade-in">
       {/* CCTV Scanlines & CRT Distortion Filter Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px] pointer-events-none z-20 opacity-60" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.08),transparent_80%)] pointer-events-none -z-10" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.3)_50%)] bg-[length:100%_4px] pointer-events-none z-20 opacity-70" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_80%)] pointer-events-none -z-10" />
 
       {/* Top CCTV Camera OSD (On-Screen Display) */}
-      <div className="flex flex-wrap items-center justify-between px-4 md:px-6 py-2.5 bg-emerald-950/80 border-b border-emerald-800/80 text-emerald-400 font-mono text-[11px] z-30 gap-2">
-        <div className="flex items-center gap-2.5">
-          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-red-950/80 text-red-400 font-bold border border-red-800 animate-pulse">
-            <span className="w-2 h-2 rounded-full bg-red-500" /> REC &bull; LIVE
+      <div className="flex flex-wrap items-center justify-between px-4 md:px-6 py-3 bg-emerald-950/90 border-b border-emerald-800/80 text-emerald-300 font-mono text-xs z-30 gap-2">
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-red-950 text-red-300 font-black border border-red-700 animate-pulse shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-red-500" /> REC &bull; LIVE INTERCEPT
           </span>
-          <span className="font-bold tracking-wider hidden sm:inline">
+          <span className="font-bold tracking-wider hidden sm:inline text-emerald-200">
             CAPITOL_SURVEILLANCE_GRID // CAM-0{activeFeedIndex + 1}
           </span>
         </div>
 
         {/* Feed Switcher Tabs (If multiple leaks in round) */}
         {totalFeeds > 1 && (
-          <div className="flex items-center gap-1.5 bg-black/60 p-1 rounded-xl border border-emerald-800/70">
-            <span className="text-[10px] text-slate-400 uppercase font-bold px-1.5 hidden md:inline">
+          <div className="flex items-center gap-1.5 bg-black/80 p-1 rounded-xl border border-emerald-700/80">
+            <span className="text-[10px] text-slate-300 uppercase font-bold px-2 hidden md:inline">
               Feeds:
             </span>
             {allPactsThisRound.map((p, idx) => {
@@ -100,13 +101,13 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                 <button
                   key={p.id || idx}
                   onClick={() => onSelectFeed && onSelectFeed(idx)}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition ${
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold transition ${
                     isActive
-                      ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/30'
-                      : 'bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900 border border-emerald-800/60'
+                      ? 'bg-emerald-400 text-black font-black shadow-md shadow-emerald-500/40'
+                      : 'bg-emerald-950/80 text-emerald-300 hover:bg-emerald-900 border border-emerald-800/80'
                   }`}
                 >
-                  <Video className="w-3 h-3" />
+                  <Video className="w-3.5 h-3.5" />
                   Feed #{idx + 1}: {p1?.name.split(' ')[0]} &amp; {p2?.name.split(' ')[0]}
                 </button>
               );
@@ -115,33 +116,33 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
         )}
 
         <div className="flex items-center gap-3">
-          <span className="text-emerald-300 font-bold tracking-widest">
+          <span className="text-emerald-200 font-bold tracking-widest bg-black/60 px-2 py-0.5 rounded border border-emerald-800">
             {timecode}
           </span>
-          <span className="px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 font-semibold border border-emerald-700/60 text-[10px]">
+          <span className="px-2.5 py-0.5 rounded-md bg-emerald-900/80 text-emerald-200 font-bold border border-emerald-600/80 text-xs">
             {displayedPact.location}
           </span>
         </div>
       </div>
 
       {/* Security Classification Watermark Banner */}
-      <div className="flex items-center justify-between px-4 py-1.5 bg-amber-500/10 border-b border-amber-500/20 text-[10px] font-mono font-black tracking-widest text-amber-400 uppercase z-20">
+      <div className="flex items-center justify-between px-5 py-2 bg-amber-500/15 border-b border-amber-500/30 text-xs font-mono font-black tracking-widest text-amber-300 uppercase z-20">
         <div className="flex items-center gap-2">
-          <FileWarning className="w-3.5 h-3.5" />
-          Leaked Confidential Feed &bull; Round {round} Secret Pacts
+          <FileWarning className="w-4 h-4 text-amber-400" />
+          Leaked Confidential Feed &bull; Round {round} Secret Alliances
         </div>
-        <div className="text-[10px] text-emerald-400 font-bold">
+        <div className="text-xs text-emerald-300 font-bold">
           Feed {activeFeedIndex + 1} of {totalFeeds}
         </div>
       </div>
 
       {/* Main CCTV Feed Body */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 gap-6 z-10">
+      <div className="flex-1 flex flex-col items-center justify-center p-5 md:p-8 gap-6 z-10">
         {/* Conspirators Faceoff Layout */}
         <div className="flex items-center justify-around w-full max-w-2xl">
           {/* Proposer / Conspirator 1 */}
           {proposer && (
-            <div className="flex flex-col items-center gap-2 text-center">
+            <div className="flex flex-col items-center gap-2.5 text-center">
               <div className="relative">
                 <CandidateAvatar
                   candidate={proposer}
@@ -149,15 +150,15 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                   isSpeaking={true}
                   showBadge={false}
                 />
-                <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-mono font-black uppercase bg-emerald-950 text-emerald-400 border border-emerald-600 shadow-md">
+                <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase bg-emerald-950 text-emerald-300 border border-emerald-500 shadow-md">
                   PROPOSER
                 </span>
               </div>
               <div className="mt-2">
-                <span className="text-sm md:text-base font-black text-white block">
+                <span className="text-base sm:text-lg font-display font-black text-white block">
                   {proposer.name}
                 </span>
-                <span className="text-[10px] font-mono text-emerald-400/90 block">
+                <span className="text-xs font-mono text-emerald-300/90 block mt-0.5">
                   {proposer.titleRole}
                 </span>
               </div>
@@ -165,33 +166,33 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
           )}
 
           {/* Wiretap / Secret Pact Icon Center */}
-          <div className="flex flex-col items-center justify-center gap-2 px-2">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-950/80 border-2 border-emerald-500/80 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)] animate-pulse">
-              <Eye className="w-6 h-6" />
+          <div className="flex flex-col items-center justify-center gap-2 px-3">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-950/90 border-2 border-emerald-400 flex items-center justify-center text-emerald-300 shadow-[0_0_25px_rgba(16,185,129,0.4)] animate-pulse">
+              <Eye className="w-7 h-7" />
             </div>
-            <span className="text-[9px] font-mono font-black uppercase tracking-widest bg-emerald-950/90 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800">
-              SECRET PACT
+            <span className="text-[10px] font-mono font-black uppercase tracking-widest bg-emerald-950 text-emerald-300 px-2.5 py-0.5 rounded-md border border-emerald-700 shadow-xs">
+              SECRET ALLIANCE
             </span>
           </div>
 
           {/* Receiver / Conspirator 2 */}
           {receiver && (
-            <div className="flex flex-col items-center gap-2 text-center">
+            <div className="flex flex-col items-center gap-2.5 text-center">
               <div className="relative">
                 <CandidateAvatar
                   candidate={receiver}
                   size="xl"
                   showBadge={false}
                 />
-                <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-mono font-black uppercase bg-cyan-950 text-cyan-400 border border-cyan-600 shadow-md">
+                <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase bg-cyan-950 text-cyan-300 border border-cyan-500 shadow-md">
                   RECEIVER
                 </span>
               </div>
               <div className="mt-2">
-                <span className="text-sm md:text-base font-black text-white block">
+                <span className="text-base sm:text-lg font-display font-black text-white block">
                   {receiver.name}
                 </span>
-                <span className="text-[10px] font-mono text-cyan-400/90 block">
+                <span className="text-xs font-mono text-cyan-300/90 block mt-0.5">
                   {receiver.titleRole}
                 </span>
               </div>
@@ -200,33 +201,33 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
         </div>
 
         {/* Leaked Transcript Terminal Box */}
-        <div className="w-full max-w-2xl relative rounded-2xl bg-black/80 border-2 border-emerald-500/50 p-6 md:p-7 shadow-2xl shadow-emerald-950/80 text-left">
+        <div className="w-full max-w-2xl relative rounded-3xl bg-black/90 border-2 border-emerald-500/60 p-6 md:p-8 shadow-2xl shadow-emerald-950/90 text-left">
           {/* Audio Intercept Tag */}
-          <div className="flex items-center justify-between mb-3 pb-2 border-b border-emerald-900/60">
-            <span className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase text-emerald-400">
-              <Volume2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-4 pb-3 border-b border-emerald-800/80">
+            <span className="flex items-center gap-2 text-xs font-mono font-bold uppercase text-emerald-300">
+              <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />
               AUDIO INTERCEPT TRANSCRIPT (FEED #{activeFeedIndex + 1}):
             </span>
 
             {/* Targeted Rival Marker */}
             {target && (
-              <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-red-950/90 text-red-300 border border-red-700/80">
-                <Crosshair className="w-3 h-3 text-red-400" /> Target: {target.name}
+              <span className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase px-3 py-0.5 rounded-full bg-red-950 text-red-200 border border-red-500 shadow-sm">
+                <Crosshair className="w-3.5 h-3.5 text-red-400" /> Target: {target.name}
               </span>
             )}
           </div>
 
           {/* Speech / Whisper Content */}
-          <p className="text-base md:text-lg font-mono font-medium text-emerald-200 leading-relaxed italic">
-            "{displayedPact.whisperText}"
+          <p className="text-lg sm:text-xl md:text-2xl font-mono font-medium text-emerald-100 leading-relaxed italic">
+            &ldquo;{displayedPact.whisperText}&rdquo;
           </p>
 
           {/* Subtext warning */}
-          <div className="mt-4 pt-2.5 border-t border-emerald-950 flex items-center justify-between text-[10px] font-mono text-slate-400">
-            <span className="text-emerald-500/80">
+          <div className="mt-5 pt-3 border-t border-emerald-900/80 flex items-center justify-between text-xs font-mono text-slate-300">
+            <span className="text-emerald-400">
               &bull; Will {proposer?.name.split(' ')[0]} and {receiver?.name.split(' ')[0]} honor their deal, or will someone stab their ally in the back during secret voting?
             </span>
-            <span className="text-amber-400 font-bold uppercase">
+            <span className="text-amber-300 font-bold uppercase shrink-0 ml-2">
               CONFIDENTIAL
             </span>
           </div>
@@ -235,3 +236,4 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
     </div>
   );
 };
+

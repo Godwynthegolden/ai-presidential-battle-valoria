@@ -100,77 +100,77 @@ export default function AIPlaygroundPage() {
       <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
       {/* Top Broadcast Banner */}
-      <header className="px-4 py-2.5 bg-slate-950/90 border-b border-slate-800/80 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 z-10">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center p-2 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-700 shadow-md shadow-cyan-500/20">
+      <header className="px-4 md:px-6 py-3 bg-[#06080d]/95 border-b border-slate-750 backdrop-blur-xl flex flex-wrap items-center justify-between gap-3 z-10">
+        <div className="flex items-center gap-3.5">
+          <div className="flex items-center justify-center p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-700 shadow-lg shadow-cyan-500/25">
             <Landmark className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-sm md:text-base font-black tracking-wider text-white uppercase flex items-center gap-2">
-              Republic of Valoria <span className="text-cyan-400 font-normal">Presidential Election</span>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+            <h1 className="text-sm sm:text-base md:text-lg font-display font-black tracking-wider text-white uppercase flex items-center gap-2">
+              Republic of Valoria <span className="text-cyan-400 font-normal">Presidential Battle</span>
+              <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-xs">
                 9router Live AI
               </span>
             </h1>
-            <p className="text-[11px] text-slate-400 font-mono hidden sm:block">
-              {candidates.length} Political Figures &bull; 9router Custom Endpoints &bull; Elimination Reality Format
+            <p className="text-xs text-slate-400 font-mono hidden sm:block">
+              {candidates.length} Autonomous Candidates &bull; Elimination Reality Format &bull; High-Stakes AI Diplomacy
             </p>
           </div>
         </div>
 
         {/* View Switcher, Round Indicator & Settings */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {/* Main Navigation Tab Switcher */}
-          <div className="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+          <div className="flex items-center bg-[#0b0f19] p-1 rounded-2xl border border-slate-750 text-xs font-display font-bold">
             <button
               onClick={() => setActiveView('arena')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
                 activeView === 'arena'
-                  ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                  ? 'bg-cyan-500 text-slate-950 shadow-md font-black'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Tv className="w-3.5 h-3.5" /> Election Arena
+              <Tv className="w-4 h-4" /> Election Arena
             </button>
             <button
               onClick={() => setActiveView('characters')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
                 activeView === 'characters'
-                  ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                  ? 'bg-cyan-500 text-slate-950 shadow-md font-black'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Users className="w-3.5 h-3.5" /> Characters Management
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+              <Users className="w-4 h-4" /> Candidates ({candidates.length})
+              <span className={`text-[10px] px-2 py-0.2 rounded-full font-mono font-bold ${
                 activeView === 'characters'
                   ? 'bg-slate-950 text-cyan-300'
-                  : 'bg-slate-800 text-cyan-400'
+                  : 'bg-slate-900 text-cyan-400 border border-cyan-500/30'
               }`}>
-                {state.participatingCandidateIds?.length || state.activeCandidateIds.length} / {candidates.length}
+                {state.participatingCandidateIds?.length || state.activeCandidateIds.length} Active
               </span>
             </button>
           </div>
 
           {activeView === 'arena' && (
             <>
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono">
-                <span className="text-slate-500">PHASE:</span>
-                <span className="font-bold text-cyan-400 uppercase">{state.phase.replace('_', ' ')}</span>
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0b0f19] border border-slate-750 text-xs font-mono">
+                <span className="text-slate-400">PHASE:</span>
+                <span className="font-bold text-cyan-300 uppercase">{state.phase.replace('_', ' ')}</span>
               </div>
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono">
-                <span className="text-slate-500">ROUND:</span>
-                <span className="font-bold text-amber-400">{state.round}</span>
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0b0f19] border border-slate-750 text-xs font-mono">
+                <span className="text-slate-400">ROUND:</span>
+                <span className="font-black text-amber-300">{state.round}</span>
               </div>
             </>
           )}
 
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-400 text-xs font-mono text-cyan-300 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0b0f19] hover:bg-slate-800 border border-slate-750 hover:border-cyan-400 text-xs font-mono text-cyan-300 transition cursor-pointer shadow-sm"
             title="Configure 9router API & Model"
           >
-            <Settings className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden md:inline">9router Settings</span>
+            <Settings className="w-4 h-4 text-cyan-400" />
+            <span className="hidden md:inline font-bold">9router Settings</span>
           </button>
         </div>
       </header>
@@ -193,7 +193,7 @@ export default function AIPlaygroundPage() {
         />
       ) : (
         /* Main Broadcast Workspace */
-        <div className="flex-1 flex flex-col p-3 md:p-4 gap-3 max-w-[1700px] w-full mx-auto">
+        <div className="flex-1 flex flex-col p-3 md:p-4 gap-3 max-w-[1750px] w-full mx-auto">
           {/* Top Controls Bar */}
           <ControlBar
             gameState={state}
@@ -209,7 +209,7 @@ export default function AIPlaygroundPage() {
           />
 
           {/* 3-Column Layout: Left (Candidates) - Center (Debate Arena) - Right (Intel & Stats) */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 min-h-[560px]">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3.5 min-h-[580px]">
             {/* Left Column: Candidate Roster (3 Cols) */}
             <div className="lg:col-span-3 h-full">
               <CandidateRoster
@@ -233,16 +233,16 @@ export default function AIPlaygroundPage() {
             {/* Right Column: Battle Intelligence & History (3 Cols) */}
             <div className="lg:col-span-3 flex flex-col gap-3 h-full">
               {/* Quick Intel Card */}
-              <div className="flex-1 flex flex-col rounded-2xl bg-slate-900/80 border border-slate-800 p-4 backdrop-blur-md overflow-hidden">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="flex-1 flex flex-col rounded-2xl bg-[#0b0f19] border border-slate-750 p-4 backdrop-blur-2xl overflow-hidden shadow-lg">
+                <div className="flex items-center justify-between pb-3.5 border-b border-slate-800">
+                  <span className="text-xs font-display font-black text-slate-100 uppercase tracking-wider flex items-center gap-2">
                     <Flame className="w-4 h-4 text-amber-400" /> Election Intel
                   </span>
                   <button
                     onClick={() => setIsTranscriptOpen(true)}
-                    className="text-[10px] font-mono text-cyan-400 hover:underline flex items-center gap-1"
+                    className="text-xs font-mono font-bold text-cyan-300 hover:text-cyan-200 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 hover:border-cyan-500/40 transition cursor-pointer"
                   >
-                    <History className="w-3 h-3" /> Full Record
+                    <History className="w-3.5 h-3.5" /> Full Log
                   </button>
                 </div>
 
@@ -251,36 +251,36 @@ export default function AIPlaygroundPage() {
                   {/* 9router Status Card */}
                   <div 
                     onClick={() => setIsSettingsOpen(true)}
-                    className="p-3 rounded-xl bg-slate-950/70 border border-slate-850 hover:border-cyan-500/40 cursor-pointer transition flex flex-col gap-1.5"
+                    className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition flex flex-col gap-1.5 shadow-sm group"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-slate-400 uppercase font-bold flex items-center gap-1">
-                        <Cpu className="w-3 h-3 text-cyan-400" /> Active 9router Engine
+                      <span className="text-xs font-mono text-slate-300 uppercase font-bold flex items-center gap-1.5">
+                        <Cpu className="w-3.5 h-3.5 text-cyan-400 group-hover:rotate-45 transition-transform" /> 9router Engine
                       </span>
                       <span 
-                        className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                        className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full ${
                           isConfigured 
-                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' 
-                            : 'bg-amber-950 text-amber-400 border border-amber-800'
+                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-600/80 shadow-xs' 
+                            : 'bg-amber-950 text-amber-300 border border-amber-600/80 animate-pulse'
                         }`}
                       >
-                        {isConfigured ? 'Ready' : 'Setup Required'}
+                        {isConfigured ? 'Ready' : 'Configure'}
                       </span>
                     </div>
-                    <div className="text-xs font-mono text-cyan-300 truncate font-bold">
-                      {nineRouterConfig.model || 'No model chosen'}
+                    <div className="text-xs font-mono text-cyan-300 truncate font-bold mt-0.5">
+                      {nineRouterConfig.model || 'No model selected'}
                     </div>
-                    <div className="text-[10px] font-mono text-slate-500 truncate">
+                    <div className="text-[11px] font-mono text-slate-400 truncate">
                       {nineRouterConfig.baseUrl}
                     </div>
                   </div>
 
                   {/* Active Contenders */}
-                  <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-850">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">
+                  <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-sm">
+                    <span className="text-xs font-mono text-slate-200 uppercase font-bold block mb-2">
                       Active Contenders ({state.activeCandidateIds.length})
                     </span>
-                    <div className="flex flex-wrap gap-1.5 mt-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {state.activeCandidateIds.map(id => {
                         const c = CANDIDATE_MAP.get(id);
                         if (!c) return null;
@@ -288,8 +288,8 @@ export default function AIPlaygroundPage() {
                           <button
                             key={id}
                             onClick={() => setSelectedCandidate(c)}
-                            className="px-2 py-0.5 rounded-md text-[10px] font-medium border bg-slate-900/90 hover:scale-105 transition"
-                            style={{ borderColor: `${c.color.primary}60`, color: c.color.primary }}
+                            className="px-2.5 py-1 rounded-lg text-xs font-sans font-semibold border bg-slate-900 hover:scale-105 transition cursor-pointer"
+                            style={{ borderColor: `${c.color.primary}70`, color: c.color.primary }}
                           >
                             {c.name.split(' ')[0]}
                           </button>
@@ -299,12 +299,12 @@ export default function AIPlaygroundPage() {
                   </div>
 
                   {/* Elimination History */}
-                  <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-850">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">
+                  <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-sm">
+                    <span className="text-xs font-mono text-slate-200 uppercase font-bold block mb-1">
                       Elimination History ({state.eliminatedCandidates.length})
                     </span>
                     {state.eliminatedCandidates.length === 0 ? (
-                      <p className="text-[11px] text-slate-500 font-mono mt-1">
+                      <p className="text-xs text-slate-400 font-mono mt-1 italic">
                         No candidates eliminated yet.
                       </p>
                     ) : (
@@ -315,12 +315,12 @@ export default function AIPlaygroundPage() {
                             <div
                               key={idx}
                               onClick={() => c && setSelectedCandidate(c)}
-                              className="flex items-center justify-between p-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-[11px] cursor-pointer hover:border-slate-700"
+                              className="flex items-center justify-between p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-xs cursor-pointer hover:border-slate-700 transition"
                             >
-                              <span className="text-stone-400 line-through">
+                              <span className="text-stone-300 font-medium line-through">
                                 {c?.name}
                               </span>
-                              <span className="text-[10px] font-mono text-red-400">
+                              <span className="text-xs font-mono font-bold text-red-400">
                                 R{e.eliminatedInRound} ({e.voteCount} votes)
                               </span>
                             </div>
@@ -331,34 +331,34 @@ export default function AIPlaygroundPage() {
                   </div>
 
                   {/* Game Flow Legend */}
-                  <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-850">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">
+                  <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-sm">
+                    <span className="text-xs font-mono text-slate-200 uppercase font-bold block mb-2">
                       Valoria Election Protocol
                     </span>
-                    <div className="flex flex-col gap-1.5 text-[11px] text-slate-400 mt-2 font-mono">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                        <span>1. Campaign Speeches (Max 40w)</span>
+                    <div className="flex flex-col gap-2 text-xs text-slate-300 font-sans">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0 shadow-xs shadow-cyan-400" />
+                        <span>1. Campaign Speeches (Broadcast Address)</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                        <span>2. Live Attacks (Max 30w)</span>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-400 shrink-0 shadow-xs shadow-red-400" />
+                        <span>2. 1v1 Public Attacks (Denunciations)</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                        <span>3. CCTV Leaked Pacts (Max 25w)</span>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs shadow-emerald-400" />
+                        <span>3. Leaked Backroom Alliances (CCTV Whispers)</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                        <span>4. Secret Ballots & Betrayals</span>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-purple-400 shrink-0 shadow-xs shadow-purple-400" />
+                        <span>4. Secret Ballots &amp; Betrayal Reveals</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                        <span>5. Repeat Until Top 3 Remain</span>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0 shadow-xs shadow-amber-400" />
+                        <span>5. Elimination Cycle (Top 3 Advance)</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
-                        <span>6. Grand Jury Presidential Vote</span>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-yellow-400 shrink-0 shadow-xs shadow-yellow-400" />
+                        <span>6. Grand Jury Presidential Inauguration</span>
                       </div>
                     </div>
                   </div>
@@ -367,7 +367,7 @@ export default function AIPlaygroundPage() {
             </div>
           </div>
 
-          {/* Bottom Event Ticker */}
+          {/* Bottom Live Wire News Flash Ticker */}
           <EventTicker
             gameState={state}
             onOpenTranscript={() => setIsTranscriptOpen(true)}
