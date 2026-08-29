@@ -89,6 +89,8 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             tally={votesByRound[round]} 
             isFinalVote={false} 
             eliminatedId={votesByRound[round].eliminatedId}
+            candidateBudgets={gameState.candidateBudgets}
+            activeCandidateIds={gameState.activeCandidateIds}
           />
         </div>
       </div>
@@ -104,6 +106,8 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             isFinalVote={true} 
             eliminatedId={null}
             winnerId={winnerId}
+            candidateBudgets={gameState.candidateBudgets}
+            activeCandidateIds={gameState.participatingCandidateIds || gameState.activeCandidateIds}
           />
         </div>
       </div>

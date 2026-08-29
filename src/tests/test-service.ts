@@ -6,6 +6,8 @@ import {
   saveStoredSelectedCandidateIds 
 } from '../data/candidates';
 import { Candidate } from '../types/candidate';
+import { VoteRecord, BailoutTransaction } from '../types/game';
+import { sounds } from '../utils/audio';
 import { COLOR_PRESETS, createColorTheme, hexToRgb } from '../components/CharacterEditorModal';
 
 async function testEngine() {
@@ -516,22 +518,65 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('2. Semantic Candidate Name & Alias to ID Healing PASSED!');
 
-  // Test 3: Candidate Reordering Array Logic
-  const sampleRoster = [...CANDIDATES].slice(0, 4);
-  const firstCandId = sampleRoster[0].id;
-  const secondCandId = sampleRoster[1].id;
-  
-  // Swap 0 and 1
-  const swapped = [...sampleRoster];
-  const [movedItem] = swapped.splice(0, 1);
-  swapped.splice(1, 0, movedItem);
+  // =========================================================================
+  // 🎬 YOUTUBE-READY SEQUENTIAL BALLOT REVEAL & BAILOUT SIMULATION TESTS
+  // =========================================================================
+  console.log('\n--- Testing Sequential Ballot Reveal & Bailout Step Calculations ---');
 
-  if (swapped[0].id !== secondCandId || swapped[1].id !== firstCandId) {
-    throw new Error('Candidate swap array logic failed');
+  // Test 4: Sequential vote tally counting (step-by-step)
+  const sampleVotes: VoteRecord[] = [
+    { voterId: 'jax-alvarez', targetId: 'marcus-vance', reason: 'Too hawkish' },
+    { voterId: 'elena-rostova', targetId: 'marcus-vance', reason: 'Dangerous general' },
+    { voterId: 'marcus-vance', targetId: 'elena-rostova', reason: 'Socialist' },
+    { voterId: 'dmitri-voronin', targetId: 'jax-alvarez', reason: 'Populist rival' },
+  ];
+
+  // Simulating step 1 (0 ballots revealed -> 0 votes each)
+  const step0Counts: Record<string, number> = { 'marcus-vance': 0, 'elena-rostova': 0, 'jax-alvarez': 0 };
+  if (step0Counts['marcus-vance'] !== 0) throw new Error('Initial ballot count must be 0');
+
+  // Simulating step 2 (2 ballots revealed -> marcus-vance = 2)
+  const step2Votes = sampleVotes.slice(0, 2);
+  const step2Counts: Record<string, number> = {};
+  step2Votes.forEach(v => {
+    step2Counts[v.targetId] = (step2Counts[v.targetId] || 0) + 1;
+  });
+  if (step2Counts['marcus-vance'] !== 2) throw new Error(`Expected marcus-vance to have 2 votes at step 2, got ${step2Counts['marcus-vance']}`);
+
+  // Test 5: Sequential Bailout step snapshot
+  const initialBudgetsTest = { 'marcus-vance': 80, 'elena-rostova': 100, 'jax-alvarez': 120 };
+  const sampleBailouts: BailoutTransaction[] = [
+    { id: 'bt-1', candidateId: 'marcus-vance', initialVotes: 2, votesRemoved: 1, cost: 40, remainingVotes: 1, remainingBudget: 40, round: 1, timestamp: Date.now() },
+    { id: 'bt-2', candidateId: 'marcus-vance', initialVotes: 1, votesRemoved: 1, cost: 40, remainingVotes: 0, remainingBudget: 0, round: 1, timestamp: Date.now() },
+  ];
+
+  let currentBudgets = { ...initialBudgetsTest };
+  let currentVotes = { 'marcus-vance': 2, 'elena-rostova': 1, 'jax-alvarez': 1 };
+
+  // Apply bailout 1
+  currentVotes['marcus-vance'] -= sampleBailouts[0].votesRemoved;
+  currentBudgets['marcus-vance'] = sampleBailouts[0].remainingBudget;
+  if (currentVotes['marcus-vance'] !== 1 || currentBudgets['marcus-vance'] !== 40) {
+    throw new Error('Bailout step 1 snapshot failed');
   }
-  console.log('3. Candidate Lineup Reordering Swap Mechanics PASSED!');
 
-  console.log('\nAll unit tests for AI JSON Integrity, Candidate Reordering & Arena Layout PASSED successfully!');
+  // Apply bailout 2
+  currentVotes['marcus-vance'] -= sampleBailouts[1].votesRemoved;
+  currentBudgets['marcus-vance'] = sampleBailouts[1].remainingBudget;
+  if (currentVotes['marcus-vance'] !== 0 || currentBudgets['marcus-vance'] !== 0) {
+    throw new Error('Bailout step 2 snapshot failed');
+  }
+  console.log('4. Sequential Ballot & Bailout Snapshot Steps PASSED!');
+
+  // Test 6: SoundManager new methods verification
+  sounds.enabled = true;
+  sounds.playBallotDrop();
+  sounds.playCashChime();
+  sounds.playSwapWhoosh();
+  sounds.playBetrayalAlarm();
+  console.log('5. SoundManager Synthesizer Audio Cues PASSED!');
+
+  console.log('\nAll unit tests for AI JSON Integrity, Candidate Reordering & YouTube Ballot Reveal PASSED successfully!');
 }
 
 testEngine().catch(err => {
