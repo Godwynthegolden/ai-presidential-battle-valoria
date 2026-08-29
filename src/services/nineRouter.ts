@@ -215,8 +215,9 @@ export class NineRouterService {
         };
       }
 
-      // Clean plain text response
-      const cleaned = rawText.replace(/^["']|["']$/g, '').trim();
+      // Clean and sanitize plain text spoken dialogue responses (attack, campaign_speech, final_speech, exit_words, victory_speech)
+      const targetCandidate = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
+      const cleaned = this.sanitizeDialogueSpeech(rawText, candidate, targetCandidate);
       return {
         text: cleaned,
         modelUsed: model,
@@ -225,6 +226,81 @@ export class NineRouterService {
       console.error(`[9router API Error for ${candidate.name}]:`, err.message);
       throw new Error(`9router request failed: ${err.message}`);
     }
+  }
+
+  /**
+   * Sanitizes spoken dialogue output from LLMs:
+   * 1. Strips outer quotes and markdown ticks
+   * 2. Strips stage directions like (points finger), (to Alvarez), [scoffs]
+   * 3. Strips script label prefixes like "Alvarez:", "Chloe:", "Leon :", "Target:", "Attack on Alvarez:", etc.
+   * 4. Capitalizes the first letter of natural dialogue.
+   */
+  public sanitizeDialogueSpeech(
+    text: string, 
+    speaker?: Candidate | null, 
+    target?: Candidate | null
+  ): string {
+    if (!text) return '';
+    let cleaned = text.trim();
+
+    // 1. Strip surrounding quotation marks or markdown backticks/asterisks
+    cleaned = cleaned.replace(/^["'“”‘’`*]+|["'“”‘’`*]+$/g, '').trim();
+
+    // 2. Strip leading parenthetical or bracketed stage directions, e.g. "(To Alvarez)", "(points finger)", "[scoffs]"
+    cleaned = cleaned.replace(/^\([^\)]+\)\s*[-:–—]?\s*/g, '').trim();
+    cleaned = cleaned.replace(/^\[[^\]]+\]\s*[-:–—]?\s*/g, '').trim();
+    cleaned = cleaned.replace(/^[-:–—\s]+/g, '').trim();
+
+    // 3. Strip target/speaker name prefixes with colons, dashes, or script tags
+    const namesToStrip: string[] = [];
+    if (target) {
+      namesToStrip.push(target.name, target.id, target.codename);
+      const parts = target.name.split(/[\s"'\-]+/).filter(p => p.length >= 2);
+      namesToStrip.push(...parts);
+    }
+    if (speaker) {
+      namesToStrip.push(speaker.name, speaker.id, speaker.codename);
+      const parts = speaker.name.split(/[\s"'\-]+/).filter(p => p.length >= 2);
+      namesToStrip.push(...parts);
+    }
+    namesToStrip.push(
+      'Target', 'Opponent', 'Rival', 'Speaker', 'Candidate', 'Attack', 'Rebuttal', 
+      'Speech', 'Statement', 'Response', 'Dialogue', 'Answer', 'Question'
+    );
+
+    // Iteratively strip any matching name prefixes
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const n of namesToStrip) {
+        if (!n) continue;
+        const escaped = n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regexes = [
+          new RegExp(`^(\\[?\\s*${escaped}\\s*\\]?\\s*[-:–—]+\\s*)+`, 'i'),
+          new RegExp(`^((Attack|Rebuttal|Speech|Challenge)\\s+(on|to|against)?\\s+${escaped}\\s*[-:–—]+\\s*)+`, 'i'),
+        ];
+        for (const rgx of regexes) {
+          if (rgx.test(cleaned)) {
+            cleaned = cleaned.replace(rgx, '').trim();
+            changed = true;
+          }
+        }
+      }
+    }
+
+    // 4. Catch generic capitalized script colon prefix (1-3 titlecase words followed by colon or em-dash)
+    // Example: "Jackson Alvarez: Look at the record", "Senator Thorne: You are..."
+    cleaned = cleaned.replace(/^[A-Z][a-zA-Z0-9\s"'.]{1,30}\s*[:–—]\s*/, '').trim();
+
+    // 5. Clean up any leftover outer quotation marks or brackets
+    cleaned = cleaned.replace(/^["'“”‘’`*]+|["'“”‘’`*]+$/g, '').trim();
+
+    // 6. Ensure first letter is capitalized
+    if (cleaned.length > 0) {
+      cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    }
+
+    return cleaned;
   }
 
   /**
@@ -584,6 +660,7 @@ In MAXIMUM 40 WORDS:
 - Confront this crisis immediately with your boldest presidential thesis.
 - Frame the election on your terms and challenge the failed status quo.
 - Do NOT use generic opening greetings ("Fellow citizens", "I stand before you"). Jump straight into your argument with fierce conviction.
+- CRITICAL FORMAT RULE: NEVER prefix your output with your name, a character tag, or a colon (e.g. NEVER write "${candidate.name.split(' ')[0]}:"). Start directly with your spoken speech.
 - Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle} - ${candidate.titleRole}).
 - Return clean speech text only, strictly under 40 words.`;
         } else {
@@ -605,6 +682,7 @@ In MAXIMUM 40 WORDS:
 - Directly REACT TO, REBUT, or CONTRAST yourself against the statement just made by ${lastSpeaker?.candidateName || 'your rival'} or earlier speakers.
 - Pivot sharply to why YOUR leadership is the only real answer to this national crisis.
 - Do NOT repeat canned biographical bullet points. Engage directly with the live debate.
+- CRITICAL FORMAT RULE: NEVER prefix your output with your name, a character tag, or a colon (e.g. NEVER write "${candidate.name.split(' ')[0]}:"). Start directly with your spoken speech.
 - Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle} - ${candidate.titleRole}).
 - Return clean speech text only, strictly under 40 words.`;
         }
@@ -614,6 +692,7 @@ In MAXIMUM 40 WORDS:
       case 'attack': {
         const targetCandidate = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
         const targetName = targetCandidate ? targetCandidate.name : 'your opponent';
+        const targetFirstName = targetCandidate ? targetCandidate.name.split(' ')[0] : 'Rival';
         const targetRole = targetCandidate ? `${targetCandidate.archetypeTitle} (${targetCandidate.titleRole})` : 'an opponent';
         const targetSlogan = targetCandidate ? targetCandidate.slogan : '';
         const targetQuote = ctx.targetSpeechQuote || '';
@@ -623,19 +702,24 @@ In MAXIMUM 40 WORDS:
         if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
           contextSnippet = `\nRecent Clashes in this round:\n` + ctx.recentAttacks
             .slice(-4)
-            .map(a => `- ${a.attackerName} attacked ${a.targetName}: "${a.text}"`)
+            .map(a => `- ${a.attackerName} challenged ${a.targetName}: "${a.text}"`)
             .join('\n');
         }
 
         userPrompt = `Round ${payload.round}: LIVE ATTACK ROUND.
-You must publicly ATTACK your rival: ${targetName} — ${targetRole}.
+You are live on stage at the national televised presidential debate, publicly attacking your rival: ${targetName} (${targetRole}).
 Slogan: "${targetSlogan}"
 ${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
 
-In MAXIMUM 30 WORDS:
-- Ruthlessly attack ${targetName}'s exact words, economic hypocrisy, scandalous donor ties, or fitness to lead Valoria.
-- Tear down their credibility before the voters with razor-sharp, authentic rhetoric.
-- Stay completely in character as ${candidate.name}. Return clean attack speech text only, strictly under 30 words.`;
+ANTI-FORMULA & STYLE RULES (CRITICAL):
+- NEVER format your output as a script label, character tag, or definition list (e.g. NEVER write "${targetFirstName}: [Explanation]", "${targetName}: ...", or "[Name]: [Adjective] person who...").
+- NEVER start your sentence with a name followed by a colon or dash.
+- Speak in authentic, fiery live debate rhetoric with dynamic sentence structure:
+  * Either confront them directly ("You stood on this stage and claimed...", "Don't let them deceive you...", "Your voting record is a betrayal to our families...")
+  * Or call them out to the voters ("Look at what they did to Iron Valley...", "Their economic fantasy will bankrupt every household in Valoria...", "Behind closed doors, they took millions from...").
+- Ruthlessly attack ${targetName}'s exact words, economic hypocrisy, donor ties, or fitness to lead Valoria.
+- Stay completely in character as ${candidate.name} (${candidate.archetypeTitle}).
+- Return clean, spoken attack speech text only. MAXIMUM 30 WORDS.`;
         break;
       }
 
@@ -667,6 +751,7 @@ ${contextSnippet}
 In MAXIMUM 25 WORDS:
 - Deliver a tense, high-stakes whispered proposal offering mutual benefit (e.g. policy concession, cabinet leverage, neutralizing a mutual threat).
 - Stay completely in character as ${candidate.name}.
+- Do NOT prefix with script labels or colons.
 
 You MUST return a JSON object with this exact schema:
 {
@@ -738,6 +823,7 @@ ${betrayalSnippet}
 In MAXIMUM 30 WORDS:
 - Deliver your dramatic, authentic concession statement or parting words to Valoria's voters.
 - Reflect your archetype: bitter defiance, righteous warning of the Republic's doom, rallying your supporters, or graceful statesmanship.
+- CRITICAL: NEVER prefix with your name, script labels, or colons.
 - Stay in character as ${candidate.name}. Return clean text only, strictly under 30 words.`;
         break;
       }
@@ -767,6 +853,7 @@ In MAXIMUM 50 WORDS:
 - Explain why YOU must be inaugurated President of the Republic of Valoria.
 - Directly contrast your vision against the other two surviving finalists and explain why their plans are dangerous or bankrupt.
 - Demand the Grand Jury's vote with presidential gravitas.
+- CRITICAL: NEVER prefix with character names, speaker labels, or colons.
 - Stay in character as ${candidate.name}. Return clean speech text only, strictly under 50 words.`;
         break;
       }
@@ -813,6 +900,7 @@ NATIONAL CRISIS MANDATE: "${electionTopic}"
 In MAXIMUM 50 WORDS:
 - Deliver your triumphant, commanding inaugural presidential victory address to the nation and the Grand Jury.
 - Acknowledge the grueling battle, address your defeated opponents, and proclaim your first executive decree.
+- CRITICAL: NEVER prefix with your name, speaker labels, or colons.
 - Stay completely in character as ${candidate.name}. Return clean speech text only, strictly under 50 words.`;
         break;
       }

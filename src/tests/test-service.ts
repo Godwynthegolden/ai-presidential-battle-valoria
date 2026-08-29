@@ -319,7 +319,58 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('Live Battle Timeline Chronological Ordering post-elimination PASSED!');
 
-  console.log('\nAll unit tests for AI Candidate Intelligence, Timeline Chronology & Prompt Engine PASSED successfully!');
+  // Test Dialogue Speech Sanitization (No "Name : Explanation" formula)
+  console.log('Testing Dialogue Speech Sanitizer for Attack Dialogue & Name-Colon Stripping...');
+  const targetCand = CANDIDATES[0]; // Jackson "Jax" Alvarez
+  const speakerCand = CANDIDATES[1]; // Elena Rostova
+
+  const sample1 = 'Alvarez : A bad person who sold out our workers.';
+  const cleaned1 = (nineRouterService as any).sanitizeDialogueSpeech(sample1, speakerCand, targetCand);
+  if (cleaned1.startsWith('Alvarez') || cleaned1.includes(':')) {
+    throw new Error(`Sanitizer failed to strip 'Alvarez :' prefix: got '${cleaned1}'`);
+  }
+  if (!cleaned1.startsWith('A bad person')) {
+    throw new Error(`Unexpected sanitized content: got '${cleaned1}'`);
+  }
+
+  const sample2 = 'Chloe: She thinks algorithms can replace human empathy.';
+  const cleaned2 = (nineRouterService as any).sanitizeDialogueSpeech(sample2, speakerCand, targetCand);
+  if (cleaned2.startsWith('Chloe:') || cleaned2.startsWith('Chloe :')) {
+    throw new Error(`Sanitizer failed to strip 'Chloe:' prefix: got '${cleaned2}'`);
+  }
+
+  const sample3 = 'Leon: bluh bluh bluh';
+  const cleaned3 = (nineRouterService as any).sanitizeDialogueSpeech(sample3, speakerCand, targetCand);
+  if (cleaned3.toLowerCase().startsWith('leon:')) {
+    throw new Error(`Sanitizer failed to strip 'Leon:' prefix: got '${cleaned3}'`);
+  }
+
+  const sample4 = '(To Alvarez): You promised manufacturing jobs but delivered debt!';
+  const cleaned4 = (nineRouterService as any).sanitizeDialogueSpeech(sample4, speakerCand, targetCand);
+  if (cleaned4.includes('(To Alvarez)') || cleaned4.includes(':')) {
+    throw new Error(`Sanitizer failed to strip stage direction '(To Alvarez):': got '${cleaned4}'`);
+  }
+
+  const sample5 = '"Jackson Alvarez: Look at your voting record."';
+  const cleaned5 = (nineRouterService as any).sanitizeDialogueSpeech(sample5, speakerCand, targetCand);
+  if (cleaned5.includes('Jackson Alvarez:') || cleaned5.startsWith('"')) {
+    throw new Error(`Sanitizer failed to strip full name colon and quotes: got '${cleaned5}'`);
+  }
+
+  // Verify Attack Prompt Anti-Formula Directives
+  const antiFormulaAttackPrompt = (nineRouterService as any).buildPrompt(speakerCand, {
+    action: 'attack',
+    candidateId: speakerCand.id,
+    targetId: targetCand.id,
+    round: 1,
+    activeCandidateIds: [speakerCand.id, targetCand.id],
+  });
+  if (!antiFormulaAttackPrompt.userPrompt.includes('ANTI-FORMULA & STYLE RULES') || !antiFormulaAttackPrompt.userPrompt.includes('NEVER format your output as a script label')) {
+    throw new Error('Attack prompt failed to contain strict anti-formula and anti-script rules');
+  }
+  console.log('Dialogue Speech Sanitizer & Anti-Formula Prompt Guardrails PASSED!');
+
+  console.log('\nAll unit tests for AI Candidate Intelligence, Timeline Chronology, Dialogue Sanitizer & Prompt Engine PASSED successfully!');
 }
 
 testEngine().catch(err => {
