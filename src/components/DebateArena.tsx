@@ -25,12 +25,14 @@ interface DebateArenaProps {
   gameState: GameState;
   onRetry: () => void;
   onRestart: () => void;
+  onSelectCCTVFeed?: (feedIndex: number) => void;
 }
 
 export const DebateArena: React.FC<DebateArenaProps> = ({
   gameState,
   onRetry,
   onRestart,
+  onSelectCCTVFeed,
 }) => {
   const { stage, phase, round, votesByRound, pactsByRound, finalVoteTally, winnerId, eliminatedCandidates } = gameState;
 
@@ -40,13 +42,16 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   // Render CCTV Leaked Backroom Feed
   if (phase === 'CCTV_BACKROOM') {
     const pactsThisRound = pactsByRound[round] || [];
-    const activePact = pactsThisRound[0] || null;
+    const activeFeedIndex = gameState.currentSpeakerIndex || 0;
+    const activePact = pactsThisRound[activeFeedIndex] || pactsThisRound[0] || null;
 
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 h-full">
         <CCTVBackroomView
           pact={activePact}
           allPactsThisRound={pactsThisRound}
+          activeFeedIndex={activeFeedIndex}
+          onSelectFeed={onSelectCCTVFeed}
           round={round}
           isLoading={stage.isLoading}
         />

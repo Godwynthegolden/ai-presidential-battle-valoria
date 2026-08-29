@@ -525,12 +525,13 @@ export function useGameEngine(
           setState(prev => ({
             ...prev,
             phase: 'CCTV_BACKROOM',
+            currentSpeakerIndex: 0,
             stage: {
               speakerId: proposer1.id,
               targetId: receiver1.id,
               actionType: 'pact',
-              headline: `ROUND ${prev.round}: LEAKED CAPITOL SURVEILLANCE FEED`,
-              content: 'Intercepting encrypted backroom audio feed...',
+              headline: `ROUND ${prev.round}: LEAKED CAPITOL SURVEILLANCE GRID`,
+              content: 'Intercepting encrypted backroom audio feeds...',
               isLoading: true,
               isRevealingVotes: false,
               revealedVoteIndex: 0,
@@ -614,12 +615,16 @@ export function useGameEngine(
 
           setState(prev => ({
             ...prev,
+            currentSpeakerIndex: 0,
             pactsByRound: {
               ...prev.pactsByRound,
               [round]: roundPacts,
             },
             stage: {
               ...prev.stage,
+              speakerId: primaryPact.proposerId,
+              targetId: primaryPact.receiverId,
+              headline: `ROUND ${prev.round}: LEAKED CAPITOL CCTV FEED 1 OF ${roundPacts.length}`,
               content: primaryPact.whisperText,
               isLoading: false,
             },
@@ -627,7 +632,7 @@ export function useGameEngine(
               {
                 id: `tick-${Date.now()}`,
                 type: 'pact',
-                message: `🤫 Leaked Deal: ${proposer1.name} whispered to ${receiver1.name}: "${primaryPact.whisperText}"`,
+                message: `🤫 Leaked Deal (Feed #1): ${proposer1.name} whispered to ${receiver1.name}: "${primaryPact.whisperText}"`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
@@ -640,9 +645,47 @@ export function useGameEngine(
       }
 
       // -------------------------------------------------------------
-      // 4. CCTV_BACKROOM -> VOTE_SECRET (Secret Voting with Betrayal Detection)
+      // 4. CCTV_BACKROOM -> View Next Feed OR VOTE_SECRET (Secret Voting with Betrayal Detection)
       // -------------------------------------------------------------
       if (phase === 'CCTV_BACKROOM') {
+        const pactsThisRound = state.pactsByRound[round] || [];
+        const nextPactIndex = currentSpeakerIndex + 1;
+
+        // If there are more CCTV feeds to show in this round, show the next one!
+        if (nextPactIndex < pactsThisRound.length) {
+          const nextPact = pactsThisRound[nextPactIndex];
+          const p1 = CANDIDATE_MAP.get(nextPact.proposerId);
+          const p2 = CANDIDATE_MAP.get(nextPact.receiverId);
+
+          sounds.playCCTVBeep();
+
+          setState(prev => ({
+            ...prev,
+            currentSpeakerIndex: nextPactIndex,
+            stage: {
+              ...prev.stage,
+              speakerId: nextPact.proposerId,
+              targetId: nextPact.receiverId,
+              headline: `ROUND ${prev.round}: LEAKED CAPITOL CCTV FEED ${nextPactIndex + 1} OF ${pactsThisRound.length}`,
+              content: nextPact.whisperText,
+              isLoading: false,
+            },
+            tickerLog: [
+              {
+                id: `tick-${Date.now()}`,
+                type: 'pact',
+                message: `🤫 Leaked Deal (Feed #${nextPactIndex + 1}): ${p1?.name} whispered to ${p2?.name}: "${nextPact.whisperText}"`,
+                timestamp: Date.now(),
+              },
+              ...prev.tickerLog,
+            ]
+          }));
+
+          isExecutingStep.current = false;
+          return;
+        }
+
+        // All CCTV feeds watched! Transition to Secret Voting
         sounds.playGavel();
 
         setState(prev => ({
@@ -675,8 +718,6 @@ export function useGameEngine(
           targetName: CANDIDATE_MAP.get(a.targetId)?.name || a.targetId,
           text: a.text,
         }));
-
-        const pactsThisRound = state.pactsByRound[round] || [];
 
         const votePromises = activeCandidateIds.map(async (voterId) => {
           // Check if candidate had an active pact in this round
@@ -1350,6 +1391,26 @@ export function useGameEngine(
     executeNextStep();
   };
 
+  const selectCCTVFeed = (feedIndex: number) => {
+    if (state.phase !== 'CCTV_BACKROOM') return;
+    const pactsThisRound = state.pactsByRound[state.round] || [];
+    if (!pactsThisRound[feedIndex]) return;
+
+    sounds.playCCTVBeep();
+    const pact = pactsThisRound[feedIndex];
+    setState(prev => ({
+      ...prev,
+      currentSpeakerIndex: feedIndex,
+      stage: {
+        ...prev.stage,
+        speakerId: pact.proposerId,
+        targetId: pact.receiverId,
+        headline: `ROUND ${prev.round}: LEAKED CAPITOL CCTV FEED ${feedIndex + 1} OF ${pactsThisRound.length}`,
+        content: pact.whisperText,
+      }
+    }));
+  };
+
   return {
     state,
     startGame,
@@ -1362,5 +1423,6 @@ export function useGameEngine(
     toggleCandidateSelection,
     setSelectedCandidateIds,
     setPresetRoster,
+    selectCCTVFeed,
   };
 }

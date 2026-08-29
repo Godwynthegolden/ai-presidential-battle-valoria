@@ -496,7 +496,14 @@ You MUST return a JSON object with this exact schema:
         if (payload.historyContext.activePact) {
           const ally = CANDIDATE_MAP.get(payload.historyContext.activePact.allyId);
           const agreedTarget = CANDIDATE_MAP.get(payload.historyContext.activePact.agreedTargetId);
-          pactContext = `\nSECRET PACT NOTICE: You previously shook hands with ${ally?.name} in the Capitol backroom to eliminate ${agreedTarget?.name}. You can honor this pact or betray ${ally?.name} to protect yourself!\n`;
+          pactContext = `
+SECRET BACKROOM DEAL & STRATEGIC BETRAYAL DILEMMA:
+In the shadowy Capitol cloakroom, you shook hands with ${ally?.name} (${ally?.titleRole}) to coordinate your votes against "${agreedTarget?.id}" (${agreedTarget?.name}).
+However, Valorian politics is ruthless and cutthroat:
+- OPTION A (HONOR PACT): Vote for "${agreedTarget?.id}" as promised.
+- OPTION B (TACTICAL BETRAYAL): If ${ally?.name} is a dangerous rival, if you distrust them, if eliminating ${ally?.name} or another heavyweight improves your own presidential survival, or if your character is calculating/opportunistic, you CAN STAB ${ally?.name} IN THE BACK and vote for "${ally?.id}" or another candidate.
+Weigh your candidate's loyalty vs ruthless ambition!
+`;
         }
 
         userPrompt = `Round ${payload.round}: SECRET ELIMINATION BALLOT.
@@ -504,7 +511,7 @@ You must secretly vote to ELIMINATE ONE candidate from the presidential race.
 Rules:
 1. You CANNOT vote for yourself (${candidate.id}).
 2. You MUST pick exactly ONE ID from this list: [${candidatesToVote}].
-3. Vote based on political rivalry, policy threat, donor grudges, or strategic survival.
+3. Vote based on political survival, rival threats, backroom pacts, or tactical betrayals.
 ${pactContext}${contextSnippet}
 
 You MUST return a JSON object with this exact schema:

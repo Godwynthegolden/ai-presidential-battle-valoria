@@ -78,6 +78,7 @@ export default function AIPlaygroundPage() {
     retryCurrentStep,
     toggleCandidateSelection,
     setPresetRoster,
+    selectCCTVFeed,
   } = useGameEngine(nineRouterConfig, () => setIsSettingsOpen(true));
 
   const isConfigured = Boolean(nineRouterConfig.baseUrl && nineRouterConfig.apiKey);
@@ -162,6 +163,7 @@ export default function AIPlaygroundPage() {
               gameState={state}
               onRetry={retryCurrentStep}
               onRestart={restartGame}
+              onSelectCCTVFeed={selectCCTVFeed}
             />
           </div>
 
