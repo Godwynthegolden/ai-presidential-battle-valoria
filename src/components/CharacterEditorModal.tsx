@@ -21,7 +21,8 @@ import {
   HelpCircle,
   Loader2,
   RefreshCw,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Cpu
 } from 'lucide-react';
 
 const SVG_ICONS: Array<{ type: CandidateSvgIcon; label: string }> = [
@@ -98,6 +99,8 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
   const [aiPrompt, setAiPrompt] = useState('');
   const [selectedModel, setSelectedModel] = useState<string>(nineRouterConfig?.model || '');
   const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [isFetchingModels, setIsFetchingModels] = useState(false);
+  const [fetchModelsError, setFetchModelsError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
 
@@ -161,23 +164,38 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
   }, [candidateToEdit, isOpen]);
 
   // Fetch available models from 9router
-  useEffect(() => {
-    if (!isOpen) return;
-
-    if (nineRouterConfig?.baseUrl) {
-      fetch(`/api/models?baseUrl=${encodeURIComponent(nineRouterConfig.baseUrl)}&apiKey=${encodeURIComponent(nineRouterConfig.apiKey || '')}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.models && Array.isArray(data.models) && data.models.length > 0) {
-            setAvailableModels(data.models);
-            if (!selectedModel) {
-              setSelectedModel(nineRouterConfig.model || data.models[0]);
-            }
-          }
-        })
-        .catch(() => {});
+  const fetchModels = async () => {
+    if (!nineRouterConfig?.baseUrl) {
+      setFetchModelsError('9router Base URL not set. Please configure in Settings.');
+      return;
     }
-  }, [isOpen, nineRouterConfig, selectedModel]);
+
+    setIsFetchingModels(true);
+    setFetchModelsError(null);
+
+    try {
+      const res = await fetch(`/api/models?baseUrl=${encodeURIComponent(nineRouterConfig.baseUrl)}&apiKey=${encodeURIComponent(nineRouterConfig.apiKey || '')}`);
+      const data = await res.json();
+      if (data.models && Array.isArray(data.models) && data.models.length > 0) {
+        setAvailableModels(data.models);
+        if (!selectedModel || !data.models.includes(selectedModel)) {
+          setSelectedModel(nineRouterConfig.model && data.models.includes(nineRouterConfig.model) ? nineRouterConfig.model : data.models[0]);
+        }
+      } else {
+        setFetchModelsError(data.error || 'No models returned by 9router endpoint.');
+      }
+    } catch (err: any) {
+      setFetchModelsError(err.message || 'Failed to connect to 9router /api/models.');
+    } finally {
+      setIsFetchingModels(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchModels();
+    }
+  }, [isOpen, nineRouterConfig?.baseUrl, nineRouterConfig?.apiKey]);
 
   const handleGenerateAI = async () => {
     if (!aiPrompt.trim()) {
@@ -304,30 +322,53 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
 
             {/* Model Selection Dropdown */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-mono font-bold text-slate-300 flex items-center justify-between">
-                <span>9router AI Model for Character Creation:</span>
-                <span className="text-[10px] text-purple-400 font-normal">
-                  (Choose any configured 9router model)
-                </span>
-              </label>
-              {availableModels.length > 0 ? (
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-mono font-bold text-slate-300 flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-purple-400" />
+                  <span>9router AI Model for Character Creation:</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-purple-400 font-mono">
+                    {isFetchingModels ? 'Fetching from 9router...' : `${availableModels.length} models loaded`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={fetchModels}
+                    disabled={isFetchingModels}
+                    className="p-1 rounded bg-slate-900 hover:bg-slate-800 text-purple-300 hover:text-white border border-slate-800 transition"
+                    title="Refresh 9router models list"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isFetchingModels ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              {isFetchingModels ? (
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono text-slate-400">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" />
+                  <span>Loading live model catalog from 9router...</span>
+                </div>
+              ) : availableModels.length > 0 ? (
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-purple-500 font-bold"
                 >
                   {availableModels.map(m => (
                     <option key={m} value={m}>{m}</option>
                   ))}
                 </select>
               ) : (
-                <input
-                  type="text"
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
-                  placeholder="e.g. anthropic/claude-3.5-sonnet, openai/gpt-4o"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-purple-500"
-                />
+                <div className="p-3 rounded-xl bg-red-950/40 border border-red-800/80 text-xs font-mono text-red-300 flex items-center justify-between">
+                  <span>⚠️ {fetchModelsError || 'No models returned from 9router. Please verify 9router connection.'}</span>
+                  <button
+                    type="button"
+                    onClick={fetchModels}
+                    className="px-2 py-1 rounded bg-red-900/50 hover:bg-red-800 text-[10px] text-white underline font-bold"
+                  >
+                    Retry
+                  </button>
+                </div>
               )}
             </div>
 

@@ -13,17 +13,13 @@ import {
   Crown, 
   CheckSquare2, 
   Square, 
-  Users,
-  Plus,
-  Edit3
+  Users
 } from 'lucide-react';
 
 interface CandidateRosterProps {
   gameState: GameState;
   candidates: Candidate[];
   onSelectCandidate: (candidate: Candidate) => void;
-  onEditCandidate?: (candidate: Candidate) => void;
-  onCreateCandidate?: () => void;
   onToggleCandidate?: (candidateId: string) => void;
   onSetPresetRoster?: (preset: 'all' | 'top8' | 'top6' | 'quick4') => void;
 }
@@ -32,8 +28,6 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
   gameState,
   candidates,
   onSelectCandidate,
-  onEditCandidate,
-  onCreateCandidate,
   onToggleCandidate,
   onSetPresetRoster,
 }) => {
@@ -52,20 +46,8 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            {onCreateCandidate && (
-              <button
-                onClick={onCreateCandidate}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[10px] font-mono font-bold transition shadow-sm"
-                title="Create a new custom candidate or generate with AI"
-              >
-                <Plus className="w-3 h-3" /> Create AI
-              </button>
-            )}
-
-            <div className="text-[11px] font-mono text-cyan-400 font-bold px-2 py-0.5 rounded bg-slate-950 border border-slate-800">
-              {activeCandidateIds.length} / {candidates.length} {isPreGame ? 'Selected' : 'Alive'}
-            </div>
+          <div className="text-[11px] font-mono text-cyan-400 font-bold px-2 py-0.5 rounded bg-slate-950 border border-slate-800">
+            {activeCandidateIds.length} / {candidates.length} {isPreGame ? 'Selected' : 'Alive'}
           </div>
         </div>
 
@@ -225,31 +207,17 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                     {candidate.titleRole}
                   </span>
 
-                  {/* Edit & Info Actions */}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {onEditCandidate && (
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEditCandidate(candidate);
-                        }}
-                        title="Edit Character Parameters & Avatar"
-                        className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition"
-                      >
-                        <Edit3 className="w-3 h-3" />
-                      </button>
-                    )}
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectCandidate(candidate);
-                      }}
-                      title="View Full Dossier"
-                      className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition"
-                    >
-                      <Info className="w-3 h-3" />
-                    </button>
-                  </div>
+                  {/* Info Action */}
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectCandidate(candidate);
+                    }}
+                    title="View Full Dossier"
+                    className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition opacity-0 group-hover:opacity-100"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
