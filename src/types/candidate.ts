@@ -77,5 +77,6 @@ export interface Candidate {
   voice?: CandidateVoiceConfig; // Fish Audio Voice reference
   customAvatarUrl?: string; // Cropped custom uploaded photo / avatar
   isCustom?: boolean;       // Flag if created by user
+  initialBudget?: number;   // Initial campaign dollars ($80, $100, $120, etc.)
   systemPrompt: string;
 }

@@ -13,7 +13,9 @@ import {
   Swords, 
   ShieldCheck, 
   AlertTriangle,
-  Flame
+  Flame,
+  DollarSign,
+  Banknote
 } from 'lucide-react';
 
 interface VoteRevealBoardProps {
@@ -77,6 +79,9 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
           const isEliminated = candId === eliminatedId;
           const isWinner = isFinalVote && candId === winnerId;
           const percentage = Math.round((count / maxVotes) * 100);
+          const candidateBailouts = (tally.bailoutTransactions || []).filter(tx => tx.candidateId === candId);
+          const votesRemoved = candidateBailouts.reduce((sum, tx) => sum + tx.votesRemoved, 0);
+          const dollarsSpent = candidateBailouts.reduce((sum, tx) => sum + tx.cost, 0);
 
           return (
             <div
@@ -112,7 +117,13 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  {/* Bailout Vote Removal Badge */}
+                  {votesRemoved > 0 && (
+                    <span className="flex items-center gap-1 text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500 shadow-sm animate-pulse">
+                      <DollarSign className="w-3 h-3 text-emerald-400" /> -${dollarsSpent} ({votesRemoved} {votesRemoved === 1 ? 'Vote' : 'Votes'} Removed)
+                    </span>
+                  )}
                   {isWinner && (
                     <span className="flex items-center gap-1 text-[11px] font-display font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-400 text-black shadow-md">
                       <Crown className="w-3 h-3 text-black" /> Elected President
@@ -198,6 +209,46 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
           );
         })}
       </div>
+
+      {/* 💰 Capitol Vote Bailout Auction Summary */}
+      {tally.bailoutTransactions && tally.bailoutTransactions.length > 0 && (
+        <div className="flex flex-col gap-3 p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/40">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Banknote className="w-5 h-5 text-emerald-400" />
+              <span className="text-xs font-mono font-black text-emerald-200 uppercase tracking-wider">
+                Capitol Vote Bailout Auction ($40 / Vote Removed)
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-emerald-400 font-bold">
+              {tally.bailoutTransactions.length} Bailout{tally.bailoutTransactions.length > 1 ? 's' : ''} Executed
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {tally.bailoutTransactions.map((tx, idx) => {
+              const cand = CANDIDATE_MAP.get(tx.candidateId);
+              return (
+                <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/80 border border-emerald-800/60 text-xs font-mono shadow-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-emerald-400 font-bold">#{idx + 1}</span>
+                    <span className="text-white font-bold">{cand?.name.split(' ')[0]}</span>
+                    <span className="text-[10px] text-slate-400">({tx.initialVotes} &rarr; {tx.remainingVotes} votes)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40">
+                      -${tx.cost}
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      (${tx.remainingBudget} left)
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Secret Ballots List with Alliance & Betrayal Flags */}
       <div className="flex flex-col gap-3 pt-4 border-t border-slate-800/80">

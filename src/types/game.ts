@@ -43,6 +43,11 @@ export interface BackroomPact {
   wasBetrayedByProposer?: boolean;
   wasBetrayedByReceiver?: boolean;
   timestamp: number;
+  // Dollars Currency Bribe Fields
+  bribeOffered?: boolean;      // True if proposer offered $20 bribe
+  bribeAmount?: number;        // e.g. $20
+  receiverDecision?: 'accept' | 'decline' | 'accept_and_betray'; // Receiver's AI choice
+  bribeAccepted?: boolean;     // True if $20 transferred
 }
 
 export interface VoteRecord {
@@ -57,13 +62,27 @@ export interface VoteRecord {
   isHonoredPact?: boolean;   // True if they kept the pact
 }
 
+export interface BailoutTransaction {
+  id: string;
+  candidateId: string;
+  round: number;
+  cost: number;             // $40 per vote
+  votesRemoved: number;     // 1 vote removed
+  initialVotes: number;
+  remainingVotes: number;
+  remainingBudget: number;
+  timestamp: number;
+}
+
 export interface RoundVoteTally {
   round: number;
   votes: VoteRecord[];
-  tally: Record<string, number>;
+  initialTally?: Record<string, number>;        // Raw vote count before bailout auction
+  tally: Record<string, number>;               // Final vote count after bailout auction
   eliminatedId: string | null;
   tieBreakerOccurred?: boolean;
   betrayalsCount?: number;
+  bailoutTransactions?: BailoutTransaction[];  // Sequential $40 buyouts in this round
 }
 
 export interface EliminatedCandidateInfo {
@@ -79,6 +98,7 @@ export interface GameState {
   participatingCandidateIds: string[]; // Candidates chosen to participate in this election
   activeCandidateIds: string[];        // Remaining alive candidates in current round
   eliminatedCandidates: EliminatedCandidateInfo[];
+  candidateBudgets: Record<string, number>; // Live dollar currency balance: candidateId -> amount
   currentSpeakerIndex: number;
   
   electionTopic?: string;              // Current national debate crisis/question for this election
@@ -117,7 +137,7 @@ export interface GameState {
   // Live Event Log
   tickerLog: Array<{
     id: string;
-    type: 'speech' | 'attack' | 'pact' | 'vote' | 'betrayal' | 'elimination' | 'system' | 'winner';
+    type: 'speech' | 'attack' | 'pact' | 'vote' | 'betrayal' | 'elimination' | 'bribe' | 'bailout' | 'system' | 'winner';
     message: string;
     timestamp: number;
   }>;
@@ -178,6 +198,15 @@ export interface LLMRequestPayload {
     }>;
     allClashesSummary?: string[];
     previousVotesAgainstSelf?: number;
+    proposerBudget?: number;
+    receiverBudget?: number;
+    bribeBetrayals?: Array<{
+      betrayerId: string;
+      betrayerName: string;
+      victimId: string;
+      victimName: string;
+      bribeAmount: number;
+    }>;
   };
   config?: {
     baseUrl?: string;
@@ -194,6 +223,11 @@ export interface LLMResponsePayload {
   privateReason?: string;
   candidateProfile?: Partial<Candidate>;
   modelUsed?: string;
+  // Bribe Fields
+  bribeOffered?: boolean;
+  bribeAmount?: number;
+  receiverDecision?: 'accept' | 'decline' | 'accept_and_betray';
+  bribeAccepted?: boolean;
 }
 
 export type StageActionType = 'speech' | 'attack' | 'pact' | 'vote' | 'eliminated' | 'winner' | 'idle';

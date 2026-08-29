@@ -1,7 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { GameState, GamePhase, LLMRequestPayload, RoundVoteTally, VoteRecord, AttackEvent, BackroomPact, StageActionType, StepDescriptor } from '@/types/game';
+import { 
+  GameState, 
+  GamePhase, 
+  LLMRequestPayload, 
+  RoundVoteTally, 
+  VoteRecord, 
+  AttackEvent, 
+  BackroomPact, 
+  BailoutTransaction,
+  StageActionType, 
+  StepDescriptor 
+} from '@/types/game';
 import { Candidate } from '@/types/candidate';
 import { 
   CANDIDATES, 
@@ -43,50 +54,211 @@ export interface PreparedStep {
   payload?: any;
 }
 
+export function resolveAttackTarget(
+  attackerId: string,
+  activeCandidateIds: string[],
+  history: {
+    attacksByRound: Record<number, AttackEvent[]>;
+    pactsByRound: Record<number, BackroomPact[]>;
+    votesByRound: Record<number, RoundVoteTally>;
+    round: number;
+  }
+): string {
+  const possibleTargets = activeCandidateIds.filter(id => id !== attackerId);
+  if (possibleTargets.length === 0) return '';
+  if (possibleTargets.length === 1) return possibleTargets[0];
+
+  const attacker = CANDIDATE_MAP.get(attackerId);
+
+  // 1. Prioritize surviving bribe betrayers:
+  // If another candidate took a $20 bribe from attackerId (or in a pact involving attackerId) and wasBetrayedByReceiver,
+  // and that betrayer is still active in possibleTargets, TARGET THEM FIRST!
+  for (let r = 1; r <= history.round; r++) {
+    const pacts = history.pactsByRound[r] || [];
+    for (const p of pacts) {
+      if (p.proposerId === attackerId && p.wasBetrayedByReceiver && possibleTargets.includes(p.receiverId)) {
+        return p.receiverId;
+      }
+      if (p.receiverId === attackerId && p.wasBetrayedByProposer && possibleTargets.includes(p.proposerId)) {
+        return p.proposerId;
+      }
+    }
+  }
+
+  // 2. Retaliation: Whoever attacked this candidate in this or previous rounds
+  const recentAttacksThisRound = history.attacksByRound[history.round] || [];
+  const retaliationTarget = recentAttacksThisRound.find(a => a.targetId === attackerId)?.attackerId;
+  if (retaliationTarget && possibleTargets.includes(retaliationTarget)) {
+    return retaliationTarget;
+  }
+
+  // 3. Rival archetypes
+  if (attacker) {
+    const rivalTarget = possibleTargets.find(id => {
+      const c = CANDIDATE_MAP.get(id);
+      return c && attacker.rivalArchetypes.includes(c.archetype);
+    });
+    if (rivalTarget) return rivalTarget;
+  }
+
+  // 4. Default to first possible target
+  return possibleTargets[0];
+}
+
+export function resolveBailoutAuction(
+  initialTally: Record<string, number>,
+  initialBudgets: Record<string, number>,
+  activeCandidateIds: string[],
+  round: number
+): {
+  finalTally: Record<string, number>;
+  finalBudgets: Record<string, number>;
+  transactions: BailoutTransaction[];
+  eliminatedId: string;
+  tieBreakerOccurred: boolean;
+} {
+  const currentTally = { ...initialTally };
+  const currentBudgets = { ...initialBudgets };
+  const transactions: BailoutTransaction[] = [];
+  let tieBreakerOccurred = false;
+
+  // Maximum iteration safety guard (avoids infinite loops)
+  let safetyLoop = 0;
+  while (safetyLoop < 100) {
+    safetyLoop++;
+
+    const activeEntries = Object.entries(currentTally).filter(([id]) => activeCandidateIds.includes(id));
+    if (activeEntries.length === 0) break;
+
+    const maxVotes = Math.max(...activeEntries.map(([, count]) => count));
+
+    // If all active candidates are down to 0 votes: zero-vote standstill!
+    if (maxVotes === 0) {
+      // Standstill tiebreaker: eliminate candidate with lowest remaining budget
+      const sortedByBudget = [...activeEntries].sort((a, b) => (currentBudgets[a[0]] ?? 0) - (currentBudgets[b[0]] ?? 0));
+      const lowestBudgetCandId = sortedByBudget[0][0];
+      tieBreakerOccurred = true;
+      return {
+        finalTally: currentTally,
+        finalBudgets: currentBudgets,
+        transactions,
+        eliminatedId: lowestBudgetCandId,
+        tieBreakerOccurred,
+      };
+    }
+
+    // Identify contenders tied for maxVotes
+    const topCandidates = activeEntries.filter(([, count]) => count === maxVotes);
+
+    // Pick top candidate with highest budget to evaluate buyout first
+    const [topCandId, topCount] = topCandidates.sort((a, b) => (currentBudgets[b[0]] ?? 0) - (currentBudgets[a[0]] ?? 0))[0];
+    const topBudget = currentBudgets[topCandId] ?? 0;
+
+    if (topBudget >= 40 && topCount > 0) {
+      // Candidate pays $40 to remove 1 vote
+      currentBudgets[topCandId] -= 40;
+      currentTally[topCandId] -= 1;
+
+      transactions.push({
+        id: `bailout-r${round}-${transactions.length + 1}-${topCandId}`,
+        candidateId: topCandId,
+        round,
+        cost: 40,
+        votesRemoved: 1,
+        initialVotes: topCount,
+        remainingVotes: currentTally[topCandId],
+        remainingBudget: currentBudgets[topCandId],
+        timestamp: Date.now(),
+      });
+      // Re-evaluate in next loop iteration
+      continue;
+    } else {
+      // Top candidate has < $40 and still has the highest votes -> eliminated!
+      if (topCandidates.length > 1) {
+        tieBreakerOccurred = true;
+        const elimCandidate = topCandidates.sort((a, b) => (currentBudgets[a[0]] ?? 0) - (currentBudgets[b[0]] ?? 0))[0][0];
+        return {
+          finalTally: currentTally,
+          finalBudgets: currentBudgets,
+          transactions,
+          eliminatedId: elimCandidate,
+          tieBreakerOccurred,
+        };
+      }
+
+      return {
+        finalTally: currentTally,
+        finalBudgets: currentBudgets,
+        transactions,
+        eliminatedId: topCandId,
+        tieBreakerOccurred,
+      };
+    }
+  }
+
+  // Fallback if loop ends
+  return {
+    finalTally: currentTally,
+    finalBudgets: currentBudgets,
+    transactions,
+    eliminatedId: activeCandidateIds[0],
+    tieBreakerOccurred: true,
+  };
+}
+
 const DEFAULT_TOPIC = `${VALORIA_DEBATE_TOPICS[0].title}: ${VALORIA_DEBATE_TOPICS[0].crisisSummary}`;
 
-const CREATE_INITIAL_STATE = (selectedIds: string[] = [], topic: string = DEFAULT_TOPIC): GameState => ({
-  phase: 'IDLE',
-  round: 1,
-  electionTopic: topic,
-  participatingCandidateIds: [...selectedIds],
-  activeCandidateIds: [...selectedIds],
-  eliminatedCandidates: [],
-  currentSpeakerIndex: 0,
-  campaignSpeeches: {},
-  finalSpeeches: {},
-  attacksByRound: {},
-  pactsByRound: {},
-  votesByRound: {},
-  finalVoteTally: null,
-  victorySpeech: null,
-  winnerId: null,
-  stage: {
-    speakerId: null,
-    targetId: null,
-    actionType: 'idle',
-    headline: 'REPUBLIC OF VALORIA PRESIDENTIAL ELECTION',
-    content: `${selectedIds.length} political candidates are registered for the presidential debate. Select your candidate lineup and press Start Election to begin the Campaign Phase.`,
-    isLoading: false,
-    isRevealingVotes: false,
-    revealedVoteIndex: 0,
-    error: null,
-  },
-  playback: {
-    autoPlay: false,
-    speed: 'normal',
-    soundEnabled: true,
-    isPaused: false,
-  },
-  tickerLog: [
-    {
-      id: 'init-1',
-      type: 'system',
-      message: `National Election Commission: ${selectedIds.length} candidates registered. National Crisis: "${topic.slice(0, 100)}..."`,
-      timestamp: Date.now(),
-    }
-  ],
-});
+const CREATE_INITIAL_STATE = (selectedIds: string[] = [], topic: string = DEFAULT_TOPIC): GameState => {
+  const candidateBudgets: Record<string, number> = {};
+  selectedIds.forEach(id => {
+    const c = CANDIDATE_MAP.get(id);
+    candidateBudgets[id] = typeof c?.initialBudget === 'number' ? c.initialBudget : 100;
+  });
+
+  return {
+    phase: 'IDLE',
+    round: 1,
+    electionTopic: topic,
+    participatingCandidateIds: [...selectedIds],
+    activeCandidateIds: [...selectedIds],
+    eliminatedCandidates: [],
+    candidateBudgets,
+    currentSpeakerIndex: 0,
+    campaignSpeeches: {},
+    finalSpeeches: {},
+    attacksByRound: {},
+    pactsByRound: {},
+    votesByRound: {},
+    finalVoteTally: null,
+    victorySpeech: null,
+    winnerId: null,
+    stage: {
+      speakerId: null,
+      targetId: null,
+      actionType: 'idle',
+      headline: 'REPUBLIC OF VALORIA PRESIDENTIAL ELECTION',
+      content: `${selectedIds.length} political candidates are registered for the presidential debate. Select your candidate lineup and press Start Election to begin the Campaign Phase.`,
+      isLoading: false,
+      isRevealingVotes: false,
+      revealedVoteIndex: 0,
+      error: null,
+    },
+    playback: {
+      autoPlay: false,
+      speed: 'normal',
+      soundEnabled: true,
+      isPaused: false,
+    },
+    tickerLog: [
+      {
+        id: 'init-1',
+        type: 'system',
+        message: `National Election Commission: ${selectedIds.length} candidates registered with campaign funds. National Crisis: "${topic.slice(0, 100)}..."`,
+        timestamp: Date.now(),
+      }
+    ],
+  };
+};
 
 export function useGameEngine(
   nineRouterConfig?: NineRouterConfigState,
@@ -484,7 +656,7 @@ export function useGameEngine(
     return promise;
   }, [callLLM, synthesizeSpeechAudio]);
 
-  const fetchOrConsumeStep = useCallback(async (descriptor: StepDescriptor): Promise<{ content: string; audioBlobUrl: string | null }> => {
+  const fetchOrConsumeStep = useCallback(async (descriptor: StepDescriptor): Promise<{ content: string; audioBlobUrl: string | null; payload?: any }> => {
     const { stepKey, actionType, round } = descriptor;
 
     // 1. Instant Memory Cache Hit by exact stepKey (0ms)
@@ -493,7 +665,7 @@ export function useGameEngine(
       preparedStepsRef.current.delete(stepKey);
       lookaheadBufferRef.current.delete(stepKey);
       setLookaheadBufferCount(preparedStepsRef.current.size);
-      return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
+      return { content: prep.content, audioBlobUrl: prep.audioBlobUrl, payload: prep.payload };
     }
 
     // 2. Pending In-Flight Preload Promise by exact stepKey
@@ -502,7 +674,7 @@ export function useGameEngine(
       preparedStepsRef.current.delete(stepKey);
       lookaheadBufferRef.current.delete(stepKey);
       setLookaheadBufferCount(preparedStepsRef.current.size);
-      return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
+      return { content: prep.content, audioBlobUrl: prep.audioBlobUrl, payload: prep.payload };
     }
 
     // 3. Robust Elimination Fallback: if an elimination step was buffered for this round under another candidate ID, consume it
@@ -512,7 +684,7 @@ export function useGameEngine(
           preparedStepsRef.current.delete(key);
           lookaheadBufferRef.current.delete(key);
           setLookaheadBufferCount(preparedStepsRef.current.size);
-          return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
+          return { content: prep.content, audioBlobUrl: prep.audioBlobUrl, payload: prep.payload };
         }
       }
     }
@@ -522,7 +694,7 @@ export function useGameEngine(
     preparedStepsRef.current.delete(stepKey);
     lookaheadBufferRef.current.delete(stepKey);
     setLookaheadBufferCount(preparedStepsRef.current.size);
-    return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
+    return { content: prep.content, audioBlobUrl: prep.audioBlobUrl, payload: prep.payload };
   }, [preloadStep]);
 
   const computeNextSteps = useCallback((currentState: GameState, maxDepth: number = 2) => {
@@ -625,11 +797,12 @@ export function useGameEngine(
         simSpeakerIndex += 1;
         if (simSpeakerIndex < simActiveIds.length) {
           const attacker = CANDIDATE_MAP.get(simActiveIds[simSpeakerIndex])!;
-          const possibleTargets = simActiveIds.filter(id => id !== attacker.id);
-          const preferredTargetId = possibleTargets.find(id => {
-            const c = CANDIDATE_MAP.get(id);
-            return c && attacker.rivalArchetypes.includes(c.archetype);
-          }) || possibleTargets[0];
+          const preferredTargetId = resolveAttackTarget(attacker.id, simActiveIds, {
+            attacksByRound: currentState.attacksByRound,
+            pactsByRound: currentState.pactsByRound,
+            votesByRound: currentState.votesByRound,
+            round: simRound,
+          });
           const targetCand = CANDIDATE_MAP.get(preferredTargetId);
 
           const recentAttackContext = (currentState.attacksByRound[simRound] || []).map(a => ({
@@ -700,6 +873,8 @@ export function useGameEngine(
               historyContext: {
                 electionTopic,
                 recentAttacks: recentAttackContext,
+                proposerBudget: currentState.candidateBudgets[p1.id] ?? 100,
+                receiverBudget: currentState.candidateBudgets[p2.id] ?? 100,
               },
             }
           });
@@ -719,10 +894,21 @@ export function useGameEngine(
         });
         simPhase = 'VOTE_REVEAL';
       } else if (simPhase === 'VOTE_REVEAL') {
-        const actualElimId = currentState.votesByRound[simRound]?.eliminatedId;
-        const elimCandidateId = (actualElimId && simActiveIds.includes(actualElimId))
-          ? actualElimId
-          : simActiveIds[simActiveIds.length - 1];
+        let elimCandidateId = currentState.votesByRound[simRound]?.eliminatedId;
+        if (!elimCandidateId || !simActiveIds.includes(elimCandidateId)) {
+          // Deterministically simulate votes & resolve bailout auction for exact elimination lookahead
+          const simBudgets = { ...currentState.candidateBudgets };
+          const simulatedVotes: Record<string, number> = {};
+          simActiveIds.forEach(id => { simulatedVotes[id] = 0; });
+          simActiveIds.forEach((voterId, idx) => {
+            const possible = simActiveIds.filter(id => id !== voterId);
+            const target = possible[(idx + 1) % possible.length];
+            simulatedVotes[target] = (simulatedVotes[target] || 0) + 1;
+          });
+          const bailoutRes = resolveBailoutAuction(simulatedVotes, simBudgets, simActiveIds, simRound);
+          elimCandidateId = bailoutRes.eliminatedId;
+        }
+
         const elimCand = CANDIDATE_MAP.get(elimCandidateId)!;
         const wasBetrayed = Boolean(currentState.votesByRound[simRound]?.votes.some(v => v.targetId === elimCandidateId && v.isBetrayal));
         const betrayerId = currentState.votesByRound[simRound]?.votes.find(v => v.targetId === elimCandidateId && v.isBetrayal)?.voterId;
@@ -1085,11 +1271,12 @@ export function useGameEngine(
           sounds.playGavel();
           const firstAttacker = CANDIDATE_MAP.get(activeCandidateIds[0])!;
           
-          const possibleTargets = activeCandidateIds.filter(id => id !== firstAttacker.id);
-          const preferredTargetId = possibleTargets.find(id => {
-            const c = CANDIDATE_MAP.get(id);
-            return c && firstAttacker.rivalArchetypes.includes(c.archetype);
-          }) || possibleTargets[0];
+          const preferredTargetId = resolveAttackTarget(firstAttacker.id, activeCandidateIds, {
+            attacksByRound: state.attacksByRound,
+            pactsByRound: state.pactsByRound,
+            votesByRound: state.votesByRound,
+            round: 1,
+          });
           const targetCand = CANDIDATE_MAP.get(preferredTargetId);
 
           setState(prev => ({
@@ -1205,17 +1392,13 @@ export function useGameEngine(
 
         if (nextIndex < activeCandidateIds.length) {
           const attacker = CANDIDATE_MAP.get(activeCandidateIds[nextIndex])!;
-          const possibleTargets = activeCandidateIds.filter(id => id !== attacker.id);
-          
           const recentAttacksThisRound = state.attacksByRound[round] || [];
-          const retaliationTarget = recentAttacksThisRound.find(a => a.targetId === attacker.id)?.attackerId;
-          
-          const preferredTargetId = (retaliationTarget && possibleTargets.includes(retaliationTarget))
-            ? retaliationTarget
-            : possibleTargets.find(id => {
-                const c = CANDIDATE_MAP.get(id);
-                return c && attacker.rivalArchetypes.includes(c.archetype);
-              }) || possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+          const preferredTargetId = resolveAttackTarget(attacker.id, activeCandidateIds, {
+            attacksByRound: state.attacksByRound,
+            pactsByRound: state.pactsByRound,
+            votesByRound: state.votesByRound,
+            round,
+          });
           const targetCand = CANDIDATE_MAP.get(preferredTargetId);
 
           setState(prev => ({
@@ -1372,22 +1555,41 @@ export function useGameEngine(
               historyContext: {
                 electionTopic: state.electionTopic || DEFAULT_TOPIC,
                 recentAttacks: recentAttackContext,
+                proposerBudget: state.candidateBudgets[proposer1.id] ?? 100,
+                receiverBudget: state.candidateBudgets[receiver1.id] ?? 100,
               },
             }
           };
 
-          const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
+          const p1Prep = await fetchOrConsumeStep(stepDescriptor);
+          const updatedBudgets = { ...state.candidateBudgets };
+
+          // Parse bribe fields from response
+          const p1Payload = p1Prep.payload;
+          const p1BribeOffered = p1Payload?.bribeOffered ?? ((updatedBudgets[proposer1.id] ?? 100) >= 20);
+          const p1ReceiverDecision = p1Payload?.receiverDecision ?? 'accept';
+          const p1BribeAccepted = p1BribeOffered && (p1ReceiverDecision === 'accept' || p1ReceiverDecision === 'accept_and_betray');
+
+          if (p1BribeAccepted) {
+            updatedBudgets[proposer1.id] = Math.max((updatedBudgets[proposer1.id] ?? 100) - 20, 0);
+            updatedBudgets[receiver1.id] = (updatedBudgets[receiver1.id] ?? 100) + 20;
+          }
 
           const primaryPact: BackroomPact = {
             id: `pact-1-${Date.now()}`,
             round,
             proposerId: proposer1.id,
             receiverId: receiver1.id,
-            agreedTargetId: activeCandidateIds.filter(id => id !== proposer1.id && id !== receiver1.id)[0] || activeCandidateIds[2] || activeCandidateIds[0],
-            whisperText: content,
-            audioBlobUrl: audioBlobUrl,
+            agreedTargetId: p1Payload?.agreedTargetId || activeCandidateIds.filter(id => id !== proposer1.id && id !== receiver1.id)[0] || activeCandidateIds[2] || activeCandidateIds[0],
+            whisperText: p1Prep.content,
+            audioBlobUrl: p1Prep.audioBlobUrl,
             location: LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)],
             timestamp: Date.now(),
+            bribeOffered: p1BribeOffered,
+            bribeAmount: p1BribeOffered ? 20 : 0,
+            receiverDecision: p1BribeOffered ? p1ReceiverDecision : undefined,
+            bribeAccepted: p1BribeAccepted,
+            wasBetrayedByReceiver: p1ReceiverDecision === 'accept_and_betray',
           };
 
           const roundPacts = [primaryPact];
@@ -1415,21 +1617,37 @@ export function useGameEngine(
                   historyContext: {
                     electionTopic: state.electionTopic || DEFAULT_TOPIC,
                     recentAttacks: recentAttackContext,
+                    proposerBudget: updatedBudgets[proposer2.id] ?? 100,
+                    receiverBudget: updatedBudgets[receiver2.id] ?? 100,
                   },
                 }
               };
               const p2Prep = await fetchOrConsumeStep(step2Descriptor);
+              const p2Payload = p2Prep.payload;
+              const p2BribeOffered = p2Payload?.bribeOffered ?? ((updatedBudgets[proposer2.id] ?? 100) >= 20);
+              const p2ReceiverDecision = p2Payload?.receiverDecision ?? 'accept';
+              const p2BribeAccepted = p2BribeOffered && (p2ReceiverDecision === 'accept' || p2ReceiverDecision === 'accept_and_betray');
+
+              if (p2BribeAccepted) {
+                updatedBudgets[proposer2.id] = Math.max((updatedBudgets[proposer2.id] ?? 100) - 20, 0);
+                updatedBudgets[receiver2.id] = (updatedBudgets[receiver2.id] ?? 100) + 20;
+              }
 
               roundPacts.push({
                 id: `pact-2-${Date.now()}`,
                 round,
                 proposerId: proposer2.id,
                 receiverId: receiver2.id,
-                agreedTargetId: activeCandidateIds.filter(id => id !== proposer2.id && id !== receiver2.id)[0] || activeCandidateIds[0],
+                agreedTargetId: p2Payload?.agreedTargetId || activeCandidateIds.filter(id => id !== proposer2.id && id !== receiver2.id)[0] || activeCandidateIds[0],
                 whisperText: p2Prep.content,
                 audioBlobUrl: p2Prep.audioBlobUrl,
                 location: LOCATIONS[(round + 2) % LOCATIONS.length],
                 timestamp: Date.now(),
+                bribeOffered: p2BribeOffered,
+                bribeAmount: p2BribeOffered ? 20 : 0,
+                receiverDecision: p2BribeOffered ? p2ReceiverDecision : undefined,
+                bribeAccepted: p2BribeAccepted,
+                wasBetrayedByReceiver: p2ReceiverDecision === 'accept_and_betray',
               });
             } catch (err) {
               console.warn('[Second pact generation skipped]:', err);
@@ -1437,15 +1655,28 @@ export function useGameEngine(
           }
 
           sounds.playCCTVBeep();
-          if (audioBlobUrl) {
-            playAudioUrl(audioBlobUrl);
+          if (p1Prep.audioBlobUrl) {
+            playAudioUrl(p1Prep.audioBlobUrl);
           } else {
-            playSpeechAudio(content, proposer1.voice?.voiceId, proposer1.id);
+            playSpeechAudio(p1Prep.content, proposer1.voice?.voiceId, proposer1.id);
           }
+
+          const bribeTickerMessages = roundPacts.filter(p => p.bribeOffered).map(p => {
+            const propName = CANDIDATE_MAP.get(p.proposerId)?.name.split(' ')[0];
+            const rxName = CANDIDATE_MAP.get(p.receiverId)?.name.split(' ')[0];
+            if (p.receiverDecision === 'accept') {
+              return `💸 CCTV BRIBE: ${propName} slipped $20 to ${rxName} (Deal Accepted!).`;
+            }
+            if (p.receiverDecision === 'accept_and_betray') {
+              return `💸 CCTV BRIBE: ${rxName} pocketed $20 from ${propName} with secret betrayal intent!`;
+            }
+            return `🚫 CCTV BRIBE DECLINED: ${rxName} refused a $20 cash bribe from ${propName}!`;
+          });
 
           setState(prev => ({
             ...prev,
             currentSpeakerIndex: 0,
+            candidateBudgets: updatedBudgets,
             pactsByRound: {
               ...prev.pactsByRound,
               [round]: roundPacts,
@@ -1459,6 +1690,12 @@ export function useGameEngine(
               isLoading: false,
             },
             tickerLog: [
+              ...bribeTickerMessages.map(msg => ({
+                id: `bribe-${Date.now()}-${Math.random()}`,
+                type: 'bribe' as const,
+                message: msg,
+                timestamp: Date.now(),
+              })),
               {
                 id: `tick-${Date.now()}`,
                 type: 'pact',
@@ -1473,6 +1710,7 @@ export function useGameEngine(
             ...state,
             phase: 'CCTV_BACKROOM',
             currentSpeakerIndex: 0,
+            candidateBudgets: updatedBudgets,
             pactsByRound: {
               ...state.pactsByRound,
               [round]: roundPacts,
@@ -1485,7 +1723,7 @@ export function useGameEngine(
       }
 
       // -------------------------------------------------------------
-      // 4. CCTV_BACKROOM -> View Next Feed OR VOTE_SECRET (Secret Voting with Betrayal Detection)
+      // 4. CCTV_BACKROOM -> View Next Feed OR VOTE_SECRET (Secret Voting with Betrayal Detection & Bailout Loop)
       // -------------------------------------------------------------
       if (phase === 'CCTV_BACKROOM') {
         const pactsThisRound = state.pactsByRound[round] || [];
@@ -1588,7 +1826,15 @@ export function useGameEngine(
             },
           });
 
-          const actualTargetId = voteRes.voteTargetId || activeCandidateIds.filter(id => id !== voterId)[0];
+          let actualTargetId = voteRes.voteTargetId || activeCandidateIds.filter(id => id !== voterId)[0];
+
+          // If receiver committed to accept_and_betray, ensure they do not vote for the agreed target
+          if (pact && pact.receiverId === voterId && pact.receiverDecision === 'accept_and_betray') {
+            if (actualTargetId === agreedTargetId) {
+              const betrayTargets = activeCandidateIds.filter(id => id !== voterId && id !== agreedTargetId);
+              actualTargetId = betrayTargets[0] || pact.proposerId;
+            }
+          }
 
           // Betrayal Analysis
           let isBetrayal = false;
@@ -1618,39 +1864,38 @@ export function useGameEngine(
 
         const votes = await Promise.all(votePromises);
 
-        const tally: Record<string, number> = {};
-        activeCandidateIds.forEach(id => { tally[id] = 0; });
+        const rawTally: Record<string, number> = {};
+        activeCandidateIds.forEach(id => { rawTally[id] = 0; });
         votes.forEach(v => {
-          if (tally[v.targetId] !== undefined) {
-            tally[v.targetId] += 1;
+          if (rawTally[v.targetId] !== undefined) {
+            rawTally[v.targetId] += 1;
           } else {
-            tally[v.targetId] = 1;
+            rawTally[v.targetId] = 1;
           }
         });
 
-        let highestVotes = -1;
-        let candidateToEliminate = activeCandidateIds[0];
-        let isTie = false;
+        // 💰 Run the $40 Vote Bailout Auction Loop
+        const bailoutResult = resolveBailoutAuction(
+          rawTally,
+          state.candidateBudgets,
+          activeCandidateIds,
+          round
+        );
 
-        Object.entries(tally).forEach(([candId, count]) => {
-          if (count > highestVotes) {
-            highestVotes = count;
-            candidateToEliminate = candId;
-            isTie = false;
-          } else if (count === highestVotes) {
-            isTie = true;
-          }
-        });
-
+        const candidateToEliminate = bailoutResult.eliminatedId;
+        const highestVotes = bailoutResult.finalTally[candidateToEliminate] || 0;
+        const isTie = bailoutResult.tieBreakerOccurred;
         const betrayalsList = votes.filter(v => v.isBetrayal);
 
         const roundTally: RoundVoteTally = {
           round,
           votes,
-          tally,
+          initialTally: rawTally,
+          tally: bailoutResult.finalTally,
           eliminatedId: candidateToEliminate,
           tieBreakerOccurred: isTie,
           betrayalsCount: betrayalsList.length,
+          bailoutTransactions: bailoutResult.transactions,
         };
 
         if (betrayalsList.length > 0) {
@@ -1666,22 +1911,34 @@ export function useGameEngine(
           return `🗡️ BETRAYAL: ${voter} broke secret pact with ${ally} and voted for ${target}!`;
         });
 
+        const bailoutMessages = bailoutResult.transactions.map(tx => {
+          const cand = CANDIDATE_MAP.get(tx.candidateId)?.name.split(' ')[0];
+          return `💰 BAILOUT: ${cand} paid $40 to cancel 1 elimination vote! ($${tx.remainingBudget} balance left).`;
+        });
+
         setState(prev => ({
           ...prev,
           phase: 'VOTE_REVEAL',
+          candidateBudgets: bailoutResult.finalBudgets,
           votesByRound: { ...prev.votesByRound, [round]: roundTally },
           stage: {
             speakerId: null,
             targetId: candidateToEliminate,
             actionType: 'vote',
-            headline: `ROUND ${prev.round}: ELIMINATION VOTE TOTALS & ALLIANCE REVEALS`,
-            content: `Vote tallies recorded. ${CANDIDATE_MAP.get(candidateToEliminate)?.name} received the highest elimination votes (${highestVotes} votes). ${betrayalsList.length > 0 ? `⚠️ ${betrayalsList.length} secret backroom pact(s) were betrayed!` : ''}`,
+            headline: `ROUND ${prev.round}: ELIMINATION VOTE TOTALS & BAILOUT AUCTION`,
+            content: `Ballots counted & $40 vote buyouts completed. ${CANDIDATE_MAP.get(candidateToEliminate)?.name} has the highest remaining votes (${highestVotes} votes) and is out of funds.`,
             isLoading: false,
             isRevealingVotes: true,
             revealedVoteIndex: votes.length,
             error: null,
           },
           tickerLog: [
+            ...bailoutMessages.map(msg => ({
+              id: `bailout-${Date.now()}-${Math.random()}`,
+              type: 'bailout' as const,
+              message: msg,
+              timestamp: Date.now(),
+            })),
             ...betrayalMessages.map(msg => ({
               id: `betray-${Date.now()}-${Math.random()}`,
               type: 'betrayal' as const,
@@ -1701,6 +1958,7 @@ export function useGameEngine(
         dispatchBackgroundPreload({
           ...state,
           phase: 'VOTE_REVEAL',
+          candidateBudgets: bailoutResult.finalBudgets,
           votesByRound: { ...state.votesByRound, [round]: roundTally },
         });
 

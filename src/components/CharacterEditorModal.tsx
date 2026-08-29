@@ -31,7 +31,8 @@ import {
   Square,
   Mic,
   Music,
-  Radio
+  Radio,
+  DollarSign
 } from 'lucide-react';
 
 const SVG_ICONS: Array<{ type: CandidateSvgIcon; label: string }> = [
@@ -966,6 +967,52 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                 onChange={(e) => setForm(prev => ({ ...prev, ideology: e.target.value }))}
                 className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
               />
+            </div>
+
+            {/* Row 3.5: Campaign Treasury & War Chest ($ Dollars) */}
+            <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-900/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-700/60 text-emerald-300">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-mono font-bold text-emerald-200 uppercase tracking-wider">
+                      Campaign War Chest ($ Dollars)
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-mono">
+                      Used for $20 CCTV backroom bribes and $40 post-vote bailout vote buyouts.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Live Current Value Pill */}
+                <div className="px-3 py-1 rounded-xl bg-emerald-900/40 border border-emerald-500/50 text-xs font-mono font-bold text-emerald-300 shadow-sm shadow-emerald-950/50">
+                  ${form.initialBudget ?? 100}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                {[
+                  { value: 80, label: '$80 (Grassroots)', desc: '2 Bailouts / 4 Bribes' },
+                  { value: 100, label: '$100 (Standard)', desc: '2 Bailouts + 1 Bribe' },
+                  { value: 120, label: '$120 (War Chest)', desc: '3 Bailouts / 6 Bribes' },
+                ].map((tier) => (
+                  <button
+                    key={tier.value}
+                    type="button"
+                    onClick={() => setForm(prev => ({ ...prev, initialBudget: tier.value }))}
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl text-xs font-mono transition-all duration-200 border ${
+                      (form.initialBudget ?? 100) === tier.value
+                        ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200 shadow-lg shadow-emerald-950/50 font-bold scale-[1.02]'
+                        : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }`}
+                  >
+                    <span className="text-xs font-bold">{tier.label}</span>
+                    <span className="text-[9px] text-slate-400 mt-0.5">{tier.desc}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Row 4: System Prompt / AI Debate Instructions */}

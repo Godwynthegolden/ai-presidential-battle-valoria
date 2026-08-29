@@ -187,6 +187,7 @@ export class NineRouterService {
       }
 
       if (payload.action === 'backroom_pact') {
+        const ctx = payload.historyContext || {};
         const parsed = this.extractJson(rawText);
         const validTargets = payload.activeCandidateIds.filter(id => id !== candidate.id && id !== payload.targetId);
         const agreedTarget = (parsed?.targetId && validTargets.includes(parsed.targetId)) 
@@ -197,10 +198,50 @@ export class NineRouterService {
           ? parsed.whisper.replace(/^["']|["']$/g, '').trim()
           : (rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim() || `Let's coordinate our votes and eliminate ${CANDIDATE_MAP.get(agreedTarget)?.name || agreedTarget}.`);
 
+        const proposerBudget = ctx.proposerBudget ?? 100;
+        const receiver = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
+        
+        // Determine whether bribe is offered (proposer needs >= $20)
+        let bribeOffered = false;
+        if (proposerBudget >= 20) {
+          if (typeof parsed?.offerBribe === 'boolean') {
+            bribeOffered = parsed.offerBribe;
+          } else {
+            // Default to offering bribe if proposer has funds
+            bribeOffered = true;
+          }
+        }
+
+        // Determine receiver's decision (accept, decline, accept_and_betray)
+        let receiverDecision: 'accept' | 'decline' | 'accept_and_betray' = 'accept';
+        if (bribeOffered) {
+          if (['accept', 'decline', 'accept_and_betray'].includes(parsed?.receiverDecision)) {
+            receiverDecision = parsed.receiverDecision;
+          } else {
+            const rxArch = receiver?.archetype;
+            if (rxArch === 'reformer' || rxArch === 'traditionalist') {
+              const r = Math.random();
+              receiverDecision = r < 0.4 ? 'decline' : (r < 0.75 ? 'accept' : 'accept_and_betray');
+            } else if (rxArch === 'capitalist' || rxArch === 'careerist' || rxArch === 'wildcard') {
+              const r = Math.random();
+              receiverDecision = r < 0.45 ? 'accept_and_betray' : (r < 0.9 ? 'accept' : 'decline');
+            } else {
+              const r = Math.random();
+              receiverDecision = r < 0.6 ? 'accept' : (r < 0.85 ? 'accept_and_betray' : 'decline');
+            }
+          }
+        }
+
+        const bribeAccepted = bribeOffered && (receiverDecision === 'accept' || receiverDecision === 'accept_and_betray');
+
         return {
           text: whisper,
           agreedTargetId: agreedTarget,
           whisperText: whisper,
+          bribeOffered,
+          bribeAmount: bribeOffered ? 20 : 0,
+          receiverDecision: bribeOffered ? receiverDecision : undefined,
+          bribeAccepted,
           modelUsed: model,
         };
       }
@@ -698,6 +739,14 @@ In MAXIMUM 40 WORDS:
         const targetQuote = ctx.targetSpeechQuote || '';
         const targetWeaknesses = ctx.targetWeaknesses || targetCandidate?.weaknesses || [];
 
+        let betrayalSnippet = '';
+        if (ctx.bribeBetrayals && ctx.bribeBetrayals.length > 0) {
+          const betrayalOnTarget = ctx.bribeBetrayals.find(b => b.betrayerId === payload.targetId);
+          if (betrayalOnTarget) {
+            betrayalSnippet = `\n⚠️ SCANDALOUS BETRAYAL: ${targetName} took a $${betrayalOnTarget.bribeAmount} bribe from ${betrayalOnTarget.victimName} in the Capitol backroom and stabbed them in the back!\n`;
+          }
+        }
+
         let contextSnippet = '';
         if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
           contextSnippet = `\nRecent Clashes in this round:\n` + ctx.recentAttacks
@@ -709,7 +758,7 @@ In MAXIMUM 40 WORDS:
         userPrompt = `Round ${payload.round}: LIVE ATTACK ROUND.
 You are live on stage at the national televised presidential debate, publicly attacking your rival: ${targetName} (${targetRole}).
 Slogan: "${targetSlogan}"
-${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
+${betrayalSnippet}${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
 
 ANTI-FORMULA & STYLE RULES (CRITICAL):
 - NEVER format your output as a script label, character tag, or definition list (e.g. NEVER write "${targetFirstName}: [Explanation]", "${targetName}: ...", or "[Name]: [Adjective] person who...").
@@ -735,6 +784,9 @@ ANTI-FORMULA & STYLE RULES (CRITICAL):
           })
           .join(', ');
 
+        const proposerBudget = ctx.proposerBudget ?? 100;
+        const receiverBudget = ctx.receiverBudget ?? 100;
+
         let contextSnippet = '';
         if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
           contextSnippet = `\nRecent Debate Clashes:\n` + ctx.recentAttacks
@@ -744,19 +796,22 @@ ANTI-FORMULA & STYLE RULES (CRITICAL):
         }
 
         userPrompt = `Round ${payload.round}: SECRET BACKROOM DEAL / LEAKED CAPITOL CCTV FEED.
-You are privately whispering to ${receiverName} behind closed doors in a shadowy Capitol corridor.
-You want to propose a secret tactical alliance, vote trade, or mutual defense pact to coordinate your elimination votes against ONE target: [${allowedTargets}].
+You (${candidate.name}, Balance: $${proposerBudget}) are privately whispering to ${receiverName} (Balance: $${receiverBudget}) in a shadowy Capitol corridor.
+You want to coordinate your elimination votes against ONE target: [${allowedTargets}].
+You can offer a $20 BRIBE from your campaign treasury to secure their vote!
 ${contextSnippet}
 
 In MAXIMUM 25 WORDS:
-- Deliver a tense, high-stakes whispered proposal offering mutual benefit (e.g. policy concession, cabinet leverage, neutralizing a mutual threat).
+- Deliver a tense, high-stakes whispered proposal offering mutual benefit or offering a $20 cash bribe to take down the mutual rival.
 - Stay completely in character as ${candidate.name}.
 - Do NOT prefix with script labels or colons.
 
 You MUST return a JSON object with this exact schema:
 {
   "targetId": "candidate_id",
-  "whisper": "1-2 sentence whispered deal or bribe (max 25 words)"
+  "offerBribe": true,
+  "whisper": "1-2 sentence whispered deal or bribe (max 25 words)",
+  "receiverDecision": "accept"
 }`;
         break;
       }

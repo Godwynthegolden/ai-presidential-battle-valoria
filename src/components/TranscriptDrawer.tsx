@@ -89,15 +89,38 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
     // 3. Backroom Pacts in Round r
     const roundPacts = pactsByRound[r] || [];
     roundPacts.forEach(p => {
+      const bribeInfo = p.bribeOffered
+        ? (p.receiverDecision === 'accept'
+            ? ' [💸 $20 Bribe Accepted]'
+            : p.receiverDecision === 'accept_and_betray'
+            ? ' [🗡️ $20 Bribe Pocketed (Betrayal)]'
+            : ' [🚫 $20 Bribe Declined]')
+        : '';
+
       allEvents.push({
         type: 'pact',
-        title: `Round ${r} Leaked CCTV Backroom Deal`,
+        title: `Round ${r} Leaked CCTV Backroom Deal${bribeInfo}`,
         speakerId: p.proposerId,
         targetId: p.receiverId,
         text: `[Targeting: ${CANDIDATE_MAP.get(p.agreedTargetId)?.name}] "${p.whisperText}" (${p.location})`,
         round: r,
       });
     });
+
+    // 3.5. Bailout Auction in Round r
+    const roundVoteTally = gameState.votesByRound[r];
+    if (roundVoteTally?.bailoutTransactions && roundVoteTally.bailoutTransactions.length > 0) {
+      roundVoteTally.bailoutTransactions.forEach(tx => {
+        const cand = CANDIDATE_MAP.get(tx.candidateId);
+        allEvents.push({
+          type: 'vote',
+          title: `Round ${r} Capitol Vote Bailout Auction`,
+          speakerId: tx.candidateId,
+          text: `💰 ${cand?.name} paid $40 to cancel 1 elimination vote (${tx.initialVotes} → ${tx.remainingVotes} votes, $${tx.remainingBudget} remaining balance).`,
+          round: r,
+        });
+      });
+    }
 
     // 4. Eliminations in Round r
     const roundEliminations = eliminatedCandidates.filter(e => e.eliminatedInRound === r);

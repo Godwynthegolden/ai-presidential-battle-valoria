@@ -370,7 +370,120 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('Dialogue Speech Sanitizer & Anti-Formula Prompt Guardrails PASSED!');
 
-  console.log('\nAll unit tests for AI Candidate Intelligence, Timeline Chronology, Dialogue Sanitizer & Prompt Engine PASSED successfully!');
+  // =========================================================================
+  // 💰 DOLLARS CURRENCY, $20 CCTV BRIBES, RETALIATION & $40 BAILOUT AUCTION TESTS
+  // =========================================================================
+  console.log('\n--- Testing Dollars Currency ($), $20 CCTV Bribes & $40 Bailout Auction ---');
+
+  // 1. Initial Budget Validation
+  for (const c of CANDIDATES) {
+    if (typeof c.initialBudget !== 'number' || ![80, 100, 120].includes(c.initialBudget)) {
+      throw new Error(`Candidate ${c.id} has invalid initialBudget: ${c.initialBudget}`);
+    }
+  }
+  console.log('1. Candidate initial budget contracts ($80, $100, $120) PASSED!');
+
+  // 2. CCTV Backroom $20 Bribe Prompt
+  const bribePactPrompt = (nineRouterService as any).buildPrompt(speakerCand, {
+    action: 'backroom_pact',
+    candidateId: speakerCand.id,
+    targetId: targetCand.id,
+    round: 1,
+    activeCandidateIds: [speakerCand.id, targetCand.id, 'marcus_vance'],
+    historyContext: {
+      proposerBudget: 120,
+      receiverBudget: 80,
+    }
+  });
+  if (!bribePactPrompt.userPrompt.includes('$20 BRIBE') && !bribePactPrompt.userPrompt.includes('Balance: $120')) {
+    throw new Error('Backroom pact prompt missing $20 bribe rules or candidate budget balance.');
+  }
+  console.log('2. CCTV Backroom $20 Bribe prompt construction PASSED!');
+
+  // 3. Import useGameEngine helpers
+  const { resolveAttackTarget, resolveBailoutAuction } = await import('../hooks/useGameEngine');
+
+  // 4. Test Bribe Betrayal Retribution in resolveAttackTarget
+  const mockPactHistory = {
+    attacksByRound: {},
+    pactsByRound: {
+      1: [{
+        id: 'pact-1',
+        round: 1,
+        proposerId: 'elena_rostova',
+        receiverId: 'jackson_alvarez',
+        agreedTargetId: 'arthur_sterling',
+        whisperText: 'Take the $20 and vote out Arthur!',
+        location: 'Capitol Cloakroom Cam 04',
+        timestamp: Date.now(),
+        bribeOffered: true,
+        bribeAmount: 20,
+        receiverDecision: 'accept_and_betray' as const,
+        bribeAccepted: true,
+        wasBetrayedByReceiver: true,
+      }]
+    },
+    votesByRound: {},
+    round: 2,
+  };
+
+  // Elena should seek revenge against Jackson Alvarez (who took $20 and betrayed)
+  const revengeTarget = resolveAttackTarget('elena_rostova', ['elena_rostova', 'jackson_alvarez', 'arthur_sterling', 'chloe_kang'], mockPactHistory);
+  if (revengeTarget !== 'jackson_alvarez') {
+    throw new Error(`Expected Elena to target betrayer jackson_alvarez, got ${revengeTarget}`);
+  }
+  console.log('3. Bribe Betrayal Retribution Target Resolution PASSED!');
+
+  // 5. Test $40 Vote Bailout Auction - Sequential Buyout & Bankrupt Elimination
+  // Marcus Vance: 3 votes, $80 -> pays $40 (remains 2 votes, $40), then pays $40 (remains 1 vote, $0).
+  // Jackson Alvarez: 2 votes, $40 -> pays $40 (remains 1 vote, $0).
+  // Arthur Sterling: 2 votes, $120 -> pays $40 (remains 1 vote, $80), then pays $40 (remains 0 votes, $40).
+  // Now Marcus (1 vote, $0) & Jackson (1 vote, $0) have max votes. Marcus is chosen/eliminated with 1 vote!
+  const initialVotes = {
+    marcus_vance: 3,
+    jackson_alvarez: 2,
+    arthur_sterling: 2,
+  };
+  const initialBudgets = {
+    marcus_vance: 80,
+    jackson_alvarez: 40,
+    arthur_sterling: 120,
+  };
+  const activeIds = ['marcus_vance', 'jackson_alvarez', 'arthur_sterling'];
+
+  const bailoutRes = resolveBailoutAuction(initialVotes, initialBudgets, activeIds, 1);
+  if (bailoutRes.transactions.length === 0) {
+    throw new Error('Expected bailout transactions to occur, got 0');
+  }
+  // Total money spent: Marcus ($80 = 2 votes removed), Jackson ($40 = 1 vote removed), Arthur ($80 = 2 votes removed)
+  if (bailoutRes.finalBudgets['marcus_vance'] !== 0 || bailoutRes.finalBudgets['jackson_alvarez'] !== 0) {
+    throw new Error(`Unexpected final budgets: ${JSON.stringify(bailoutRes.finalBudgets)}`);
+  }
+  console.log(`4. Sequential $40 Vote Bailout Auction (${bailoutRes.transactions.length} buyouts executed, Eliminated: ${bailoutRes.eliminatedId}) PASSED!`);
+
+  // 6. Test Standstill Zero-Vote Tiebreaker (Everyone buys down to 0 votes)
+  // Low budget candidate should be eliminated!
+  const zeroStandstillVotes = {
+    cand_a: 1,
+    cand_b: 1,
+    cand_c: 1,
+  };
+  const zeroStandstillBudgets = {
+    cand_a: 40, // Buys down to 0 votes -> $0 balance left
+    cand_b: 80, // Buys down to 0 votes -> $40 balance left
+    cand_c: 120, // Buys down to 0 votes -> $80 balance left
+  };
+  const standstillRes = resolveBailoutAuction(zeroStandstillVotes, zeroStandstillBudgets, ['cand_a', 'cand_b', 'cand_c'], 1);
+  if (standstillRes.finalTally['cand_a'] !== 0 || standstillRes.finalTally['cand_b'] !== 0 || standstillRes.finalTally['cand_c'] !== 0) {
+    throw new Error('Expected all candidates to reach 0 votes in standstill');
+  }
+  // cand_a had $40 - $40 = $0 (lowest remaining budget) -> cand_a eliminated
+  if (standstillRes.eliminatedId !== 'cand_a') {
+    throw new Error(`Expected lowest remaining budget candidate 'cand_a' to be eliminated, got ${standstillRes.eliminatedId}`);
+  }
+  console.log('5. Zero-Vote Standstill Tiebreaker (Lowest Budget Elimination) PASSED!');
+
+  console.log('\nAll unit tests for Dollars Currency ($), $20 CCTV Bribes, Retaliation AI & $40 Bailout Auction PASSED successfully!');
 }
 
 testEngine().catch(err => {

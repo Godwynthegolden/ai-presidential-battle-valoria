@@ -213,7 +213,23 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
               <span>AUDIO INTERCEPT TRANSCRIPT (FEED #{activeFeedIndex + 1}):</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* $20 Bribe Status Indicator */}
+              {displayedPact.bribeOffered && (
+                <span className={`flex items-center gap-1.5 text-xs font-mono font-black uppercase px-3 py-0.5 rounded-full shadow-md border animate-pulse ${
+                  displayedPact.receiverDecision === 'accept'
+                    ? 'bg-emerald-950 text-emerald-300 border-emerald-400 shadow-emerald-950/60'
+                    : displayedPact.receiverDecision === 'accept_and_betray'
+                    ? 'bg-purple-950 text-amber-300 border-purple-500 shadow-purple-950/60'
+                    : 'bg-red-950 text-red-300 border-red-500 shadow-red-950/60'
+                }`}>
+                  <span className="text-amber-400 font-extrabold">$20</span>
+                  {displayedPact.receiverDecision === 'accept' && '💸 Bribe Accepted'}
+                  {displayedPact.receiverDecision === 'accept_and_betray' && '🗡️ Money Pocketed (Betrayal Intent)'}
+                  {displayedPact.receiverDecision === 'decline' && '🚫 Bribe Declined'}
+                </span>
+              )}
+
               {!isLoading && onPlaySpeechAudio && (
                 <button
                   type="button"

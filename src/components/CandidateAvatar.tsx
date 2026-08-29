@@ -32,6 +32,7 @@ import {
 
 interface CandidateAvatarProps {
   candidate: Candidate;
+  budget?: number;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   isSpeaking?: boolean;
   isAttacking?: boolean;
@@ -43,6 +44,7 @@ interface CandidateAvatarProps {
 
 export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
   candidate,
+  budget,
   size = 'md',
   isSpeaking = false,
   isAttacking = false,
@@ -199,6 +201,17 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
           }`}
         >
           {candidate.codename}
+        </div>
+      )}
+
+      {/* Live War Chest Budget Badge */}
+      {typeof budget === 'number' && !isEliminated && size !== 'xs' && (
+        <div 
+          className={`absolute -top-2 -left-2 bg-emerald-950/95 text-emerald-300 border border-emerald-500/50 font-mono font-bold rounded-full shadow-md z-30 pointer-events-none flex items-center gap-0.5 ${
+            size === 'sm' ? 'px-1.5 py-0.2 text-[8px]' : 'px-2 py-0.5 text-[9px]'
+          }`}
+        >
+          <span className="text-emerald-400 font-extrabold">$</span>{budget}
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { GameState } from '@/types/game';
-import { Radio, Flame, Swords, Vote, Skull, Crown, Info, Eye, AlertTriangle } from 'lucide-react';
+import { Radio, Flame, Swords, Vote, Skull, Crown, Info, Eye, AlertTriangle, DollarSign, Banknote } from 'lucide-react';
 
 interface EventTickerProps {
   gameState: GameState;
@@ -17,6 +17,10 @@ export const EventTicker: React.FC<EventTickerProps> = ({
 
   const renderIcon = (type: string) => {
     switch (type) {
+      case 'bribe':
+        return <DollarSign className="w-3.5 h-3.5 text-amber-400" />;
+      case 'bailout':
+        return <Banknote className="w-3.5 h-3.5 text-emerald-400" />;
       case 'betrayal':
         return <AlertTriangle className="w-3.5 h-3.5 text-red-400" />;
       case 'pact':

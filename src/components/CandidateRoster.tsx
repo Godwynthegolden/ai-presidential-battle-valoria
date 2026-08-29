@@ -113,6 +113,7 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
               {/* Avatar Icon / Custom Image */}
               <CandidateAvatar
                 candidate={candidate}
+                budget={gameState.candidateBudgets?.[candidate.id] ?? candidate.initialBudget ?? 100}
                 size="md"
                 isSpeaking={isSpeaking}
                 isAttacking={false}
@@ -157,9 +158,14 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                       <Skull className="w-3 h-3 text-red-400" /> R{eliminatedInfo?.eliminatedInRound || 1} Out
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-900/90 text-cyan-300 border border-cyan-500/30 shrink-0">
-                      In Race
-                    </span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
+                        ${gameState.candidateBudgets?.[candidate.id] ?? candidate.initialBudget ?? 100}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-900/90 text-cyan-300 border border-cyan-500/30">
+                        In Race
+                      </span>
+                    </div>
                   )}
                 </div>
 

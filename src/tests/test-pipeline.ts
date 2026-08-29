@@ -2,6 +2,7 @@ import assert from 'assert';
 import { fishAudioService } from '../services/fishAudio';
 import { CANDIDATES, CANDIDATE_MAP } from '../data/candidates';
 import { GameState, GamePhase, StepDescriptor } from '../types/game';
+import { resolveBailoutAuction, resolveAttackTarget } from '../hooks/useGameEngine';
 
 // Universal simulation stepper matching useGameEngine.ts
 function simulateNextSteps(currentState: GameState, maxDepth: number = 2): StepDescriptor[] {
@@ -112,10 +113,20 @@ function simulateNextSteps(currentState: GameState, maxDepth: number = 2): StepD
       });
       simPhase = 'VOTE_REVEAL';
     } else if (simPhase === 'VOTE_REVEAL') {
-      const actualElimId = currentState.votesByRound[simRound]?.eliminatedId;
-      const elimCandidateId = (actualElimId && simActiveIds.includes(actualElimId))
-        ? actualElimId
-        : simActiveIds[simActiveIds.length - 1];
+      let elimCandidateId = currentState.votesByRound[simRound]?.eliminatedId;
+      if (!elimCandidateId || !simActiveIds.includes(elimCandidateId)) {
+        // Deterministically simulate votes & resolve bailout auction for exact elimination lookahead
+        const simBudgets = { ...currentState.candidateBudgets };
+        const simulatedVotes: Record<string, number> = {};
+        simActiveIds.forEach(id => { simulatedVotes[id] = 0; });
+        simActiveIds.forEach((voterId, idx) => {
+          const possible = simActiveIds.filter(id => id !== voterId);
+          const target = possible[(idx + 1) % possible.length];
+          simulatedVotes[target] = (simulatedVotes[target] || 0) + 1;
+        });
+        const bailoutRes = resolveBailoutAuction(simulatedVotes, simBudgets, simActiveIds, simRound);
+        elimCandidateId = bailoutRes.eliminatedId;
+      }
       const elimCand = CANDIDATE_MAP.get(elimCandidateId)!;
       steps.push({
         stepKey: `elimination-r${simRound}-${elimCand.id}`,
@@ -195,6 +206,14 @@ async function runPipelineTests() {
     participatingCandidateIds: activeIds,
     activeCandidateIds: activeIds,
     eliminatedCandidates: [],
+    candidateBudgets: {
+      [activeIds[0]]: 80,
+      [activeIds[1]]: 100,
+      [activeIds[2]]: 120,
+      [activeIds[3]]: 80,
+      [activeIds[4]]: 100,
+      [activeIds[5]]: 120,
+    },
     currentSpeakerIndex: 0,
     campaignSpeeches: {},
     finalSpeeches: {},
@@ -340,6 +359,26 @@ async function runPipelineTests() {
   });
   assert(attackAudio instanceof ArrayBuffer && attackAudio.byteLength > 1000, 'Post-elimination first attack TTS audio buffer must be valid');
   console.log(`  ✓ Post-elimination Round 2 first attack (${postElimLookahead[0].stepKey}) TTS audio generated (${attackAudio.byteLength} bytes) for ${nextAttacker.name}`);
+
+  // 7. Test Bailout Auction Lookahead Synchronization
+  console.log('7. Testing Bailout Auction Lookahead Synchronization in VOTE_REVEAL...');
+  const voteTallyState: GameState = {
+    ...baseState,
+    phase: 'VOTE_SECRET',
+    round: 1,
+    candidateBudgets: {
+      [activeIds[0]]: 120, // High budget can buy off votes
+      [activeIds[1]]: 120,
+      [activeIds[2]]: 0,   // $0 budget cannot buy off votes -> Eliminated!
+      [activeIds[3]]: 100,
+    },
+    activeCandidateIds: activeIds.slice(0, 4),
+  };
+
+  const voteSecretLookahead = simulateNextSteps(voteTallyState, 2);
+  assert.strictEqual(voteSecretLookahead[0].phase, 'VOTE_SECRET');
+  assert.strictEqual(voteSecretLookahead[1].phase, 'ELIMINATION');
+  console.log(`  ✓ Bailout auction lookahead accurately predicted elimination step: ${voteSecretLookahead[1].stepKey}`);
 
   console.log('\n--- ALL Universal Multi-Step Lookahead Pipeline Tests PASSED! ---');
 }
