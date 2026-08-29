@@ -49,15 +49,17 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
     const activePact = pactsThisRound[activeFeedIndex] || pactsThisRound[0] || null;
 
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
-        <CCTVBackroomView
-          pact={activePact}
-          allPactsThisRound={pactsThisRound}
-          activeFeedIndex={activeFeedIndex}
-          onSelectFeed={onSelectCCTVFeed}
-          round={round}
-          isLoading={stage.isLoading}
-        />
+      <div className="flex-1 flex flex-col items-center justify-start p-2 md:p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
+        <div className="w-full max-w-4xl my-auto">
+          <CCTVBackroomView
+            pact={activePact}
+            allPactsThisRound={pactsThisRound}
+            activeFeedIndex={activeFeedIndex}
+            onSelectFeed={onSelectCCTVFeed}
+            round={round}
+            isLoading={stage.isLoading}
+          />
+        </div>
       </div>
     );
   }
@@ -65,25 +67,29 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   // Render Special Phases (Vote Reveal & Winner)
   if (phase === 'VOTE_REVEAL' && votesByRound[round]) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
-        <VoteRevealBoard 
-          tally={votesByRound[round]} 
-          isFinalVote={false} 
-          eliminatedId={votesByRound[round].eliminatedId}
-        />
+      <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 h-full min-h-0 overflow-y-auto custom-scrollbar">
+        <div className="w-full max-w-3xl my-auto">
+          <VoteRevealBoard 
+            tally={votesByRound[round]} 
+            isFinalVote={false} 
+            eliminatedId={votesByRound[round].eliminatedId}
+          />
+        </div>
       </div>
     );
   }
 
   if (phase === 'FINAL_REVEAL' && finalVoteTally) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
-        <VoteRevealBoard 
-          tally={finalVoteTally} 
-          isFinalVote={true} 
-          eliminatedId={null}
-          winnerId={winnerId}
-        />
+      <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 h-full min-h-0 overflow-y-auto custom-scrollbar">
+        <div className="w-full max-w-3xl my-auto">
+          <VoteRevealBoard 
+            tally={finalVoteTally} 
+            isFinalVote={true} 
+            eliminatedId={null}
+            winnerId={winnerId}
+          />
+        </div>
       </div>
     );
   }
@@ -91,14 +97,16 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   if (phase === 'WINNER' && winnerId) {
     const winningCandidate = CANDIDATE_MAP.get(winnerId)!;
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
-        <WinnerPodium 
-          winner={winningCandidate}
-          victorySpeech={gameState.victorySpeech || stage.content}
-          eliminatedCount={eliminatedCandidates.length}
-          totalRounds={round}
-          onRestart={onRestart}
-        />
+      <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 h-full min-h-0 overflow-y-auto custom-scrollbar">
+        <div className="w-full max-w-3xl my-auto">
+          <WinnerPodium 
+            winner={winningCandidate}
+            victorySpeech={gameState.victorySpeech || stage.content}
+            eliminatedCount={eliminatedCandidates.length}
+            totalRounds={round}
+            onRestart={onRestart}
+          />
+        </div>
       </div>
     );
   }
@@ -155,7 +163,8 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
       </div>
 
       {/* Main Arena Visual Area */}
-      <div className="flex-1 flex flex-col justify-center items-center p-4 sm:p-6 md:p-8 relative min-h-0 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 flex flex-col justify-start items-center p-4 sm:p-6 md:p-8 relative min-h-0 overflow-y-auto custom-scrollbar">
+        <div className="w-full flex flex-col items-center max-w-3xl my-auto">
         {/* If Error Occurred */}
         {stage.error ? (
           <div className="flex flex-col items-center justify-center text-center max-w-md p-8 rounded-3xl bg-red-950/50 border-2 border-red-600/80 shadow-2xl shadow-red-950/80 backdrop-blur-xl">
@@ -367,6 +376,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

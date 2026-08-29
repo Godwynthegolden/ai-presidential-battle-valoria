@@ -393,9 +393,9 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
             <div className="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-mono">
               <button
                 onClick={() => setActiveTab('editor')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-black transition ${
                   activeTab === 'editor'
-                    ? 'bg-cyan-500 text-slate-950 shadow'
+                    ? 'bg-cyan-500 text-black shadow'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -560,8 +560,23 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
             {/* Avatar Preview */}
             <div className="flex flex-col items-center justify-center p-4 bg-slate-950/80 rounded-2xl border border-slate-800 gap-2">
               <CandidateAvatar candidate={form} size="lg" isSpeaking={true} />
-              <span className="text-sm font-bold text-white mt-1">{form.name}</span>
-              <span className="text-xs text-slate-400 font-mono">{form.titleRole}</span>
+              <div className="flex items-center gap-1.5 flex-wrap justify-center mt-1">
+                <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-slate-900 text-cyan-300 border border-cyan-500/40 shadow-xs">
+                  {form.codename}
+                </span>
+                <span 
+                  className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border"
+                  style={{
+                    backgroundColor: `${form.color.primary}18`,
+                    color: form.color.primary,
+                    borderColor: `${form.color.primary}55`
+                  }}
+                >
+                  {form.archetypeTitle}
+                </span>
+              </div>
+              <span className="text-sm font-bold text-white mt-0.5">{form.name}</span>
+              <span className="text-xs text-slate-400 font-mono text-center">{form.titleRole}</span>
             </div>
 
             {/* Custom Photo Upload & Crop Button */}
@@ -651,7 +666,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                     onClick={() => setColorCategory(cat.id as any)}
                     className={`px-2 py-0.5 rounded-md transition whitespace-nowrap ${
                       colorCategory === cat.id
-                        ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
+                        ? 'bg-cyan-500 text-black font-black shadow-xs'
                         : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
                     }`}
                   >
@@ -727,7 +742,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                  className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-display font-bold"
                 />
               </div>
 
@@ -739,17 +754,48 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                   type="text"
                   value={form.titleRole}
                   onChange={(e) => setForm(prev => ({ ...prev, titleRole: e.target.value }))}
-                  placeholder="e.g. Rust-Belt Populist Governor"
+                  placeholder="e.g. Founder & CEO of Apex Dynamics"
                   className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
                 />
               </div>
             </div>
 
-            {/* Row 2: Archetype & Slogan */}
+            {/* Row 2: Codename & Archetype Title Badges (Directly Editable) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-950/70 border border-cyan-500/30">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-mono font-bold text-cyan-300 flex items-center justify-between">
+                  <span>Codename / Call-Sign Badge:</span>
+                  <span className="text-[10px] text-slate-400 font-normal">(Top Header Badge)</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.codename}
+                  onChange={(e) => setForm(prev => ({ ...prev, codename: e.target.value }))}
+                  placeholder="e.g. THE_HYPER_CAPITALIST_DISRUPTOR_8377"
+                  className="bg-slate-900 border border-cyan-500/50 rounded-xl px-3 py-2 text-xs font-mono font-bold text-cyan-300 focus:outline-none focus:border-cyan-400 uppercase tracking-wider"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-mono font-bold text-slate-300 flex items-center justify-between">
+                  <span>Archetype Persona Title:</span>
+                  <span className="text-[10px] text-slate-400 font-normal">(e.g. INDIE TECH TYCOON)</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.archetypeTitle}
+                  onChange={(e) => setForm(prev => ({ ...prev, archetypeTitle: e.target.value }))}
+                  placeholder="e.g. INDIE TECH TYCOON"
+                  className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white focus:outline-none focus:border-cyan-500 uppercase"
+                />
+              </div>
+            </div>
+
+            {/* Row 3: Political Archetype & Slogan */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-mono font-bold text-slate-300">
-                  Political Archetype:
+                  Political Archetype Class:
                 </label>
                 <select
                   value={form.archetype}

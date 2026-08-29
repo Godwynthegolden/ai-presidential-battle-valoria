@@ -12,6 +12,7 @@ import { NineRouterSettingsModal, NineRouterConfigState } from '@/components/Nin
 import { ElectionIntelModal } from '@/components/ElectionIntelModal';
 import { BroadcastTimeline } from '@/components/BroadcastTimeline';
 import { CharactersManagerView } from '@/components/CharactersManagerView';
+import { CharacterEditorModal } from '@/components/CharacterEditorModal';
 import { Candidate } from '@/types/candidate';
 import { CANDIDATE_MAP } from '@/data/candidates';
 import { 
@@ -42,6 +43,8 @@ export default function AIPlaygroundPage() {
   const [isIntelOpen, setIsIntelOpen] = useState(false);
   const [isCleanView, setIsCleanView] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [candidateToEdit, setCandidateToEdit] = useState<Candidate | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -356,6 +359,37 @@ export default function AIPlaygroundPage() {
       <CandidateDossierModal
         candidate={selectedCandidate}
         onClose={() => setSelectedCandidate(null)}
+        onEditCandidate={(cand) => {
+          setSelectedCandidate(null);
+          setCandidateToEdit(cand);
+          setIsEditorOpen(true);
+        }}
+      />
+
+      {/* Character Editor Modal (accessible anywhere via Dossier or Characters Manager) */}
+      <CharacterEditorModal
+        isOpen={isEditorOpen}
+        onClose={() => {
+          setIsEditorOpen(false);
+          setCandidateToEdit(null);
+        }}
+        candidateToEdit={candidateToEdit}
+        onSaveCandidate={(updated) => {
+          saveCandidate(updated);
+          setIsEditorOpen(false);
+          setCandidateToEdit(null);
+        }}
+        onDeleteCandidate={(id) => {
+          deleteCandidate(id);
+          setIsEditorOpen(false);
+          setCandidateToEdit(null);
+        }}
+        onResetCandidateToDefault={(id) => {
+          resetCandidateToDefault(id);
+          setIsEditorOpen(false);
+          setCandidateToEdit(null);
+        }}
+        nineRouterConfig={nineRouterConfig}
       />
 
       {/* Full Transcript Drawer */}
