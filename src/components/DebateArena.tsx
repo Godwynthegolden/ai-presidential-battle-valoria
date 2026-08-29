@@ -21,7 +21,10 @@ import {
   Quote,
   Mic2,
   ShieldCheck,
-  Target
+  Target,
+  Volume2,
+  Mic,
+  RotateCcw
 } from 'lucide-react';
 
 interface DebateArenaProps {
@@ -29,6 +32,8 @@ interface DebateArenaProps {
   onRetry: () => void;
   onRestart: () => void;
   onSelectCCTVFeed?: (feedIndex: number) => void;
+  onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string) => void;
+  isSpeakingAudio?: boolean;
 }
 
 export const DebateArena: React.FC<DebateArenaProps> = ({
@@ -36,6 +41,8 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   onRetry,
   onRestart,
   onSelectCCTVFeed,
+  onPlaySpeechAudio,
+  isSpeakingAudio = false,
 }) => {
   const { stage, phase, round, votesByRound, pactsByRound, finalVoteTally, winnerId, eliminatedCandidates } = gameState;
 
@@ -236,8 +243,22 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
 
             {/* Attack Speech Box */}
             <div className="w-full relative rounded-3xl bg-slate-950/90 border-2 border-red-500/70 p-6 md:p-8 shadow-2xl shadow-red-950/60 backdrop-blur-xl">
-              <div className="absolute -top-3.5 left-8 px-3.5 py-1 rounded-md bg-red-600 text-white text-xs font-display font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-                <Flame className="w-3.5 h-3.5" /> Public Denunciation
+              <div className="flex items-center justify-between absolute -top-3.5 left-6 right-6">
+                <div className="px-3.5 py-1 rounded-md bg-red-600 text-white text-xs font-display font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5">
+                  <Flame className="w-3.5 h-3.5" /> Public Denunciation
+                </div>
+
+                {!stage.isLoading && onPlaySpeechAudio && (
+                  <button
+                    type="button"
+                    onClick={() => onPlaySpeechAudio(stage.content, speaker?.voice?.voiceId, speaker?.id)}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900/90 hover:bg-slate-800 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-mono font-bold shadow-md transition active:scale-95 cursor-pointer"
+                    title="Replay candidate's attack voice"
+                  >
+                    <Volume2 className="w-3.5 h-3.5 text-purple-400" />
+                    <span>{isSpeakingAudio ? 'Speaking...' : 'Replay Voice'}</span>
+                  </button>
+                )}
               </div>
 
               {stage.isLoading ? (
@@ -265,7 +286,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
               <CandidateAvatar
                 candidate={speaker}
                 size="xl"
-                isSpeaking={!stage.isLoading}
+                isSpeaking={!stage.isLoading || isSpeakingAudio}
                 isEliminated={stage.actionType === 'eliminated'}
               />
               <div className="text-center">
@@ -304,7 +325,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
               }}
             >
               {/* Top Speaker Identity Tag & Live Visualizer */}
-              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80">
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80 flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <span 
                     className="w-2.5 h-2.5 rounded-full animate-pulse"
@@ -315,13 +336,27 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
                   </span>
                 </div>
 
-                {/* Animated Audio Equalizer Visualizer */}
+                {/* Animated Audio Equalizer Visualizer & Replay Audio Button */}
                 {!stage.isLoading && (
-                  <div className="flex items-end gap-1 h-4">
-                    <span className="w-1 bg-cyan-400 rounded-full animate-equalizer eq-bar-1" />
-                    <span className="w-1 bg-cyan-400 rounded-full animate-equalizer eq-bar-2" />
-                    <span className="w-1 bg-cyan-400 rounded-full animate-equalizer eq-bar-3" />
-                    <span className="w-1 bg-cyan-400 rounded-full animate-equalizer eq-bar-4" />
+                  <div className="flex items-center gap-3">
+                    {onPlaySpeechAudio && (
+                      <button
+                        type="button"
+                        onClick={() => onPlaySpeechAudio(stage.content, speaker.voice?.voiceId, speaker.id)}
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-mono font-bold shadow-sm transition active:scale-95 cursor-pointer"
+                        title="Replay candidate's speech with Fish Audio TTS"
+                      >
+                        <Volume2 className={`w-3.5 h-3.5 text-purple-400 ${isSpeakingAudio ? 'animate-pulse' : ''}`} />
+                        <span>{isSpeakingAudio ? 'Speaking...' : 'Replay Voice'}</span>
+                      </button>
+                    )}
+
+                    <div className="flex items-end gap-1 h-4">
+                      <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-1' : 'bg-slate-600 h-1'}`} />
+                      <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-2' : 'bg-slate-600 h-2'}`} />
+                      <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-3' : 'bg-slate-600 h-1.5'}`} />
+                      <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-4' : 'bg-slate-600 h-2.5'}`} />
+                    </div>
                   </div>
                 )}
               </div>

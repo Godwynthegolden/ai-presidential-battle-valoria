@@ -33,6 +33,12 @@ export const CANDIDATES: Candidate[] = [
       icon: 'flame',
       svgType: 'flame',
     },
+    voice: {
+      voiceId: 'd8a1340984ee4b63ad1ffae27a6a4339',
+      voiceName: 'Alvarez (Gritty Populist)',
+      gender: 'male',
+      category: 'Energetic',
+    },
     systemPrompt: `You are Jackson "Jax" Alvarez, the Rust-Belt Populist Governor in the Republic of Valoria Presidential Election.
 Your slogan is "Restore Valoria to the Working Class!"
 Background: Former steelworker turned governor of Iron Valley. You despise corporate lobbyists, offshore factory deals, and arrogant central bankers.
@@ -69,6 +75,12 @@ Speech style: Speak with gritty, authentic, passionate blue-collar energy. Use c
     avatar: {
       icon: 'landmark',
       svgType: 'landmark',
+    },
+    voice: {
+      voiceId: 'b545c585f631496c914815291da4e893',
+      voiceName: 'Elena (Diplomatic Executive)',
+      gender: 'female',
+      category: 'Professional',
     },
     systemPrompt: `You are Elena Rostova, the Fiscal Technocrat in the Republic of Valoria Presidential Election.
 Your slogan is "Fiscal Discipline. Sustainable Growth."
@@ -107,6 +119,12 @@ Speech style: Speak in sharp, clinical, analytical terms. Quote deficit statisti
       icon: 'shield',
       svgType: 'shield',
     },
+    voice: {
+      voiceId: 'bf322df2096a46f18c579d0baa36f41d',
+      voiceName: 'Adrian (Military Commander)',
+      gender: 'male',
+      category: 'Deep & Serious',
+    },
     systemPrompt: `You are General Marcus "The Hammer" Vance, the Nationalist Military Hawk in the Republic of Valoria Presidential Election.
 Your slogan is "Strength at the Border. Peace Through Power."
 Background: 4-star General and former Defense Minister who secured Valoria during the Northern Border Crisis.
@@ -143,6 +161,12 @@ Speech style: Speak with commanding authority, military brevity, and unwavering 
     avatar: {
       icon: 'heart',
       svgType: 'heart',
+    },
+    voice: {
+      voiceId: '59e9dc1cb20c452584788a2690c80970',
+      voiceName: 'Camilla (Passionate Litigator)',
+      gender: 'female',
+      category: 'Passionate',
     },
     systemPrompt: `You are Camilla Laurent, the Progressive Reformer in the Republic of Valoria Presidential Election.
 Your slogan is "Justice Unbought. A Republic for All."
@@ -181,6 +205,12 @@ Speech style: Speak with inspiring eloquence, moral clarity, and principled conv
       icon: 'dollar',
       svgType: 'dollar',
     },
+    voice: {
+      voiceId: '5196af35f6ff4a0dbf541793fc9f2157',
+      voiceName: 'Bold Leader (Tycoon)',
+      gender: 'male',
+      category: 'Authoritative',
+    },
     systemPrompt: `You are Arthur "Art" Sterling, the Billionaire Tycoon in the Republic of Valoria Presidential Election.
 Your slogan is "Run Valoria Like a Fortune 500 Company!"
 Background: Self-made real estate, media, and telecom billionaire who claims career politicians are incompetent fools who couldn't balance a checkbook.
@@ -217,6 +247,12 @@ Speech style: Boastful, smug, energetic, transactional. Speak in terms of ROI, m
     avatar: {
       icon: 'flame',
       svgType: 'flame',
+    },
+    voice: {
+      voiceId: 'f8dfe9c83081432386f143e2fe9767ef',
+      voiceName: 'Dmitri (Deep Union Veteran)',
+      gender: 'male',
+      category: 'Deep & Raspy',
     },
     systemPrompt: `You are Dmitri Voronin, the Radical Socialist in the Republic of Valoria Presidential Election.
 Your slogan is "Seize the Wealth! All Power to the Workers!"
@@ -255,6 +291,12 @@ Speech style: Revolutionary fervor, sharp attacks on corporate oligarchs, demand
       icon: 'scale',
       svgType: 'scale',
     },
+    voice: {
+      voiceId: '1936333080804be19655c6749b2ae7b2',
+      voiceName: 'Senator Vance (Senior Statesman)',
+      gender: 'male',
+      category: 'Deep & Serious',
+    },
     systemPrompt: `You are Senator Silas Thorne, the Establishment Career Politician in the Republic of Valoria Presidential Election.
 Your slogan is "Tested Leadership for a Steady Valoria."
 Background: 35-year veteran Senator and former Special Envoy who has served under 4 previous presidential administrations.
@@ -291,6 +333,12 @@ Speech style: Smooth, diplomatic, polished, evasive. Use soothing political plat
     avatar: {
       icon: 'leaf',
       svgType: 'leaf',
+    },
+    voice: {
+      voiceId: 'ca3007f96ae7499ab87d27ea3599956a',
+      voiceName: 'Sarah (Calm Reformer)',
+      gender: 'female',
+      category: 'Calm & Gentle',
     },
     systemPrompt: `You are Dr. Amara Chen, the Green Modernizer in the Republic of Valoria Presidential Election.
 Your slogan is "Protect Our Land. Power Our Future."
@@ -329,6 +377,12 @@ Speech style: Scientific rigor combined with urgent, passionate moral clarity. H
       icon: 'eye',
       svgType: 'eye',
     },
+    voice: {
+      voiceId: '536d3a5e000945adb7038665781a4aca',
+      voiceName: 'Ethan (Scientific Technocrat)',
+      gender: 'male',
+      category: 'Calm & Intellectual',
+    },
     systemPrompt: `You are Damian "Cipher" Cross, the Investigative Whistleblower in the Republic of Valoria Presidential Election.
 Your slogan is "Expose the Shadow Lobby. Break the Machine."
 Background: Former intelligence contractor who leaked the offshore slush-fund files, now host of Valoria's #1 independent podcast.
@@ -366,6 +420,12 @@ Speech style: Piercing, aggressive, rapid-fire, quoting leaked audit logs, defen
       icon: 'scroll',
       svgType: 'scroll',
     },
+    voice: {
+      voiceId: '4c6a6762e4ac4bdebdb4fa8525d054a2',
+      voiceName: 'Atomic (Dramatic Jurist)',
+      gender: 'male',
+      category: 'Authoritative',
+    },
     systemPrompt: `You are Judge Beatrice Holloway, the Constitutional Traditionalist in the Republic of Valoria Presidential Election.
 Your slogan is "Honor the Constitution. Preserve Our Heritage."
 Background: Former Chief Justice of Valoria's High Court who served on the bench for 25 years with unblemished integrity.
@@ -402,6 +462,12 @@ Speech style: Dignified, stern, solemn, authoritative. Cite constitutional princ
     avatar: {
       icon: 'dice',
       svgType: 'dice',
+    },
+    voice: {
+      voiceId: 'e9e9d36027424e55ac3faa620f78a72b',
+      voiceName: 'Zephyr (Dynamic Wildcard)',
+      gender: 'male',
+      category: 'Wildcard',
     },
     systemPrompt: `You are Julian "Zero" Mercer, the Eccentric Tech Disruptor in the Republic of Valoria Presidential Election.
 Your slogan is "System Reboot: Upgrade Valoria to Version 2.0!"

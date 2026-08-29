@@ -36,6 +36,15 @@ export type CandidateSvgIcon =
   | 'star'
   | 'hammer';
 
+export interface CandidateVoiceConfig {
+  voiceId: string;        // Fish Audio reference_id
+  voiceName: string;      // Display name (e.g. "Adrian", "Donald", "Ethan")
+  gender?: 'male' | 'female' | 'neutral';
+  category?: string;      // e.g. "Authoritative", "Energetic", "Calm", "Deep", "Tech"
+  speed?: number;         // Speech rate (default: 1.0)
+  sampleText?: string;    // Sample text for audio preview
+}
+
 export interface Candidate {
   id: string;
   name: string;
@@ -65,6 +74,7 @@ export interface Candidate {
     icon: string;
     svgType: CandidateSvgIcon;
   };
+  voice?: CandidateVoiceConfig; // Fish Audio Voice reference
   customAvatarUrl?: string; // Cropped custom uploaded photo / avatar
   isCustom?: boolean;       // Flag if created by user
   systemPrompt: string;

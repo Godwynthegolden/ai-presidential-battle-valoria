@@ -36,6 +36,9 @@ export default function AIPlaygroundPage() {
     baseUrl: 'http://localhost:20128/v1',
     apiKey: '',
     model: 'gpt-4o-mini',
+    fishAudioApiKey: 'sk-fish-5Zz7hVlOft5sr46Nz1jPf4LhAPdSBJ0Ar08dxdBdCq0',
+    fishAudioModel: 's2.1-pro-free',
+    fishAudioEnabled: true,
   });
 
   const [activeView, setActiveView] = useState<'arena' | 'characters'>('arena');
@@ -59,8 +62,14 @@ export default function AIPlaygroundPage() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed.baseUrl || parsed.apiKey) {
-          setNineRouterConfig(parsed);
+        if (parsed.baseUrl || parsed.apiKey || parsed.fishAudioApiKey) {
+          setNineRouterConfig(prev => ({
+            ...prev,
+            ...parsed,
+            fishAudioApiKey: parsed.fishAudioApiKey || prev.fishAudioApiKey || 'sk-fish-5Zz7hVlOft5sr46Nz1jPf4LhAPdSBJ0Ar08dxdBdCq0',
+            fishAudioModel: parsed.fishAudioModel || prev.fishAudioModel || 's2.1-pro-free',
+            fishAudioEnabled: parsed.fishAudioEnabled !== false,
+          }));
           return;
         }
       }
@@ -71,6 +80,7 @@ export default function AIPlaygroundPage() {
       .then(res => res.json())
       .then(data => {
         setNineRouterConfig(prev => ({
+          ...prev,
           baseUrl: data.defaultBaseUrl || prev.baseUrl,
           apiKey: prev.apiKey || '',
           model: data.defaultModel || prev.model,
@@ -89,6 +99,9 @@ export default function AIPlaygroundPage() {
   const {
     state,
     candidates,
+    isSpeakingAudio,
+    playSpeechAudio,
+    stopSpeechAudio,
     startGame,
     nextStep,
     toggleAutoPlay,
@@ -313,6 +326,8 @@ export default function AIPlaygroundPage() {
                 onRetry={retryCurrentStep}
                 onRestart={restartGame}
                 onSelectCCTVFeed={selectCCTVFeed}
+                onPlaySpeechAudio={playSpeechAudio}
+                isSpeakingAudio={isSpeakingAudio}
               />
             </div>
 

@@ -99,6 +99,85 @@ export function useGameEngine(
     sounds.enabled = state.playback.soundEnabled;
   }, [state.playback.soundEnabled]);
 
+  // TTS Speech Synthesis Player Controller
+  const [isSpeakingAudio, setIsSpeakingAudio] = useState(false);
+  const activeTtsAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopSpeechAudio = useCallback(() => {
+    if (activeTtsAudioRef.current) {
+      activeTtsAudioRef.current.pause();
+      activeTtsAudioRef.current = null;
+    }
+    setIsSpeakingAudio(false);
+  }, []);
+
+  const playSpeechAudio = useCallback(async (text: string, voiceId?: string, speakerCandidateId?: string) => {
+    if (!text || !text.trim()) return;
+
+    // Stop any existing playing speech
+    stopSpeechAudio();
+
+    const config = configRef.current;
+    if (config?.fishAudioEnabled === false || !state.playback.soundEnabled) {
+      return;
+    }
+
+    let targetVoiceId = voiceId;
+    if (!targetVoiceId && speakerCandidateId) {
+      const candidate = CANDIDATE_MAP.get(speakerCandidateId);
+      targetVoiceId = candidate?.voice?.voiceId;
+    }
+
+    try {
+      setIsSpeakingAudio(true);
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          voiceId: targetVoiceId,
+          apiKey: config?.fishAudioApiKey,
+          model: config?.fishAudioModel,
+        }),
+      });
+
+      if (!res.ok) {
+        setIsSpeakingAudio(false);
+        return;
+      }
+
+      const blob = await res.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+      activeTtsAudioRef.current = audio;
+
+      audio.onended = () => {
+        setIsSpeakingAudio(false);
+        activeTtsAudioRef.current = null;
+      };
+
+      audio.onerror = () => {
+        setIsSpeakingAudio(false);
+        activeTtsAudioRef.current = null;
+      };
+
+      await audio.play();
+    } catch (e) {
+      console.warn('[useGameEngine TTS playback error]:', e);
+      setIsSpeakingAudio(false);
+    }
+  }, [state.playback.soundEnabled, stopSpeechAudio]);
+
+  // Cleanup speech audio on unmount
+  useEffect(() => {
+    return () => {
+      if (activeTtsAudioRef.current) {
+        activeTtsAudioRef.current.pause();
+        activeTtsAudioRef.current = null;
+      }
+    };
+  }, []);
+
   // Call the server API for LLM generation with active 9router config
   const callLLM = async (payload: LLMRequestPayload) => {
     const activeConfig = configRef.current;
@@ -367,6 +446,7 @@ export function useGameEngine(
         });
 
         sounds.playSpeechBeep();
+        playSpeechAudio(result.text, firstCandidate.voice?.voiceId, firstCandidate.id);
 
         setState(prev => ({
           ...prev,
@@ -426,6 +506,7 @@ export function useGameEngine(
           });
 
           sounds.playSpeechBeep();
+          playSpeechAudio(result.text, speaker.voice?.voiceId, speaker.id);
 
           setState(prev => ({
             ...prev,
@@ -495,6 +576,7 @@ export function useGameEngine(
           });
 
           sounds.playAttackSting();
+          playSpeechAudio(result.text, firstAttacker.voice?.voiceId, firstAttacker.id);
 
           const attackEvent: AttackEvent = {
             id: `atk-${Date.now()}`,
@@ -587,6 +669,7 @@ export function useGameEngine(
           });
 
           sounds.playAttackSting();
+          playSpeechAudio(result.text, attacker.voice?.voiceId, attacker.id);
 
           const attackEvent: AttackEvent = {
             id: `atk-${Date.now()}`,
@@ -1152,6 +1235,7 @@ export function useGameEngine(
           });
 
           sounds.playSpeechBeep();
+          playSpeechAudio(result.text, firstFinalist.voice?.voiceId, firstFinalist.id);
 
           setState(prev => ({
             ...prev,
@@ -1212,6 +1296,7 @@ export function useGameEngine(
           });
 
           sounds.playSpeechBeep();
+          playSpeechAudio(result.text, finalist.voice?.voiceId, finalist.id);
 
           setState(prev => ({
             ...prev,
@@ -1381,6 +1466,8 @@ export function useGameEngine(
           historyContext: {},
         });
 
+        playSpeechAudio(result.text, winner.voice?.voiceId, winner.id);
+
         setState(prev => ({
           ...prev,
           victorySpeech: result.text,
@@ -1463,11 +1550,7 @@ export function useGameEngine(
   const toggleAutoPlay = () => {
     setState(prev => ({
       ...prev,
-      playback: {
-        ...prev.playback,
-        autoPlay: !prev.playback.autoPlay,
-        isPaused: false,
-      }
+      playback: { ...prev.playback, autoPlay: !prev.playback.autoPlay }
     }));
   };
 
@@ -1479,14 +1562,21 @@ export function useGameEngine(
   };
 
   const toggleSound = () => {
-    setState(prev => ({
-      ...prev,
-      playback: { ...prev.playback, soundEnabled: !prev.playback.soundEnabled }
-    }));
+    setState(prev => {
+      const nextSound = !prev.playback.soundEnabled;
+      if (!nextSound) {
+        stopSpeechAudio();
+      }
+      return {
+        ...prev,
+        playback: { ...prev.playback, soundEnabled: nextSound }
+      };
+    });
   };
 
   const restartGame = () => {
     if (autoPlayTimer.current) clearTimeout(autoPlayTimer.current);
+    stopSpeechAudio();
     isExecutingStep.current = false;
     setState(CREATE_INITIAL_STATE(state.participatingCandidateIds));
   };
@@ -1518,6 +1608,9 @@ export function useGameEngine(
   return {
     state,
     candidates,
+    isSpeakingAudio,
+    playSpeechAudio,
+    stopSpeechAudio,
     startGame,
     nextStep,
     toggleAutoPlay,
