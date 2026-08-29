@@ -26,6 +26,8 @@ interface VoteRevealBoardProps {
   winnerId?: string | null;
   candidateBudgets?: Record<string, number>;
   activeCandidateIds?: string[];
+  defaultSpeed?: 0.5 | 1.0 | 2.0;
+  defaultAutoPlay?: boolean;
   onComplete?: () => void;
 }
 
@@ -53,10 +55,12 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
   winnerId,
   candidateBudgets = {},
   activeCandidateIds = [],
+  defaultSpeed = 1.0,
+  defaultAutoPlay = true,
   onComplete,
 }) => {
-  const [speed, setSpeed] = useState<0.5 | 1.0 | 2.0>(1.0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [speed, setSpeed] = useState<0.5 | 1.0 | 2.0>(defaultSpeed);
+  const [isPlaying, setIsPlaying] = useState<boolean>(defaultAutoPlay);
   const [phase, setPhase] = useState<RevealPhase>('CLEAN_INTRO');
   
   const [currentBallotIndex, setCurrentBallotIndex] = useState<number>(-1);
@@ -66,6 +70,10 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const activeBailoutBadgeRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    setSpeed(defaultSpeed);
+  }, [defaultSpeed]);
+
   const participatingIds = useMemo(() => {
     if (activeCandidateIds && activeCandidateIds.length > 0) return activeCandidateIds;
     return Object.keys(tally.tally);
@@ -74,10 +82,10 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
   const initialBudgets = useMemo(() => {
     const map: Record<string, number> = {};
     participatingIds.forEach(id => {
-      map[id] = candidateBudgets[id] ?? 100;
+      map[id] = tally.initialBudgets?.[id] ?? candidateBudgets[id] ?? CANDIDATE_MAP.get(id)?.initialBudget ?? 100;
     });
     return map;
-  }, [participatingIds, candidateBudgets]);
+  }, [participatingIds, tally.initialBudgets, candidateBudgets]);
 
   const liveCandidateStates = useMemo<Record<string, CandidateDisplayState>>(() => {
     const states: Record<string, CandidateDisplayState> = {};
@@ -263,26 +271,43 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 bg-slate-950/90 p-1.5 rounded-2xl border border-slate-800 shadow-lg">
-            <button type="button" onClick={() => setIsPlaying(prev => !prev)} className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/60 text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <button 
+              type="button" 
+              onClick={() => setIsPlaying(prev => !prev)} 
+              className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/60 text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer"
+              title={isPlaying ? 'Pause auto-progression' : 'Play auto-progression'}
+            >
               {isPlaying ? <Pause className="w-3.5 h-3.5 text-amber-400" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
               <span className="hidden sm:inline">{isPlaying ? 'Pause' : 'Play'}</span>
             </button>
-            <button type="button" onClick={() => { setIsPlaying(false); stepForward(); }} disabled={phase === 'COMPLETE'} className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-800/80 text-xs font-mono font-bold transition flex items-center gap-1 cursor-pointer disabled:opacity-40">
+            <button 
+              type="button" 
+              onClick={() => { setIsPlaying(false); stepForward(); }} 
+              disabled={phase === 'COMPLETE'} 
+              className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-800/80 text-xs font-mono font-bold transition flex items-center gap-1 cursor-pointer disabled:opacity-40"
+              title="Step forward 1 ballot or bailout"
+            >
               <ArrowRight className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Next</span>
             </button>
-            <div className="flex items-center bg-slate-900 rounded-xl border border-slate-800 p-0.5 text-[11px] font-mono font-bold">
-              {[0.5, 1.0, 2.0].map(s => (
-                <button key={s} type="button" onClick={() => setSpeed(s as any)} className={`px-1.5 py-0.5 rounded-lg transition ${speed === s ? 'bg-cyan-500 text-black font-black' : 'text-slate-400 hover:text-white'}`}>
-                  {s}x
-                </button>
-              ))}
-            </div>
-            <button type="button" onClick={skipToEnd} disabled={phase === 'COMPLETE'} className="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-mono transition">
+            <button 
+              type="button" 
+              onClick={skipToEnd} 
+              disabled={phase === 'COMPLETE'} 
+              className="p-1.5 sm:px-2 sm:py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-mono transition flex items-center gap-1 cursor-pointer disabled:opacity-40"
+              title="Skip to final tally"
+            >
               <SkipForward className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Skip</span>
             </button>
-            <button type="button" onClick={replayReveal} className="p-1.5 rounded-xl bg-purple-950/80 hover:bg-purple-900 text-purple-300 border border-purple-800 text-xs font-mono transition">
+            <button 
+              type="button" 
+              onClick={replayReveal} 
+              className="p-1.5 sm:px-2 sm:py-1.5 rounded-xl bg-purple-950/80 hover:bg-purple-900 text-purple-300 border border-purple-800 text-xs font-mono transition flex items-center gap-1 cursor-pointer"
+              title="Replay entire reveal from 0"
+            >
               <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Replay</span>
             </button>
           </div>
         </div>

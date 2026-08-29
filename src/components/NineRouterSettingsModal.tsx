@@ -18,7 +18,11 @@ import {
   Volume2,
   Square,
   Play,
-  Layers
+  Layers,
+  Vote,
+  Banknote,
+  Sliders,
+  DollarSign
 } from 'lucide-react';
 
 export interface NineRouterConfigState {
@@ -29,6 +33,8 @@ export interface NineRouterConfigState {
   fishAudioModel?: string;
   fishAudioEnabled?: boolean;
   lookaheadDepth?: 2 | 3 | 4 | 5;
+  ballotSpeed?: 0.5 | 1.0 | 2.0;
+  ballotAutoPlay?: boolean;
 }
 
 interface NineRouterSettingsModalProps {
@@ -44,12 +50,16 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
   currentConfig,
   onSaveConfig,
 }) => {
-  const [activeTab, setActiveTab] = useState<'9router' | 'fishaudio'>('9router');
+  const [activeTab, setActiveTab] = useState<'9router' | 'fishaudio' | 'ballot'>('9router');
   const [baseUrl, setBaseUrl] = useState(currentConfig.baseUrl || 'http://localhost:20128/v1');
   const [apiKey, setApiKey] = useState(currentConfig.apiKey || '');
   const [model, setModel] = useState(currentConfig.model || 'gpt-4o-mini');
   const [lookaheadDepth, setLookaheadDepth] = useState<2 | 3 | 4 | 5>(currentConfig.lookaheadDepth || 2);
   const [showKey, setShowKey] = useState(false);
+
+  // Ballot Live Feed settings
+  const [ballotSpeed, setBallotSpeed] = useState<0.5 | 1.0 | 2.0>(currentConfig.ballotSpeed ?? 1.0);
+  const [ballotAutoPlay, setBallotAutoPlay] = useState<boolean>(currentConfig.ballotAutoPlay !== false);
 
   // Fish Audio settings
   const [fishAudioApiKey, setFishAudioApiKey] = useState(
@@ -80,6 +90,8 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
       setApiKey(currentConfig.apiKey || '');
       setModel(currentConfig.model || 'gpt-4o-mini');
       setLookaheadDepth(currentConfig.lookaheadDepth || 2);
+      setBallotSpeed(currentConfig.ballotSpeed ?? 1.0);
+      setBallotAutoPlay(currentConfig.ballotAutoPlay !== false);
       setFishAudioApiKey(currentConfig.fishAudioApiKey || 'sk-fish-5Zz7hVlOft5sr46Nz1jPf4LhAPdSBJ0Ar08dxdBdCq0');
       setFishAudioModel(currentConfig.fishAudioModel || 's2.1-pro-free');
       setFishAudioEnabled(currentConfig.fishAudioEnabled !== false);
@@ -158,19 +170,18 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
 
     setIsTestingTts(true);
     setStatusMessage({ type: 'idle', text: '' });
-    setTtsTestSuccess(false);
-
-    if (activeAudioRef.current) {
-      activeAudioRef.current.pause();
-      activeAudioRef.current = null;
-    }
 
     try {
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+        activeAudioRef.current = null;
+      }
+
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: 'Fish Audio Text-To-Speech is successfully connected and online for Republic of Valoria!',
+          text: 'The Republic of Valoria presidential election broadcast system is operating normally.',
           apiKey: fishAudioApiKey.trim(),
           model: fishAudioModel.trim(),
         }),
@@ -178,22 +189,31 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
 
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || `HTTP ${res.status}: Synthesis failed`);
+        throw new Error(errJson.error || `TTS request failed with HTTP ${res.status}`);
       }
 
-      const blob = await res.blob();
-      const audioUrl = URL.createObjectURL(blob);
+      const audioBlob = await res.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       activeAudioRef.current = audio;
 
       audio.onended = () => {
         setIsTestingTts(false);
+        setTtsTestSuccess(true);
+        URL.revokeObjectURL(audioUrl);
       };
+
       audio.onerror = () => {
         setIsTestingTts(false);
+        setStatusMessage({
+          type: 'error',
+          text: 'Audio playback failed in browser.',
+        });
+        URL.revokeObjectURL(audioUrl);
       };
 
       await audio.play();
+      setIsTestingTts(false);
       setTtsTestSuccess(true);
       setStatusMessage({
         type: 'success',
@@ -230,6 +250,8 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
       fishAudioApiKey: fishAudioApiKey.trim(),
       fishAudioModel: fishAudioModel.trim(),
       fishAudioEnabled: fishAudioEnabled,
+      ballotSpeed,
+      ballotAutoPlay,
     });
     onClose();
   };
@@ -250,9 +272,17 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
             <div className={`p-2.5 rounded-xl border transition ${
               activeTab === '9router'
                 ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
-                : 'bg-purple-500/10 border-purple-500/30 text-purple-400'
+                : activeTab === 'fishaudio'
+                ? 'bg-purple-500/10 border-purple-500/30 text-purple-400'
+                : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
             }`}>
-              {activeTab === '9router' ? <Cpu className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+              {activeTab === '9router' ? (
+                <Cpu className="w-6 h-6" />
+              ) : activeTab === 'fishaudio' ? (
+                <Mic className="w-6 h-6" />
+              ) : (
+                <Vote className="w-6 h-6" />
+              )}
             </div>
             <div>
               <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-wide flex items-center gap-2">
@@ -262,13 +292,13 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
                 </span>
               </h2>
               <p className="text-xs text-slate-400 font-mono">
-                Manage 9router LLM endpoints and Fish.Audio speech synthesis.
+                Manage 9router LLM endpoints, Fish.Audio speech synthesis &amp; ballot animation pacing.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition"
+            className="p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -279,26 +309,38 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
           <button
             type="button"
             onClick={() => { setActiveTab('9router'); setStatusMessage({ type: 'idle', text: '' }); }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-bold transition cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl font-bold transition cursor-pointer ${
               activeTab === '9router'
                 ? 'bg-cyan-500 text-black shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Cpu className="w-4 h-4" />
-            <span>9router LLM Engine</span>
+            <Cpu className="w-3.5 h-3.5" />
+            <span>9router LLM</span>
           </button>
           <button
             type="button"
             onClick={() => { setActiveTab('fishaudio'); setStatusMessage({ type: 'idle', text: '' }); }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-bold transition cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl font-bold transition cursor-pointer ${
               activeTab === 'fishaudio'
                 ? 'bg-purple-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Mic className="w-4 h-4" />
-            <span>Fish.Audio (TTS)</span>
+            <Mic className="w-3.5 h-3.5" />
+            <span>Fish.Audio</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => { setActiveTab('ballot'); setStatusMessage({ type: 'idle', text: '' }); }}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl font-bold transition cursor-pointer ${
+              activeTab === 'ballot'
+                ? 'bg-emerald-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Vote className="w-3.5 h-3.5" />
+            <span>Ballot Feed</span>
           </button>
         </div>
 
@@ -563,6 +605,79 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
                 </>
               )}
             </button>
+          </div>
+        )}
+
+        {/* Form Body: Tab 3 - Ballot Live Feed */}
+        {activeTab === 'ballot' && (
+          <div className="flex flex-col gap-4">
+            {/* 1. Animation Speed Selection */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <Sliders className="w-3.5 h-3.5 text-emerald-400" /> Ballot Reveal &amp; Bailout Speed
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 0.5, label: '0.5x Cinematic', desc: 'Slow & suspenseful for YouTube drama (2.5s/step)' },
+                  { value: 1.0, label: '1.0x Standard', desc: 'Balanced broadcast speed (1.4s/step)' },
+                  { value: 2.0, label: '2.0x Fast', desc: 'Quick count (0.7s/step)' },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setBallotSpeed(opt.value as 0.5 | 1.0 | 2.0)}
+                    className={`flex flex-col items-start p-3 rounded-2xl border text-left transition cursor-pointer ${
+                      ballotSpeed === opt.value
+                        ? 'bg-emerald-950/70 border-emerald-500 text-white shadow-lg shadow-emerald-950/50'
+                        : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                    }`}
+                  >
+                    <span className={`text-xs font-mono font-black ${ballotSpeed === opt.value ? 'text-emerald-400' : 'text-slate-300'}`}>
+                      {opt.label}
+                    </span>
+                    <span className="text-[10px] text-slate-400 mt-1 leading-snug">
+                      {opt.desc}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. Auto-Play Ballot Feed */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-emerald-200 flex items-center gap-1.5">
+                  <Play className="w-3.5 h-3.5 text-emerald-400" /> Auto-Play Live Ballot Feed
+                </span>
+                <span className="text-[11px] text-slate-400 font-mono">
+                  Automatically advance through unsealed votes and -$40 bailout steps.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBallotAutoPlay(!ballotAutoPlay)}
+                className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition cursor-pointer ${
+                  ballotAutoPlay
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'
+                    : 'bg-slate-900 text-slate-400 border border-slate-800'
+                }`}
+              >
+                {ballotAutoPlay ? 'ON' : 'OFF'}
+              </button>
+            </div>
+
+            {/* 3. $40 Capitol Vote Bailout Details Info Card */}
+            <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-800/40 flex items-start gap-3 text-xs text-emerald-300/90 leading-relaxed font-sans">
+              <DollarSign className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-emerald-300 text-xs mb-1">
+                  YouTube-Ready Bailout Auction System
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  During live vote counting, candidates in 1st place on the chopping block automatically pay $40 to remove 1 elimination vote if they hold funds. GSAP spring tweens animate the floating cash badge and smoothly rearrange leaderboard rankings.
+                </p>
+              </div>
+            </div>
           </div>
         )}
 

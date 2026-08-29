@@ -79,6 +79,7 @@ export interface RoundVoteTally {
   votes: VoteRecord[];
   initialTally?: Record<string, number>;        // Raw vote count before bailout auction
   tally: Record<string, number>;               // Final vote count after bailout auction
+  initialBudgets?: Record<string, number>;      // Candidate treasury balances going into the vote (before bailouts)
   eliminatedId: string | null;
   tieBreakerOccurred?: boolean;
   betrayalsCount?: number;

@@ -6,7 +6,7 @@ import {
   saveStoredSelectedCandidateIds 
 } from '../data/candidates';
 import { Candidate } from '../types/candidate';
-import { VoteRecord, BailoutTransaction } from '../types/game';
+import { VoteRecord, BailoutTransaction, RoundVoteTally } from '../types/game';
 import { sounds } from '../utils/audio';
 import { COLOR_PRESETS, createColorTheme, hexToRgb } from '../components/CharacterEditorModal';
 
@@ -550,7 +550,20 @@ Ideology: Direct algorithmic optimization of public resources.
     { id: 'bt-2', candidateId: 'marcus-vance', initialVotes: 1, votesRemoved: 1, cost: 40, remainingVotes: 0, remainingBudget: 0, round: 1, timestamp: Date.now() },
   ];
 
-  let currentBudgets = { ...initialBudgetsTest };
+  const roundTallyTest: RoundVoteTally = {
+    round: 1,
+    votes: sampleVotes,
+    tally: { 'marcus-vance': 0, 'elena-rostova': 1, 'jax-alvarez': 1 },
+    initialBudgets: { ...initialBudgetsTest },
+    eliminatedId: 'marcus-vance',
+    bailoutTransactions: sampleBailouts,
+  };
+
+  if (!roundTallyTest.initialBudgets || roundTallyTest.initialBudgets['marcus-vance'] !== 80) {
+    throw new Error('roundTally initialBudgets snapshot failed');
+  }
+
+  let currentBudgets = { ...roundTallyTest.initialBudgets };
   let currentVotes = { 'marcus-vance': 2, 'elena-rostova': 1, 'jax-alvarez': 1 };
 
   // Apply bailout 1

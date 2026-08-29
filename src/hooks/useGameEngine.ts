@@ -569,10 +569,17 @@ export function useGameEngine(
 
       saveStoredSelectedCandidateIds(nextSelected);
 
+      const nextBudgets: Record<string, number> = {};
+      nextSelected.forEach(id => {
+        const c = CANDIDATE_MAP.get(id) || candidates.find(cand => cand.id === id);
+        nextBudgets[id] = prev.candidateBudgets?.[id] ?? (typeof c?.initialBudget === 'number' ? c.initialBudget : 100);
+      });
+
       return {
         ...prev,
         participatingCandidateIds: nextSelected,
         activeCandidateIds: nextSelected,
+        candidateBudgets: nextBudgets,
         stage: {
           ...prev.stage,
           content: `${nextSelected.length} candidates selected (${nextSelected.length >= 4 ? 'Ready' : 'Minimum 4 required'}). Press Start Election to begin.`,
@@ -585,10 +592,18 @@ export function useGameEngine(
   const setSelectedCandidateIds = (ids: string[]) => {
     if (state.phase !== 'IDLE') return;
     saveStoredSelectedCandidateIds(ids);
+
+    const nextBudgets: Record<string, number> = {};
+    ids.forEach(id => {
+      const c = CANDIDATE_MAP.get(id) || candidates.find(cand => cand.id === id);
+      nextBudgets[id] = state.candidateBudgets?.[id] ?? (typeof c?.initialBudget === 'number' ? c.initialBudget : 100);
+    });
+
     setState(prev => ({
       ...prev,
       participatingCandidateIds: [...ids],
       activeCandidateIds: [...ids],
+      candidateBudgets: nextBudgets,
       stage: {
         ...prev.stage,
         content: `${ids.length} candidates selected. Press Start Election to begin.`,
@@ -1926,6 +1941,7 @@ export function useGameEngine(
           votes,
           initialTally: rawTally,
           tally: bailoutResult.finalTally,
+          initialBudgets: { ...state.candidateBudgets },
           eliminatedId: candidateToEliminate,
           tieBreakerOccurred: isTie,
           betrayalsCount: betrayalsList.length,
@@ -2495,6 +2511,7 @@ export function useGameEngine(
             round: 99,
             votes,
             tally,
+            initialBudgets: { ...state.candidateBudgets },
             eliminatedId: null,
           };
 

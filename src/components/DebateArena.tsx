@@ -38,6 +38,8 @@ interface DebateArenaProps {
   isBufferingLookahead?: boolean;
   bufferingStatus?: string;
   lookaheadBufferCount?: number;
+  ballotSpeed?: 0.5 | 1.0 | 2.0;
+  ballotAutoPlay?: boolean;
 }
 
 export const DebateArena: React.FC<DebateArenaProps> = ({
@@ -50,6 +52,8 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   isBufferingLookahead = false,
   bufferingStatus = '',
   lookaheadBufferCount = 0,
+  ballotSpeed = 1.0,
+  ballotAutoPlay = true,
 }) => {
   const { stage, phase, round, votesByRound, pactsByRound, finalVoteTally, winnerId, eliminatedCandidates } = gameState;
 
@@ -91,6 +95,8 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             eliminatedId={votesByRound[round].eliminatedId}
             candidateBudgets={gameState.candidateBudgets}
             activeCandidateIds={gameState.activeCandidateIds}
+            defaultSpeed={ballotSpeed}
+            defaultAutoPlay={ballotAutoPlay}
           />
         </div>
       </div>
@@ -108,6 +114,8 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             winnerId={winnerId}
             candidateBudgets={gameState.candidateBudgets}
             activeCandidateIds={gameState.participatingCandidateIds || gameState.activeCandidateIds}
+            defaultSpeed={ballotSpeed}
+            defaultAutoPlay={ballotAutoPlay}
           />
         </div>
       </div>
@@ -281,7 +289,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             </div>
 
             {/* Attack Speech Box */}
-            <div className="w-full relative rounded-3xl bg-slate-950/90 border-2 border-red-500/70 p-6 md:p-8 shadow-2xl shadow-red-950/60 backdrop-blur-xl">
+            <div className="w-full relative rounded-3xl bg-slate-950/90 border border-slate-750 p-6 md:p-8 shadow-2xl shadow-black/80 backdrop-blur-xl">
               <div className="flex items-center justify-between absolute -top-3.5 left-6 right-6">
                 <div className="px-3.5 py-1 rounded-md bg-red-600 text-white text-xs font-display font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5">
                   <Flame className="w-3.5 h-3.5" /> Public Denunciation
@@ -309,7 +317,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
                 </div>
               ) : (
                 <div className="relative">
-                  <Quote className="absolute -top-3 -left-2 w-8 h-8 text-red-500/20 -z-0 pointer-events-none" />
+                  <Quote className="absolute -top-3 -left-2 w-8 h-8 text-slate-750/40 -z-0 pointer-events-none" />
                   <p className="text-lg sm:text-xl md:text-2xl font-sans font-semibold text-white leading-relaxed relative z-10 italic">
                     &ldquo;{stage.content}&rdquo;
                   </p>

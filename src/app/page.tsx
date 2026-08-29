@@ -156,20 +156,6 @@ export default function AIPlaygroundPage() {
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
-      {/* Floating Clean Broadcast View Badge Indicator */}
-      {isCleanView && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-2 rounded-2xl bg-black/90 border border-slate-750 text-xs font-mono text-slate-200 backdrop-blur-2xl shadow-2xl animate-fade-in">
-          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-sm shadow-cyan-400" />
-          <span>Clean Broadcast Mode &bull; Press <strong className="text-cyan-300 font-bold px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700">H</strong> to restore UI</span>
-          <button 
-            onClick={() => setIsCleanView(false)}
-            className="ml-1 text-xs font-sans font-bold text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
-          >
-            Show All
-          </button>
-        </div>
-      )}
-
       {/* Top Broadcast Banner (Hidden in Clean View) */}
       {!isCleanView && (
         <header className="px-4 md:px-6 py-3 bg-[#06080d]/95 border-b border-slate-750 backdrop-blur-xl flex flex-wrap items-center justify-between gap-3 z-10 transition-all shrink-0">
@@ -339,6 +325,8 @@ export default function AIPlaygroundPage() {
                 isBufferingLookahead={isBufferingLookahead}
                 bufferingStatus={bufferingStatus}
                 lookaheadBufferCount={lookaheadBufferCount}
+                ballotSpeed={nineRouterConfig.ballotSpeed}
+                ballotAutoPlay={nineRouterConfig.ballotAutoPlay}
               />
             </div>
 
