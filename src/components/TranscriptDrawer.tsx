@@ -44,21 +44,38 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
     round: number;
   }> = [];
 
-  // 1. Campaign Speeches
-  Object.entries(campaignSpeeches).forEach(([candId, text]) => {
-    allEvents.push({
-      type: 'speech',
-      title: 'Campaign Speech',
-      speakerId: candId,
-      text,
-      round: 1,
-    });
-  });
+  const roundNumbers = new Set<number>([1, gameState.round]);
+  Object.keys(attacksByRound).forEach(r => roundNumbers.add(Number(r)));
+  Object.keys(pactsByRound).forEach(r => roundNumbers.add(Number(r)));
+  eliminatedCandidates.forEach(e => roundNumbers.add(e.eliminatedInRound));
 
-  // 2. Attacks by round
-  Object.entries(attacksByRound).forEach(([rStr, attacks]) => {
-    const r = parseInt(rStr, 10);
-    attacks.forEach(a => {
+  const sortedRoundNumbers = Array.from(roundNumbers)
+    .filter(r => r > 0 && r < 90)
+    .sort((a, b) => a - b);
+
+  sortedRoundNumbers.forEach(r => {
+    // 1. If Round 1, add Campaign Speeches
+    if (r === 1) {
+      const speakerOrder = (gameState.participatingCandidateIds && gameState.participatingCandidateIds.length > 0)
+        ? gameState.participatingCandidateIds
+        : Object.keys(campaignSpeeches);
+
+      speakerOrder.forEach(candId => {
+        if (campaignSpeeches[candId]) {
+          allEvents.push({
+            type: 'speech',
+            title: 'Campaign Speech',
+            speakerId: candId,
+            text: campaignSpeeches[candId],
+            round: 1,
+          });
+        }
+      });
+    }
+
+    // 2. Attacks in Round r
+    const roundAttacks = attacksByRound[r] || [];
+    roundAttacks.forEach(a => {
       allEvents.push({
         type: 'attack',
         title: `Round ${r} Attack`,
@@ -68,12 +85,10 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
         round: r,
       });
     });
-  });
 
-  // 3. Backroom Pacts by round
-  Object.entries(pactsByRound).forEach(([rStr, pacts]) => {
-    const r = parseInt(rStr, 10);
-    pacts.forEach(p => {
+    // 3. Backroom Pacts in Round r
+    const roundPacts = pactsByRound[r] || [];
+    roundPacts.forEach(p => {
       allEvents.push({
         type: 'pact',
         title: `Round ${r} Leaked CCTV Backroom Deal`,
@@ -83,16 +98,17 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
         round: r,
       });
     });
-  });
 
-  // 4. Eliminations
-  eliminatedCandidates.forEach(e => {
-    allEvents.push({
-      type: 'elimination',
-      title: `Round ${e.eliminatedInRound} Elimination Exit Words`,
-      speakerId: e.candidateId,
-      text: e.exitWords,
-      round: e.eliminatedInRound,
+    // 4. Eliminations in Round r
+    const roundEliminations = eliminatedCandidates.filter(e => e.eliminatedInRound === r);
+    roundEliminations.forEach(e => {
+      allEvents.push({
+        type: 'elimination',
+        title: `Round ${e.eliminatedInRound} Elimination Exit Words`,
+        speakerId: e.candidateId,
+        text: e.exitWords,
+        round: e.eliminatedInRound,
+      });
     });
   });
 

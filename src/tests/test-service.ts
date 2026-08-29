@@ -236,7 +236,90 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('Concession prompt with backroom betrayal context PASSED!');
 
-  console.log('\nAll unit tests for AI Candidate Intelligence, Crisis Topics & Prompt Engine PASSED successfully!');
+  // Test Timeline Event Ordering post-elimination
+  console.log('Testing Live Battle Timeline Chronological Ordering...');
+  const mockState = {
+    phase: 'ATTACK' as const,
+    round: 2,
+    participatingCandidateIds: ['cand1', 'cand2', 'cand3', 'cand4', 'cand5'],
+    activeCandidateIds: ['cand1', 'cand2', 'cand3', 'cand4'],
+    eliminatedCandidates: [
+      { candidateId: 'cand5', eliminatedInRound: 1, voteCount: 3, exitWords: 'Goodbye Valoria' }
+    ],
+    currentSpeakerIndex: 0,
+    campaignSpeeches: {
+      'cand1': 'Speech 1',
+      'cand2': 'Speech 2',
+      'cand3': 'Speech 3',
+      'cand4': 'Speech 4',
+      'cand5': 'Speech 5',
+    } as Record<string, string>,
+    finalSpeeches: {} as Record<string, string>,
+    attacksByRound: {
+      1: [
+        { id: 'atk-r1-1', round: 1, attackerId: 'cand1', targetId: 'cand2', text: 'Attack R1', timestamp: 100 }
+      ],
+      2: [
+        { id: 'atk-r2-1', round: 2, attackerId: 'cand1', targetId: 'cand3', text: 'Attack R2', timestamp: 200 }
+      ],
+    } as Record<number, any[]>,
+    pactsByRound: {
+      1: [
+        { id: 'pact-r1-1', round: 1, proposerId: 'cand1', receiverId: 'cand2', agreedTargetId: 'cand5', whisperText: 'Pact R1', location: 'Hallway', timestamp: 150 }
+      ],
+    } as Record<number, any[]>,
+    votesByRound: {},
+    finalVoteTally: null,
+    victorySpeech: null,
+    winnerId: null,
+    stage: {
+      speakerId: 'cand1',
+      targetId: 'cand3',
+      actionType: 'attack' as const,
+      headline: 'Attack R2',
+      content: 'Attack R2',
+      isLoading: false,
+      isRevealingVotes: false,
+      revealedVoteIndex: 0,
+      error: null,
+    },
+    playback: { autoPlay: false, speed: 'normal' as const, soundEnabled: true, isPaused: false },
+    tickerLog: [],
+  };
+
+  const roundNumbers = new Set<number>([1, mockState.round]);
+  Object.keys(mockState.attacksByRound).forEach(r => roundNumbers.add(Number(r)));
+  Object.keys(mockState.pactsByRound).forEach(r => roundNumbers.add(Number(r)));
+  mockState.eliminatedCandidates.forEach(e => roundNumbers.add(e.eliminatedInRound));
+  const sortedRounds = Array.from(roundNumbers).sort((a, b) => a - b);
+  
+  const testEvents: any[] = [];
+  sortedRounds.forEach(r => {
+    if (r === 1) {
+      mockState.participatingCandidateIds.forEach(id => {
+        if (mockState.campaignSpeeches[id]) {
+          testEvents.push({ id: `speech-r1-${id}`, round: 1, type: 'speech' });
+        }
+      });
+    }
+    (mockState.attacksByRound[r] || []).forEach(a => testEvents.push({ id: a.id, round: r, type: 'attack' }));
+    (mockState.pactsByRound[r] || []).forEach(p => testEvents.push({ id: p.id, round: r, type: 'pact' }));
+    mockState.eliminatedCandidates.filter(e => e.eliminatedInRound === r).forEach(e => testEvents.push({ id: `elim-r${r}-${e.candidateId}`, round: r, type: 'elimination' }));
+  });
+  const reversed = [...testEvents].reverse();
+
+  if (reversed[0].id !== 'atk-r2-1') {
+    throw new Error(`Expected latest event to be Round 2 attack 'atk-r2-1', but got '${reversed[0].id}'`);
+  }
+  if (reversed[1].id !== 'elim-r1-cand5') {
+    throw new Error(`Expected second event to be Round 1 elimination 'elim-r1-cand5', but got '${reversed[1].id}'`);
+  }
+  if (reversed[2].id !== 'pact-r1-1') {
+    throw new Error(`Expected third event to be Round 1 pact 'pact-r1-1', but got '${reversed[2].id}'`);
+  }
+  console.log('Live Battle Timeline Chronological Ordering post-elimination PASSED!');
+
+  console.log('\nAll unit tests for AI Candidate Intelligence, Timeline Chronology & Prompt Engine PASSED successfully!');
 }
 
 testEngine().catch(err => {

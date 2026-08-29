@@ -60,28 +60,49 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
     votesByRound, 
     eliminatedCandidates, 
     victorySpeech, 
-    winnerId 
+    winnerId,
+    participatingCandidateIds,
+    round: currentRound
   } = gameState;
 
-  // Build full chronological list
+  // Build full chronological round-by-round event stream
   const events: TimelineItem[] = [];
 
-  // 1. Campaign Speeches
-  Object.entries(campaignSpeeches).forEach(([candId, text]) => {
-    events.push({
-      id: `speech-r1-${candId}`,
-      type: 'speech',
-      round: 1,
-      title: 'Campaign Speech',
-      speakerId: candId,
-      text,
-    });
-  });
+  // Determine all active/past round numbers in ascending order
+  const roundNumbers = new Set<number>([1, currentRound]);
+  Object.keys(attacksByRound).forEach(r => roundNumbers.add(Number(r)));
+  Object.keys(pactsByRound).forEach(r => roundNumbers.add(Number(r)));
+  Object.keys(votesByRound).forEach(r => roundNumbers.add(Number(r)));
+  eliminatedCandidates.forEach(e => roundNumbers.add(e.eliminatedInRound));
 
-  // 2. Attacks by Round
-  Object.entries(attacksByRound).forEach(([rStr, attacks]) => {
-    const r = parseInt(rStr, 10);
-    attacks.forEach(a => {
+  const sortedRoundNumbers = Array.from(roundNumbers)
+    .filter(r => r > 0 && r < 90)
+    .sort((a, b) => a - b);
+
+  sortedRoundNumbers.forEach(r => {
+    // 1. If Round 1, add Campaign Speeches first
+    if (r === 1) {
+      const speakerOrder = (participatingCandidateIds && participatingCandidateIds.length > 0)
+        ? participatingCandidateIds
+        : Object.keys(campaignSpeeches);
+
+      speakerOrder.forEach(candId => {
+        if (campaignSpeeches[candId]) {
+          events.push({
+            id: `speech-r1-${candId}`,
+            type: 'speech',
+            round: 1,
+            title: 'Campaign Speech',
+            speakerId: candId,
+            text: campaignSpeeches[candId],
+          });
+        }
+      });
+    }
+
+    // 2. Live Attacks in Round r
+    const roundAttacks = attacksByRound[r] || [];
+    roundAttacks.forEach(a => {
       events.push({
         id: a.id || `attack-r${r}-${a.attackerId}-${a.targetId}`,
         type: 'attack',
@@ -92,12 +113,10 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
         text: a.text,
       });
     });
-  });
 
-  // 3. CCTV Backroom Pacts
-  Object.entries(pactsByRound).forEach(([rStr, pacts]) => {
-    const r = parseInt(rStr, 10);
-    pacts.forEach(p => {
+    // 3. CCTV Backroom Pacts in Round r
+    const roundPacts = pactsByRound[r] || [];
+    roundPacts.forEach(p => {
       events.push({
         id: p.id || `pact-r${r}-${p.proposerId}-${p.receiverId}`,
         type: 'pact',
@@ -110,22 +129,23 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
         location: p.location,
       });
     });
-  });
 
-  // 4. Eliminations
-  eliminatedCandidates.forEach(e => {
-    events.push({
-      id: `elim-r${e.eliminatedInRound}-${e.candidateId}`,
-      type: 'elimination',
-      round: e.eliminatedInRound,
-      title: `R${e.eliminatedInRound} Eliminated`,
-      speakerId: e.candidateId,
-      text: e.exitWords,
-      voteCount: e.voteCount,
+    // 4. Eliminations in Round r
+    const roundEliminations = eliminatedCandidates.filter(e => e.eliminatedInRound === r);
+    roundEliminations.forEach(e => {
+      events.push({
+        id: `elim-r${e.eliminatedInRound}-${e.candidateId}`,
+        type: 'elimination',
+        round: e.eliminatedInRound,
+        title: `R${e.eliminatedInRound} Eliminated`,
+        speakerId: e.candidateId,
+        text: e.exitWords,
+        voteCount: e.voteCount,
+      });
     });
   });
 
-  // 5. Final Speeches
+  // 5. Final Speeches (Top 3 Showdown)
   Object.entries(finalSpeeches).forEach(([candId, text]) => {
     events.push({
       id: `final-speech-${candId}`,
