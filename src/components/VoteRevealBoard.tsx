@@ -4,7 +4,17 @@ import React from 'react';
 import { RoundVoteTally } from '@/types/game';
 import { CANDIDATE_MAP } from '@/data/candidates';
 import { CandidateAvatar } from './CandidateAvatar';
-import { Vote, Skull, Crown, Award, CheckCircle2 } from 'lucide-react';
+import { 
+  Vote, 
+  Skull, 
+  Crown, 
+  Award, 
+  CheckCircle2, 
+  Swords, 
+  ShieldCheck, 
+  AlertTriangle,
+  Flame
+} from 'lucide-react';
 
 interface VoteRevealBoardProps {
   tally: RoundVoteTally;
@@ -21,6 +31,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
 }) => {
   const sortedCandidates = Object.entries(tally.tally).sort((a, b) => b[1] - a[1]);
   const maxVotes = Math.max(...Object.values(tally.tally), 1);
+  const betrayals = tally.votes.filter(v => v.isBetrayal);
 
   return (
     <div className="w-full max-w-3xl flex flex-col gap-6 rounded-2xl bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 border border-slate-800 p-6 md:p-8 shadow-2xl backdrop-blur-xl animate-fade-in">
@@ -36,17 +47,25 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
             </h2>
             <p className="text-xs text-slate-400 font-mono mt-0.5">
               {isFinalVote 
-                ? 'All 11 candidates cast their secret ballots to determine the President.'
-                : 'Highest vote recipient is permanently eliminated from the presidential race.'}
+                ? 'All participating candidates cast secret ballots for the President of Valoria.'
+                : 'Highest vote recipient is eliminated from the presidential race.'}
             </p>
           </div>
         </div>
 
-        {tally.tieBreakerOccurred && (
-          <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
-            Tie-Breaker Applied
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {betrayals.length > 0 && !isFinalVote && (
+            <span className="flex items-center gap-1 text-[10px] font-mono font-black uppercase px-2.5 py-1 rounded-full bg-red-950 text-red-300 border border-red-700 animate-pulse shadow-md">
+              <Swords className="w-3.5 h-3.5 text-red-400" /> {betrayals.length} {betrayals.length === 1 ? 'Betrayal' : 'Betrayals'} Uncovered!
+            </span>
+          )}
+
+          {tally.tieBreakerOccurred && (
+            <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+              Tie-Breaker Applied
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Vote Bar Tally Rows */}
@@ -88,7 +107,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                       {candidate.name}
                     </span>
                     <span className="text-[11px] text-slate-400 ml-2">
-                      ({candidate.archetypeTitle})
+                      ({candidate.titleRole})
                     </span>
                   </div>
                 </div>
@@ -128,27 +147,68 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
         })}
       </div>
 
-      {/* Secret Ballots List */}
-      <div className="flex flex-col gap-2 pt-3 border-t border-slate-800/80">
-        <span className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider">
-          Individual Ballots Cast:
-        </span>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+      {/* Secret Ballots List with Alliance & Betrayal Flags */}
+      <div className="flex flex-col gap-2.5 pt-3 border-t border-slate-800/80">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider">
+            Individual Ballots & Backroom Deal Verifications:
+          </span>
+          <span className="text-[10px] font-mono text-slate-500 hidden sm:inline">
+            (Pacts vs Votes Verified)
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {tally.votes.map((v, i) => {
             const voter = CANDIDATE_MAP.get(v.voterId);
             const target = CANDIDATE_MAP.get(v.targetId);
+            const ally = v.betrayedAllyId || v.pactWithId ? CANDIDATE_MAP.get(v.betrayedAllyId || v.pactWithId!) : null;
+
             return (
               <div 
                 key={i} 
-                className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px]"
+                className={`flex flex-col gap-1 p-2 rounded-xl border text-xs transition-all ${
+                  v.isBetrayal 
+                    ? 'bg-red-950/70 border-red-600/80 shadow-md shadow-red-950/40' 
+                    : v.isHonoredPact 
+                    ? 'bg-emerald-950/40 border-emerald-700/60' 
+                    : 'bg-slate-950/80 border-slate-800'
+                }`}
               >
-                <span className="font-semibold text-slate-300 truncate max-w-[90px]">
-                  {voter?.name.split(' ')[0]}
-                </span>
-                <span className="text-slate-500">&rarr;</span>
-                <span className="font-bold text-cyan-400 truncate max-w-[90px]">
-                  {target?.name.split(' ')[0]}
-                </span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <span className="text-white">{voter?.name.split(' ')[0]}</span>
+                    <span className="text-slate-500">&rarr;</span>
+                    <span className="text-cyan-400">{target?.name.split(' ')[0]}</span>
+                  </div>
+
+                  {v.isBetrayal ? (
+                    <span className="flex items-center gap-1 text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded bg-red-600 text-white animate-pulse">
+                      <Swords className="w-2.5 h-2.5" /> BETRAYAL!
+                    </span>
+                  ) : v.isHonoredPact ? (
+                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-emerald-900/80 text-emerald-300 border border-emerald-700/50">
+                      <ShieldCheck className="w-2.5 h-2.5 text-emerald-400" /> PACT KEPT
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-mono text-slate-500">
+                      Independent
+                    </span>
+                  )}
+                </div>
+
+                {/* Betrayal or Pact Subtitle Note */}
+                {v.isBetrayal && ally && (
+                  <p className="text-[10px] font-mono text-red-300 leading-tight">
+                    &bull; Broke secret pact with <strong className="text-white">{ally.name.split(' ')[0]}</strong> to eliminate {target?.name.split(' ')[0]}!
+                  </p>
+                )}
+
+                {v.isHonoredPact && ally && (
+                  <p className="text-[10px] font-mono text-emerald-400/90 leading-tight">
+                    &bull; Voted alongside <strong className="text-white">{ally.name.split(' ')[0]}</strong> as secretly agreed in the Capitol backroom.
+                  </p>
+                )}
               </div>
             );
           })}

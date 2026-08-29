@@ -27,12 +27,13 @@ async function testEngine() {
   const preset11 = CANDIDATES.map(c => c.id);
   console.log(`Verified custom roster presets: Quick4 (${preset4.length}), Top6 (${preset6.length}), Top8 (${preset8.length}), All11 (${preset11.length})`);
 
-  console.log('\nTesting unconfigured error handling:');
+  console.log('\nTesting backroom_pact error handling when unconfigured:');
   try {
     await nineRouterService.generateAgentAction(
       {
-        action: 'campaign_speech',
+        action: 'backroom_pact',
         candidateId: CANDIDATES[0].id,
+        targetId: CANDIDATES[1].id,
         round: 1,
         activeCandidateIds: preset4,
         historyContext: {},
@@ -41,10 +42,10 @@ async function testEngine() {
     );
     throw new Error('Expected generateAgentAction to throw when unconfigured, but it succeeded.');
   } catch (err: any) {
-    console.log('Successfully caught unconfigured error:', err.message);
+    console.log('Successfully caught unconfigured error for backroom_pact:', err.message);
   }
 
-  console.log('\nAll unit tests for Republic of Valoria realistic election engine PASSED successfully!');
+  console.log('\nAll unit tests for CCTV Leaked Backroom Deals & Betrayals PASSED successfully!');
 }
 
 testEngine().catch(err => {

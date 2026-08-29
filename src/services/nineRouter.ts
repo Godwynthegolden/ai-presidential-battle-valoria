@@ -167,6 +167,25 @@ export class NineRouterService {
         };
       }
 
+      if (payload.action === 'backroom_pact') {
+        const parsed = this.extractJson(rawText);
+        const validTargets = payload.activeCandidateIds.filter(id => id !== candidate.id && id !== payload.targetId);
+        const agreedTarget = (parsed?.targetId && validTargets.includes(parsed.targetId)) 
+          ? parsed.targetId 
+          : (validTargets[0] || payload.activeCandidateIds.filter(id => id !== candidate.id)[0]);
+        
+        const whisper = parsed?.whisper 
+          ? parsed.whisper.replace(/^["']|["']$/g, '').trim()
+          : (rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim() || `Let's coordinate our votes and eliminate ${CANDIDATE_MAP.get(agreedTarget)?.name || agreedTarget}.`);
+
+        return {
+          text: whisper,
+          agreedTargetId: agreedTarget,
+          whisperText: whisper,
+          modelUsed: model,
+        };
+      }
+
       // Clean plain text response
       const cleaned = rawText.replace(/^["']|["']$/g, '').trim();
       return {
@@ -420,6 +439,41 @@ Stay completely in character as ${candidate.name}. Return clean attack speech te
         break;
       }
 
+      case 'backroom_pact': {
+        isJsonExpected = true;
+        const receiver = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
+        const receiverName = receiver ? `${receiver.name} (${receiver.archetypeTitle})` : 'your ally';
+        const allowedTargets = payload.activeCandidateIds
+          .filter(id => id !== candidate.id && id !== payload.targetId)
+          .map(id => {
+            const c = CANDIDATE_MAP.get(id);
+            return `"${id}" (${c?.name} - ${c?.archetypeTitle})`;
+          })
+          .join(', ');
+
+        let contextSnippet = '';
+        if (payload.historyContext.recentAttacks && payload.historyContext.recentAttacks.length > 0) {
+          contextSnippet = `\nRecent Clashes:\n` + payload.historyContext.recentAttacks
+            .slice(-3)
+            .map(a => `- ${a.attackerName} attacked ${a.targetName}`)
+            .join('\n');
+        }
+
+        userPrompt = `Round ${payload.round}: SECRET BACKROOM DEAL / LEAKED CCTV CONSPIRACY.
+You are privately whispering to ${receiverName} behind closed doors in a shadowy Capitol hallway.
+You want to propose a secret tactical alliance, vote pact, or bribe to coordinate your votes to eliminate ONE target: [${allowedTargets}].
+${contextSnippet}
+
+In MAXIMUM 25 WORDS, deliver your whispered proposal or bribe in character.
+
+You MUST return a JSON object with this exact schema:
+{
+  "targetId": "candidate_id",
+  "whisper": "1-2 sentence whispered deal or bribe (max 25 words)"
+}`;
+        break;
+      }
+
       case 'elimination_vote': {
         isJsonExpected = true;
         const allowedTargets = payload.activeCandidateIds.filter(id => id !== candidate.id);
@@ -433,9 +487,16 @@ Stay completely in character as ${candidate.name}. Return clean attack speech te
         let contextSnippet = '';
         if (payload.historyContext.recentAttacks && payload.historyContext.recentAttacks.length > 0) {
           contextSnippet = `\nDebate context so far:\n` + payload.historyContext.recentAttacks
-            .slice(-5)
+            .slice(-4)
             .map(a => `- ${a.attackerName} attacked ${a.targetName}`)
             .join('\n');
+        }
+
+        let pactContext = '';
+        if (payload.historyContext.activePact) {
+          const ally = CANDIDATE_MAP.get(payload.historyContext.activePact.allyId);
+          const agreedTarget = CANDIDATE_MAP.get(payload.historyContext.activePact.agreedTargetId);
+          pactContext = `\nSECRET PACT NOTICE: You previously shook hands with ${ally?.name} in the Capitol backroom to eliminate ${agreedTarget?.name}. You can honor this pact or betray ${ally?.name} to protect yourself!\n`;
         }
 
         userPrompt = `Round ${payload.round}: SECRET ELIMINATION BALLOT.
@@ -444,7 +505,7 @@ Rules:
 1. You CANNOT vote for yourself (${candidate.id}).
 2. You MUST pick exactly ONE ID from this list: [${candidatesToVote}].
 3. Vote based on political rivalry, policy threat, donor grudges, or strategic survival.
-${contextSnippet}
+${pactContext}${contextSnippet}
 
 You MUST return a JSON object with this exact schema:
 {

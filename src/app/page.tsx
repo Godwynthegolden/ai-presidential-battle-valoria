@@ -280,16 +280,20 @@ export default function AIPlaygroundPage() {
                       <span>2. Live Attacks (Max 30w)</span>
                     </div>
                     <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span>3. CCTV Leaked Pacts (Max 25w)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                      <span>3. Secret Ballots & Concessions</span>
+                      <span>4. Secret Ballots & Betrayals</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                      <span>4. Repeat Until Top 3 Remain</span>
+                      <span>5. Repeat Until Top 3 Remain</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
-                      <span>5. Grand Jury Presidential Vote</span>
+                      <span>6. Grand Jury Presidential Vote</span>
                     </div>
                   </div>
                 </div>

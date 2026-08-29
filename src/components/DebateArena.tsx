@@ -5,6 +5,7 @@ import { GameState } from '@/types/game';
 import { CandidateAvatar } from './CandidateAvatar';
 import { VoteRevealBoard } from './VoteRevealBoard';
 import { WinnerPodium } from './WinnerPodium';
+import { CCTVBackroomView } from './CCTVBackroomView';
 import { CANDIDATE_MAP } from '@/data/candidates';
 import { 
   Radio, 
@@ -16,7 +17,8 @@ import {
   Loader2, 
   AlertCircle,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Eye
 } from 'lucide-react';
 
 interface DebateArenaProps {
@@ -30,10 +32,27 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   onRetry,
   onRestart,
 }) => {
-  const { stage, phase, round, votesByRound, finalVoteTally, winnerId, eliminatedCandidates } = gameState;
+  const { stage, phase, round, votesByRound, pactsByRound, finalVoteTally, winnerId, eliminatedCandidates } = gameState;
 
   const speaker = stage.speakerId ? CANDIDATE_MAP.get(stage.speakerId) : null;
   const target = stage.targetId ? CANDIDATE_MAP.get(stage.targetId) : null;
+
+  // Render CCTV Leaked Backroom Feed
+  if (phase === 'CCTV_BACKROOM') {
+    const pactsThisRound = pactsByRound[round] || [];
+    const activePact = pactsThisRound[0] || null;
+
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 h-full">
+        <CCTVBackroomView
+          pact={activePact}
+          allPactsThisRound={pactsThisRound}
+          round={round}
+          isLoading={stage.isLoading}
+        />
+      </div>
+    );
+  }
 
   // Render Special Phases (Vote Reveal & Winner)
   if (phase === 'VOTE_REVEAL' && votesByRound[round]) {

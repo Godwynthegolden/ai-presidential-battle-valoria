@@ -31,11 +31,11 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
 
   if (!isOpen) return null;
 
-  const { campaignSpeeches, finalSpeeches, attacksByRound, votesByRound, eliminatedCandidates, victorySpeech, winnerId } = gameState;
+  const { campaignSpeeches, finalSpeeches, attacksByRound, pactsByRound, votesByRound, eliminatedCandidates, victorySpeech, winnerId } = gameState;
 
   // Compile full event stream
   const allEvents: Array<{
-    type: 'speech' | 'attack' | 'vote' | 'elimination' | 'winner';
+    type: 'speech' | 'attack' | 'pact' | 'vote' | 'elimination' | 'winner';
     title: string;
     speakerId?: string;
     targetId?: string;
@@ -70,7 +70,22 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
     });
   });
 
-  // 3. Eliminations
+  // 3. Backroom Pacts by round
+  Object.entries(pactsByRound).forEach(([rStr, pacts]) => {
+    const r = parseInt(rStr, 10);
+    pacts.forEach(p => {
+      allEvents.push({
+        type: 'pact',
+        title: `Round ${r} Leaked CCTV Backroom Deal`,
+        speakerId: p.proposerId,
+        targetId: p.receiverId,
+        text: `[Targeting: ${CANDIDATE_MAP.get(p.agreedTargetId)?.name}] "${p.whisperText}" (${p.location})`,
+        round: r,
+      });
+    });
+  });
+
+  // 4. Eliminations
   eliminatedCandidates.forEach(e => {
     allEvents.push({
       type: 'elimination',
@@ -81,7 +96,7 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
     });
   });
 
-  // 4. Final Speeches
+  // 5. Final Speeches
   Object.entries(finalSpeeches).forEach(([candId, text]) => {
     allEvents.push({
       type: 'speech',
@@ -92,7 +107,7 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
     });
   });
 
-  // 5. Winner Speech
+  // 6. Winner Speech
   if (winnerId && victorySpeech) {
     allEvents.push({
       type: 'winner',
@@ -156,7 +171,7 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
           <span className="text-[10px] font-mono text-slate-500 uppercase flex items-center gap-1 mr-1">
             <Filter className="w-3 h-3" />
           </span>
-          {['all', 'speech', 'attack', 'elimination', 'winner'].map(t => (
+          {['all', 'speech', 'attack', 'pact', 'elimination', 'winner'].map(t => (
             <button
               key={t}
               onClick={() => setFilterType(t)}

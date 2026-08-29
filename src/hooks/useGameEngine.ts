@@ -1,12 +1,21 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { GameState, GamePhase, LLMRequestPayload, RoundVoteTally, VoteRecord, AttackEvent } from '@/types/game';
+import { GameState, GamePhase, LLMRequestPayload, RoundVoteTally, VoteRecord, AttackEvent, BackroomPact } from '@/types/game';
 import { CANDIDATES, CANDIDATE_MAP } from '@/data/candidates';
 import { sounds } from '@/utils/audio';
 import { NineRouterConfigState } from '@/components/NineRouterSettingsModal';
 
 const ALL_CANDIDATE_IDS = CANDIDATES.map(c => c.id);
+
+const LOCATIONS = [
+  'Capitol Cloakroom Cam 04',
+  'Sub-Basement Boiler Room',
+  'Executive VIP Skybox',
+  'Service Elevator B',
+  'Underground Parking Cam 09',
+  'West Wing Corridor 3',
+];
 
 const CREATE_INITIAL_STATE = (selectedIds: string[] = ALL_CANDIDATE_IDS): GameState => ({
   phase: 'IDLE',
@@ -18,6 +27,7 @@ const CREATE_INITIAL_STATE = (selectedIds: string[] = ALL_CANDIDATE_IDS): GameSt
   campaignSpeeches: {},
   finalSpeeches: {},
   attacksByRound: {},
+  pactsByRound: {},
   votesByRound: {},
   finalVoteTally: null,
   victorySpeech: null,
@@ -505,18 +515,22 @@ export function useGameEngine(
             ]
           }));
         } else {
-          // All active candidates attacked! Transition to Secret Elimination Voting
-          sounds.playGavel();
+          // All active candidates attacked! Transition to CCTV_BACKROOM (Leaked private pacts)
+          sounds.playCCTVBeep();
+
+          // Generate 1-2 secret backroom alliances
+          const proposer1 = CANDIDATE_MAP.get(activeCandidateIds[0])!;
+          const receiver1 = CANDIDATE_MAP.get(activeCandidateIds[1])!;
 
           setState(prev => ({
             ...prev,
-            phase: 'VOTE_SECRET',
+            phase: 'CCTV_BACKROOM',
             stage: {
-              speakerId: null,
-              targetId: null,
-              actionType: 'vote',
-              headline: `ROUND ${prev.round}: CONFIDENTIAL ELIMINATION BALLOT`,
-              content: 'Candidates are casting secret elimination ballots with the election board...',
+              speakerId: proposer1.id,
+              targetId: receiver1.id,
+              actionType: 'pact',
+              headline: `ROUND ${prev.round}: LEAKED CAPITOL SURVEILLANCE FEED`,
+              content: 'Intercepting encrypted backroom audio feed...',
               isLoading: true,
               isRevealingVotes: false,
               revealedVoteIndex: 0,
@@ -525,94 +539,95 @@ export function useGameEngine(
             tickerLog: [
               {
                 id: `tick-${Date.now()}`,
-                type: 'system',
-                message: `🗳️ ROUND ${prev.round} SECRET BALLOTS BEING CAST...`,
+                type: 'pact',
+                message: `🎥 BREAKING LEAK: Secret surveillance feed intercepted in Capitol Cloakroom!`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
             ]
           }));
 
-          const recentAttacksContext = (state.attacksByRound[round] || []).map(a => ({
+          const recentAttackContext = (state.attacksByRound[round] || []).map(a => ({
             attackerName: CANDIDATE_MAP.get(a.attackerId)?.name || a.attackerId,
             targetName: CANDIDATE_MAP.get(a.targetId)?.name || a.targetId,
             text: a.text,
           }));
 
-          const votePromises = activeCandidateIds.map(async (voterId) => {
-            const voteRes = await callLLM({
-              action: 'elimination_vote',
-              candidateId: voterId,
-              round,
-              activeCandidateIds,
-              historyContext: {
-                recentAttacks: recentAttacksContext,
-              },
-            });
-
-            return {
-              voterId,
-              targetId: voteRes.voteTargetId || activeCandidateIds.filter(id => id !== voterId)[0],
-              reason: voteRes.privateReason,
-            } as VoteRecord;
-          });
-
-          const votes = await Promise.all(votePromises);
-
-          const tally: Record<string, number> = {};
-          activeCandidateIds.forEach(id => { tally[id] = 0; });
-          votes.forEach(v => {
-            if (tally[v.targetId] !== undefined) {
-              tally[v.targetId] += 1;
-            } else {
-              tally[v.targetId] = 1;
-            }
-          });
-
-          let highestVotes = -1;
-          let candidateToEliminate = activeCandidateIds[0];
-          let isTie = false;
-
-          Object.entries(tally).forEach(([candId, count]) => {
-            if (count > highestVotes) {
-              highestVotes = count;
-              candidateToEliminate = candId;
-              isTie = false;
-            } else if (count === highestVotes) {
-              isTie = true;
-            }
-          });
-
-          const roundTally: RoundVoteTally = {
+          // Primary pact call
+          const pactResult = await callLLM({
+            action: 'backroom_pact',
+            candidateId: proposer1.id,
+            targetId: receiver1.id,
             round,
-            votes,
-            tally,
-            eliminatedId: candidateToEliminate,
-            tieBreakerOccurred: isTie,
+            activeCandidateIds,
+            historyContext: {
+              recentAttacks: recentAttackContext,
+            },
+          });
+
+          const primaryPact: BackroomPact = {
+            id: `pact-1-${Date.now()}`,
+            round,
+            proposerId: proposer1.id,
+            receiverId: receiver1.id,
+            agreedTargetId: pactResult.agreedTargetId || activeCandidateIds.filter(id => id !== proposer1.id && id !== receiver1.id)[0] || activeCandidateIds[2] || activeCandidateIds[0],
+            whisperText: pactResult.text,
+            location: LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)],
+            timestamp: Date.now(),
           };
 
-          sounds.playVoteRevealDing();
+          const roundPacts = [primaryPact];
+
+          // If 4+ candidates alive, generate a second secret pact
+          if (activeCandidateIds.length >= 4) {
+            const proposer2 = CANDIDATE_MAP.get(activeCandidateIds[2])!;
+            const receiver2 = CANDIDATE_MAP.get(activeCandidateIds[3])!;
+
+            try {
+              const pact2Result = await callLLM({
+                action: 'backroom_pact',
+                candidateId: proposer2.id,
+                targetId: receiver2.id,
+                round,
+                activeCandidateIds,
+                historyContext: {
+                  recentAttacks: recentAttackContext,
+                },
+              });
+
+              roundPacts.push({
+                id: `pact-2-${Date.now()}`,
+                round,
+                proposerId: proposer2.id,
+                receiverId: receiver2.id,
+                agreedTargetId: pact2Result.agreedTargetId || activeCandidateIds.filter(id => id !== proposer2.id && id !== receiver2.id)[0] || activeCandidateIds[0],
+                whisperText: pact2Result.text,
+                location: LOCATIONS[(round + 2) % LOCATIONS.length],
+                timestamp: Date.now(),
+              });
+            } catch (err) {
+              console.warn('[Second pact generation skipped]:', err);
+            }
+          }
+
+          sounds.playCCTVBeep();
 
           setState(prev => ({
             ...prev,
-            phase: 'VOTE_REVEAL',
-            votesByRound: { ...prev.votesByRound, [round]: roundTally },
+            pactsByRound: {
+              ...prev.pactsByRound,
+              [round]: roundPacts,
+            },
             stage: {
-              speakerId: null,
-              targetId: candidateToEliminate,
-              actionType: 'vote',
-              headline: `ROUND ${prev.round}: ELIMINATION VOTE TOTALS`,
-              content: `Vote tallies recorded. ${CANDIDATE_MAP.get(candidateToEliminate)?.name} received the highest elimination votes (${highestVotes} votes).`,
+              ...prev.stage,
+              content: primaryPact.whisperText,
               isLoading: false,
-              isRevealingVotes: true,
-              revealedVoteIndex: votes.length,
-              error: null,
             },
             tickerLog: [
               {
                 id: `tick-${Date.now()}`,
-                type: 'vote',
-                message: `📊 Round ${round} Vote Results: ${CANDIDATE_MAP.get(candidateToEliminate)?.name} received ${highestVotes} elimination votes.`,
+                type: 'pact',
+                message: `🤫 Leaked Deal: ${proposer1.name} whispered to ${receiver1.name}: "${primaryPact.whisperText}"`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
@@ -625,7 +640,177 @@ export function useGameEngine(
       }
 
       // -------------------------------------------------------------
-      // 4. VOTE REVEAL -> ELIMINATION ANNOUNCEMENT & EXIT WORDS
+      // 4. CCTV_BACKROOM -> VOTE_SECRET (Secret Voting with Betrayal Detection)
+      // -------------------------------------------------------------
+      if (phase === 'CCTV_BACKROOM') {
+        sounds.playGavel();
+
+        setState(prev => ({
+          ...prev,
+          phase: 'VOTE_SECRET',
+          stage: {
+            speakerId: null,
+            targetId: null,
+            actionType: 'vote',
+            headline: `ROUND ${prev.round}: CONFIDENTIAL ELIMINATION BALLOT`,
+            content: 'Candidates are casting secret elimination ballots with the election board...',
+            isLoading: true,
+            isRevealingVotes: false,
+            revealedVoteIndex: 0,
+            error: null,
+          },
+          tickerLog: [
+            {
+              id: `tick-${Date.now()}`,
+              type: 'system',
+              message: `🗳️ ROUND ${prev.round} SECRET BALLOTS BEING CAST...`,
+              timestamp: Date.now(),
+            },
+            ...prev.tickerLog,
+          ]
+        }));
+
+        const recentAttacksContext = (state.attacksByRound[round] || []).map(a => ({
+          attackerName: CANDIDATE_MAP.get(a.attackerId)?.name || a.attackerId,
+          targetName: CANDIDATE_MAP.get(a.targetId)?.name || a.targetId,
+          text: a.text,
+        }));
+
+        const pactsThisRound = state.pactsByRound[round] || [];
+
+        const votePromises = activeCandidateIds.map(async (voterId) => {
+          // Check if candidate had an active pact in this round
+          const pact = pactsThisRound.find(p => p.proposerId === voterId || p.receiverId === voterId);
+          const allyId = pact ? (pact.proposerId === voterId ? pact.receiverId : pact.proposerId) : undefined;
+          const agreedTargetId = pact ? pact.agreedTargetId : undefined;
+
+          const voteRes = await callLLM({
+            action: 'elimination_vote',
+            candidateId: voterId,
+            round,
+            activeCandidateIds,
+            historyContext: {
+              recentAttacks: recentAttacksContext,
+              activePact: (allyId && agreedTargetId) ? { allyId, agreedTargetId } : undefined,
+            },
+          });
+
+          const actualTargetId = voteRes.voteTargetId || activeCandidateIds.filter(id => id !== voterId)[0];
+
+          // Betrayal Analysis
+          let isBetrayal = false;
+          let isHonoredPact = false;
+          let betrayedAllyId: string | undefined;
+
+          if (pact && allyId && agreedTargetId) {
+            if (actualTargetId === agreedTargetId) {
+              isHonoredPact = true;
+            } else {
+              isBetrayal = true;
+              betrayedAllyId = allyId;
+            }
+          }
+
+          return {
+            voterId,
+            targetId: actualTargetId,
+            reason: voteRes.privateReason,
+            pactWithId: allyId,
+            pactTargetId: agreedTargetId,
+            isBetrayal,
+            betrayedAllyId,
+            isHonoredPact,
+          } as VoteRecord;
+        });
+
+        const votes = await Promise.all(votePromises);
+
+        const tally: Record<string, number> = {};
+        activeCandidateIds.forEach(id => { tally[id] = 0; });
+        votes.forEach(v => {
+          if (tally[v.targetId] !== undefined) {
+            tally[v.targetId] += 1;
+          } else {
+            tally[v.targetId] = 1;
+          }
+        });
+
+        let highestVotes = -1;
+        let candidateToEliminate = activeCandidateIds[0];
+        let isTie = false;
+
+        Object.entries(tally).forEach(([candId, count]) => {
+          if (count > highestVotes) {
+            highestVotes = count;
+            candidateToEliminate = candId;
+            isTie = false;
+          } else if (count === highestVotes) {
+            isTie = true;
+          }
+        });
+
+        const betrayalsList = votes.filter(v => v.isBetrayal);
+
+        const roundTally: RoundVoteTally = {
+          round,
+          votes,
+          tally,
+          eliminatedId: candidateToEliminate,
+          tieBreakerOccurred: isTie,
+          betrayalsCount: betrayalsList.length,
+        };
+
+        if (betrayalsList.length > 0) {
+          sounds.playBetrayalStab();
+        } else {
+          sounds.playVoteRevealDing();
+        }
+
+        const betrayalMessages = betrayalsList.map(b => {
+          const voter = CANDIDATE_MAP.get(b.voterId)?.name.split(' ')[0];
+          const ally = CANDIDATE_MAP.get(b.betrayedAllyId!)?.name.split(' ')[0];
+          const target = CANDIDATE_MAP.get(b.targetId)?.name.split(' ')[0];
+          return `🗡️ BETRAYAL: ${voter} broke secret pact with ${ally} and voted for ${target}!`;
+        });
+
+        setState(prev => ({
+          ...prev,
+          phase: 'VOTE_REVEAL',
+          votesByRound: { ...prev.votesByRound, [round]: roundTally },
+          stage: {
+            speakerId: null,
+            targetId: candidateToEliminate,
+            actionType: 'vote',
+            headline: `ROUND ${prev.round}: ELIMINATION VOTE TOTALS & ALLIANCE REVEALS`,
+            content: `Vote tallies recorded. ${CANDIDATE_MAP.get(candidateToEliminate)?.name} received the highest elimination votes (${highestVotes} votes). ${betrayalsList.length > 0 ? `⚠️ ${betrayalsList.length} secret backroom pact(s) were betrayed!` : ''}`,
+            isLoading: false,
+            isRevealingVotes: true,
+            revealedVoteIndex: votes.length,
+            error: null,
+          },
+          tickerLog: [
+            ...betrayalMessages.map(msg => ({
+              id: `betray-${Date.now()}-${Math.random()}`,
+              type: 'betrayal' as const,
+              message: msg,
+              timestamp: Date.now(),
+            })),
+            {
+              id: `tick-${Date.now()}`,
+              type: 'vote',
+              message: `📊 Round ${round} Results: ${CANDIDATE_MAP.get(candidateToEliminate)?.name} eliminated with ${highestVotes} votes.`,
+              timestamp: Date.now(),
+            },
+            ...prev.tickerLog,
+          ]
+        }));
+
+        isExecutingStep.current = false;
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // 5. VOTE REVEAL -> ELIMINATION ANNOUNCEMENT & EXIT WORDS
       // -------------------------------------------------------------
       if (phase === 'VOTE_REVEAL') {
         const roundTally = state.votesByRound[round];
@@ -700,7 +885,7 @@ export function useGameEngine(
       }
 
       // -------------------------------------------------------------
-      // 5. POST-ELIMINATION: Next Attack Round or Final 3 Speeches
+      // 6. POST-ELIMINATION: Next Attack Round or Final 3 Speeches
       // -------------------------------------------------------------
       if (phase === 'ELIMINATION') {
         if (activeCandidateIds.length > 3) {
@@ -848,7 +1033,7 @@ export function useGameEngine(
       }
 
       // -------------------------------------------------------------
-      // 6. FINAL SPEECHES (3 Finalists)
+      // 7. FINAL SPEECHES (3 Finalists)
       // -------------------------------------------------------------
       if (phase === 'FINAL_SPEECHES') {
         const nextIndex = currentSpeakerIndex + 1;
@@ -1012,7 +1197,7 @@ export function useGameEngine(
       }
 
       // -------------------------------------------------------------
-      // 7. FINAL REVEAL -> WINNER CORONATION & INAUGURAL SPEECH
+      // 8. FINAL REVEAL -> WINNER CORONATION & INAUGURAL SPEECH
       // -------------------------------------------------------------
       if (phase === 'FINAL_REVEAL') {
         const winner = CANDIDATE_MAP.get(state.winnerId || activeCandidateIds[0])!;
