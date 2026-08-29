@@ -80,6 +80,8 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
               key={candidate.id}
               onClick={() => onSelectCandidate(candidate)}
               className={`group relative flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 cursor-pointer select-none ${
+                isSpeaking || isTarget || isPresident ? 'z-20' : 'z-0'
+              } ${
                 isPresident
                   ? 'bg-gradient-to-r from-amber-950/90 to-[#0e1424] border-amber-400 shadow-xl shadow-amber-500/30'
                   : isSpeaking
@@ -113,7 +115,7 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                 candidate={candidate}
                 size="md"
                 isSpeaking={isSpeaking}
-                isAttacking={isAttacking}
+                isAttacking={false}
                 isTarget={isTarget}
                 isEliminated={!isPreGame && !isAlive}
                 isPresident={isPresident}

@@ -178,7 +178,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
         ) : stage.actionType === 'attack' && speaker && target ? (
           /* Attack Showdown View: Attacker vs Target */
           <div className="w-full flex flex-col items-center gap-6 max-w-3xl animate-fade-in">
-            <div className="flex items-center justify-between w-full max-w-xl px-4">
+            <div className="flex items-center justify-between w-full max-w-xl px-4 pt-3">
               {/* Attacker Podium */}
               <div className="flex flex-col items-center gap-2.5">
                 <CandidateAvatar

@@ -413,6 +413,7 @@ Speech style: Witty, sharp, fast, humorous, futuristic. Mock obsolete bureaucrac
 export const DEFAULT_CANDIDATES = CANDIDATES;
 
 export const CANDIDATE_STORAGE_KEY = 'valoria_custom_candidates_v2';
+export const SELECTED_CANDIDATES_STORAGE_KEY = 'ai_politics_selected_candidates';
 
 export function getStoredCandidates(): Candidate[] {
   if (typeof window === 'undefined') return DEFAULT_CANDIDATES;
@@ -446,11 +447,44 @@ export function resetStoredCandidates(): Candidate[] {
   if (typeof window !== 'undefined') {
     try {
       localStorage.removeItem(CANDIDATE_STORAGE_KEY);
+      localStorage.removeItem(SELECTED_CANDIDATES_STORAGE_KEY);
     } catch {}
   }
   CANDIDATE_MAP.clear();
   DEFAULT_CANDIDATES.forEach(c => CANDIDATE_MAP.set(c.id, c));
   return DEFAULT_CANDIDATES;
+}
+
+export function getStoredSelectedCandidateIds(availableCandidateIds?: string[]): string[] {
+  if (typeof window === 'undefined') {
+    return availableCandidateIds || DEFAULT_CANDIDATES.map(c => c.id);
+  }
+  try {
+    const raw = localStorage.getItem(SELECTED_CANDIDATES_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length >= 4) {
+        if (availableCandidateIds && availableCandidateIds.length > 0) {
+          const valid = parsed.filter(id => availableCandidateIds.includes(id));
+          if (valid.length >= 4) return valid;
+        } else {
+          return parsed;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[Error loading selected candidate ids]:', err);
+  }
+  return availableCandidateIds || DEFAULT_CANDIDATES.map(c => c.id);
+}
+
+export function saveStoredSelectedCandidateIds(ids: string[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(SELECTED_CANDIDATES_STORAGE_KEY, JSON.stringify(ids));
+  } catch (err) {
+    console.warn('[Error saving selected candidate ids]:', err);
+  }
 }
 
 export const CANDIDATE_MAP = new Map<string, Candidate>(

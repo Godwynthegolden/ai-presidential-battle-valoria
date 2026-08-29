@@ -9,7 +9,9 @@ import {
   DEFAULT_CANDIDATES, 
   getStoredCandidates, 
   saveStoredCandidates, 
-  resetStoredCandidates 
+  resetStoredCandidates,
+  getStoredSelectedCandidateIds,
+  saveStoredSelectedCandidateIds 
 } from '@/data/candidates';
 import { sounds } from '@/utils/audio';
 import { NineRouterConfigState } from '@/components/NineRouterSettingsModal';
@@ -78,8 +80,9 @@ export function useGameEngine(
 
   const [state, setState] = useState<GameState>(() => {
     const stored = getStoredCandidates();
-    const ids = stored.map(c => c.id);
-    return CREATE_INITIAL_STATE(ids);
+    const candidateIds = stored.map(c => c.id);
+    const selectedIds = getStoredSelectedCandidateIds(candidateIds);
+    return CREATE_INITIAL_STATE(selectedIds);
   });
 
   const isExecutingStep = useRef(false);
@@ -99,115 +102,91 @@ export function useGameEngine(
   // Call the server API for LLM generation with active 9router config
   const callLLM = async (payload: LLMRequestPayload) => {
     const activeConfig = configRef.current;
-    const currentCandidate = payload.candidate || CANDIDATE_MAP.get(payload.candidateId) || candidates.find(c => c.id === payload.candidateId);
-
-    const requestPayload: LLMRequestPayload = {
-      ...payload,
-      candidate: currentCandidate,
-      allCandidates: candidates,
-      config: activeConfig ? {
-        baseUrl: activeConfig.baseUrl,
-        apiKey: activeConfig.apiKey,
-        model: activeConfig.model,
-      } : undefined,
-    };
+    if (!activeConfig?.baseUrl || !activeConfig?.apiKey) {
+      if (onRequireConfig) {
+        onRequireConfig();
+      }
+      throw new Error('9router is not configured. Please enter your 9router Endpoint, API Key, and Model.');
+    }
 
     const res = await fetch('/api/llm/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestPayload),
+      body: JSON.stringify({
+        ...payload,
+        nineRouterConfig: activeConfig,
+      }),
     });
 
-    if (!res.ok) {
-      const errJson = await res.json().catch(() => ({ error: 'Unknown server error' }));
-      throw new Error(errJson.error || `HTTP ${res.status}`);
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'LLM generation failed via 9router');
     }
 
-    return res.json();
+    return data.result;
   };
 
   /**
-   * Candidate Management (Add, Edit, Delete, Reset)
+   * Candidate Management Methods
    */
-  const saveCandidate = (updated: Candidate) => {
-    setCandidates(prev => {
-      const existingIndex = prev.findIndex(c => c.id === updated.id);
-      let nextList: Candidate[];
-      if (existingIndex >= 0) {
-        nextList = [...prev];
-        nextList[existingIndex] = updated;
-      } else {
-        nextList = [...prev, updated];
-      }
-      saveStoredCandidates(nextList);
-      return nextList;
-    });
+  const saveCandidate = (candidate: Candidate) => {
+    const updated = candidates.some(c => c.id === candidate.id)
+      ? candidates.map(c => (c.id === candidate.id ? candidate : c))
+      : [...candidates, candidate];
 
-    CANDIDATE_MAP.set(updated.id, updated);
+    setCandidates(updated);
+    saveStoredCandidates(updated);
+    CANDIDATE_MAP.set(candidate.id, candidate);
 
-    setState(prev => {
-      const isSelected = prev.activeCandidateIds.includes(updated.id);
-      const nextActive = (prev.phase === 'IDLE' && !isSelected)
-        ? [...prev.activeCandidateIds, updated.id]
-        : prev.activeCandidateIds;
-
-      return {
+    // If new custom candidate added, auto-include in active lineup if IDLE
+    if (state.phase === 'IDLE' && !state.activeCandidateIds.includes(candidate.id)) {
+      const nextActive = [...state.activeCandidateIds, candidate.id];
+      saveStoredSelectedCandidateIds(nextActive);
+      setState(prev => ({
         ...prev,
         participatingCandidateIds: nextActive,
         activeCandidateIds: nextActive,
-        tickerLog: [
-          {
-            id: `tick-${Date.now()}`,
-            type: 'system',
-            message: `⚙️ Candidate Saved: ${updated.name} (${updated.titleRole}) updated in election registry.`,
-            timestamp: Date.now(),
-          },
-          ...prev.tickerLog,
-        ]
-      };
-    });
-  };
-
-  const createCandidate = (newCand: Candidate) => {
-    saveCandidate(newCand);
-  };
-
-  const deleteCandidate = (candId: string) => {
-    setCandidates(prev => {
-      const nextList = prev.filter(c => c.id !== candId);
-      saveStoredCandidates(nextList);
-      return nextList;
-    });
-
-    CANDIDATE_MAP.delete(candId);
-
-    setState(prev => ({
-      ...prev,
-      participatingCandidateIds: prev.participatingCandidateIds.filter(id => id !== candId),
-      activeCandidateIds: prev.activeCandidateIds.filter(id => id !== candId),
-      tickerLog: [
-        {
-          id: `tick-${Date.now()}`,
-          type: 'system',
-          message: `🗑️ Candidate Removed from election lineup.`,
-          timestamp: Date.now(),
-        },
-        ...prev.tickerLog,
-      ]
-    }));
-  };
-
-  const resetCandidateToDefault = (candId: string) => {
-    const defaultCand = DEFAULT_CANDIDATES.find(c => c.id === candId);
-    if (defaultCand) {
-      saveCandidate(defaultCand);
+        stage: {
+          ...prev.stage,
+          content: `${nextActive.length} candidates registered for the election. Press Start Election to begin.`,
+        }
+      }));
     }
+  };
+
+  const createCandidate = (candidate: Candidate) => {
+    saveCandidate(candidate);
+  };
+
+  const deleteCandidate = (candidateId: string) => {
+    const updated = candidates.filter(c => c.id !== candidateId);
+    setCandidates(updated);
+    saveStoredCandidates(updated);
+    CANDIDATE_MAP.delete(candidateId);
+
+    if (state.phase === 'IDLE') {
+      const nextActive = state.activeCandidateIds.filter(id => id !== candidateId);
+      saveStoredSelectedCandidateIds(nextActive);
+      setState(prev => ({
+        ...prev,
+        participatingCandidateIds: nextActive,
+        activeCandidateIds: nextActive,
+      }));
+    }
+  };
+
+  const resetCandidateToDefault = (candidateId: string) => {
+    const def = DEFAULT_CANDIDATES.find(c => c.id === candidateId);
+    if (!def) return;
+    saveCandidate(def);
   };
 
   const resetAllCandidatesToDefault = () => {
     const defaults = resetStoredCandidates();
     setCandidates(defaults);
-    setState(CREATE_INITIAL_STATE(defaults.map(c => c.id)));
+    const defIds = defaults.map(c => c.id);
+    saveStoredSelectedCandidateIds(defIds);
+    setState(CREATE_INITIAL_STATE(defIds));
   };
 
   /**
@@ -227,6 +206,8 @@ export function useGameEngine(
         nextSelected = [...current, candidateId];
       }
 
+      saveStoredSelectedCandidateIds(nextSelected);
+
       return {
         ...prev,
         participatingCandidateIds: nextSelected,
@@ -242,6 +223,7 @@ export function useGameEngine(
 
   const setSelectedCandidateIds = (ids: string[]) => {
     if (state.phase !== 'IDLE') return;
+    saveStoredSelectedCandidateIds(ids);
     setState(prev => ({
       ...prev,
       participatingCandidateIds: [...ids],

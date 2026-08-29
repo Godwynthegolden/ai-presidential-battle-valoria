@@ -43,21 +43,11 @@ export default function AIPlaygroundPage() {
   const [isCleanView, setIsCleanView] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
-  // Global hotkey 'H' for Streamer Clean Broadcast View
+  // Set mounted flag to safely hydrate client-side custom candidate counts
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
-        return;
-      }
-      if (e.key === 'h' || e.key === 'H') {
-        setIsCleanView(prev => !prev);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    setHasMounted(true);
   }, []);
 
   // Load config from localStorage or fallback to server env
@@ -113,10 +103,35 @@ export default function AIPlaygroundPage() {
     resetAllCandidatesToDefault,
   } = useGameEngine(nineRouterConfig, () => setIsSettingsOpen(true));
 
+  // Global hotkeys: 'H' for Clean View, ArrowRight / ArrowDown / Enter for Start & Next Step
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return;
+      }
+      if (e.key === 'h' || e.key === 'H') {
+        setIsCleanView(prev => !prev);
+        return;
+      }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (state.phase === 'IDLE') {
+          startGame();
+        } else if (!state.stage.isLoading && !state.playback.autoPlay && state.phase !== 'WINNER') {
+          nextStep();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [state.phase, state.stage.isLoading, state.playback.autoPlay, startGame, nextStep]);
+
   const isConfigured = Boolean(nineRouterConfig.baseUrl && nineRouterConfig.apiKey);
 
   return (
-    <main className="min-h-screen flex flex-col bg-[#07090e] cyber-grid relative overflow-hidden">
+    <main className="min-h-screen flex flex-col bg-[#07090e] cyber-grid relative overflow-hidden" suppressHydrationWarning>
       {/* Dynamic Ambient Background Glow */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -149,8 +164,8 @@ export default function AIPlaygroundPage() {
                   9router Live AI
                 </span>
               </h1>
-              <p className="text-xs text-slate-400 font-mono hidden sm:block">
-                {candidates.length} Autonomous Candidates &bull; Elimination Reality Format &bull; High-Stakes AI Diplomacy
+              <p className="text-xs text-slate-400 font-mono hidden sm:block" suppressHydrationWarning>
+                {hasMounted ? candidates.length : 11} Autonomous Candidates &bull; Elimination Reality Format &bull; High-Stakes AI Diplomacy
               </p>
             </div>
           </div>
@@ -177,13 +192,16 @@ export default function AIPlaygroundPage() {
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <Users className="w-4 h-4" /> Candidates ({candidates.length})
-                <span className={`text-[10px] px-2 py-0.2 rounded-full font-mono font-bold ${
-                  activeView === 'characters'
-                    ? 'bg-slate-950 text-cyan-300'
-                    : 'bg-slate-900 text-cyan-400 border border-cyan-500/30'
-                }`}>
-                  {state.participatingCandidateIds?.length || state.activeCandidateIds.length} Active
+                <Users className="w-4 h-4" /> <span suppressHydrationWarning>Candidates ({hasMounted ? candidates.length : 11})</span>
+                <span 
+                  suppressHydrationWarning
+                  className={`text-[10px] px-2 py-0.2 rounded-full font-mono font-bold ${
+                    activeView === 'characters'
+                      ? 'bg-slate-950 text-cyan-300'
+                      : 'bg-slate-900 text-cyan-400 border border-cyan-500/30'
+                  }`}
+                >
+                  {hasMounted ? (state.participatingCandidateIds?.length || state.activeCandidateIds.length) : 11} Active
                 </span>
               </button>
             </div>

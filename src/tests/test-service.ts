@@ -1,5 +1,10 @@
 import { nineRouterService } from '../services/nineRouter';
-import { CANDIDATES, CANDIDATE_MAP } from '../data/candidates';
+import { 
+  CANDIDATES, 
+  CANDIDATE_MAP, 
+  getStoredSelectedCandidateIds, 
+  saveStoredSelectedCandidateIds 
+} from '../data/candidates';
 import { Candidate } from '../types/candidate';
 import { COLOR_PRESETS, createColorTheme, hexToRgb } from '../components/CharacterEditorModal';
 
@@ -22,12 +27,19 @@ async function testEngine() {
   console.log('Without credentials:', nineRouterService.isConfigured({ baseUrl: '', apiKey: '' }));
   console.log('With credentials:', nineRouterService.isConfigured({ baseUrl: 'http://localhost:20128/v1', apiKey: 'test_key' }));
 
-  // Test dynamic preset counts
+  // Test dynamic preset counts & selection persistence fallback
   const preset4 = CANDIDATES.slice(0, 4).map(c => c.id);
   const preset6 = CANDIDATES.slice(0, 6).map(c => c.id);
   const preset8 = CANDIDATES.slice(0, 8).map(c => c.id);
   const preset11 = CANDIDATES.map(c => c.id);
   console.log(`Verified custom roster presets: Quick4 (${preset4.length}), Top6 (${preset6.length}), Top8 (${preset8.length}), All11 (${preset11.length})`);
+
+  // Test selected lineup fallback
+  const storedFallback = getStoredSelectedCandidateIds(preset6);
+  if (storedFallback.length !== 6) {
+    throw new Error(`Expected fallback to return 6 IDs, got ${storedFallback.length}`);
+  }
+  console.log('Candidate lineup selection persistence & fallback helpers PASSED!');
 
   // Test expanded color themes
   console.log('Testing expanded character color presets: count =', COLOR_PRESETS.length);

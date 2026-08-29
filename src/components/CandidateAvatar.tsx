@@ -125,17 +125,17 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
       {/* Outer Glow / Speaking Pulse */}
       {isSpeaking && (
         <span 
-          className="absolute inset-0 rounded-2xl animate-ping opacity-40 -z-10"
+          className="absolute inset-0 rounded-2xl animate-ping opacity-30 -z-10"
           style={{ backgroundColor: candidate.color.primary }}
         />
       )}
 
       {/* Target Laser Alert Ring */}
       {isTarget && (
-        <span className="absolute -inset-2 rounded-2xl border-2 border-red-500 animate-pulse-glow" />
+        <span className="absolute -inset-2 rounded-2xl border-2 border-red-500 animate-pulse-glow z-20 pointer-events-none" />
       )}
 
-      {/* Main Avatar Body */}
+      {/* Main Avatar Body (Clips Image/Icon) */}
       <div 
         className={`relative flex items-center justify-center rounded-2xl border overflow-hidden transition-all duration-300 ${currentSize.box} ${
           isEliminated
@@ -173,29 +173,29 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
             <Skull className="text-red-500/80" size={currentSize.icon * 0.9} />
           </div>
         )}
-
-        {/* President Crown Top Badge */}
-        {isPresident && (
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 p-1 rounded-full shadow-lg shadow-amber-500/50 animate-bounce z-30">
-            <Crown size={size === 'xl' ? 24 : 14} />
-          </div>
-        )}
-
-        {/* Attack Crosshair Marker */}
-        {isAttacking && (
-          <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-md animate-pulse z-30">
-            ATTACK
-          </div>
-        )}
       </div>
 
+      {/* President Crown Top Badge (Placed OUTSIDE overflow-hidden with high z-index) */}
+      {isPresident && (
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-400 text-black p-1 rounded-full shadow-lg shadow-amber-500/50 animate-pulse z-30 pointer-events-none">
+          <Crown size={size === 'xl' ? 24 : size === 'lg' ? 18 : 12} />
+        </div>
+      )}
+
+      {/* Attack Marker (Placed OUTSIDE overflow-hidden so it never clips) */}
+      {isAttacking && showBadge && (
+        <div className="absolute -top-2.5 -right-2.5 bg-red-600 text-white text-[10px] font-display font-black px-2 py-0.5 rounded-full shadow-lg shadow-red-950/80 animate-pulse z-30 pointer-events-none border border-red-400">
+          ATTACK
+        </div>
+      )}
+
       {/* Archetype Bottom Badge */}
-      {showBadge && size !== 'sm' && (
+      {showBadge && size !== 'sm' && size !== 'xs' && (
         <div 
-          className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase whitespace-nowrap border shadow-sm z-30 ${
+          className={`absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wider uppercase whitespace-nowrap border shadow-sm z-30 pointer-events-none ${
             isEliminated 
               ? 'bg-stone-900 text-stone-500 border-stone-800' 
-              : 'bg-slate-950/90 text-slate-300 border-slate-700'
+              : 'bg-slate-950/95 text-slate-300 border-slate-700'
           }`}
         >
           {candidate.codename}

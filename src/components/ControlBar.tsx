@@ -58,9 +58,12 @@ export const ControlBar: React.FC<ControlBarProps> = ({
           <button
             onClick={onStartGame}
             disabled={isLoading}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-display font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
+            title="Start Debate (Shortcut: ArrowRight / ArrowDown)"
           >
-            <Play className="w-4 h-4 fill-current" /> Start Debate
+            <Play className="w-4 h-4 fill-current text-black" /> 
+            <span>Start Debate</span>
+            <span className="ml-1 px-1.5 py-0.2 rounded bg-slate-950/80 border border-slate-700 text-cyan-300 text-[10px] font-mono font-bold">→</span>
           </button>
         ) : (
           <>
@@ -90,8 +93,11 @@ export const ControlBar: React.FC<ControlBarProps> = ({
               onClick={onNextStep}
               disabled={isLoading || playback.autoPlay || isWinner}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-display font-black uppercase tracking-wider transition-all disabled:opacity-40 hover:scale-102 cursor-pointer shadow-xs"
+              title="Next Step (Shortcut: ArrowRight / ArrowDown)"
             >
-              <SkipForward className="w-3.5 h-3.5" /> Next Step
+              <SkipForward className="w-3.5 h-3.5" /> 
+              <span>Next Step</span>
+              <span className="ml-1 px-1.5 py-0.2 rounded bg-slate-950 border border-slate-700 text-slate-400 text-[10px] font-mono font-bold">→</span>
             </button>
           </>
         )}
