@@ -1828,7 +1828,10 @@ export function useGameEngine(
           const nextRound = round + 1;
           const firstAttacker = CANDIDATE_MAP.get(activeCandidateIds[0])!;
           const possibleTargets = activeCandidateIds.filter(id => id !== firstAttacker.id);
-          const preferredTargetId = possibleTargets[0];
+          const preferredTargetId = possibleTargets.find(id => {
+            const c = CANDIDATE_MAP.get(id);
+            return c && firstAttacker.rivalArchetypes.includes(c.archetype);
+          }) || possibleTargets[0];
           const targetCand = CANDIDATE_MAP.get(preferredTargetId);
 
           setState(prev => ({
@@ -1858,29 +1861,45 @@ export function useGameEngine(
             ]
           }));
 
-          const result = await callLLM({
-            action: 'attack',
-            candidateId: firstAttacker.id,
-            targetId: preferredTargetId,
+          const stepDescriptor: StepDescriptor = {
+            stepKey: `attack-r${nextRound}-0-${firstAttacker.id}`,
+            phase: 'ATTACK' as GamePhase,
             round: nextRound,
-            activeCandidateIds,
-            historyContext: {
-              electionTopic: state.electionTopic || DEFAULT_TOPIC,
-              campaignSpeeches: state.campaignSpeeches,
-              targetSpeechQuote: state.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
-              targetWeaknesses: targetCand?.weaknesses,
-              recentAttacks: [],
-            },
-          });
+            speakerId: firstAttacker.id,
+            targetId: preferredTargetId,
+            actionType: 'attack' as const,
+            headline: `ROUND ${nextRound}: LIVE ATTACK ROUND — ${firstAttacker.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'attack' as const,
+              candidateId: firstAttacker.id,
+              targetId: preferredTargetId,
+              round: nextRound,
+              activeCandidateIds,
+              historyContext: {
+                electionTopic: state.electionTopic || DEFAULT_TOPIC,
+                campaignSpeeches: state.campaignSpeeches,
+                targetSpeechQuote: state.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
+                targetWeaknesses: targetCand?.weaknesses,
+                recentAttacks: [],
+              },
+            }
+          };
+
+          const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
           sounds.playAttackSting();
+          if (audioBlobUrl) {
+            playAudioUrl(audioBlobUrl);
+          } else {
+            playSpeechAudio(content, firstAttacker.voice?.voiceId, firstAttacker.id);
+          }
 
           const attackEvent: AttackEvent = {
             id: `atk-${Date.now()}`,
             round: nextRound,
             attackerId: firstAttacker.id,
             targetId: preferredTargetId,
-            text: result.text,
+            text: content,
             timestamp: Date.now(),
           };
 
@@ -1892,19 +1911,30 @@ export function useGameEngine(
             },
             stage: {
               ...prev.stage,
-              content: result.text,
+              content,
               isLoading: false,
             },
             tickerLog: [
               {
                 id: `tick-${Date.now()}`,
                 type: 'attack',
-                message: `💥 ${firstAttacker.name} challenged ${CANDIDATE_MAP.get(preferredTargetId)?.name}: "${result.text.slice(0, 80)}..."`,
+                message: `💥 ${firstAttacker.name} challenged ${CANDIDATE_MAP.get(preferredTargetId)?.name}: "${content.slice(0, 80)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
             ]
           }));
+
+          dispatchBackgroundPreload({
+            ...state,
+            phase: 'ATTACK',
+            round: nextRound,
+            currentSpeakerIndex: 0,
+            attacksByRound: {
+              ...state.attacksByRound,
+              [nextRound]: [attackEvent],
+            }
+          });
         } else {
           // Exactly 3 candidates remain -> FINAL PRESIDENTIAL SPEECHES!
           sounds.playGavel();

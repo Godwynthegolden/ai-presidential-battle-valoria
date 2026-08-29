@@ -316,6 +316,31 @@ async function runPipelineTests() {
   assert(elapsedMs < 2, `Cache retrieval must be < 2ms (took ${elapsedMs.toFixed(3)}ms)`);
   console.log(`  ✓ Instantaneous Cache Retrieval: ${elapsedMs.toFixed(3)}ms`);
 
+  // 6. Test Post-Elimination First Attack Lookahead & TTS readiness
+  console.log('6. Testing Post-Elimination first attack of Round 2 lookahead & TTS readiness...');
+  const postElimState: GameState = {
+    ...baseState,
+    phase: 'ELIMINATION',
+    round: 1,
+    activeCandidateIds: activeIds.slice(0, 5), // 5 candidates remaining (>3)
+  };
+  const postElimLookahead = simulateNextSteps(postElimState, 2);
+  const nextAttacker = CANDIDATE_MAP.get(activeIds[0])!;
+  assert.strictEqual(postElimLookahead[0].phase, 'ATTACK', 'Next step after Elimination with >3 candidates must be ATTACK');
+  assert.strictEqual(postElimLookahead[0].round, 2, 'Next attack round must be Round 2');
+  assert.strictEqual(postElimLookahead[0].speakerId, nextAttacker.id, `First attacker of Round 2 must be ${nextAttacker.name}`);
+  assert.strictEqual(postElimLookahead[0].stepKey, `attack-r2-0-${nextAttacker.id}`);
+  
+  // Test TTS generation for this first attack step
+  const attackText = "Your economic policies have plunged the working class into poverty, and your donor ties are undeniable!";
+  const attackAudio = await fishAudioService.generateSpeech({
+    text: attackText,
+    voiceId: nextAttacker.voice?.voiceId || '5196af35f6ff4a0dbf541793fc9f2157',
+    model: 's2.1-pro-free',
+  });
+  assert(attackAudio instanceof ArrayBuffer && attackAudio.byteLength > 1000, 'Post-elimination first attack TTS audio buffer must be valid');
+  console.log(`  ✓ Post-elimination Round 2 first attack (${postElimLookahead[0].stepKey}) TTS audio generated (${attackAudio.byteLength} bytes) for ${nextAttacker.name}`);
+
   console.log('\n--- ALL Universal Multi-Step Lookahead Pipeline Tests PASSED! ---');
 }
 
