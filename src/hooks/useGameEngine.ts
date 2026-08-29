@@ -106,24 +106,40 @@ export function useGameEngine(
       if (onRequireConfig) {
         onRequireConfig();
       }
-      throw new Error('9router is not configured. Please enter your 9router Endpoint, API Key, and Model.');
+      throw new Error('9router is not configured. Please enter your 9router Endpoint, API Key, and Model in Settings.');
     }
+
+    const currentCandidate = payload.candidate || CANDIDATE_MAP.get(payload.candidateId) || candidates.find(c => c.id === payload.candidateId);
+
+    const requestConfig = {
+      baseUrl: activeConfig.baseUrl,
+      apiKey: activeConfig.apiKey,
+      model: activeConfig.model,
+    };
+
+    const requestPayload: LLMRequestPayload = {
+      ...payload,
+      candidate: currentCandidate,
+      allCandidates: candidates,
+      config: requestConfig,
+    };
 
     const res = await fetch('/api/llm/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...payload,
-        nineRouterConfig: activeConfig,
+        ...requestPayload,
+        config: requestConfig,
+        nineRouterConfig: requestConfig,
       }),
     });
 
     const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'LLM generation failed via 9router');
+    if (!res.ok) {
+      throw new Error(data.error || `HTTP ${res.status}: AI generation failed via 9router`);
     }
 
-    return data.result;
+    return data.result !== undefined ? data.result : data;
   };
 
   /**

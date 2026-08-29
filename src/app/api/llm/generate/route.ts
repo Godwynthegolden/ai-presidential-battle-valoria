@@ -13,12 +13,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await nineRouterService.generateAgentAction(payload, payload.config);
-    return NextResponse.json(result);
+    // Robustly resolve config from payload.config or payload.nineRouterConfig
+    const config = payload.config || (payload as any).nineRouterConfig;
+
+    const result = await nineRouterService.generateAgentAction(payload, config);
+    return NextResponse.json({
+      success: true,
+      result,
+      ...result,
+    });
   } catch (error: any) {
     console.error('[API /api/llm/generate error]:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { success: false, error: error.message || 'Internal Server Error' },
       { status: 500 }
     );
   }
