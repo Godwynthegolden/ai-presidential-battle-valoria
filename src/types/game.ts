@@ -39,6 +39,7 @@ export interface BackroomPact {
   agreedTargetId: string;
   whisperText: string;
   location: string;
+  audioBlobUrl?: string | null;
   wasBetrayedByProposer?: boolean;
   wasBetrayedByReceiver?: boolean;
   timestamp: number;

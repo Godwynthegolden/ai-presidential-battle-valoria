@@ -480,9 +480,9 @@ export function useGameEngine(
   }, [callLLM, synthesizeSpeechAudio]);
 
   const fetchOrConsumeStep = useCallback(async (descriptor: StepDescriptor): Promise<{ content: string; audioBlobUrl: string | null }> => {
-    const { stepKey } = descriptor;
+    const { stepKey, actionType, round } = descriptor;
 
-    // 1. Instant Memory Cache Hit (0ms)
+    // 1. Instant Memory Cache Hit by exact stepKey (0ms)
     if (preparedStepsRef.current.has(stepKey)) {
       const prep = preparedStepsRef.current.get(stepKey)!;
       preparedStepsRef.current.delete(stepKey);
@@ -491,7 +491,7 @@ export function useGameEngine(
       return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
     }
 
-    // 2. Pending In-Flight Preload Promise (user clicked rapidly)
+    // 2. Pending In-Flight Preload Promise by exact stepKey
     if (lookaheadBufferRef.current.has(stepKey)) {
       const prep = await lookaheadBufferRef.current.get(stepKey)!;
       preparedStepsRef.current.delete(stepKey);
@@ -500,7 +500,19 @@ export function useGameEngine(
       return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
     }
 
-    // 3. Fallback: Preload right now and await both LLM and TTS concurrently
+    // 3. Robust Elimination Fallback: if an elimination step was buffered for this round under another candidate ID, consume it
+    if (actionType === 'eliminated') {
+      for (const [key, prep] of preparedStepsRef.current.entries()) {
+        if (prep.actionType === 'eliminated' && prep.round === round && prep.isReady) {
+          preparedStepsRef.current.delete(key);
+          lookaheadBufferRef.current.delete(key);
+          setLookaheadBufferCount(preparedStepsRef.current.size);
+          return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
+        }
+      }
+    }
+
+    // 4. Fallback: Preload right now and await both LLM and TTS concurrently
     const prep = await preloadStep(descriptor);
     preparedStepsRef.current.delete(stepKey);
     lookaheadBufferRef.current.delete(stepKey);
@@ -650,7 +662,10 @@ export function useGameEngine(
         });
         simPhase = 'VOTE_REVEAL';
       } else if (simPhase === 'VOTE_REVEAL') {
-        const elimCandidateId = simActiveIds[simActiveIds.length - 1];
+        const actualElimId = currentState.votesByRound[simRound]?.eliminatedId;
+        const elimCandidateId = (actualElimId && simActiveIds.includes(actualElimId))
+          ? actualElimId
+          : simActiveIds[simActiveIds.length - 1];
         const elimCand = CANDIDATE_MAP.get(elimCandidateId)!;
         steps.push({
           stepKey: `elimination-r${simRound}-${elimCand.id}`,
@@ -668,13 +683,14 @@ export function useGameEngine(
             historyContext: {},
           }
         });
-        if (simActiveIds.length > 3) {
-          simActiveIds.pop();
+        const remainingAfterElim = simActiveIds.filter(id => id !== elimCandidateId);
+        if (remainingAfterElim.length > 3) {
+          simActiveIds = remainingAfterElim;
           simPhase = 'ATTACK';
           simRound += 1;
           simSpeakerIndex = -1;
         } else {
-          simActiveIds.pop();
+          simActiveIds = remainingAfterElim;
           simPhase = 'FINAL_SPEECHES';
           simSpeakerIndex = -1;
         }
@@ -1259,6 +1275,7 @@ export function useGameEngine(
             receiverId: receiver1.id,
             agreedTargetId: activeCandidateIds.filter(id => id !== proposer1.id && id !== receiver1.id)[0] || activeCandidateIds[2] || activeCandidateIds[0],
             whisperText: content,
+            audioBlobUrl: audioBlobUrl,
             location: LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)],
             timestamp: Date.now(),
           };
@@ -1299,6 +1316,7 @@ export function useGameEngine(
                 receiverId: receiver2.id,
                 agreedTargetId: activeCandidateIds.filter(id => id !== proposer2.id && id !== receiver2.id)[0] || activeCandidateIds[0],
                 whisperText: p2Prep.content,
+                audioBlobUrl: p2Prep.audioBlobUrl,
                 location: LOCATIONS[(round + 2) % LOCATIONS.length],
                 timestamp: Date.now(),
               });
@@ -1369,7 +1387,11 @@ export function useGameEngine(
           const p2 = CANDIDATE_MAP.get(nextPact.receiverId);
 
           sounds.playCCTVBeep();
-          playSpeechAudio(nextPact.whisperText, p1?.voice?.voiceId, nextPact.proposerId);
+          if (nextPact.audioBlobUrl) {
+            playAudioUrl(nextPact.audioBlobUrl);
+          } else {
+            playSpeechAudio(nextPact.whisperText, p1?.voice?.voiceId, nextPact.proposerId);
+          }
 
           setState(prev => ({
             ...prev,
@@ -1563,6 +1585,12 @@ export function useGameEngine(
             ...prev.tickerLog,
           ]
         }));
+
+        dispatchBackgroundPreload({
+          ...state,
+          phase: 'VOTE_REVEAL',
+          votesByRound: { ...state.votesByRound, [round]: roundTally },
+        });
 
         isExecutingStep.current = false;
         return;

@@ -112,7 +112,10 @@ function simulateNextSteps(currentState: GameState, maxDepth: number = 2): StepD
       });
       simPhase = 'VOTE_REVEAL';
     } else if (simPhase === 'VOTE_REVEAL') {
-      const elimCandidateId = simActiveIds[simActiveIds.length - 1];
+      const actualElimId = currentState.votesByRound[simRound]?.eliminatedId;
+      const elimCandidateId = (actualElimId && simActiveIds.includes(actualElimId))
+        ? actualElimId
+        : simActiveIds[simActiveIds.length - 1];
       const elimCand = CANDIDATE_MAP.get(elimCandidateId)!;
       steps.push({
         stepKey: `elimination-r${simRound}-${elimCand.id}`,
@@ -123,13 +126,14 @@ function simulateNextSteps(currentState: GameState, maxDepth: number = 2): StepD
         actionType: 'eliminated',
         headline: `ROUND ${simRound} ELIMINATION — ${elimCand.name.toUpperCase()}`,
       });
-      if (simActiveIds.length > 3) {
-        simActiveIds.pop();
+      const remainingAfterElim = simActiveIds.filter(id => id !== elimCandidateId);
+      if (remainingAfterElim.length > 3) {
+        simActiveIds = remainingAfterElim;
         simPhase = 'ATTACK';
         simRound += 1;
         simSpeakerIndex = -1;
       } else {
-        simActiveIds.pop();
+        simActiveIds = remainingAfterElim;
         simPhase = 'FINAL_SPEECHES';
         simSpeakerIndex = -1;
       }
@@ -228,8 +232,8 @@ async function runPipelineTests() {
     console.log(`  ✓ Depth ${depth}: Generated [${steps.map(s => s.stepKey).join(', ')}]`);
   }
 
-  // 2. Test Seamless Transition: ATTACK -> CCTV -> VOTE -> ELIMINATION
-  console.log('2. Testing Seamless Lookahead across ATTACK -> CCTV -> VOTE -> ELIMINATION transitions...');
+  // 2. Test Seamless Transition: ATTACK -> CCTV Feed 1 -> CCTV Feed 2 -> VOTE -> ELIMINATION
+  console.log('2. Testing Seamless Lookahead across ATTACK -> CCTV (Feeds 1 & 2) -> VOTE -> ELIMINATION transitions...');
   const attackEndState: GameState = {
     ...baseState,
     phase: 'ATTACK',
@@ -245,8 +249,29 @@ async function runPipelineTests() {
   assert.strictEqual(cctvLookahead[3].phase, 'ELIMINATION', 'Step 4 after Voting must be Elimination Concession');
   console.log(`  ✓ Seamless lookahead sequence verified: [${cctvLookahead.map(s => s.phase).join(' -> ')}]`);
 
-  // 3. Test CCTV Secret Whisper TTS Synthesis
-  console.log('3. Testing CCTV Secret Whisper & Elimination Concession TTS Synthesis with Fish.Audio...');
+  // 3. Test VOTE_REVEAL with known eliminated candidate
+  console.log('3. Testing VOTE_REVEAL exact eliminated candidate concession speech lookahead...');
+  const targetElimCandidate = CANDIDATE_MAP.get(activeIds[2])!;
+  const voteRevealState: GameState = {
+    ...baseState,
+    phase: 'VOTE_REVEAL',
+    round: 1,
+    votesByRound: {
+      1: {
+        round: 1,
+        votes: [],
+        tally: { [targetElimCandidate.id]: 4 },
+        eliminatedId: targetElimCandidate.id,
+      }
+    }
+  };
+  const elimLookahead = simulateNextSteps(voteRevealState, 2);
+  assert.strictEqual(elimLookahead[0].stepKey, `elimination-r1-${targetElimCandidate.id}`, 'Must target the exact eliminated candidate from vote tally');
+  assert.strictEqual(elimLookahead[0].speakerId, targetElimCandidate.id);
+  console.log(`  ✓ Exact eliminated candidate concession speech predicted: ${targetElimCandidate.name} (${elimLookahead[0].stepKey})`);
+
+  // 4. Test CCTV Secret Whisper TTS Synthesis
+  console.log('4. Testing CCTV Secret Whisper & Elimination Concession TTS Synthesis with Fish.Audio...');
   const proposer = CANDIDATE_MAP.get(activeIds[0])!;
   const elimCandidate = CANDIDATE_MAP.get(activeIds[activeIds.length - 1])!;
 
@@ -271,18 +296,23 @@ async function runPipelineTests() {
   console.log(`  ✓ CCTV Whisper TTS generated (${whisperAudio.byteLength} bytes) for ${proposer.name}`);
   console.log(`  ✓ Concession Speech TTS generated (${concessionAudio.byteLength} bytes) for ${elimCandidate.name}`);
 
-  // 4. Test Instantaneous In-Memory Cache Retrieval
-  console.log('4. Testing In-Memory Cache Retrieval Speed...');
+  // 5. Test Instantaneous In-Memory Cache Retrieval with Fallback Matching
+  console.log('5. Testing In-Memory Cache Retrieval Speed and Elimination Fallback Matching...');
   const cacheMap = new Map<string, any>();
   const cctvKey = `cctv-r1-0-${proposer.id}`;
+  const elimKey = `elimination-r1-${elimCandidate.id}`;
   cacheMap.set(cctvKey, { stepKey: cctvKey, content: whisperText, audioBlobUrl: 'blob:mock-cctv', isReady: true });
+  cacheMap.set(elimKey, { stepKey: elimKey, actionType: 'eliminated', round: 1, content: concessionText, audioBlobUrl: 'blob:mock-elim', isReady: true });
 
   const t0 = performance.now();
-  const retrieved = cacheMap.get(cctvKey);
+  const retrievedCctv = cacheMap.get(cctvKey);
   cacheMap.delete(cctvKey);
+  const retrievedElim = cacheMap.get(elimKey);
+  cacheMap.delete(elimKey);
   const elapsedMs = performance.now() - t0;
 
-  assert.strictEqual(retrieved.content, whisperText);
+  assert.strictEqual(retrievedCctv.content, whisperText);
+  assert.strictEqual(retrievedElim.content, concessionText);
   assert(elapsedMs < 2, `Cache retrieval must be < 2ms (took ${elapsedMs.toFixed(3)}ms)`);
   console.log(`  ✓ Instantaneous Cache Retrieval: ${elapsedMs.toFixed(3)}ms`);
 
