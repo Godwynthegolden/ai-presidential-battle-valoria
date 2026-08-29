@@ -164,3 +164,17 @@ export interface LLMResponsePayload {
   candidateProfile?: Partial<Candidate>;
   modelUsed?: string;
 }
+
+export type StageActionType = 'speech' | 'attack' | 'pact' | 'vote' | 'eliminated' | 'winner' | 'idle';
+
+export interface StepDescriptor {
+  stepKey: string;
+  phase: GamePhase;
+  round: number;
+  speakerId: string | null;
+  targetId: string | null;
+  actionType: StageActionType;
+  headline: string;
+  llmPayload?: LLMRequestPayload;
+}
+

@@ -20,6 +20,8 @@ interface CCTVBackroomViewProps {
   allPactsThisRound?: BackroomPact[];
   activeFeedIndex?: number;
   onSelectFeed?: (index: number) => void;
+  onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string) => void;
+  isSpeakingAudio?: boolean;
   round: number;
   isLoading?: boolean;
 }
@@ -29,6 +31,8 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
   allPactsThisRound = [],
   activeFeedIndex = 0,
   onSelectFeed,
+  onPlaySpeechAudio,
+  isSpeakingAudio = false,
   round,
   isLoading = false,
 }) => {
@@ -204,17 +208,31 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
         <div className="w-full max-w-2xl relative rounded-3xl bg-black/90 border-2 border-emerald-500/60 p-6 md:p-8 shadow-2xl shadow-emerald-950/90 text-left">
           {/* Audio Intercept Tag */}
           <div className="flex items-center justify-between flex-wrap gap-2 mb-4 pb-3 border-b border-emerald-800/80">
-            <span className="flex items-center gap-2 text-xs font-mono font-bold uppercase text-emerald-300">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase text-emerald-300">
               <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />
-              AUDIO INTERCEPT TRANSCRIPT (FEED #{activeFeedIndex + 1}):
-            </span>
+              <span>AUDIO INTERCEPT TRANSCRIPT (FEED #{activeFeedIndex + 1}):</span>
+            </div>
 
-            {/* Targeted Rival Marker */}
-            {target && (
-              <span className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase px-3 py-0.5 rounded-full bg-red-950 text-red-200 border border-red-500 shadow-sm">
-                <Crosshair className="w-3.5 h-3.5 text-red-400" /> Target: {target.name}
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {!isLoading && onPlaySpeechAudio && (
+                <button
+                  type="button"
+                  onClick={() => onPlaySpeechAudio(displayedPact.whisperText, proposer?.voice?.voiceId, proposer?.id)}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 hover:text-white border border-emerald-500/40 text-xs font-mono font-bold shadow-md transition active:scale-95 cursor-pointer"
+                  title="Replay candidate's secret whisper audio"
+                >
+                  <Volume2 className={`w-3.5 h-3.5 text-emerald-400 ${isSpeakingAudio ? 'animate-pulse' : ''}`} />
+                  <span>{isSpeakingAudio ? 'Whispering...' : 'Replay Whisper'}</span>
+                </button>
+              )}
+
+              {/* Targeted Rival Marker */}
+              {target && (
+                <span className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase px-3 py-0.5 rounded-full bg-red-950 text-red-200 border border-red-500 shadow-sm">
+                  <Crosshair className="w-3.5 h-3.5 text-red-400" /> Target: {target.name}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Speech / Whisper Content */}

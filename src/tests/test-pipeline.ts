@@ -1,18 +1,191 @@
 import assert from 'assert';
 import { fishAudioService } from '../services/fishAudio';
 import { CANDIDATES, CANDIDATE_MAP } from '../data/candidates';
-import { GameState } from '../types/game';
+import { GameState, GamePhase, StepDescriptor } from '../types/game';
+
+// Universal simulation stepper matching useGameEngine.ts
+function simulateNextSteps(currentState: GameState, maxDepth: number = 2): StepDescriptor[] {
+  const steps: StepDescriptor[] = [];
+  const activeCandidateIds = [...currentState.activeCandidateIds];
+  if (activeCandidateIds.length === 0) return steps;
+
+  let simPhase: GamePhase = currentState.phase;
+  let simRound: number = currentState.round;
+  let simSpeakerIndex: number = currentState.currentSpeakerIndex;
+  let simActiveIds = [...activeCandidateIds];
+  let simWinnerId = currentState.winnerId;
+
+  while (steps.length < maxDepth) {
+    if (simPhase === 'IDLE') {
+      const nextIdx = steps.length;
+      if (nextIdx < simActiveIds.length) {
+        const cand = CANDIDATE_MAP.get(simActiveIds[nextIdx])!;
+        steps.push({
+          stepKey: `campaign-${nextIdx}-${cand.id}`,
+          phase: 'CAMPAIGN',
+          round: 1,
+          speakerId: cand.id,
+          targetId: null,
+          actionType: 'speech',
+          headline: nextIdx === 0
+            ? `ROUND 1: OPENING CAMPAIGN ADDRESS — ${cand.name.toUpperCase()}`
+            : `ROUND 1: CAMPAIGN ADDRESS — ${cand.name.toUpperCase()}`,
+        });
+      } else {
+        simPhase = 'ATTACK';
+        simSpeakerIndex = -1;
+        simRound = 1;
+      }
+    } else if (simPhase === 'CAMPAIGN') {
+      simSpeakerIndex += 1;
+      if (simSpeakerIndex < simActiveIds.length) {
+        const cand = CANDIDATE_MAP.get(simActiveIds[simSpeakerIndex])!;
+        steps.push({
+          stepKey: `campaign-${simSpeakerIndex}-${cand.id}`,
+          phase: 'CAMPAIGN',
+          round: 1,
+          speakerId: cand.id,
+          targetId: null,
+          actionType: 'speech',
+          headline: `ROUND 1: CAMPAIGN ADDRESS — ${cand.name.toUpperCase()}`,
+        });
+      } else {
+        simPhase = 'ATTACK';
+        simSpeakerIndex = -1;
+        simRound = 1;
+      }
+    } else if (simPhase === 'ATTACK') {
+      simSpeakerIndex += 1;
+      if (simSpeakerIndex < simActiveIds.length) {
+        const attacker = CANDIDATE_MAP.get(simActiveIds[simSpeakerIndex])!;
+        const possibleTargets = simActiveIds.filter(id => id !== attacker.id);
+        const preferredTargetId = possibleTargets.find(id => {
+          const c = CANDIDATE_MAP.get(id);
+          return c && attacker.rivalArchetypes.includes(c.archetype);
+        }) || possibleTargets[0];
+
+        steps.push({
+          stepKey: `attack-r${simRound}-${simSpeakerIndex}-${attacker.id}`,
+          phase: 'ATTACK',
+          round: simRound,
+          speakerId: attacker.id,
+          targetId: preferredTargetId,
+          actionType: 'attack',
+          headline: `ROUND ${simRound}: LIVE ATTACK ROUND — ${attacker.name.toUpperCase()}`,
+        });
+      } else {
+        simPhase = 'CCTV_BACKROOM';
+        simSpeakerIndex = -1;
+      }
+    } else if (simPhase === 'CCTV_BACKROOM') {
+      simSpeakerIndex += 1;
+      const pactCount = simActiveIds.length >= 4 ? 2 : 1;
+      if (simSpeakerIndex < pactCount) {
+        const p1 = simSpeakerIndex === 0
+          ? CANDIDATE_MAP.get(simActiveIds[0])!
+          : (CANDIDATE_MAP.get(simActiveIds[2]) || CANDIDATE_MAP.get(simActiveIds[0])!);
+        const p2 = simSpeakerIndex === 0
+          ? CANDIDATE_MAP.get(simActiveIds[1])!
+          : (CANDIDATE_MAP.get(simActiveIds[3]) || CANDIDATE_MAP.get(simActiveIds[1])!);
+
+        steps.push({
+          stepKey: `cctv-r${simRound}-${simSpeakerIndex}-${p1.id}`,
+          phase: 'CCTV_BACKROOM',
+          round: simRound,
+          speakerId: p1.id,
+          targetId: p2.id,
+          actionType: 'pact',
+          headline: `ROUND ${simRound}: LEAKED CAPITOL CCTV FEED ${simSpeakerIndex + 1} OF ${pactCount}`,
+        });
+      } else {
+        simPhase = 'VOTE_SECRET';
+      }
+    } else if (simPhase === 'VOTE_SECRET') {
+      steps.push({
+        stepKey: `vote_tally-r${simRound}`,
+        phase: 'VOTE_SECRET',
+        round: simRound,
+        speakerId: null,
+        targetId: null,
+        actionType: 'vote',
+        headline: `ROUND ${simRound}: CONFIDENTIAL ELIMINATION BALLOT`,
+      });
+      simPhase = 'VOTE_REVEAL';
+    } else if (simPhase === 'VOTE_REVEAL') {
+      const elimCandidateId = simActiveIds[simActiveIds.length - 1];
+      const elimCand = CANDIDATE_MAP.get(elimCandidateId)!;
+      steps.push({
+        stepKey: `elimination-r${simRound}-${elimCand.id}`,
+        phase: 'ELIMINATION',
+        round: simRound,
+        speakerId: elimCand.id,
+        targetId: null,
+        actionType: 'eliminated',
+        headline: `ROUND ${simRound} ELIMINATION — ${elimCand.name.toUpperCase()}`,
+      });
+      if (simActiveIds.length > 3) {
+        simActiveIds.pop();
+        simPhase = 'ATTACK';
+        simRound += 1;
+        simSpeakerIndex = -1;
+      } else {
+        simActiveIds.pop();
+        simPhase = 'FINAL_SPEECHES';
+        simSpeakerIndex = -1;
+      }
+    } else if (simPhase === 'ELIMINATION') {
+      if (simActiveIds.length > 3) {
+        simPhase = 'ATTACK';
+        simRound += 1;
+        simSpeakerIndex = -1;
+      } else {
+        simPhase = 'FINAL_SPEECHES';
+        simSpeakerIndex = -1;
+      }
+    } else if (simPhase === 'FINAL_SPEECHES') {
+      simSpeakerIndex += 1;
+      if (simSpeakerIndex < simActiveIds.length && simSpeakerIndex < 3) {
+        const finalist = CANDIDATE_MAP.get(simActiveIds[simSpeakerIndex])!;
+        steps.push({
+          stepKey: `final_speech-${simSpeakerIndex}-${finalist.id}`,
+          phase: 'FINAL_SPEECHES',
+          round: simRound,
+          speakerId: finalist.id,
+          targetId: null,
+          actionType: 'speech',
+          headline: `THE FINAL 3 SHOWDOWN: CLOSING ARGUMENT — ${finalist.name.toUpperCase()}`,
+        });
+      } else {
+        simPhase = 'FINAL_VOTE';
+      }
+    } else if (simPhase === 'FINAL_VOTE' || simPhase === 'FINAL_REVEAL') {
+      const winner = CANDIDATE_MAP.get(simWinnerId || simActiveIds[0])!;
+      steps.push({
+        stepKey: `winner-${winner.id}`,
+        phase: 'WINNER',
+        round: 100,
+        speakerId: winner.id,
+        targetId: null,
+        actionType: 'winner',
+        headline: `PRESIDENT OF THE REPUBLIC OF VALORIA: ${winner.name.toUpperCase()}`,
+      });
+      break;
+    } else {
+      break;
+    }
+  }
+
+  return steps;
+}
 
 async function runPipelineTests() {
-  console.log('--- Starting 2-Step Lookahead Execution Pipeline Tests ---');
+  console.log('--- Starting Universal Lookahead Pipeline & Complete TTS Tests ---');
 
   // Initialize CANDIDATE_MAP
   CANDIDATES.forEach(c => CANDIDATE_MAP.set(c.id, c));
   const activeIds = CANDIDATES.map(c => c.id).slice(0, 6);
 
-  // 1. Test Lookahead Descriptors for IDLE Phase
-  console.log('1. Testing IDLE Phase 2-step lookahead generation...');
-  const idleState: GameState = {
+  const baseState: GameState = {
     phase: 'IDLE',
     round: 1,
     participatingCandidateIds: activeIds,
@@ -47,83 +220,73 @@ async function runPipelineTests() {
     tickerLog: [],
   };
 
-  const c0 = CANDIDATE_MAP.get(activeIds[0])!;
-  const c1 = CANDIDATE_MAP.get(activeIds[1])!;
+  // 1. Test Configurable Depth Lookaheads (2, 3, 4, 5 Steps)
+  console.log('1. Testing Configurable Lookahead Depths (2, 3, 4, 5 steps)...');
+  for (const depth of [2, 3, 4, 5] as const) {
+    const steps = simulateNextSteps(baseState, depth);
+    assert.strictEqual(steps.length, depth, `Lookahead must return exactly ${depth} steps`);
+    console.log(`  ✓ Depth ${depth}: Generated [${steps.map(s => s.stepKey).join(', ')}]`);
+  }
 
-  assert.strictEqual(c0.id, activeIds[0]);
-  assert.strictEqual(c1.id, activeIds[1]);
-  console.log(`✓ IDLE phase step 1 (Speaker 0: ${c0.name}) and step 2 (Speaker 1: ${c1.name}) computed successfully!`);
-
-  // 2. Test Lookahead Descriptors for Campaign Phase
-  console.log('2. Testing CAMPAIGN Phase lookahead progression...');
-  const campaignLastSpeakerState: GameState = {
-    ...idleState,
-    phase: 'CAMPAIGN',
-    currentSpeakerIndex: activeIds.length - 1, // Last speaker
+  // 2. Test Seamless Transition: ATTACK -> CCTV -> VOTE -> ELIMINATION
+  console.log('2. Testing Seamless Lookahead across ATTACK -> CCTV -> VOTE -> ELIMINATION transitions...');
+  const attackEndState: GameState = {
+    ...baseState,
+    phase: 'ATTACK',
+    round: 1,
+    currentSpeakerIndex: activeIds.length - 1, // Last attacker
   };
 
-  // Next step after last campaign speaker should transition directly to ATTACK round 1
-  const firstAttacker = CANDIDATE_MAP.get(activeIds[0])!;
-  const possibleTargets = activeIds.filter(id => id !== firstAttacker.id);
-  const preferredTargetId = possibleTargets.find(id => {
-    const c = CANDIDATE_MAP.get(id);
-    return c && firstAttacker.rivalArchetypes.includes(c.archetype);
-  }) || possibleTargets[0];
+  const cctvLookahead = simulateNextSteps(attackEndState, 4);
+  assert.strictEqual(cctvLookahead.length, 4);
+  assert.strictEqual(cctvLookahead[0].phase, 'CCTV_BACKROOM', 'Step 1 after attack must be CCTV Feed 1');
+  assert.strictEqual(cctvLookahead[1].phase, 'CCTV_BACKROOM', 'Step 2 after attack must be CCTV Feed 2');
+  assert.strictEqual(cctvLookahead[2].phase, 'VOTE_SECRET', 'Step 3 after CCTV must be Secret Voting');
+  assert.strictEqual(cctvLookahead[3].phase, 'ELIMINATION', 'Step 4 after Voting must be Elimination Concession');
+  console.log(`  ✓ Seamless lookahead sequence verified: [${cctvLookahead.map(s => s.phase).join(' -> ')}]`);
 
-  assert(preferredTargetId !== undefined, 'Target for first attacker must exist');
-  console.log(`✓ Campaign completion transitions lookahead to ATTACK phase (${firstAttacker.name} -> ${CANDIDATE_MAP.get(preferredTargetId)?.name})`);
+  // 3. Test CCTV Secret Whisper TTS Synthesis
+  console.log('3. Testing CCTV Secret Whisper & Elimination Concession TTS Synthesis with Fish.Audio...');
+  const proposer = CANDIDATE_MAP.get(activeIds[0])!;
+  const elimCandidate = CANDIDATE_MAP.get(activeIds[activeIds.length - 1])!;
 
-  // 3. Test Concurrent Pre-buffering with Fish.Audio TTS
-  console.log('3. Testing Concurrent Pre-buffering of 2 Steps (LLM + TTS)...');
-  const step1Text = "Valoria stands at a historic crossroads. We must unite for prosperity!";
-  const step2Text = "My opponent speaks of prosperity, but our borders and industries need decisive strength!";
+  const whisperText = "Let's align our factions and eliminate our mutual rival on the upcoming secret ballot.";
+  const concessionText = "The people have spoken. I step down with honor, but our movement continues!";
 
-  const [res1, res2] = await Promise.all([
+  const [whisperAudio, concessionAudio] = await Promise.all([
     fishAudioService.generateSpeech({
-      text: step1Text,
-      voiceId: c0.voice?.voiceId || '5196af35f6ff4a0dbf541793fc9f2157',
+      text: whisperText,
+      voiceId: proposer.voice?.voiceId || '5196af35f6ff4a0dbf541793fc9f2157',
       model: 's2.1-pro-free',
     }),
     fishAudioService.generateSpeech({
-      text: step2Text,
-      voiceId: c1.voice?.voiceId || 'b545c585f631496c914815291da4e893',
+      text: concessionText,
+      voiceId: elimCandidate.voice?.voiceId || 'b545c585f631496c914815291da4e893',
       model: 's2.1-pro-free',
     }),
   ]);
 
-  assert(res1 instanceof ArrayBuffer && res1.byteLength > 1000, 'Step 1 TTS audio buffer must be valid');
-  assert(res2 instanceof ArrayBuffer && res2.byteLength > 1000, 'Step 2 TTS audio buffer must be valid');
-  console.log(`✓ Concurrent TTS Pre-buffering PASSED: Step 1 (${res1.byteLength} bytes), Step 2 (${res2.byteLength} bytes) ready simultaneously!`);
+  assert(whisperAudio instanceof ArrayBuffer && whisperAudio.byteLength > 1000, 'Whisper TTS audio buffer must be valid');
+  assert(concessionAudio instanceof ArrayBuffer && concessionAudio.byteLength > 1000, 'Concession TTS audio buffer must be valid');
+  console.log(`  ✓ CCTV Whisper TTS generated (${whisperAudio.byteLength} bytes) for ${proposer.name}`);
+  console.log(`  ✓ Concession Speech TTS generated (${concessionAudio.byteLength} bytes) for ${elimCandidate.name}`);
 
-  // 4. Test In-memory Preload Buffer Instantaneous 0ms Retrieval
-  console.log('4. Testing Instantaneous 0ms In-Memory Consumption...');
+  // 4. Test Instantaneous In-Memory Cache Retrieval
+  console.log('4. Testing In-Memory Cache Retrieval Speed...');
   const cacheMap = new Map<string, any>();
-  const stepKey1 = `campaign-0-${c0.id}`;
-  const stepKey2 = `campaign-1-${c1.id}`;
+  const cctvKey = `cctv-r1-0-${proposer.id}`;
+  cacheMap.set(cctvKey, { stepKey: cctvKey, content: whisperText, audioBlobUrl: 'blob:mock-cctv', isReady: true });
 
-  const mockBlobUrl1 = 'blob:http://localhost:3000/audio-mock-1';
-  const mockBlobUrl2 = 'blob:http://localhost:3000/audio-mock-2';
-
-  cacheMap.set(stepKey1, { stepKey: stepKey1, content: step1Text, audioBlobUrl: mockBlobUrl1, isReady: true });
-  cacheMap.set(stepKey2, { stepKey: stepKey2, content: step2Text, audioBlobUrl: mockBlobUrl2, isReady: true });
-
-  assert.strictEqual(cacheMap.size, 2);
-
-  // Measure consumption time
   const t0 = performance.now();
-  const consumed1 = cacheMap.get(stepKey1);
-  cacheMap.delete(stepKey1);
+  const retrieved = cacheMap.get(cctvKey);
+  cacheMap.delete(cctvKey);
   const elapsedMs = performance.now() - t0;
 
-  assert.strictEqual(consumed1.content, step1Text);
-  assert.strictEqual(consumed1.audioBlobUrl, mockBlobUrl1);
-  assert.strictEqual(cacheMap.has(stepKey1), false);
-  assert.strictEqual(cacheMap.has(stepKey2), true);
-  assert(elapsedMs < 5, `Memory consumption must be near-instantaneous (took ${elapsedMs.toFixed(3)}ms)`);
+  assert.strictEqual(retrieved.content, whisperText);
+  assert(elapsedMs < 2, `Cache retrieval must be < 2ms (took ${elapsedMs.toFixed(3)}ms)`);
+  console.log(`  ✓ Instantaneous Cache Retrieval: ${elapsedMs.toFixed(3)}ms`);
 
-  console.log(`✓ Instantaneous Cache Retrieval PASSED: consumed Step 1 (text + audioBlobUrl) in ${elapsedMs.toFixed(3)}ms (0 network delay)!`);
-
-  console.log('\n--- ALL 2-Step Lookahead Execution Pipeline Tests PASSED! ---');
+  console.log('\n--- ALL Universal Multi-Step Lookahead Pipeline Tests PASSED! ---');
 }
 
 runPipelineTests().catch(err => {

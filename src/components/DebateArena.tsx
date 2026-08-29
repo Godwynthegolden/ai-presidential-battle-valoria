@@ -70,6 +70,8 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             allPactsThisRound={pactsThisRound}
             activeFeedIndex={activeFeedIndex}
             onSelectFeed={onSelectCCTVFeed}
+            onPlaySpeechAudio={onPlaySpeechAudio}
+            isSpeakingAudio={isSpeakingAudio}
             round={round}
             isLoading={stage.isLoading}
           />

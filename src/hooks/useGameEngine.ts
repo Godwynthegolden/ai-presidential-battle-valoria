@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { GameState, GamePhase, LLMRequestPayload, RoundVoteTally, VoteRecord, AttackEvent, BackroomPact } from '@/types/game';
+import { GameState, GamePhase, LLMRequestPayload, RoundVoteTally, VoteRecord, AttackEvent, BackroomPact, StageActionType, StepDescriptor } from '@/types/game';
 import { Candidate } from '@/types/candidate';
 import { 
   CANDIDATES, 
@@ -31,7 +31,7 @@ export interface PreparedStep {
   round: number;
   speakerId: string | null;
   targetId: string | null;
-  actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
+  actionType: StageActionType;
   headline: string;
   content: string;
   audioBlobUrl: string | null;
@@ -39,17 +39,6 @@ export interface PreparedStep {
   isReady: boolean;
   error?: string | null;
   payload?: any;
-}
-
-export interface StepDescriptor {
-  stepKey: string;
-  phase: GamePhase;
-  round: number;
-  speakerId: string | null;
-  targetId: string | null;
-  actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
-  headline: string;
-  llmPayload?: LLMRequestPayload;
 }
 
 const CREATE_INITIAL_STATE = (selectedIds: string[] = []): GameState => ({
@@ -424,29 +413,7 @@ export function useGameEngine(
   // -----------------------------------------------------------------
   // ⚡ 2-Step Lookahead Execution Pipeline Helpers
   // -----------------------------------------------------------------
-  const preloadStep = useCallback(async (descriptor: {
-    stepKey: string;
-    phase: GamePhase;
-    round: number;
-    speakerId: string | null;
-    targetId: string | null;
-    actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
-    headline: string;
-    llmPayload?: LLMRequestPayload;
-  }): Promise<{
-    stepKey: string;
-    phase: GamePhase;
-    round: number;
-    speakerId: string | null;
-    targetId: string | null;
-    actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
-    headline: string;
-    content: string;
-    audioBlobUrl: string | null;
-    audioBlob: Blob | null;
-    isReady: boolean;
-    error?: string | null;
-  }> => {
+  const preloadStep = useCallback(async (descriptor: StepDescriptor): Promise<PreparedStep> => {
     const { stepKey } = descriptor;
     if (lookaheadBufferRef.current.has(stepKey)) {
       return lookaheadBufferRef.current.get(stepKey)!;
@@ -470,7 +437,7 @@ export function useGameEngine(
           audioBlob = ttsRes.audioBlob;
         }
 
-        const prepared = {
+        const prepared: PreparedStep = {
           stepKey,
           phase: descriptor.phase,
           round: descriptor.round,
@@ -489,7 +456,7 @@ export function useGameEngine(
         return prepared;
       } catch (err: any) {
         console.warn(`[Preload Warning for ${stepKey}]:`, err);
-        const fallback = {
+        const fallback: PreparedStep = {
           stepKey,
           phase: descriptor.phase,
           round: descriptor.round,
@@ -512,16 +479,7 @@ export function useGameEngine(
     return promise;
   }, [callLLM, synthesizeSpeechAudio]);
 
-  const fetchOrConsumeStep = useCallback(async (descriptor: {
-    stepKey: string;
-    phase: GamePhase;
-    round: number;
-    speakerId: string | null;
-    targetId: string | null;
-    actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
-    headline: string;
-    llmPayload?: LLMRequestPayload;
-  }): Promise<{ content: string; audioBlobUrl: string | null }> => {
+  const fetchOrConsumeStep = useCallback(async (descriptor: StepDescriptor): Promise<{ content: string; audioBlobUrl: string | null }> => {
     const { stepKey } = descriptor;
 
     // 1. Instant Memory Cache Hit (0ms)
@@ -550,274 +508,211 @@ export function useGameEngine(
     return { content: prep.content, audioBlobUrl: prep.audioBlobUrl };
   }, [preloadStep]);
 
-  const computeNextSteps = useCallback((currentState: GameState) => {
-    const { phase, round, currentSpeakerIndex, activeCandidateIds } = currentState;
-    const steps: Array<{
-      stepKey: string;
-      phase: GamePhase;
-      round: number;
-      speakerId: string | null;
-      targetId: string | null;
-      actionType: 'speech' | 'attack' | 'vote' | 'eliminated' | 'winner' | 'idle';
-      headline: string;
-      llmPayload?: LLMRequestPayload;
-    }> = [];
+  const computeNextSteps = useCallback((currentState: GameState, maxDepth: number = 2) => {
+    const steps: StepDescriptor[] = [];
+    const activeCandidateIds = [...currentState.activeCandidateIds];
+    if (activeCandidateIds.length === 0) return steps;
 
-    if (phase === 'IDLE') {
-      if (activeCandidateIds.length > 0) {
-        const c0 = CANDIDATE_MAP.get(activeCandidateIds[0])!;
-        steps.push({
-          stepKey: `campaign-0-${c0.id}`,
-          phase: 'CAMPAIGN',
-          round: 1,
-          speakerId: c0.id,
-          targetId: null,
-          actionType: 'speech',
-          headline: `ROUND 1: OPENING CAMPAIGN ADDRESS — ${c0.name.toUpperCase()}`,
-          llmPayload: {
-            action: 'campaign_speech',
-            candidateId: c0.id,
+    // Simulate step progression from currentState
+    let simPhase: GamePhase = currentState.phase;
+    let simRound: number = currentState.round;
+    let simSpeakerIndex: number = currentState.currentSpeakerIndex;
+    let simActiveIds = [...activeCandidateIds];
+    let simWinnerId = currentState.winnerId;
+
+    while (steps.length < maxDepth) {
+      if (simPhase === 'IDLE') {
+        const nextIdx = steps.length;
+        if (nextIdx < simActiveIds.length) {
+          const cand = CANDIDATE_MAP.get(simActiveIds[nextIdx])!;
+          steps.push({
+            stepKey: `campaign-${nextIdx}-${cand.id}`,
+            phase: 'CAMPAIGN',
             round: 1,
-            activeCandidateIds,
-            historyContext: {},
-          }
-        });
-      }
-      if (activeCandidateIds.length > 1) {
-        const c1 = CANDIDATE_MAP.get(activeCandidateIds[1])!;
-        steps.push({
-          stepKey: `campaign-1-${c1.id}`,
-          phase: 'CAMPAIGN',
-          round: 1,
-          speakerId: c1.id,
-          targetId: null,
-          actionType: 'speech',
-          headline: `ROUND 1: CAMPAIGN ADDRESS — ${c1.name.toUpperCase()}`,
-          llmPayload: {
-            action: 'campaign_speech',
-            candidateId: c1.id,
+            speakerId: cand.id,
+            targetId: null,
+            actionType: 'speech',
+            headline: nextIdx === 0
+              ? `ROUND 1: OPENING CAMPAIGN ADDRESS — ${cand.name.toUpperCase()}`
+              : `ROUND 1: CAMPAIGN ADDRESS — ${cand.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'campaign_speech',
+              candidateId: cand.id,
+              round: 1,
+              activeCandidateIds: simActiveIds,
+              historyContext: {},
+            }
+          });
+        } else {
+          simPhase = 'ATTACK';
+          simSpeakerIndex = -1;
+          simRound = 1;
+        }
+      } else if (simPhase === 'CAMPAIGN') {
+        simSpeakerIndex += 1;
+        if (simSpeakerIndex < simActiveIds.length) {
+          const cand = CANDIDATE_MAP.get(simActiveIds[simSpeakerIndex])!;
+          steps.push({
+            stepKey: `campaign-${simSpeakerIndex}-${cand.id}`,
+            phase: 'CAMPAIGN',
             round: 1,
-            activeCandidateIds,
-            historyContext: {},
-          }
-        });
-      }
-      return steps;
-    }
+            speakerId: cand.id,
+            targetId: null,
+            actionType: 'speech',
+            headline: `ROUND 1: CAMPAIGN ADDRESS — ${cand.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'campaign_speech',
+              candidateId: cand.id,
+              round: 1,
+              activeCandidateIds: simActiveIds,
+              historyContext: {},
+            }
+          });
+        } else {
+          // Transition to ATTACK phase
+          simPhase = 'ATTACK';
+          simSpeakerIndex = -1;
+          simRound = 1;
+        }
+      } else if (simPhase === 'ATTACK') {
+        simSpeakerIndex += 1;
+        if (simSpeakerIndex < simActiveIds.length) {
+          const attacker = CANDIDATE_MAP.get(simActiveIds[simSpeakerIndex])!;
+          const possibleTargets = simActiveIds.filter(id => id !== attacker.id);
+          const preferredTargetId = possibleTargets.find(id => {
+            const c = CANDIDATE_MAP.get(id);
+            return c && attacker.rivalArchetypes.includes(c.archetype);
+          }) || possibleTargets[0];
 
-    if (phase === 'CAMPAIGN') {
-      const nextIdx1 = currentSpeakerIndex + 1;
-      const nextIdx2 = currentSpeakerIndex + 2;
-
-      // Next step
-      if (nextIdx1 < activeCandidateIds.length) {
-        const c = CANDIDATE_MAP.get(activeCandidateIds[nextIdx1])!;
-        steps.push({
-          stepKey: `campaign-${nextIdx1}-${c.id}`,
-          phase: 'CAMPAIGN',
-          round: 1,
-          speakerId: c.id,
-          targetId: null,
-          actionType: 'speech',
-          headline: `ROUND 1: CAMPAIGN ADDRESS — ${c.name.toUpperCase()}`,
-          llmPayload: {
-            action: 'campaign_speech',
-            candidateId: c.id,
-            round: 1,
-            activeCandidateIds,
-            historyContext: {},
-          }
-        });
-      } else {
-        const firstAttacker = CANDIDATE_MAP.get(activeCandidateIds[0])!;
-        const possibleTargets = activeCandidateIds.filter(id => id !== firstAttacker.id);
-        const preferredTargetId = possibleTargets.find(id => {
-          const targetCand = CANDIDATE_MAP.get(id);
-          return targetCand && firstAttacker.rivalArchetypes.includes(targetCand.archetype);
-        }) || possibleTargets[0];
-
-        steps.push({
-          stepKey: `attack-r1-0-${firstAttacker.id}`,
-          phase: 'ATTACK',
-          round: 1,
-          speakerId: firstAttacker.id,
-          targetId: preferredTargetId,
-          actionType: 'attack',
-          headline: `ROUND 1: LIVE ATTACK ROUND — ${firstAttacker.name.toUpperCase()}`,
-          llmPayload: {
-            action: 'attack',
-            candidateId: firstAttacker.id,
+          steps.push({
+            stepKey: `attack-r${simRound}-${simSpeakerIndex}-${attacker.id}`,
+            phase: 'ATTACK',
+            round: simRound,
+            speakerId: attacker.id,
             targetId: preferredTargetId,
-            round: 1,
-            activeCandidateIds,
-            historyContext: { campaignSpeeches: currentState.campaignSpeeches },
-          }
-        });
-      }
+            actionType: 'attack',
+            headline: `ROUND ${simRound}: LIVE ATTACK ROUND — ${attacker.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'attack',
+              candidateId: attacker.id,
+              targetId: preferredTargetId,
+              round: simRound,
+              activeCandidateIds: simActiveIds,
+              historyContext: { campaignSpeeches: currentState.campaignSpeeches },
+            }
+          });
+        } else {
+          // Transition to CCTV_BACKROOM
+          simPhase = 'CCTV_BACKROOM';
+          simSpeakerIndex = -1;
+        }
+      } else if (simPhase === 'CCTV_BACKROOM') {
+        simSpeakerIndex += 1;
+        const pactCount = simActiveIds.length >= 4 ? 2 : 1;
+        if (simSpeakerIndex < pactCount) {
+          const p1 = simSpeakerIndex === 0
+            ? (CANDIDATE_MAP.get(simActiveIds[0]) || CANDIDATE_MAP.get(simActiveIds[0])!)
+            : (CANDIDATE_MAP.get(simActiveIds[2]) || CANDIDATE_MAP.get(simActiveIds[0])!);
+          const p2 = simSpeakerIndex === 0
+            ? (CANDIDATE_MAP.get(simActiveIds[1]) || CANDIDATE_MAP.get(simActiveIds[1])!)
+            : (CANDIDATE_MAP.get(simActiveIds[3]) || CANDIDATE_MAP.get(simActiveIds[1])!);
 
-      // Step + 2
-      if (nextIdx2 < activeCandidateIds.length) {
-        const c2 = CANDIDATE_MAP.get(activeCandidateIds[nextIdx2])!;
+          steps.push({
+            stepKey: `cctv-r${simRound}-${simSpeakerIndex}-${p1.id}`,
+            phase: 'CCTV_BACKROOM',
+            round: simRound,
+            speakerId: p1.id,
+            targetId: p2.id,
+            actionType: 'pact',
+            headline: `ROUND ${simRound}: LEAKED CAPITOL CCTV FEED ${simSpeakerIndex + 1} OF ${pactCount}`,
+            llmPayload: {
+              action: 'backroom_pact',
+              candidateId: p1.id,
+              targetId: p2.id,
+              round: simRound,
+              activeCandidateIds: simActiveIds,
+              historyContext: {},
+            }
+          });
+        } else {
+          // Transition to Secret Voting calculation
+          simPhase = 'VOTE_SECRET';
+        }
+      } else if (simPhase === 'VOTE_SECRET') {
         steps.push({
-          stepKey: `campaign-${nextIdx2}-${c2.id}`,
-          phase: 'CAMPAIGN',
-          round: 1,
-          speakerId: c2.id,
+          stepKey: `vote_tally-r${simRound}`,
+          phase: 'VOTE_SECRET',
+          round: simRound,
+          speakerId: null,
           targetId: null,
-          actionType: 'speech',
-          headline: `ROUND 1: CAMPAIGN ADDRESS — ${c2.name.toUpperCase()}`,
+          actionType: 'vote',
+          headline: `ROUND ${simRound}: CONFIDENTIAL ELIMINATION BALLOT`,
+        });
+        simPhase = 'VOTE_REVEAL';
+      } else if (simPhase === 'VOTE_REVEAL') {
+        const elimCandidateId = simActiveIds[simActiveIds.length - 1];
+        const elimCand = CANDIDATE_MAP.get(elimCandidateId)!;
+        steps.push({
+          stepKey: `elimination-r${simRound}-${elimCand.id}`,
+          phase: 'ELIMINATION',
+          round: simRound,
+          speakerId: elimCand.id,
+          targetId: null,
+          actionType: 'eliminated',
+          headline: `ROUND ${simRound} ELIMINATION — ${elimCand.name.toUpperCase()}`,
           llmPayload: {
-            action: 'campaign_speech',
-            candidateId: c2.id,
-            round: 1,
-            activeCandidateIds,
+            action: 'exit_words',
+            candidateId: elimCand.id,
+            round: simRound,
+            activeCandidateIds: simActiveIds,
             historyContext: {},
           }
         });
-      } else if (nextIdx1 < activeCandidateIds.length) {
-        const firstAttacker = CANDIDATE_MAP.get(activeCandidateIds[0])!;
-        const possibleTargets = activeCandidateIds.filter(id => id !== firstAttacker.id);
-        const preferredTargetId = possibleTargets.find(id => {
-          const targetCand = CANDIDATE_MAP.get(id);
-          return targetCand && firstAttacker.rivalArchetypes.includes(targetCand.archetype);
-        }) || possibleTargets[0];
-
-        steps.push({
-          stepKey: `attack-r1-0-${firstAttacker.id}`,
-          phase: 'ATTACK',
-          round: 1,
-          speakerId: firstAttacker.id,
-          targetId: preferredTargetId,
-          actionType: 'attack',
-          headline: `ROUND 1: LIVE ATTACK ROUND — ${firstAttacker.name.toUpperCase()}`,
-          llmPayload: {
-            action: 'attack',
-            candidateId: firstAttacker.id,
-            targetId: preferredTargetId,
-            round: 1,
-            activeCandidateIds,
-            historyContext: { campaignSpeeches: currentState.campaignSpeeches },
-          }
-        });
-      }
-
-      return steps;
-    }
-
-    if (phase === 'ATTACK') {
-      const nextIdx1 = currentSpeakerIndex + 1;
-      const nextIdx2 = currentSpeakerIndex + 2;
-
-      if (nextIdx1 < activeCandidateIds.length) {
-        const attacker = CANDIDATE_MAP.get(activeCandidateIds[nextIdx1])!;
-        const possibleTargets = activeCandidateIds.filter(id => id !== attacker.id);
-        const preferredTargetId = possibleTargets.find(id => {
-          const targetCand = CANDIDATE_MAP.get(id);
-          return targetCand && attacker.rivalArchetypes.includes(targetCand.archetype);
-        }) || possibleTargets[0];
-
-        steps.push({
-          stepKey: `attack-r${round}-${nextIdx1}-${attacker.id}`,
-          phase: 'ATTACK',
-          round,
-          speakerId: attacker.id,
-          targetId: preferredTargetId,
-          actionType: 'attack',
-          headline: `ROUND ${round}: LIVE ATTACK ROUND — ${attacker.name.toUpperCase()}`,
-          llmPayload: {
-            action: 'attack',
-            candidateId: attacker.id,
-            targetId: preferredTargetId,
-            round,
-            activeCandidateIds,
-            historyContext: { campaignSpeeches: currentState.campaignSpeeches },
-          }
-        });
-      }
-
-      if (nextIdx2 < activeCandidateIds.length) {
-        const attacker2 = CANDIDATE_MAP.get(activeCandidateIds[nextIdx2])!;
-        const possibleTargets2 = activeCandidateIds.filter(id => id !== attacker2.id);
-        const preferredTargetId2 = possibleTargets2.find(id => {
-          const targetCand = CANDIDATE_MAP.get(id);
-          return targetCand && attacker2.rivalArchetypes.includes(targetCand.archetype);
-        }) || possibleTargets2[0];
-
-        steps.push({
-          stepKey: `attack-r${round}-${nextIdx2}-${attacker2.id}`,
-          phase: 'ATTACK',
-          round,
-          speakerId: attacker2.id,
-          targetId: preferredTargetId2,
-          actionType: 'attack',
-          headline: `ROUND ${round}: LIVE ATTACK ROUND — ${attacker2.name.toUpperCase()}`,
-          llmPayload: {
-            action: 'attack',
-            candidateId: attacker2.id,
-            targetId: preferredTargetId2,
-            round,
-            activeCandidateIds,
-            historyContext: { campaignSpeeches: currentState.campaignSpeeches },
-          }
-        });
-      }
-
-      return steps;
-    }
-
-    if (phase === 'FINAL_SPEECHES') {
-      const nextIdx1 = currentSpeakerIndex + 1;
-      const nextIdx2 = currentSpeakerIndex + 2;
-
-      if (nextIdx1 < activeCandidateIds.length) {
-        const finalist = CANDIDATE_MAP.get(activeCandidateIds[nextIdx1])!;
-        steps.push({
-          stepKey: `final_speech-${nextIdx1}-${finalist.id}`,
-          phase: 'FINAL_SPEECHES',
-          round,
-          speakerId: finalist.id,
-          targetId: null,
-          actionType: 'speech',
-          headline: `THE FINAL 3 SHOWDOWN: CLOSING ARGUMENT — ${finalist.name.toUpperCase()}`,
-          llmPayload: {
-            action: 'final_speech',
-            candidateId: finalist.id,
-            round,
-            activeCandidateIds,
-            finalistIds: activeCandidateIds,
-            historyContext: {},
-          }
-        });
-      }
-
-      if (nextIdx2 < activeCandidateIds.length) {
-        const finalist2 = CANDIDATE_MAP.get(activeCandidateIds[nextIdx2])!;
-        steps.push({
-          stepKey: `final_speech-${nextIdx2}-${finalist2.id}`,
-          phase: 'FINAL_SPEECHES',
-          round,
-          speakerId: finalist2.id,
-          targetId: null,
-          actionType: 'speech',
-          headline: `THE FINAL 3 SHOWDOWN: CLOSING ARGUMENT — ${finalist2.name.toUpperCase()}`,
-          llmPayload: {
-            action: 'final_speech',
-            candidateId: finalist2.id,
-            round,
-            activeCandidateIds,
-            finalistIds: activeCandidateIds,
-            historyContext: {},
-          }
-        });
-      }
-
-      return steps;
-    }
-
-    if (phase === 'FINAL_VOTE' || phase === 'FINAL_REVEAL') {
-      const winnerId = currentState.winnerId || activeCandidateIds[0];
-      const winner = CANDIDATE_MAP.get(winnerId);
-      if (winner) {
+        if (simActiveIds.length > 3) {
+          simActiveIds.pop();
+          simPhase = 'ATTACK';
+          simRound += 1;
+          simSpeakerIndex = -1;
+        } else {
+          simActiveIds.pop();
+          simPhase = 'FINAL_SPEECHES';
+          simSpeakerIndex = -1;
+        }
+      } else if (simPhase === 'ELIMINATION') {
+        if (simActiveIds.length > 3) {
+          simPhase = 'ATTACK';
+          simRound += 1;
+          simSpeakerIndex = -1;
+        } else {
+          simPhase = 'FINAL_SPEECHES';
+          simSpeakerIndex = -1;
+        }
+      } else if (simPhase === 'FINAL_SPEECHES') {
+        simSpeakerIndex += 1;
+        if (simSpeakerIndex < simActiveIds.length && simSpeakerIndex < 3) {
+          const finalist = CANDIDATE_MAP.get(simActiveIds[simSpeakerIndex])!;
+          steps.push({
+            stepKey: `final_speech-${simSpeakerIndex}-${finalist.id}`,
+            phase: 'FINAL_SPEECHES',
+            round: simRound,
+            speakerId: finalist.id,
+            targetId: null,
+            actionType: 'speech',
+            headline: `THE FINAL 3 SHOWDOWN: CLOSING ARGUMENT — ${finalist.name.toUpperCase()}`,
+            llmPayload: {
+              action: 'final_speech',
+              candidateId: finalist.id,
+              round: simRound,
+              activeCandidateIds: simActiveIds,
+              finalistIds: simActiveIds,
+              historyContext: {},
+            }
+          });
+        } else {
+          simPhase = 'FINAL_VOTE';
+        }
+      } else if (simPhase === 'FINAL_VOTE' || simPhase === 'FINAL_REVEAL') {
+        const winner = CANDIDATE_MAP.get(simWinnerId || simActiveIds[0])!;
         steps.push({
           stepKey: `winner-${winner.id}`,
           phase: 'WINNER',
@@ -834,15 +729,18 @@ export function useGameEngine(
             historyContext: {},
           }
         });
+        break;
+      } else {
+        break;
       }
-      return steps;
     }
 
     return steps;
   }, []);
 
   const dispatchBackgroundPreload = useCallback((currentState: GameState) => {
-    const nextSteps = computeNextSteps(currentState);
+    const depth = configRef.current?.lookaheadDepth || 2;
+    const nextSteps = computeNextSteps(currentState, depth);
     nextSteps.forEach(step => {
       preloadStep(step);
     });
@@ -1332,25 +1230,35 @@ export function useGameEngine(
             text: a.text,
           }));
 
-          // Primary pact call
-          const pactResult = await callLLM({
-            action: 'backroom_pact',
-            candidateId: proposer1.id,
-            targetId: receiver1.id,
+          const stepDescriptor = {
+            stepKey: `cctv-r${round}-0-${proposer1.id}`,
+            phase: 'CCTV_BACKROOM' as GamePhase,
             round,
-            activeCandidateIds,
-            historyContext: {
-              recentAttacks: recentAttackContext,
-            },
-          });
+            speakerId: proposer1.id,
+            targetId: receiver1.id,
+            actionType: 'pact' as const,
+            headline: `ROUND ${round}: LEAKED CAPITOL CCTV FEED 1 OF ${activeCandidateIds.length >= 4 ? 2 : 1}`,
+            llmPayload: {
+              action: 'backroom_pact' as const,
+              candidateId: proposer1.id,
+              targetId: receiver1.id,
+              round,
+              activeCandidateIds,
+              historyContext: {
+                recentAttacks: recentAttackContext,
+              },
+            }
+          };
+
+          const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
           const primaryPact: BackroomPact = {
             id: `pact-1-${Date.now()}`,
             round,
             proposerId: proposer1.id,
             receiverId: receiver1.id,
-            agreedTargetId: pactResult.agreedTargetId || activeCandidateIds.filter(id => id !== proposer1.id && id !== receiver1.id)[0] || activeCandidateIds[2] || activeCandidateIds[0],
-            whisperText: pactResult.text,
+            agreedTargetId: activeCandidateIds.filter(id => id !== proposer1.id && id !== receiver1.id)[0] || activeCandidateIds[2] || activeCandidateIds[0],
+            whisperText: content,
             location: LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)],
             timestamp: Date.now(),
           };
@@ -1363,24 +1271,34 @@ export function useGameEngine(
             const receiver2 = CANDIDATE_MAP.get(activeCandidateIds[3])!;
 
             try {
-              const pact2Result = await callLLM({
-                action: 'backroom_pact',
-                candidateId: proposer2.id,
-                targetId: receiver2.id,
+              const step2Descriptor = {
+                stepKey: `cctv-r${round}-1-${proposer2.id}`,
+                phase: 'CCTV_BACKROOM' as GamePhase,
                 round,
-                activeCandidateIds,
-                historyContext: {
-                  recentAttacks: recentAttackContext,
-                },
-              });
+                speakerId: proposer2.id,
+                targetId: receiver2.id,
+                actionType: 'pact' as const,
+                headline: `ROUND ${round}: LEAKED CAPITOL CCTV FEED 2 OF 2`,
+                llmPayload: {
+                  action: 'backroom_pact' as const,
+                  candidateId: proposer2.id,
+                  targetId: receiver2.id,
+                  round,
+                  activeCandidateIds,
+                  historyContext: {
+                    recentAttacks: recentAttackContext,
+                  },
+                }
+              };
+              const p2Prep = await fetchOrConsumeStep(step2Descriptor);
 
               roundPacts.push({
                 id: `pact-2-${Date.now()}`,
                 round,
                 proposerId: proposer2.id,
                 receiverId: receiver2.id,
-                agreedTargetId: pact2Result.agreedTargetId || activeCandidateIds.filter(id => id !== proposer2.id && id !== receiver2.id)[0] || activeCandidateIds[0],
-                whisperText: pact2Result.text,
+                agreedTargetId: activeCandidateIds.filter(id => id !== proposer2.id && id !== receiver2.id)[0] || activeCandidateIds[0],
+                whisperText: p2Prep.content,
                 location: LOCATIONS[(round + 2) % LOCATIONS.length],
                 timestamp: Date.now(),
               });
@@ -1390,6 +1308,11 @@ export function useGameEngine(
           }
 
           sounds.playCCTVBeep();
+          if (audioBlobUrl) {
+            playAudioUrl(audioBlobUrl);
+          } else {
+            playSpeechAudio(content, proposer1.voice?.voiceId, proposer1.id);
+          }
 
           setState(prev => ({
             ...prev,
@@ -1416,6 +1339,16 @@ export function useGameEngine(
               ...prev.tickerLog,
             ]
           }));
+
+          dispatchBackgroundPreload({
+            ...state,
+            phase: 'CCTV_BACKROOM',
+            currentSpeakerIndex: 0,
+            pactsByRound: {
+              ...state.pactsByRound,
+              [round]: roundPacts,
+            },
+          });
         }
 
         isExecutingStep.current = false;
@@ -1436,6 +1369,7 @@ export function useGameEngine(
           const p2 = CANDIDATE_MAP.get(nextPact.receiverId);
 
           sounds.playCCTVBeep();
+          playSpeechAudio(nextPact.whisperText, p1?.voice?.voiceId, nextPact.proposerId);
 
           setState(prev => ({
             ...prev,
@@ -1458,6 +1392,12 @@ export function useGameEngine(
               ...prev.tickerLog,
             ]
           }));
+
+          dispatchBackgroundPreload({
+            ...state,
+            phase: 'CCTV_BACKROOM',
+            currentSpeakerIndex: nextPactIndex,
+          });
 
           isExecutingStep.current = false;
           return;
@@ -1663,20 +1603,38 @@ export function useGameEngine(
           ]
         }));
 
-        const result = await callLLM({
-          action: 'exit_words',
-          candidateId: eliminatedId,
+        const stepDescriptor = {
+          stepKey: `elimination-r${round}-${eliminatedCandidate.id}`,
+          phase: 'ELIMINATION' as GamePhase,
           round,
-          activeCandidateIds,
-          historyContext: {},
-        });
+          speakerId: eliminatedCandidate.id,
+          targetId: null,
+          actionType: 'eliminated' as const,
+          headline: `ROUND ${round} ELIMINATION — ${eliminatedCandidate.name.toUpperCase()}`,
+          llmPayload: {
+            action: 'exit_words' as const,
+            candidateId: eliminatedCandidate.id,
+            round,
+            activeCandidateIds,
+            historyContext: {},
+          }
+        };
+
+        const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
+
+        sounds.playSpeechBeep();
+        if (audioBlobUrl) {
+          playAudioUrl(audioBlobUrl);
+        } else {
+          playSpeechAudio(content, eliminatedCandidate.voice?.voiceId, eliminatedCandidate.id);
+        }
 
         const newActiveIds = activeCandidateIds.filter(id => id !== eliminatedId);
         const eliminatedInfo = {
           candidateId: eliminatedId,
           eliminatedInRound: round,
           voteCount: roundTally?.tally[eliminatedId] || 0,
-          exitWords: result.text,
+          exitWords: content,
         };
 
         setState(prev => ({
@@ -1685,19 +1643,25 @@ export function useGameEngine(
           eliminatedCandidates: [...prev.eliminatedCandidates, eliminatedInfo],
           stage: {
             ...prev.stage,
-            content: `"${result.text}"`,
+            content: `"${content}"`,
             isLoading: false,
           },
           tickerLog: [
             {
               id: `tick-${Date.now()}`,
               type: 'speech',
-              message: `${eliminatedCandidate.name} Concession: "${result.text}"`,
+              message: `${eliminatedCandidate.name} Concession: "${content}"`,
               timestamp: Date.now(),
             },
             ...prev.tickerLog,
           ]
         }));
+
+        dispatchBackgroundPreload({
+          ...state,
+          phase: 'ELIMINATION',
+          activeCandidateIds: newActiveIds,
+        });
 
         isExecutingStep.current = false;
         return;
@@ -2216,23 +2180,17 @@ export function useGameEngine(
       return;
     }
 
+    const depth = activeConfig?.lookaheadDepth || 2;
     setIsBufferingLookahead(true);
-    setBufferingStatus('⚡ Initializing 2-Step Lookahead Pipeline (Buffering Step 1 & Step 2 Dialogue and Neural Voices)...');
+    setBufferingStatus(`⚡ Initializing ${depth}-Step Lookahead Pipeline (Buffering ${depth} Steps of Dialogue and Neural Voices)...`);
 
-    const nextSteps = computeNextSteps(state);
-    if (nextSteps.length >= 2) {
+    const nextSteps = computeNextSteps(state, depth);
+    if (nextSteps.length > 0) {
       try {
-        await Promise.all([
-          preloadStep(nextSteps[0]),
-          preloadStep(nextSteps[1])
-        ]);
+        await Promise.all(nextSteps.slice(0, depth).map(step => preloadStep(step)));
       } catch (e) {
         console.warn('Initial pre-buffer error:', e);
       }
-    } else if (nextSteps.length === 1) {
-      try {
-        await preloadStep(nextSteps[0]);
-      } catch (e) {}
     }
 
     setIsBufferingLookahead(false);

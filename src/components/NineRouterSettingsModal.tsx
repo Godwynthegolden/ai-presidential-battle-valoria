@@ -28,6 +28,7 @@ export interface NineRouterConfigState {
   fishAudioApiKey?: string;
   fishAudioModel?: string;
   fishAudioEnabled?: boolean;
+  lookaheadDepth?: 2 | 3 | 4 | 5;
 }
 
 interface NineRouterSettingsModalProps {
@@ -47,6 +48,7 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
   const [baseUrl, setBaseUrl] = useState(currentConfig.baseUrl || 'http://localhost:20128/v1');
   const [apiKey, setApiKey] = useState(currentConfig.apiKey || '');
   const [model, setModel] = useState(currentConfig.model || 'gpt-4o-mini');
+  const [lookaheadDepth, setLookaheadDepth] = useState<2 | 3 | 4 | 5>(currentConfig.lookaheadDepth || 2);
   const [showKey, setShowKey] = useState(false);
 
   // Fish Audio settings
@@ -77,6 +79,7 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
       setBaseUrl(currentConfig.baseUrl || 'http://localhost:20128/v1');
       setApiKey(currentConfig.apiKey || '');
       setModel(currentConfig.model || 'gpt-4o-mini');
+      setLookaheadDepth(currentConfig.lookaheadDepth || 2);
       setFishAudioApiKey(currentConfig.fishAudioApiKey || 'sk-fish-5Zz7hVlOft5sr46Nz1jPf4LhAPdSBJ0Ar08dxdBdCq0');
       setFishAudioModel(currentConfig.fishAudioModel || 's2.1-pro-free');
       setFishAudioEnabled(currentConfig.fishAudioEnabled !== false);
@@ -223,6 +226,7 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
       baseUrl: baseUrl.trim(),
       apiKey: apiKey.trim(),
       model: model.trim(),
+      lookaheadDepth,
       fishAudioApiKey: fishAudioApiKey.trim(),
       fishAudioModel: fishAudioModel.trim(),
       fishAudioEnabled: fishAudioEnabled,
@@ -432,6 +436,40 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white font-mono placeholder:text-slate-600 focus:outline-hidden focus:border-cyan-400 transition"
                 />
               )}
+            </div>
+
+            {/* 5. Lookahead Pipeline Buffer Depth */}
+            <div className="flex flex-col gap-2 p-3 rounded-2xl bg-slate-900 border border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-cyan-400" /> Pipeline Lookahead Buffer Depth
+                </label>
+                <span className="text-[10px] font-mono text-cyan-400 font-bold px-2 py-0.5 rounded bg-cyan-950 border border-cyan-800">
+                  {lookaheadDepth} Steps Ahead
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 font-sans leading-relaxed">
+                Controls how many future dialogue steps and neural voices are pre-synthesized in memory ahead of the live broadcast.
+              </p>
+              <div className="grid grid-cols-4 gap-1.5 pt-1">
+                {([2, 3, 4, 5] as const).map((depth) => (
+                  <button
+                    key={depth}
+                    type="button"
+                    onClick={() => setLookaheadDepth(depth)}
+                    className={`py-2 px-2 rounded-xl text-xs font-mono font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                      lookaheadDepth === depth
+                        ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/20 font-black'
+                        : 'bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800'
+                    }`}
+                  >
+                    <span>{depth} Steps</span>
+                    <span className={`text-[9px] ${lookaheadDepth === depth ? 'text-black/80' : 'text-slate-500'}`}>
+                      {depth === 2 ? 'Fastest' : depth === 5 ? 'Ultra-Deep' : 'Deep'}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
