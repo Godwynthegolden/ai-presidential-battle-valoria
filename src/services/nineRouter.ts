@@ -189,61 +189,106 @@ export class NineRouterService {
       if (payload.action === 'backroom_pact') {
         const ctx = payload.historyContext || {};
         const parsed = this.extractAndRepairJson(rawText);
+        const validCandidates = payload.activeCandidateIds.filter(id => id !== candidate.id);
         const validTargets = payload.activeCandidateIds.filter(id => id !== candidate.id && id !== payload.targetId);
-        const healedTarget = parsed?.targetId ? this.resolveCandidateIdFromNameOrAlias(parsed.targetId, validTargets) : null;
-        const agreedTarget = healedTarget || validTargets[0] || payload.activeCandidateIds.filter(id => id !== candidate.id)[0];
         
-        let whisper = parsed?.whisper 
-          ? parsed.whisper.replace(/^["']|["']$/g, '').trim()
-          : (rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim() || `Let's coordinate our votes and eliminate ${CANDIDATE_MAP.get(agreedTarget)?.name || agreedTarget}.`);
+        // Resolve target candidate (person negotiated with)
+        const rawTargetCandidate = parsed?.targetCandidateId || parsed?.targetId || payload.targetId;
+        const healedTargetCandId = rawTargetCandidate ? this.resolveCandidateIdFromNameOrAlias(rawTargetCandidate, validCandidates) : null;
+        const targetCandidateId = healedTargetCandId || payload.targetId || validCandidates[0] || validTargets[0];
 
-        // Sanitize any accidental speaker prefix
-        whisper = whisper.replace(/^[^:]+:\s*/, '').replace(/^["']|["']$/g, '').trim();
+        // Resolve elimination target candidate
+        const rawElimTarget = parsed?.agreedEliminationTargetId || parsed?.targetId || parsed?.agreedTargetId;
+        const healedElimTarget = rawElimTarget ? this.resolveCandidateIdFromNameOrAlias(rawElimTarget, validCandidates) : null;
+        const agreedTargetId = healedElimTarget || validTargets.find(id => id !== targetCandidateId) || validTargets[0] || validCandidates[0];
+
+        // Private strategy extraction
+        const privateStrategy = parsed?.privateStrategy 
+          ? parsed.privateStrategy.replace(/^["']|["']$/g, '').trim()
+          : `Align tactically to eliminate ${CANDIDATE_MAP.get(agreedTargetId)?.name || agreedTargetId} while preserving treasury.`;
+
+        // Action Type Resolution ('bribe' | 'offer' | 'pass')
+        let actionType: 'bribe' | 'offer' | 'pass' = 'pass';
+        if (parsed?.actionType === 'bribe' || parsed?.actionType === 'offer' || parsed?.actionType === 'pass') {
+          actionType = parsed.actionType;
+        } else if (parsed?.offerBribe === true || parsed?.bribeOffered === true) {
+          actionType = 'bribe';
+        } else if (parsed?.offerPrice || parsed?.offeredPrice) {
+          actionType = 'offer';
+        } else {
+          actionType = (ctx.proposerBudget ?? 100) >= 30 ? 'bribe' : 'pass';
+        }
 
         const proposerBudget = ctx.proposerBudget ?? 100;
-        const receiver = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
-        
-        // Determine whether bribe is offered (proposer needs >= $20)
-        let bribeOffered = false;
-        if (proposerBudget >= 20) {
-          if (typeof parsed?.offerBribe === 'boolean') {
-            bribeOffered = parsed.offerBribe;
-          } else {
-            // Default to offering bribe if proposer has funds
-            bribeOffered = true;
+        let bribeAmount = 0;
+        let upfrontPaid = 0;
+        let escrowPending = 0;
+        let offerPrice = typeof parsed?.offerPrice === 'number' ? Math.max(20, Math.min(40, parsed.offerPrice)) : 30;
+
+        // Enforce strict $30 treasury limit for bribes
+        if (actionType === 'bribe') {
+          if (proposerBudget < 30) {
+            // Cannot afford $30 bribe -> Fallback to offer or pass
+            actionType = 'offer';
           }
         }
 
-        // Determine receiver's decision (accept, decline, accept_and_betray)
+        if (actionType === 'bribe') {
+          bribeAmount = 30;
+          upfrontPaid = 15;
+          escrowPending = 15;
+        } else if (actionType === 'offer') {
+          bribeAmount = offerPrice;
+          upfrontPaid = Math.floor(offerPrice / 2);
+          escrowPending = offerPrice - upfrontPaid;
+        }
+
+        // Receiver Decision Resolution
         let receiverDecision: 'accept' | 'decline' | 'accept_and_betray' = 'accept';
-        if (bribeOffered) {
-          if (['accept', 'decline', 'accept_and_betray'].includes(parsed?.receiverDecision)) {
-            receiverDecision = parsed.receiverDecision;
+        if (['accept', 'decline', 'accept_and_betray'].includes(parsed?.receiverDecision)) {
+          receiverDecision = parsed.receiverDecision;
+        } else {
+          const receiver = CANDIDATE_MAP.get(targetCandidateId);
+          const rxArch = receiver?.archetype;
+          if (rxArch === 'reformer' || rxArch === 'traditionalist') {
+            const r = Math.random();
+            receiverDecision = r < 0.4 ? 'decline' : (r < 0.75 ? 'accept' : 'accept_and_betray');
+          } else if (rxArch === 'capitalist' || rxArch === 'careerist' || rxArch === 'wildcard') {
+            const r = Math.random();
+            receiverDecision = r < 0.45 ? 'accept_and_betray' : (r < 0.9 ? 'accept' : 'decline');
           } else {
-            const rxArch = receiver?.archetype;
-            if (rxArch === 'reformer' || rxArch === 'traditionalist') {
-              const r = Math.random();
-              receiverDecision = r < 0.4 ? 'decline' : (r < 0.75 ? 'accept' : 'accept_and_betray');
-            } else if (rxArch === 'capitalist' || rxArch === 'careerist' || rxArch === 'wildcard') {
-              const r = Math.random();
-              receiverDecision = r < 0.45 ? 'accept_and_betray' : (r < 0.9 ? 'accept' : 'decline');
-            } else {
-              const r = Math.random();
-              receiverDecision = r < 0.6 ? 'accept' : (r < 0.85 ? 'accept_and_betray' : 'decline');
-            }
+            const r = Math.random();
+            receiverDecision = r < 0.6 ? 'accept' : (r < 0.85 ? 'accept_and_betray' : 'decline');
           }
         }
 
-        const bribeAccepted = bribeOffered && (receiverDecision === 'accept' || receiverDecision === 'accept_and_betray');
+        const dealAccepted = (actionType === 'bribe' || actionType === 'offer') && (receiverDecision === 'accept' || receiverDecision === 'accept_and_betray');
+
+        let whisper = parsed?.whisper 
+          ? parsed.whisper.replace(/^["']|["']$/g, '').trim()
+          : (rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim() || (
+            actionType === 'bribe' 
+              ? `Take this $30 bribe. $15 now, $15 after we eliminate ${CANDIDATE_MAP.get(agreedTargetId)?.name || agreedTargetId}.`
+              : actionType === 'offer'
+              ? `Pay me $${offerPrice} and I'll deliver my vote against ${CANDIDATE_MAP.get(agreedTargetId)?.name || agreedTargetId}.`
+              : `I'm keeping my powder dry. ${CANDIDATE_MAP.get(agreedTargetId)?.name || agreedTargetId} won't see this coming.`
+          ));
+
+        whisper = whisper.replace(/^[^:]+:\s*/, '').replace(/^["']|["']$/g, '').trim();
 
         return {
           text: whisper,
-          agreedTargetId: agreedTarget,
+          agreedTargetId,
           whisperText: whisper,
-          bribeOffered,
-          bribeAmount: bribeOffered ? 20 : 0,
-          receiverDecision: bribeOffered ? receiverDecision : undefined,
-          bribeAccepted,
+          privateStrategy,
+          actionType,
+          bribeOffered: actionType === 'bribe',
+          bribeAmount,
+          upfrontPaid,
+          escrowPending,
+          offerPrice: actionType === 'offer' ? offerPrice : undefined,
+          receiverDecision: (actionType === 'bribe' || actionType === 'offer') ? receiverDecision : undefined,
+          bribeAccepted: dealAccepted,
           modelUsed: model,
         };
       }
@@ -937,42 +982,67 @@ ANTI-FORMULA & DIRECT OUTPUT RULES (CRITICAL):
         isJsonExpected = true;
         const receiver = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
         const receiverName = receiver ? `${receiver.name} (${receiver.archetypeTitle})` : 'your potential ally';
-        const allowedTargets = payload.activeCandidateIds
-          .filter(id => id !== candidate.id && id !== payload.targetId)
+        
+        // Active candidates with balances and roles
+        const candidateTreasuries = ctx.candidateTreasuries || {};
+        const activeCandidatesList = payload.activeCandidateIds
           .map(id => {
             const c = CANDIDATE_MAP.get(id);
-            return `"${id}" (${c?.name} - ${c?.archetypeTitle})`;
+            const bal = candidateTreasuries[id] ?? 100;
+            return `"${id}" (${c?.name} - ${c?.archetypeTitle}, Balance: $${bal})`;
+          })
+          .join('\n  - ');
+
+        const allowedTargets = payload.activeCandidateIds
+          .filter(id => id !== candidate.id)
+          .map(id => {
+            const c = CANDIDATE_MAP.get(id);
+            return `"${id}" (${c?.name})`;
           })
           .join(', ');
 
-        const proposerBudget = ctx.proposerBudget ?? 100;
-        const receiverBudget = ctx.receiverBudget ?? 100;
+        const proposerBudget = ctx.proposerBudget ?? candidateTreasuries[candidate.id] ?? 100;
+        const affordableBribes = Math.floor(proposerBudget / 30);
 
         let contextSnippet = '';
         if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
           contextSnippet = `\nRecent Debate Clashes:\n` + ctx.recentAttacks
-            .slice(-3)
-            .map(a => `- ${a.attackerName} targeted ${a.targetName}`)
+            .slice(-4)
+            .map(a => `- ${a.attackerName} targeted ${a.targetName}: "${a.text}"`)
             .join('\n');
         }
 
-        userPrompt = `Round ${payload.round}: SECRET BACKROOM DEAL / LEAKED CAPITOL CCTV FEED.
-You (${candidate.name}, Balance: $${proposerBudget}) are privately whispering to ${receiverName} (Balance: $${receiverBudget}) in a shadowy Capitol corridor.
-You want to coordinate your elimination votes against ONE target: [${allowedTargets}].
-You can offer a $20 BRIBE from your campaign treasury to secure their vote!
+        userPrompt = `Round ${payload.round}: SECRET BACKROOM NEGOTIATION / LEAKED CAPITOL CCTV FEED.
+You are ${candidate.name} (${candidate.archetypeTitle}, Balance: $${proposerBudget}).
+Surveillance is recording unmonitored Capitol hallways. All active candidates are maneuvering before the secret ballot:
+Active Candidates & Treasuries:
+  - ${activeCandidatesList}
 ${contextSnippet}
 
+YOUR STRATEGIC CHOICES:
+1. "bribe" (Costs $30 total: $15 upfront to receiver + $15 held in escrow until they vote for your target).
+   - Requires balance >= $30. You currently have $${proposerBudget} (can afford ${affordableBribes} bribe${affordableBribes === 1 ? '' : 's'}).
+   - If balance < $30, you CANNOT bribe others!
+2. "offer" (Sell your vote to another candidate for $20 to $40).
+   - You offer to vote out whoever they want in exchange for $20-$40 (50% upfront + 50% upon verified vote).
+3. "pass" (Plot solo / observe).
+   - Save your money for $40 vote bailouts during the ballot reveal or plan a solo ambush.
+
 DIRECT OUTPUT RULES:
-- In MAXIMUM 25 WORDS: deliver a tense, high-stakes whispered proposal offering mutual benefit or offering a $20 cash bribe to take down the mutual rival.
-- Return ONLY the raw JSON object below. Do NOT include markdown fences, thinking process, or explanatory text.
-- Stay completely in character as ${candidate.name}.
-- Do NOT prefix with script labels or colons.
+- Formulate your secret inner strategy ("privateStrategy") to calculate your optimal survival path.
+- Choose your action ("actionType": "bribe" | "offer" | "pass").
+- Deliver an authentic, tense whispered pitch ("whisper", max 25 words).
+- If negotiating with someone, model their likely reaction ("receiverDecision": "accept" | "decline" | "accept_and_betray").
+- Return ONLY the raw JSON object below. Do NOT output markdown fences or explanatory text.
 
 You MUST return a JSON object with this exact schema:
 {
-  "targetId": "candidate_id",
-  "offerBribe": true,
-  "whisper": "1-2 sentence whispered deal or bribe (max 25 words)",
+  "privateStrategy": "sharp, confidential tactical calculation (max 30 words)",
+  "actionType": "bribe",
+  "targetCandidateId": "candidate_id_to_negotiate_with",
+  "agreedEliminationTargetId": "candidate_id_to_eliminate",
+  "offerPrice": 30,
+  "whisper": "1-2 sentence whispered proposal or pitch (max 25 words)",
   "receiverDecision": "accept"
 }`;
         break;
@@ -996,17 +1066,43 @@ You MUST return a JSON object with this exact schema:
             .join('\n');
         }
 
+        let strategyContext = '';
+        if (ctx.candidateSecretStrategy) {
+          strategyContext = `
+YOUR CONFIDENTIAL STRATEGY RECORDED IN THE CAPITOL CORRIDORS:
+"${ctx.candidateSecretStrategy}"
+`;
+        }
+
         let pactContext = '';
-        if (ctx.activePact) {
+        if (ctx.activePactsForVoter && ctx.activePactsForVoter.length > 0) {
+          const pactDetails = ctx.activePactsForVoter.map(p => {
+            const isProposer = p.proposerId === candidate.id;
+            const partner = CANDIDATE_MAP.get(isProposer ? p.receiverId : p.proposerId);
+            const target = CANDIDATE_MAP.get(p.agreedTargetId);
+            if (p.actionType === 'bribe') {
+              return isProposer
+                ? `- You paid $30 to bribe ${partner?.name} to eliminate "${target?.id}" (${target?.name}) [$15 pending escrow].`
+                : `- You received $15 upfront from ${partner?.name} to eliminate "${target?.id}" (${target?.name}) [+$15 pending escrow if you vote for ${target?.name}; forfeited on betrayal].`;
+            } else if (p.actionType === 'offer') {
+              return isProposer
+                ? `- You offered your vote to ${partner?.name} against "${target?.id}" for $${p.bribeAmount} [+$${p.escrowPending} pending escrow if kept].`
+                : `- You bought ${partner?.name}'s vote against "${target?.id}" for $${p.bribeAmount} [$${p.escrowPending} escrow held].`;
+            }
+            return `- Pact with ${partner?.name} against "${target?.id}".`;
+          }).join('\n');
+
+          pactContext = `
+ACTIVE BACKROOM CONTRACTS & ESCROW STAKES THIS ROUND:
+${pactDetails}
+(Betrayal Rule: If you took upfront money and vote for someone else, you forfeit the remaining escrow payout!)
+`;
+        } else if (ctx.activePact) {
           const ally = CANDIDATE_MAP.get(ctx.activePact.allyId);
           const agreedTarget = CANDIDATE_MAP.get(ctx.activePact.agreedTargetId);
           pactContext = `
-SECRET BACKROOM PACT & TACTICAL BETRAYAL DILEMMA:
-In the Capitol cloakroom, you shook hands with ${ally?.name} (${ally?.titleRole}) to coordinate votes against "${agreedTarget?.id}" (${agreedTarget?.name}).
-However, Valorian politics is ruthless:
-- OPTION A (HONOR PACT): Vote for "${agreedTarget?.id}" as promised to build trust.
-- OPTION B (TACTICAL BETRAYAL): If ${ally?.name} is a dangerous long-term threat, or if you suspect they might betray you, you CAN STAB ${ally?.name} IN THE BACK and vote for "${ally?.id}" or another heavyweight.
-Weigh loyalty vs cutthroat ambition!
+SECRET BACKROOM PACT:
+You shook hands with ${ally?.name} (${ally?.titleRole}) to coordinate votes against "${agreedTarget?.id}" (${agreedTarget?.name}).
 `;
         }
 
@@ -1016,7 +1112,7 @@ Rules:
 1. You CANNOT vote for yourself (${candidate.id}).
 2. You MUST pick exactly ONE ID from: [${candidatesToVote}].
 3. Vote based on political survival, rival threats, backroom pacts, or tactical betrayals.
-${pactContext}${contextSnippet}
+${strategyContext}${pactContext}${contextSnippet}
 
 DIRECT OUTPUT RULES:
 - Return ONLY the raw JSON object below. Do NOT output markdown code blocks, reasoning steps, or notes.
@@ -1100,9 +1196,14 @@ DIRECT OUTPUT RULES:
           historyMemories = `\nKey Debate Memory:\n` + ctx.allClashesSummary.slice(-5).join('\n');
         }
 
+        let strategyReminder = '';
+        if (ctx.candidateSecretStrategy) {
+          strategyReminder = `\nYOUR STRATEGIC CAMPAIGN ETHOS:\n"${ctx.candidateSecretStrategy}"\n`;
+        }
+
         userPrompt = `GRAND JURY PRESIDENTIAL ELECTION VOTE.
 ${juryStatus}
-Candidates on the presidential ballot: [${finalistsDesc}].${historyMemories}
+Candidates on the presidential ballot: [${finalistsDesc}].${strategyReminder}${historyMemories}
 Rules:
 1. You CANNOT vote for yourself.
 2. Cast your vote based on who earned your respect, shared your policy goals, or vote against whoever betrayed/insulted you during the election.

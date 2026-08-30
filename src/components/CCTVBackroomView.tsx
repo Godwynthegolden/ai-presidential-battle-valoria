@@ -7,12 +7,18 @@ import { CANDIDATE_MAP } from '@/data/candidates';
 import { 
   Eye, 
   Radio, 
-  Crosshair,
-  Volume2,
-  FileWarning,
-  Video,
-  ChevronRight,
-  ShieldAlert
+  Crosshair, 
+  Volume2, 
+  FileWarning, 
+  Video, 
+  ChevronLeft,
+  ChevronRight, 
+  ShieldAlert,
+  Lock,
+  Unlock,
+  Coins,
+  Handshake,
+  Sparkles
 } from 'lucide-react';
 
 interface CCTVBackroomViewProps {
@@ -37,6 +43,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
   isLoading = false,
 }) => {
   const [timecode, setTimecode] = useState('00:00:00.00');
+  const [showSecretStrategy, setShowSecretStrategy] = useState(false);
 
   useEffect(() => {
     const update = () => {
@@ -87,32 +94,34 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
             <span className="w-2 h-2 rounded-full bg-red-500" /> REC &bull; LIVE INTERCEPT
           </span>
           <span className="font-bold tracking-wider hidden sm:inline text-emerald-200">
-            CAPITOL_SURVEILLANCE_GRID // CAM-0{activeFeedIndex + 1}
+            CAPITOL_SURVEILLANCE_GRID // CAM-{String(activeFeedIndex + 1).padStart(2, '0')}
           </span>
         </div>
 
-        {/* Feed Switcher Tabs (If multiple leaks in round) */}
+        {/* Multi-Feed Camera Switcher Matrix */}
         {totalFeeds > 1 && (
-          <div className="flex items-center gap-1.5 bg-black/80 p-1 rounded-xl border border-emerald-700/80">
-            <span className="text-[10px] text-slate-300 uppercase font-bold px-2 hidden md:inline">
-              Feeds:
+          <div className="flex items-center gap-1.5 bg-black/80 p-1 rounded-xl border border-emerald-700/80 max-w-full overflow-x-auto">
+            <span className="text-[10px] text-slate-300 uppercase font-bold px-2 hidden lg:inline">
+              CAM GRID:
             </span>
             {allPactsThisRound.map((p, idx) => {
               const p1 = CANDIDATE_MAP.get(p.proposerId);
-              const p2 = CANDIDATE_MAP.get(p.receiverId);
               const isActive = idx === activeFeedIndex;
               return (
                 <button
                   key={p.id || idx}
-                  onClick={() => onSelectFeed && onSelectFeed(idx)}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold transition ${
+                  onClick={() => {
+                    setShowSecretStrategy(false);
+                    onSelectFeed && onSelectFeed(idx);
+                  }}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition whitespace-nowrap ${
                     isActive
                       ? 'bg-emerald-400 text-black font-black shadow-md shadow-emerald-500/40'
                       : 'bg-emerald-950/80 text-emerald-300 hover:bg-emerald-900 border border-emerald-800/80'
                   }`}
                 >
                   <Video className="w-3.5 h-3.5" />
-                  Feed #{idx + 1}: {p1?.name.split(' ')[0]} &amp; {p2?.name.split(' ')[0]}
+                  <span>CAM {idx + 1}: {p1?.name.split(' ')[0]}</span>
                 </button>
               );
             })}
@@ -133,7 +142,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
       <div className="flex items-center justify-between px-5 py-2 bg-amber-500/15 border-b border-amber-500/30 text-xs font-mono font-black tracking-widest text-amber-300 uppercase z-20">
         <div className="flex items-center gap-2">
           <FileWarning className="w-4 h-4 text-amber-400" />
-          Leaked Confidential Feed &bull; Round {round} Secret Alliances
+          Leaked Confidential Feed &bull; Round {round} Secret Backroom Maneuvers
         </div>
         <div className="text-xs text-emerald-300 font-bold">
           Feed {activeFeedIndex + 1} of {totalFeeds}
@@ -141,12 +150,12 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
       </div>
 
       {/* Main CCTV Feed Body */}
-      <div className="flex-1 flex flex-col items-center justify-center p-5 md:p-8 gap-6 z-10">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 gap-5 z-10">
         {/* Conspirators Faceoff Layout */}
         <div className="flex items-center justify-around w-full max-w-2xl">
           {/* Proposer / Conspirator 1 */}
           {proposer && (
-            <div className="flex flex-col items-center gap-2.5 text-center">
+            <div className="flex flex-col items-center gap-2 text-center">
               <div className="relative">
                 <CandidateAvatar
                   candidate={proposer}
@@ -169,19 +178,25 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
             </div>
           )}
 
-          {/* Wiretap / Secret Pact Icon Center */}
+          {/* Wiretap / Deal Type Center Badge */}
           <div className="flex flex-col items-center justify-center gap-2 px-3">
             <div className="w-14 h-14 rounded-2xl bg-emerald-950/90 border-2 border-emerald-400 flex items-center justify-center text-emerald-300 shadow-[0_0_25px_rgba(16,185,129,0.4)] animate-pulse">
-              <Eye className="w-7 h-7" />
+              {displayedPact.actionType === 'bribe' ? (
+                <Coins className="w-7 h-7 text-amber-400" />
+              ) : displayedPact.actionType === 'offer' ? (
+                <Handshake className="w-7 h-7 text-cyan-400" />
+              ) : (
+                <Eye className="w-7 h-7 text-emerald-400" />
+              )}
             </div>
             <span className="text-[10px] font-mono font-black uppercase tracking-widest bg-emerald-950 text-emerald-300 px-2.5 py-0.5 rounded-md border border-emerald-700 shadow-xs">
-              SECRET ALLIANCE
+              {displayedPact.actionType === 'bribe' ? '$30 BRIBE' : displayedPact.actionType === 'offer' ? 'VOTE OFFER' : 'SOLO PLOT'}
             </span>
           </div>
 
           {/* Receiver / Conspirator 2 */}
           {receiver && (
-            <div className="flex flex-col items-center gap-2.5 text-center">
+            <div className="flex flex-col items-center gap-2 text-center">
               <div className="relative">
                 <CandidateAvatar
                   candidate={receiver}
@@ -205,28 +220,40 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
         </div>
 
         {/* Leaked Transcript Terminal Box */}
-        <div className="w-full max-w-2xl relative rounded-3xl bg-black/90 border-2 border-emerald-500/60 p-6 md:p-8 shadow-2xl shadow-emerald-950/90 text-left">
-          {/* Audio Intercept Tag */}
+        <div className="w-full max-w-2xl relative rounded-3xl bg-black/90 border-2 border-emerald-500/60 p-5 md:p-7 shadow-2xl shadow-emerald-950/90 text-left">
+          {/* Audio Intercept & Financial Status Bar */}
           <div className="flex items-center justify-between flex-wrap gap-2 mb-4 pb-3 border-b border-emerald-800/80">
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase text-emerald-300">
               <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span>AUDIO INTERCEPT TRANSCRIPT (FEED #{activeFeedIndex + 1}):</span>
+              <span>AUDIO INTERCEPT (CAM #{activeFeedIndex + 1}):</span>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {/* $20 Bribe Status Indicator */}
-              {displayedPact.bribeOffered && (
-                <span className={`flex items-center gap-1.5 text-xs font-mono font-black uppercase px-3 py-0.5 rounded-full shadow-md border animate-pulse ${
+              {/* $30 Bribe & Escrow Status Pill */}
+              {displayedPact.actionType === 'bribe' && (
+                <span className={`flex items-center gap-1.5 text-xs font-mono font-black uppercase px-3 py-0.5 rounded-full shadow-md border ${
                   displayedPact.receiverDecision === 'accept'
                     ? 'bg-emerald-950 text-emerald-300 border-emerald-400 shadow-emerald-950/60'
                     : displayedPact.receiverDecision === 'accept_and_betray'
                     ? 'bg-purple-950 text-amber-300 border-purple-500 shadow-purple-950/60'
                     : 'bg-red-950 text-red-300 border-red-500 shadow-red-950/60'
                 }`}>
-                  <span className="text-amber-400 font-extrabold">$20</span>
-                  {displayedPact.receiverDecision === 'accept' && '💸 Bribe Accepted'}
-                  {displayedPact.receiverDecision === 'accept_and_betray' && '🗡️ Money Pocketed (Betrayal Intent)'}
-                  {displayedPact.receiverDecision === 'decline' && '🚫 Bribe Declined'}
+                  <span className="text-amber-400 font-extrabold">$30 Bribe</span>
+                  {displayedPact.receiverDecision === 'accept' && '• $15 Paid ($15 Escrow)'}
+                  {displayedPact.receiverDecision === 'accept_and_betray' && '• $15 Pocketed (Betrayal Intent)'}
+                  {displayedPact.receiverDecision === 'decline' && '• Declined'}
+                </span>
+              )}
+
+              {/* Vote Offer Status Pill */}
+              {displayedPact.actionType === 'offer' && (
+                <span className={`flex items-center gap-1.5 text-xs font-mono font-black uppercase px-3 py-0.5 rounded-full shadow-md border ${
+                  displayedPact.bribeAccepted
+                    ? 'bg-cyan-950 text-cyan-300 border-cyan-400 shadow-cyan-950/60'
+                    : 'bg-red-950 text-red-300 border-red-500'
+                }`}>
+                  <span className="text-cyan-400 font-extrabold">Offer: ${displayedPact.bribeAmount}</span>
+                  {displayedPact.bribeAccepted ? `• $${displayedPact.upfrontPaid} Paid ($${displayedPact.escrowPending} Escrow)` : '• Declined'}
                 </span>
               )}
 
@@ -238,7 +265,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                   title="Replay candidate's secret whisper audio"
                 >
                   <Volume2 className={`w-3.5 h-3.5 text-emerald-400 ${isSpeakingAudio ? 'animate-pulse' : ''}`} />
-                  <span>{isSpeakingAudio ? 'Whispering...' : 'Replay Whisper'}</span>
+                  <span>{isSpeakingAudio ? 'Whispering...' : 'Replay Audio'}</span>
                 </button>
               )}
 
@@ -256,10 +283,37 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
             &ldquo;{displayedPact.whisperText}&rdquo;
           </p>
 
-          {/* Subtext warning */}
-          <div className="mt-5 pt-3 border-t border-emerald-900/80 flex items-center justify-between text-xs font-mono text-slate-300">
+          {/* Secret Strategy Memo Dropdown / Vault */}
+          {displayedPact.privateStrategy && (
+            <div className="mt-4 pt-3 border-t border-emerald-900/60">
+              <button
+                type="button"
+                onClick={() => setShowSecretStrategy(!showSecretStrategy)}
+                className="flex items-center gap-2 text-xs font-mono font-bold uppercase text-amber-300 hover:text-amber-200 transition cursor-pointer"
+              >
+                {showSecretStrategy ? <Unlock className="w-3.5 h-3.5 text-amber-400" /> : <Lock className="w-3.5 h-3.5 text-amber-400" />}
+                <span>{showSecretStrategy ? 'Hide Secret Strategy Memo' : '🔒 Reveal Classified Strategy Memo'}</span>
+              </button>
+
+              {showSecretStrategy && (
+                <div className="mt-2.5 p-3 rounded-xl bg-amber-950/40 border border-amber-500/40 text-xs font-mono text-amber-200 leading-relaxed animate-fade-in">
+                  <span className="font-bold text-amber-400 uppercase block mb-1">
+                    TOP SECRET TACTICAL MEMO (CONFIDENTIAL):
+                  </span>
+                  &ldquo;{displayedPact.privateStrategy}&rdquo;
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Subtext Escrow Explanation */}
+          <div className="mt-4 pt-3 border-t border-emerald-900/80 flex items-center justify-between text-[11px] font-mono text-slate-300">
             <span className="text-emerald-400">
-              &bull; Will {proposer?.name.split(' ')[0]} and {receiver?.name.split(' ')[0]} honor their deal, or will someone stab their ally in the back during secret voting?
+              {displayedPact.actionType === 'bribe'
+                ? `• $15 paid upfront. Final $15 escrow released only if ${receiver?.name.split(' ')[0]} votes for ${target?.name.split(' ')[0]} (forfeited on betrayal).`
+                : displayedPact.actionType === 'offer'
+                ? `• $${displayedPact.upfrontPaid} upfront paid. Final $${displayedPact.escrowPending} escrow released upon verified vote.`
+                : `• ${proposer?.name.split(' ')[0]} is holding their campaign treasury for $40 bailout vote buyouts.`}
             </span>
             <span className="text-amber-300 font-bold uppercase shrink-0 ml-2">
               CONFIDENTIAL

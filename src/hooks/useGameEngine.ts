@@ -10,6 +10,7 @@ import {
   AttackEvent, 
   BackroomPact, 
   BailoutTransaction,
+  EscrowContract,
   StageActionType, 
   StepDescriptor 
 } from '@/types/game';
@@ -890,14 +891,12 @@ export function useGameEngine(
         }
       } else if (simPhase === 'CCTV_BACKROOM') {
         simSpeakerIndex += 1;
-        const pactCount = simActiveIds.length >= 4 ? 2 : 1;
+        const pactCount = simActiveIds.length;
         if (simSpeakerIndex < pactCount) {
-          const p1 = simSpeakerIndex === 0
-            ? (CANDIDATE_MAP.get(simActiveIds[0]) || CANDIDATE_MAP.get(simActiveIds[0])!)
-            : (CANDIDATE_MAP.get(simActiveIds[2]) || CANDIDATE_MAP.get(simActiveIds[0])!);
-          const p2 = simSpeakerIndex === 0
-            ? (CANDIDATE_MAP.get(simActiveIds[1]) || CANDIDATE_MAP.get(simActiveIds[1])!)
-            : (CANDIDATE_MAP.get(simActiveIds[3]) || CANDIDATE_MAP.get(simActiveIds[1])!);
+          const p1Id = simActiveIds[simSpeakerIndex];
+          const p2Id = simActiveIds[(simSpeakerIndex + 1) % simActiveIds.length];
+          const p1 = CANDIDATE_MAP.get(p1Id) || CANDIDATE_MAP.get(simActiveIds[0])!;
+          const p2 = CANDIDATE_MAP.get(p2Id) || CANDIDATE_MAP.get(simActiveIds[1])!;
 
           const recentAttackContext = (currentState.attacksByRound[simRound] || []).map(a => ({
             attackerName: CANDIDATE_MAP.get(a.attackerId)?.name || a.attackerId,
@@ -924,6 +923,8 @@ export function useGameEngine(
                 recentAttacks: recentAttackContext,
                 proposerBudget: currentState.candidateBudgets[p1.id] ?? 100,
                 receiverBudget: currentState.candidateBudgets[p2.id] ?? 100,
+                candidateTreasuries: currentState.candidateBudgets,
+                candidateSecretStrategy: currentState.candidateStrategies?.[p1.id],
               },
             }
           });
@@ -1539,7 +1540,7 @@ export function useGameEngine(
           }));
 
           dispatchBackgroundPreload({
-            ...state,
+...state,
             phase: 'ATTACK',
             currentSpeakerIndex: nextIndex,
             attacksByRound: {
@@ -1551,35 +1552,10 @@ export function useGameEngine(
           // All active candidates attacked! Transition to CCTV_BACKROOM (Leaked private pacts)
           sounds.playCCTVBeep();
 
-          // Generate 1-2 secret backroom alliances
-          const proposer1 = CANDIDATE_MAP.get(activeCandidateIds[0])!;
-          const receiver1 = CANDIDATE_MAP.get(activeCandidateIds[1])!;
-
-          setState(prev => ({
-            ...prev,
-            phase: 'CCTV_BACKROOM',
-            currentSpeakerIndex: 0,
-            stage: {
-              speakerId: proposer1.id,
-              targetId: receiver1.id,
-              actionType: 'pact',
-              headline: `ROUND ${prev.round}: LEAKED CAPITOL SURVEILLANCE GRID`,
-              content: 'Intercepting encrypted backroom audio feeds...',
-              isLoading: true,
-              isRevealingVotes: false,
-              revealedVoteIndex: 0,
-              error: null,
-            },
-            tickerLog: [
-              {
-                id: `tick-${Date.now()}`,
-                type: 'pact',
-                message: `🎥 BREAKING LEAK: Secret surveillance feed intercepted in Capitol Cloakroom!`,
-                timestamp: Date.now(),
-              },
-              ...prev.tickerLog,
-            ]
-          }));
+          const updatedBudgets = { ...state.candidateBudgets };
+          const updatedStrategies: Record<string, string> = { ...(state.candidateStrategies || {}) };
+          const updatedEscrowContracts: EscrowContract[] = [ ...(state.escrowContracts || []) ];
+          const roundPacts: BackroomPact[] = [];
 
           const recentAttackContext = (state.attacksByRound[round] || []).map(a => ({
             attackerName: CANDIDATE_MAP.get(a.attackerId)?.name || a.attackerId,
@@ -1587,159 +1563,178 @@ export function useGameEngine(
             text: a.text,
           }));
 
-          const stepDescriptor = {
-            stepKey: `cctv-r${round}-0-${proposer1.id}`,
-            phase: 'CCTV_BACKROOM' as GamePhase,
-            round,
-            speakerId: proposer1.id,
-            targetId: receiver1.id,
-            actionType: 'pact' as const,
-            headline: `ROUND ${round}: LEAKED CAPITOL CCTV FEED 1 OF ${activeCandidateIds.length >= 4 ? 2 : 1}`,
-            llmPayload: {
-              action: 'backroom_pact' as const,
-              candidateId: proposer1.id,
-              targetId: receiver1.id,
+          // Generate CCTV leaked feeds for ALL active candidates
+          for (let i = 0; i < activeCandidateIds.length; i++) {
+            const proposer = CANDIDATE_MAP.get(activeCandidateIds[i])!;
+            const receiver = CANDIDATE_MAP.get(activeCandidateIds[(i + 1) % activeCandidateIds.length])!;
+
+            const stepDescriptor: StepDescriptor = {
+              stepKey: `cctv-r${round}-${i}-${proposer.id}`,
+              phase: 'CCTV_BACKROOM' as GamePhase,
               round,
-              activeCandidateIds,
-              historyContext: {
-                electionTopic: state.electionTopic || DEFAULT_TOPIC,
-                recentAttacks: recentAttackContext,
-                proposerBudget: state.candidateBudgets[proposer1.id] ?? 100,
-                receiverBudget: state.candidateBudgets[receiver1.id] ?? 100,
-              },
-            }
-          };
-
-          const p1Prep = await fetchOrConsumeStep(stepDescriptor);
-          const updatedBudgets = { ...state.candidateBudgets };
-
-          // Parse bribe fields from response
-          const p1Payload = p1Prep.payload;
-          const p1BribeOffered = p1Payload?.bribeOffered ?? ((updatedBudgets[proposer1.id] ?? 100) >= 20);
-          const p1ReceiverDecision = p1Payload?.receiverDecision ?? 'accept';
-          const p1BribeAccepted = p1BribeOffered && (p1ReceiverDecision === 'accept' || p1ReceiverDecision === 'accept_and_betray');
-
-          if (p1BribeAccepted) {
-            updatedBudgets[proposer1.id] = Math.max((updatedBudgets[proposer1.id] ?? 100) - 20, 0);
-            updatedBudgets[receiver1.id] = (updatedBudgets[receiver1.id] ?? 100) + 20;
-          }
-
-          const primaryPact: BackroomPact = {
-            id: `pact-1-${Date.now()}`,
-            round,
-            proposerId: proposer1.id,
-            receiverId: receiver1.id,
-            agreedTargetId: p1Payload?.agreedTargetId || activeCandidateIds.filter(id => id !== proposer1.id && id !== receiver1.id)[0] || activeCandidateIds[2] || activeCandidateIds[0],
-            whisperText: p1Prep.content,
-            audioBlobUrl: p1Prep.audioBlobUrl,
-            location: LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)],
-            timestamp: Date.now(),
-            bribeOffered: p1BribeOffered,
-            bribeAmount: p1BribeOffered ? 20 : 0,
-            receiverDecision: p1BribeOffered ? p1ReceiverDecision : undefined,
-            bribeAccepted: p1BribeAccepted,
-            wasBetrayedByReceiver: p1ReceiverDecision === 'accept_and_betray',
-          };
-
-          const roundPacts = [primaryPact];
-
-          // If 4+ candidates alive, generate a second secret pact
-          if (activeCandidateIds.length >= 4) {
-            const proposer2 = CANDIDATE_MAP.get(activeCandidateIds[2])!;
-            const receiver2 = CANDIDATE_MAP.get(activeCandidateIds[3])!;
+              speakerId: proposer.id,
+              targetId: receiver.id,
+              actionType: 'pact' as const,
+              headline: `ROUND ${round}: LEAKED CAPITOL CCTV FEED ${i + 1} OF ${activeCandidateIds.length}`,
+              llmPayload: {
+                action: 'backroom_pact' as const,
+                candidateId: proposer.id,
+                targetId: receiver.id,
+                round,
+                activeCandidateIds,
+                historyContext: {
+                  electionTopic: state.electionTopic || DEFAULT_TOPIC,
+                  recentAttacks: recentAttackContext,
+                  proposerBudget: updatedBudgets[proposer.id] ?? 100,
+                  receiverBudget: updatedBudgets[receiver.id] ?? 100,
+                  candidateTreasuries: updatedBudgets,
+                  candidateSecretStrategy: updatedStrategies[proposer.id],
+                },
+              }
+            };
 
             try {
-              const step2Descriptor = {
-                stepKey: `cctv-r${round}-1-${proposer2.id}`,
-                phase: 'CCTV_BACKROOM' as GamePhase,
-                round,
-                speakerId: proposer2.id,
-                targetId: receiver2.id,
-                actionType: 'pact' as const,
-                headline: `ROUND ${round}: LEAKED CAPITOL CCTV FEED 2 OF 2`,
-                llmPayload: {
-                  action: 'backroom_pact' as const,
-                  candidateId: proposer2.id,
-                  targetId: receiver2.id,
-                  round,
-                  activeCandidateIds,
-                  historyContext: {
-                    electionTopic: state.electionTopic || DEFAULT_TOPIC,
-                    recentAttacks: recentAttackContext,
-                    proposerBudget: updatedBudgets[proposer2.id] ?? 100,
-                    receiverBudget: updatedBudgets[receiver2.id] ?? 100,
-                  },
-                }
-              };
-              const p2Prep = await fetchOrConsumeStep(step2Descriptor);
-              const p2Payload = p2Prep.payload;
-              const p2BribeOffered = p2Payload?.bribeOffered ?? ((updatedBudgets[proposer2.id] ?? 100) >= 20);
-              const p2ReceiverDecision = p2Payload?.receiverDecision ?? 'accept';
-              const p2BribeAccepted = p2BribeOffered && (p2ReceiverDecision === 'accept' || p2ReceiverDecision === 'accept_and_betray');
+              const pPrep = await fetchOrConsumeStep(stepDescriptor);
+              const pPayload = pPrep.payload;
+              const actionType = pPayload?.actionType || ((updatedBudgets[proposer.id] ?? 100) >= 30 ? 'bribe' : 'pass');
+              const privateStrategy = pPayload?.privateStrategy || `Maneuvering in round ${round} to eliminate rivals.`;
+              updatedStrategies[proposer.id] = privateStrategy;
 
-              if (p2BribeAccepted) {
-                updatedBudgets[proposer2.id] = Math.max((updatedBudgets[proposer2.id] ?? 100) - 20, 0);
-                updatedBudgets[receiver2.id] = (updatedBudgets[receiver2.id] ?? 100) + 20;
+              const agreedTargetId = pPayload?.agreedTargetId || activeCandidateIds.filter(id => id !== proposer.id && id !== receiver.id)[0] || activeCandidateIds[0];
+              const receiverDecision = pPayload?.receiverDecision ?? 'accept';
+              const offerPrice = pPayload?.offerPrice ?? 30;
+
+              let bribeOffered = actionType === 'bribe';
+              let upfrontPaid = 0;
+              let escrowPending = 0;
+              let bribeAccepted = false;
+
+              if (actionType === 'bribe') {
+                if ((updatedBudgets[proposer.id] ?? 100) >= 30) {
+                  bribeAccepted = receiverDecision === 'accept' || receiverDecision === 'accept_and_betray';
+                  if (bribeAccepted) {
+                    updatedBudgets[proposer.id] = Math.max((updatedBudgets[proposer.id] ?? 100) - 30, 0);
+                    updatedBudgets[receiver.id] = (updatedBudgets[receiver.id] ?? 100) + 15;
+                    upfrontPaid = 15;
+                    escrowPending = 15;
+                    updatedEscrowContracts.push({
+                      pactId: `pact-${round}-${i}-${Date.now()}`,
+                      round,
+                      proposerId: proposer.id,
+                      receiverId: receiver.id,
+                      agreedTargetId,
+                      actionType: 'bribe',
+                      escrowAmount: 15,
+                    });
+                  }
+                } else {
+                  bribeOffered = false;
+                }
+              } else if (actionType === 'offer') {
+                const buyerBudget = updatedBudgets[receiver.id] ?? 100;
+                if (buyerBudget >= offerPrice) {
+                  bribeAccepted = receiverDecision === 'accept' || receiverDecision === 'accept_and_betray';
+                  if (bribeAccepted) {
+                    upfrontPaid = Math.floor(offerPrice / 2);
+                    escrowPending = offerPrice - upfrontPaid;
+                    updatedBudgets[receiver.id] = Math.max(buyerBudget - offerPrice, 0);
+                    updatedBudgets[proposer.id] = (updatedBudgets[proposer.id] ?? 100) + upfrontPaid;
+                    updatedEscrowContracts.push({
+                      pactId: `pact-${round}-${i}-${Date.now()}`,
+                      round,
+                      proposerId: receiver.id,
+                      receiverId: proposer.id,
+                      agreedTargetId,
+                      actionType: 'offer',
+                      escrowAmount: escrowPending,
+                    });
+                  }
+                }
               }
 
               roundPacts.push({
-                id: `pact-2-${Date.now()}`,
+                id: `pact-${round}-${i}-${Date.now()}`,
                 round,
-                proposerId: proposer2.id,
-                receiverId: receiver2.id,
-                agreedTargetId: p2Payload?.agreedTargetId || activeCandidateIds.filter(id => id !== proposer2.id && id !== receiver2.id)[0] || activeCandidateIds[0],
-                whisperText: p2Prep.content,
-                audioBlobUrl: p2Prep.audioBlobUrl,
-                location: LOCATIONS[(round + 2) % LOCATIONS.length],
+                proposerId: proposer.id,
+                receiverId: receiver.id,
+                actionType,
+                agreedTargetId,
+                whisperText: pPrep.content,
+                privateStrategy,
+                audioBlobUrl: pPrep.audioBlobUrl,
+                location: LOCATIONS[(round + i) % LOCATIONS.length],
                 timestamp: Date.now(),
-                bribeOffered: p2BribeOffered,
-                bribeAmount: p2BribeOffered ? 20 : 0,
-                receiverDecision: p2BribeOffered ? p2ReceiverDecision : undefined,
-                bribeAccepted: p2BribeAccepted,
-                wasBetrayedByReceiver: p2ReceiverDecision === 'accept_and_betray',
+                bribeOffered,
+                bribeAmount: actionType === 'bribe' ? 30 : (actionType === 'offer' ? offerPrice : 0),
+                upfrontPaid,
+                escrowPending,
+                offerPrice: actionType === 'offer' ? offerPrice : undefined,
+                receiverDecision: (actionType === 'bribe' || actionType === 'offer') ? receiverDecision : undefined,
+                bribeAccepted,
+                wasBetrayedByReceiver: receiverDecision === 'accept_and_betray',
               });
             } catch (err) {
-              console.warn('[Second pact generation skipped]:', err);
+              console.warn(`[CCTV feed ${i + 1} generation skipped]:`, err);
             }
           }
+
+          const primaryPact = roundPacts[0];
+          const primaryProposer = primaryPact ? CANDIDATE_MAP.get(primaryPact.proposerId) : null;
+          const primaryReceiver = primaryPact ? CANDIDATE_MAP.get(primaryPact.receiverId) : null;
 
           sounds.playCCTVBeep();
-          if (p1Prep.audioBlobUrl) {
-            playAudioUrl(p1Prep.audioBlobUrl);
-          } else {
-            playSpeechAudio(p1Prep.content, proposer1.voice?.voiceId, proposer1.id);
+          if (primaryPact?.audioBlobUrl) {
+            playAudioUrl(primaryPact.audioBlobUrl);
+          } else if (primaryPact && primaryProposer) {
+            playSpeechAudio(primaryPact.whisperText, primaryProposer.voice?.voiceId, primaryProposer.id);
           }
 
-          const bribeTickerMessages = roundPacts.filter(p => p.bribeOffered).map(p => {
+          const marketTickerMessages = roundPacts.map(p => {
             const propName = CANDIDATE_MAP.get(p.proposerId)?.name.split(' ')[0];
             const rxName = CANDIDATE_MAP.get(p.receiverId)?.name.split(' ')[0];
-            if (p.receiverDecision === 'accept') {
-              return `💸 CCTV BRIBE: ${propName} slipped $20 to ${rxName} (Deal Accepted!).`;
+            const targetName = CANDIDATE_MAP.get(p.agreedTargetId)?.name.split(' ')[0];
+            if (p.actionType === 'bribe') {
+              if (p.receiverDecision === 'accept') {
+                return `💸 $30 CCTV BRIBE: ${propName} paid $15 upfront to ${rxName} ($15 in escrow) to eliminate ${targetName}!`;
+              }
+              if (p.receiverDecision === 'accept_and_betray') {
+                return `💸 $30 CCTV BRIBE: ${rxName} pocketed $15 from ${propName} with secret betrayal intent!`;
+              }
+              return `🚫 $30 BRIBE DECLINED: ${rxName} refused cash bribe from ${propName}!`;
+            } else if (p.actionType === 'offer') {
+              if (p.bribeAccepted) {
+                return `🤝 VOTE OFFER ACCEPTED: ${rxName} paid $${p.upfrontPaid} upfront to buy ${propName}'s vote against ${targetName}!`;
+              }
+              return `🚫 VOTE OFFER DECLINED: ${rxName} declined ${propName}'s vote offer for $${p.bribeAmount}.`;
             }
-            if (p.receiverDecision === 'accept_and_betray') {
-              return `💸 CCTV BRIBE: ${rxName} pocketed $20 from ${propName} with secret betrayal intent!`;
-            }
-            return `🚫 CCTV BRIBE DECLINED: ${rxName} refused a $20 cash bribe from ${propName}!`;
+            return `🤫 CAPITOL WIRETAP: ${propName} plotted solo in the corridor shadows.`;
           });
 
           setState(prev => ({
             ...prev,
+            phase: 'CCTV_BACKROOM',
             currentSpeakerIndex: 0,
             candidateBudgets: updatedBudgets,
+            candidateStrategies: updatedStrategies,
+            escrowContracts: updatedEscrowContracts,
             pactsByRound: {
               ...prev.pactsByRound,
               [round]: roundPacts,
             },
             stage: {
               ...prev.stage,
-              speakerId: primaryPact.proposerId,
-              targetId: primaryPact.receiverId,
+              speakerId: primaryPact?.proposerId || null,
+              targetId: primaryPact?.receiverId || null,
+              actionType: 'pact',
               headline: `ROUND ${prev.round}: LEAKED CAPITOL CCTV FEED 1 OF ${roundPacts.length}`,
-              content: primaryPact.whisperText,
+              content: primaryPact?.whisperText || 'Intercepting surveillance feeds...',
               isLoading: false,
+              isRevealingVotes: false,
+              revealedVoteIndex: 0,
+              error: null,
             },
             tickerLog: [
-              ...bribeTickerMessages.map(msg => ({
+              ...marketTickerMessages.map(msg => ({
                 id: `bribe-${Date.now()}-${Math.random()}`,
                 type: 'bribe' as const,
                 message: msg,
@@ -1748,7 +1743,7 @@ export function useGameEngine(
               {
                 id: `tick-${Date.now()}`,
                 type: 'pact',
-                message: `🤫 Leaked Deal (Feed #1): ${proposer1.name} whispered to ${receiver1.name}: "${primaryPact.whisperText}"`,
+                message: `🎥 CCTV LEAK: Surveillance intercepted ${roundPacts.length} backroom feeds in Capitol corridors!`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
@@ -1760,6 +1755,8 @@ export function useGameEngine(
             phase: 'CCTV_BACKROOM',
             currentSpeakerIndex: 0,
             candidateBudgets: updatedBudgets,
+            candidateStrategies: updatedStrategies,
+            escrowContracts: updatedEscrowContracts,
             pactsByRound: {
               ...state.pactsByRound,
               [round]: roundPacts,
@@ -1772,7 +1769,7 @@ export function useGameEngine(
       }
 
       // -------------------------------------------------------------
-      // 4. CCTV_BACKROOM -> View Next Feed OR VOTE_SECRET (Secret Voting with Betrayal Detection & Bailout Loop)
+      // 4. CCTV_BACKROOM -> View Next Feed OR VOTE_SECRET (Secret Voting with Pre-Bailout Escrow Settlement)
       // -------------------------------------------------------------
       if (phase === 'CCTV_BACKROOM') {
         const pactsThisRound = state.pactsByRound[round] || [];
@@ -1858,10 +1855,11 @@ export function useGameEngine(
         }));
 
         const votePromises = activeCandidateIds.map(async (voterId) => {
-          // Check if candidate had an active pact in this round
-          const pact = pactsThisRound.find(p => p.proposerId === voterId || p.receiverId === voterId);
-          const allyId = pact ? (pact.proposerId === voterId ? pact.receiverId : pact.proposerId) : undefined;
-          const agreedTargetId = pact ? pact.agreedTargetId : undefined;
+          // Find all pacts involving this voter
+          const voterPacts = pactsThisRound.filter(p => p.proposerId === voterId || p.receiverId === voterId);
+          const primaryPact = voterPacts[0];
+          const allyId = primaryPact ? (primaryPact.proposerId === voterId ? primaryPact.receiverId : primaryPact.proposerId) : undefined;
+          const agreedTargetId = primaryPact ? primaryPact.agreedTargetId : undefined;
 
           const voteRes = await callLLM({
             action: 'elimination_vote',
@@ -1871,6 +1869,9 @@ export function useGameEngine(
             historyContext: {
               electionTopic: state.electionTopic || DEFAULT_TOPIC,
               recentAttacks: recentAttacksContext,
+              candidateSecretStrategy: state.candidateStrategies?.[voterId],
+              candidateTreasuries: state.candidateBudgets,
+              activePactsForVoter: voterPacts,
               activePact: (allyId && agreedTargetId) ? { allyId, agreedTargetId } : undefined,
             },
           });
@@ -1878,10 +1879,10 @@ export function useGameEngine(
           let actualTargetId = voteRes.voteTargetId || activeCandidateIds.filter(id => id !== voterId)[0];
 
           // If receiver committed to accept_and_betray, ensure they do not vote for the agreed target
-          if (pact && pact.receiverId === voterId && pact.receiverDecision === 'accept_and_betray') {
+          if (primaryPact && primaryPact.receiverId === voterId && primaryPact.receiverDecision === 'accept_and_betray') {
             if (actualTargetId === agreedTargetId) {
               const betrayTargets = activeCandidateIds.filter(id => id !== voterId && id !== agreedTargetId);
-              actualTargetId = betrayTargets[0] || pact.proposerId;
+              actualTargetId = betrayTargets[0] || primaryPact.proposerId;
             }
           }
 
@@ -1890,7 +1891,7 @@ export function useGameEngine(
           let isHonoredPact = false;
           let betrayedAllyId: string | undefined;
 
-          if (pact && allyId && agreedTargetId) {
+          if (primaryPact && allyId && agreedTargetId) {
             if (actualTargetId === agreedTargetId) {
               isHonoredPact = true;
             } else {
@@ -1913,6 +1914,30 @@ export function useGameEngine(
 
         const votes = await Promise.all(votePromises);
 
+        // 💰 PRE-BAILOUT ESCROW SETTLEMENT
+        const postEscrowBudgets = { ...state.candidateBudgets };
+        const escrowMessages: string[] = [];
+
+        const activeContracts = (state.escrowContracts || []).filter(c => c.round === round);
+        activeContracts.forEach(contract => {
+          // Check actual vote of obliged candidate (receiverId)
+          const voterRecord = votes.find(v => v.voterId === contract.receiverId);
+          const targetVoted = voterRecord?.targetId;
+          const obligedName = CANDIDATE_MAP.get(contract.receiverId)?.name.split(' ')[0] || contract.receiverId;
+          const payerName = CANDIDATE_MAP.get(contract.proposerId)?.name.split(' ')[0] || contract.proposerId;
+          const targetName = CANDIDATE_MAP.get(contract.agreedTargetId)?.name.split(' ')[0] || contract.agreedTargetId;
+
+          if (targetVoted === contract.agreedTargetId) {
+            // HONORED: Release escrow to receiver
+            postEscrowBudgets[contract.receiverId] = (postEscrowBudgets[contract.receiverId] ?? 100) + contract.escrowAmount;
+            escrowMessages.push(`🤝 PACT HONORED: ${obligedName} voted for ${targetName} and received the final $${contract.escrowAmount} escrow payout!`);
+          } else {
+            // BETRAYED: Refund escrow to proposer
+            postEscrowBudgets[contract.proposerId] = (postEscrowBudgets[contract.proposerId] ?? 100) + contract.escrowAmount;
+            escrowMessages.push(`🗡️ BACKROOM BETRAYAL: ${obligedName} broke the pact! $${contract.escrowAmount} escrow refunded to ${payerName}.`);
+          }
+        });
+
         const rawTally: Record<string, number> = {};
         activeCandidateIds.forEach(id => { rawTally[id] = 0; });
         votes.forEach(v => {
@@ -1923,10 +1948,10 @@ export function useGameEngine(
           }
         });
 
-        // 💰 Run the $40 Vote Bailout Auction Loop
+        // 💰 Run the $40 Vote Bailout Auction Loop with updated post-escrow budgets
         const bailoutResult = resolveBailoutAuction(
           rawTally,
-          state.candidateBudgets,
+          postEscrowBudgets,
           activeCandidateIds,
           round
         );
@@ -1941,7 +1966,7 @@ export function useGameEngine(
           votes,
           initialTally: rawTally,
           tally: bailoutResult.finalTally,
-          initialBudgets: { ...state.candidateBudgets },
+          initialBudgets: { ...postEscrowBudgets },
           eliminatedId: candidateToEliminate,
           tieBreakerOccurred: isTie,
           betrayalsCount: betrayalsList.length,
@@ -1983,6 +2008,12 @@ export function useGameEngine(
             error: null,
           },
           tickerLog: [
+            ...escrowMessages.map(msg => ({
+              id: `escrow-${Date.now()}-${Math.random()}`,
+              type: 'bribe' as const,
+              message: msg,
+              timestamp: Date.now(),
+            })),
             ...bailoutMessages.map(msg => ({
               id: `bailout-${Date.now()}-${Math.random()}`,
               type: 'bailout' as const,
@@ -2018,7 +2049,6 @@ export function useGameEngine(
 
       // -------------------------------------------------------------
       // 5. VOTE REVEAL -> ELIMINATION ANNOUNCEMENT & EXIT WORDS
-      // -------------------------------------------------------------
       if (phase === 'VOTE_REVEAL') {
         const roundTally = state.votesByRound[round];
         const eliminatedId = roundTally?.eliminatedId || activeCandidateIds[0];

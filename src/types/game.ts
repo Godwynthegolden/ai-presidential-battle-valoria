@@ -31,23 +31,33 @@ export interface AttackEvent {
   timestamp: number;
 }
 
+export type CCTVPactActionType = 'bribe' | 'offer' | 'pass';
+
 export interface BackroomPact {
   id: string;
   round: number;
   proposerId: string;
   receiverId: string;
+  actionType?: CCTVPactActionType;
   agreedTargetId: string;
   whisperText: string;
+  privateStrategy?: string; // Secret tactical reasoning (kept confidential)
   location: string;
   audioBlobUrl?: string | null;
   wasBetrayedByProposer?: boolean;
   wasBetrayedByReceiver?: boolean;
   timestamp: number;
-  // Dollars Currency Bribe Fields
-  bribeOffered?: boolean;      // True if proposer offered $20 bribe
-  bribeAmount?: number;        // e.g. $20
+  
+  // Dollars Currency & Escrow Tracking
+  bribeOffered?: boolean;      // True if proposer offered $30 bribe
+  bribeAmount?: number;        // $30 for bribe, or $20-$40 for offer
+  upfrontPaid?: number;        // $15 upfront paid in CCTV phase
+  escrowPending?: number;      // $15 pending ballot verification
+  isEscrowReleased?: boolean;  // True if remaining escrow was paid on verified vote
+  isEscrowRefunded?: boolean;  // True if escrow was refunded to payer upon betrayal
+  offerPrice?: number;         // $20-$40 if action is 'offer'
   receiverDecision?: 'accept' | 'decline' | 'accept_and_betray'; // Receiver's AI choice
-  bribeAccepted?: boolean;     // True if $20 transferred
+  bribeAccepted?: boolean;     // True if deal accepted and upfront payment transferred
 }
 
 export interface VoteRecord {
@@ -93,6 +103,16 @@ export interface EliminatedCandidateInfo {
   exitWords: string;
 }
 
+export interface EscrowContract {
+  pactId: string;
+  round: number;
+  proposerId: string;
+  receiverId: string;
+  agreedTargetId: string;
+  actionType: CCTVPactActionType;
+  escrowAmount: number; // e.g. $15
+}
+
 export interface GameState {
   phase: GamePhase;
   round: number;
@@ -100,6 +120,8 @@ export interface GameState {
   activeCandidateIds: string[];        // Remaining alive candidates in current round
   eliminatedCandidates: EliminatedCandidateInfo[];
   candidateBudgets: Record<string, number>; // Live dollar currency balance: candidateId -> amount
+  candidateStrategies?: Record<string, string>; // Secret strategy memo: candidateId -> privateStrategy
+  escrowContracts?: EscrowContract[]; // Active escrow contracts waiting for ballot verification
   currentSpeakerIndex: number;
   
   electionTopic?: string;              // Current national debate crisis/question for this election
@@ -184,6 +206,9 @@ export interface LLMRequestPayload {
     recentEliminations?: Array<{ candidateName: string; round: number }>;
     eliminatedCandidatesSummary?: Array<{ candidateName: string; candidateId: string; round: number; exitWords?: string }>;
     activePact?: { allyId: string; agreedTargetId: string };
+    activePactsForVoter?: BackroomPact[];
+    candidateSecretStrategy?: string; // Secret strategy memo to remind the voter
+    candidateTreasuries?: Record<string, number>; // Full treasury balances of all candidates
     betrayalContext?: { 
       wasBetrayed: boolean; 
       betrayedByCandidateName?: string; 
@@ -222,11 +247,17 @@ export interface LLMResponsePayload {
   agreedTargetId?: string;
   whisperText?: string;
   privateReason?: string;
+  privateStrategy?: string; // Candidate's secret inner strategy
   candidateProfile?: Partial<Candidate>;
   modelUsed?: string;
-  // Bribe Fields
+  // Bribe & CCTV Market Fields
+  actionType?: CCTVPactActionType;
   bribeOffered?: boolean;
   bribeAmount?: number;
+  upfrontPaid?: number;
+  escrowPending?: number;
+  offerPrice?: number;
+  bribeRecipients?: string[];
   receiverDecision?: 'accept' | 'decline' | 'accept_and_betray';
   bribeAccepted?: boolean;
 }

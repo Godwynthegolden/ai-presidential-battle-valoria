@@ -80,14 +80,12 @@ function simulateNextSteps(currentState: GameState, maxDepth: number = 2): StepD
       }
     } else if (simPhase === 'CCTV_BACKROOM') {
       simSpeakerIndex += 1;
-      const pactCount = simActiveIds.length >= 4 ? 2 : 1;
+      const pactCount = simActiveIds.length;
       if (simSpeakerIndex < pactCount) {
-        const p1 = simSpeakerIndex === 0
-          ? CANDIDATE_MAP.get(simActiveIds[0])!
-          : (CANDIDATE_MAP.get(simActiveIds[2]) || CANDIDATE_MAP.get(simActiveIds[0])!);
-        const p2 = simSpeakerIndex === 0
-          ? CANDIDATE_MAP.get(simActiveIds[1])!
-          : (CANDIDATE_MAP.get(simActiveIds[3]) || CANDIDATE_MAP.get(simActiveIds[1])!);
+        const p1Id = simActiveIds[simSpeakerIndex];
+        const p2Id = simActiveIds[(simSpeakerIndex + 1) % simActiveIds.length];
+        const p1 = CANDIDATE_MAP.get(p1Id) || CANDIDATE_MAP.get(simActiveIds[0])!;
+        const p2 = CANDIDATE_MAP.get(p2Id) || CANDIDATE_MAP.get(simActiveIds[1])!;
 
         steps.push({
           stepKey: `cctv-r${simRound}-${simSpeakerIndex}-${p1.id}`,
@@ -251,8 +249,8 @@ async function runPipelineTests() {
     console.log(`  ✓ Depth ${depth}: Generated [${steps.map(s => s.stepKey).join(', ')}]`);
   }
 
-  // 2. Test Seamless Transition: ATTACK -> CCTV Feed 1 -> CCTV Feed 2 -> VOTE -> ELIMINATION
-  console.log('2. Testing Seamless Lookahead across ATTACK -> CCTV (Feeds 1 & 2) -> VOTE -> ELIMINATION transitions...');
+  // 2. Test Seamless Transition: ATTACK -> Universal CCTV Feeds (All Active Candidates) -> VOTE -> ELIMINATION
+  console.log(`2. Testing Seamless Lookahead across ATTACK -> Universal CCTV (Feeds 1 to ${activeIds.length}) -> VOTE -> ELIMINATION transitions...`);
   const attackEndState: GameState = {
     ...baseState,
     phase: 'ATTACK',
@@ -260,13 +258,17 @@ async function runPipelineTests() {
     currentSpeakerIndex: activeIds.length - 1, // Last attacker
   };
 
-  const cctvLookahead = simulateNextSteps(attackEndState, 4);
-  assert.strictEqual(cctvLookahead.length, 4);
-  assert.strictEqual(cctvLookahead[0].phase, 'CCTV_BACKROOM', 'Step 1 after attack must be CCTV Feed 1');
-  assert.strictEqual(cctvLookahead[1].phase, 'CCTV_BACKROOM', 'Step 2 after attack must be CCTV Feed 2');
-  assert.strictEqual(cctvLookahead[2].phase, 'VOTE_SECRET', 'Step 3 after CCTV must be Secret Voting');
-  assert.strictEqual(cctvLookahead[3].phase, 'ELIMINATION', 'Step 4 after Voting must be Elimination Concession');
-  console.log(`  ✓ Seamless lookahead sequence verified: [${cctvLookahead.map(s => s.phase).join(' -> ')}]`);
+  const totalStepsToElim = activeIds.length + 2; // N CCTV feeds + 1 Secret Vote + 1 Elimination
+  const cctvLookahead = simulateNextSteps(attackEndState, totalStepsToElim);
+  assert.strictEqual(cctvLookahead.length, totalStepsToElim);
+  
+  // Verify all N active candidates have their individual CCTV feeds
+  for (let i = 0; i < activeIds.length; i++) {
+    assert.strictEqual(cctvLookahead[i].phase, 'CCTV_BACKROOM', `Step ${i + 1} after attack must be CCTV Feed ${i + 1}`);
+  }
+  assert.strictEqual(cctvLookahead[activeIds.length].phase, 'VOTE_SECRET', `Step ${activeIds.length + 1} after CCTV must be Secret Voting`);
+  assert.strictEqual(cctvLookahead[activeIds.length + 1].phase, 'ELIMINATION', `Step ${activeIds.length + 2} after Voting must be Elimination Concession`);
+  console.log(`  ✓ Seamless universal CCTV lookahead verified (${activeIds.length} feeds -> VOTE -> ELIMINATION)!`);
 
   // 3. Test VOTE_REVEAL with known eliminated candidate
   console.log('3. Testing VOTE_REVEAL exact eliminated candidate concession speech lookahead...');

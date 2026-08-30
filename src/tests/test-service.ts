@@ -385,22 +385,38 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('1. Candidate initial budget contracts ($80, $100, $120) PASSED!');
 
-  // 2. CCTV Backroom $20 Bribe Prompt
+  // 2. CCTV Backroom $30 Bribe Prompt & Market Mechanics
   const bribePactPrompt = (nineRouterService as any).buildPrompt(speakerCand, {
     action: 'backroom_pact',
     candidateId: speakerCand.id,
     targetId: targetCand.id,
     round: 1,
-    activeCandidateIds: [speakerCand.id, targetCand.id, 'marcus_vance'],
+    activeCandidateIds: [speakerCand.id, targetCand.id, 'marcus-vance'],
     historyContext: {
       proposerBudget: 120,
       receiverBudget: 80,
+      candidateTreasuries: { [speakerCand.id]: 120, [targetCand.id]: 80, 'marcus-vance': 100 },
     }
   });
-  if (!bribePactPrompt.userPrompt.includes('$20 BRIBE') && !bribePactPrompt.userPrompt.includes('Balance: $120')) {
-    throw new Error('Backroom pact prompt missing $20 bribe rules or candidate budget balance.');
+  if (!bribePactPrompt.userPrompt.includes('$30') || !bribePactPrompt.userPrompt.includes('Balance: $120')) {
+    throw new Error('Backroom pact prompt missing $30 bribe rules or candidate budget balance.');
   }
-  console.log('2. CCTV Backroom $20 Bribe prompt construction PASSED!');
+  console.log('2. CCTV Backroom $30 Bribe & Universal Market prompt construction PASSED!');
+
+  // Test 2b: Secret Strategy Reminder in Elimination Vote Prompt
+  const votePromptWithStrategy = (nineRouterService as any).buildPrompt(speakerCand, {
+    action: 'elimination_vote',
+    candidateId: speakerCand.id,
+    round: 1,
+    activeCandidateIds: [speakerCand.id, targetCand.id, 'marcus-vance'],
+    historyContext: {
+      candidateSecretStrategy: 'Formed secret pact to eliminate Marcus Vance and save $40 for bailout auctions.',
+    }
+  });
+  if (!votePromptWithStrategy.userPrompt.includes('YOUR CONFIDENTIAL STRATEGY') || !votePromptWithStrategy.userPrompt.includes('Formed secret pact to eliminate Marcus Vance')) {
+    throw new Error('Elimination vote prompt failed to inject candidate secret strategy memo.');
+  }
+  console.log('2b. Confidential Strategy Memo Injection in Voting Prompt PASSED!');
 
   // 3. Import useGameEngine helpers
   const { resolveAttackTarget, resolveBailoutAuction } = await import('../hooks/useGameEngine');
@@ -415,11 +431,13 @@ Ideology: Direct algorithmic optimization of public resources.
         proposerId: 'elena_rostova',
         receiverId: 'jackson_alvarez',
         agreedTargetId: 'arthur_sterling',
-        whisperText: 'Take the $20 and vote out Arthur!',
+        whisperText: 'Take the $30 and vote out Arthur!',
         location: 'Capitol Cloakroom Cam 04',
         timestamp: Date.now(),
         bribeOffered: true,
-        bribeAmount: 20,
+        bribeAmount: 30,
+        upfrontPaid: 15,
+        escrowPending: 15,
         receiverDecision: 'accept_and_betray' as const,
         bribeAccepted: true,
         wasBetrayedByReceiver: true,
@@ -429,7 +447,7 @@ Ideology: Direct algorithmic optimization of public resources.
     round: 2,
   };
 
-  // Elena should seek revenge against Jackson Alvarez (who took $20 and betrayed)
+  // Elena should seek revenge against Jackson Alvarez (who took $30 and betrayed)
   const revengeTarget = resolveAttackTarget('elena_rostova', ['elena_rostova', 'jackson_alvarez', 'arthur_sterling', 'chloe_kang'], mockPactHistory);
   if (revengeTarget !== 'jackson_alvarez') {
     throw new Error(`Expected Elena to target betrayer jackson_alvarez, got ${revengeTarget}`);
