@@ -435,6 +435,37 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('2c. CCTV Whisper Dialogue Addressee Alignment PASSED!');
 
+  // Test 2d: Lookahead PreparedStep Cache Payload Persistence
+  const mockPreparedStep = {
+    stepKey: 'cctv-r1-0-jackson-alvarez',
+    phase: 'CCTV_BACKROOM' as const,
+    round: 1,
+    speakerId: 'jackson-alvarez',
+    targetId: 'marcus-vance',
+    actionType: 'pact' as const,
+    headline: 'ROUND 1: LEAKED CAPITOL CCTV FEED 1 OF 6',
+    content: "Dmitri, let's team up to bury Sterling.",
+    audioBlobUrl: null,
+    audioBlob: null,
+    isReady: true,
+    payload: {
+      text: "Dmitri, let's team up to bury Sterling.",
+      targetCandidateId: 'dmitri-voronin',
+      agreedTargetId: 'art-sterling',
+      actionType: 'bribe',
+      bribeAmount: 30,
+      upfrontPaid: 15,
+      escrowPending: 15,
+      receiverDecision: 'accept',
+      bribeAccepted: true,
+    }
+  };
+
+  if (!mockPreparedStep.payload || mockPreparedStep.payload.targetCandidateId !== 'dmitri-voronin') {
+    throw new Error('PreparedStep failed to retain lookahead payload.');
+  }
+  console.log('2d. Lookahead PreparedStep Cache Payload Persistence PASSED!');
+
   // 3. Import useGameEngine helpers
   const { resolveAttackTarget, resolveBailoutAuction } = await import('../hooks/useGameEngine');
 

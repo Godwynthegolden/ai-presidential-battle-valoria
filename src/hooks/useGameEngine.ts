@@ -649,8 +649,10 @@ export function useGameEngine(
     const promise = (async () => {
       try {
         let content = '';
+        let stepPayload: any = undefined;
         if (descriptor.llmPayload) {
           const res = await callLLM(descriptor.llmPayload);
+          stepPayload = res;
           content = typeof res === 'object' && res.text ? res.text : (typeof res === 'string' ? res : '');
         }
 
@@ -676,6 +678,7 @@ export function useGameEngine(
           audioBlobUrl,
           audioBlob,
           isReady: true,
+          payload: stepPayload,
         };
 
         preparedStepsRef.current.set(stepKey, prepared);
@@ -696,6 +699,7 @@ export function useGameEngine(
           audioBlob: null,
           isReady: false,
           error: err.message,
+          payload: undefined,
         };
         preparedStepsRef.current.set(stepKey, fallback);
         return fallback;
