@@ -164,7 +164,7 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log(`Verified ${VALORIA_DEBATE_TOPICS.length} Valoria crisis debate topics. Sample topic: "${randomTopic.title}" PASSED!`);
 
-  // Test prompt builder with preceding speeches & reactive context
+  // Test campaign prompt builder promoting platform and vision
   const testCandidate = CANDIDATES[0];
   const openingPrompt = (nineRouterService as any).buildPrompt(testCandidate, {
     action: 'campaign_speech',
@@ -176,11 +176,11 @@ Ideology: Direct algorithmic optimization of public resources.
       precedingSpeeches: [],
     },
   });
-  if (!openingPrompt.userPrompt.includes('FIRST candidate') || !openingPrompt.userPrompt.includes(randomTopic.title)) {
-    throw new Error('Opening campaign prompt failed to inject opening stance and crisis topic');
+  if (!openingPrompt.userPrompt.includes('PRESIDENTIAL CAMPAIGN') || !openingPrompt.userPrompt.includes(randomTopic.title) || !openingPrompt.userPrompt.includes('PROMOTE YOURSELF')) {
+    throw new Error('Opening campaign prompt failed to inject campaign stance and crisis topic');
   }
 
-  const reactivePrompt = (nineRouterService as any).buildPrompt(CANDIDATES[1], {
+  const subsequentPrompt = (nineRouterService as any).buildPrompt(CANDIDATES[1], {
     action: 'campaign_speech',
     candidateId: CANDIDATES[1].id,
     round: 1,
@@ -197,10 +197,10 @@ Ideology: Direct algorithmic optimization of public resources.
       ],
     },
   });
-  if (!reactivePrompt.userPrompt.includes('REBUT') || !reactivePrompt.userPrompt.includes(testCandidate.name)) {
-    throw new Error('Subsequent campaign prompt failed to inject reactive rebuttal and preceding candidate speech');
+  if (!subsequentPrompt.userPrompt.includes('DO NOT default to attacking or rebutting the candidate who spoke before you') || !subsequentPrompt.userPrompt.includes('PROMOTE YOURSELF')) {
+    throw new Error('Subsequent campaign prompt failed to enforce self-promotion and anti-previous-speaker attack rules');
   }
-  console.log('Reactive debate prompt construction with multi-candidate contextual awareness PASSED!');
+  console.log('Campaign speech prompt self-promotion & platform focus PASSED!');
 
   // Test attack prompt with spoken quote and vulnerabilities
   const attackPrompt = (nineRouterService as any).buildPrompt(testCandidate, {

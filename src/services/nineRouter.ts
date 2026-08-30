@@ -782,44 +782,28 @@ export class NineRouterService {
 
     switch (payload.action) {
       case 'campaign_speech': {
-        const preceding = ctx.precedingSpeeches || [];
-        
-        if (preceding.length === 0) {
-          // First speaker: Sets the national debate agenda with explosive opening thesis
-          userPrompt = `ROUND 1: OPENING PRESIDENTIAL CAMPAIGN ADDRESS.
-NATIONAL CRISIS FOCUS: "${electionTopic}"
-You are the FIRST candidate to take the microphone on live national television. The electorate and all rival contenders are watching.
+        const sloganSnippet = candidate.slogan ? `Campaign Slogan: "${candidate.slogan}"\n` : '';
+        const ideologySnippet = candidate.ideology ? `Core Ideology: ${candidate.ideology}\n` : '';
+        const rivalSnippet = candidate.rivalArchetypes && candidate.rivalArchetypes.length > 0 
+          ? `Ideological Opposites/Rivals: ${candidate.rivalArchetypes.join(', ')}\n` 
+          : '';
 
+        userPrompt = `ROUND 1: PRESIDENTIAL CAMPAIGN ADDRESS & STUMP SPEECH.
+NATIONAL CRISIS FOCUS: "${electionTopic}"
+${sloganSnippet}${ideologySnippet}${rivalSnippet}
+You are taking the stage on live national television to deliver your official presidential campaign address to the voters of Valoria.
+
+PRIMARY GOAL: PROMOTE YOURSELF, YOUR PLATFORM, AND YOUR VISION.
 In MAXIMUM 40 WORDS:
-- Confront this crisis immediately with your boldest presidential thesis.
-- Frame the election on your terms and challenge the failed status quo.
-- Do NOT use generic opening greetings ("Fellow citizens", "I stand before you"). Jump straight into your argument with fierce conviction.
+- Boldly pitch why YOU must be elected President of the Republic of Valoria.
+- Present your signature solution to "${electionTopic}".
+- Inspire the electorate with your core philosophy, energy, and leadership strengths.
+- DO NOT default to attacking or rebutting the candidate who spoke before you. This round is for promoting YOUR platform and inspiring voters to support you.
+- (Optional): If you take a brief swipe, only aim it at your ideological opposites (${candidate.rivalArchetypes?.join(', ') || 'corrupt elites'}), but ensure the majority of your speech champions YOUR vision.
+- Do NOT use generic opening greetings ("Hello fellow citizens", "I stand before you"). Jump straight into your message with fierce conviction.
 - CRITICAL FORMAT RULE: NEVER prefix your output with your name, a character tag, or a colon (e.g. NEVER write "${candidate.name.split(' ')[0]}:"). Start directly with your spoken speech.
 - Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle} - ${candidate.titleRole}).
 - Return clean speech text only, strictly under 40 words.`;
-        } else {
-          // Subsequent speakers: Must directly react to, contrast with, or dismantle preceding speeches!
-          const recentPreceding = preceding.slice(-3);
-          const precedingSnippet = recentPreceding
-            .map(p => `- ${p.candidateName} (${p.titleRole}): "${p.speech}"`)
-            .join('\n');
-          const lastSpeaker = recentPreceding[recentPreceding.length - 1];
-
-          userPrompt = `ROUND 1: PRESIDENTIAL CAMPAIGN ADDRESS.
-NATIONAL CRISIS FOCUS: "${electionTopic}"
-You are taking the microphone after hearing your rivals speak on stage.
-
-PREVIOUS STATEMENTS ON STAGE:
-${precedingSnippet}
-
-In MAXIMUM 40 WORDS:
-- Directly REACT TO, REBUT, or CONTRAST yourself against the statement just made by ${lastSpeaker?.candidateName || 'your rival'} or earlier speakers.
-- Pivot sharply to why YOUR leadership is the only real answer to this national crisis.
-- Do NOT repeat canned biographical bullet points. Engage directly with the live debate.
-- CRITICAL FORMAT RULE: NEVER prefix your output with your name, a character tag, or a colon (e.g. NEVER write "${candidate.name.split(' ')[0]}:"). Start directly with your spoken speech.
-- Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle} - ${candidate.titleRole}).
-- Return clean speech text only, strictly under 40 words.`;
-        }
         break;
       }
 
