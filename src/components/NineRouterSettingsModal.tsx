@@ -33,7 +33,7 @@ export interface NineRouterConfigState {
   fishAudioModel?: string;
   fishAudioEnabled?: boolean;
   lookaheadDepth?: 2 | 3 | 4 | 5;
-  ballotSpeed?: 0.5 | 1.0 | 2.0;
+  ballotSpeed?: number;
   ballotAutoPlay?: boolean;
 }
 
@@ -58,7 +58,7 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
   const [showKey, setShowKey] = useState(false);
 
   // Ballot Live Feed settings
-  const [ballotSpeed, setBallotSpeed] = useState<0.5 | 1.0 | 2.0>(currentConfig.ballotSpeed ?? 1.0);
+  const [ballotSpeed, setBallotSpeed] = useState<number>(currentConfig.ballotSpeed ?? 1.0);
   const [ballotAutoPlay, setBallotAutoPlay] = useState<boolean>(currentConfig.ballotAutoPlay !== false);
 
   // Fish Audio settings
@@ -614,21 +614,23 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
             {/* 1. Animation Speed Selection */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Sliders className="w-3.5 h-3.5 text-emerald-400" /> Ballot Reveal &amp; Bailout Speed
+                <Sliders className="w-3.5 h-3.5 text-emerald-400" /> Cinematic Ballot Reveal &amp; Bailout Speed
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                 {[
-                  { value: 0.5, label: '0.5x Cinematic', desc: 'Slow & suspenseful for YouTube drama (2.5s/step)' },
-                  { value: 1.0, label: '1.0x Standard', desc: 'Balanced broadcast speed (1.4s/step)' },
-                  { value: 2.0, label: '2.0x Fast', desc: 'Quick count (0.7s/step)' },
+                  { value: 0.5, label: '0.5x Suspense', desc: 'Slow & intense for YouTube drama' },
+                  { value: 0.75, label: '0.75x Dramatic', desc: 'Extended dramatic pacing' },
+                  { value: 1.0, label: '1.0x Standard', desc: 'Balanced broadcast speed' },
+                  { value: 1.5, label: '1.5x Fast', desc: 'High-energy fast reveal' },
+                  { value: 2.0, label: '2.0x Turbo', desc: 'Maximum speed playback' },
                 ].map(opt => (
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setBallotSpeed(opt.value as 0.5 | 1.0 | 2.0)}
-                    className={`flex flex-col items-start p-3 rounded-2xl border text-left transition cursor-pointer ${
+                    onClick={() => setBallotSpeed(opt.value)}
+                    className={`flex flex-col items-start p-2.5 sm:p-3 rounded-2xl border text-left transition cursor-pointer ${
                       ballotSpeed === opt.value
-                        ? 'bg-emerald-950/70 border-emerald-500 text-white shadow-lg shadow-emerald-950/50'
+                        ? 'bg-emerald-950/80 border-emerald-400 text-white shadow-lg shadow-emerald-950/60 ring-1 ring-emerald-400'
                         : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
                     }`}
                   >

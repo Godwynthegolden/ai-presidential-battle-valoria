@@ -32,13 +32,14 @@ interface DebateArenaProps {
   gameState: GameState;
   onRetry: () => void;
   onRestart: () => void;
+  onNextStep?: () => void;
   onSelectCCTVFeed?: (feedIndex: number) => void;
   onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string) => void;
   isSpeakingAudio?: boolean;
   isBufferingLookahead?: boolean;
   bufferingStatus?: string;
   lookaheadBufferCount?: number;
-  ballotSpeed?: 0.5 | 1.0 | 2.0;
+  ballotSpeed?: number;
   ballotAutoPlay?: boolean;
 }
 
@@ -46,6 +47,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   gameState,
   onRetry,
   onRestart,
+  onNextStep,
   onSelectCCTVFeed,
   onPlaySpeechAudio,
   isSpeakingAudio = false,
@@ -87,38 +89,32 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   // Render Special Phases (Vote Reveal & Winner)
   if (phase === 'VOTE_REVEAL' && votesByRound[round]) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 h-full min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="w-full max-w-3xl my-auto">
-          <VoteRevealBoard 
-            tally={votesByRound[round]} 
-            isFinalVote={false} 
-            eliminatedId={votesByRound[round].eliminatedId}
-            candidateBudgets={gameState.candidateBudgets}
-            activeCandidateIds={gameState.activeCandidateIds}
-            defaultSpeed={ballotSpeed}
-            defaultAutoPlay={ballotAutoPlay}
-          />
-        </div>
-      </div>
+      <VoteRevealBoard 
+        tally={votesByRound[round]} 
+        isFinalVote={false} 
+        eliminatedId={votesByRound[round].eliminatedId}
+        candidateBudgets={gameState.candidateBudgets}
+        activeCandidateIds={gameState.activeCandidateIds}
+        defaultSpeed={ballotSpeed}
+        defaultAutoPlay={ballotAutoPlay}
+        onComplete={onNextStep}
+      />
     );
   }
 
   if (phase === 'FINAL_REVEAL' && finalVoteTally) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 h-full min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="w-full max-w-3xl my-auto">
-          <VoteRevealBoard 
-            tally={finalVoteTally} 
-            isFinalVote={true} 
-            eliminatedId={null}
-            winnerId={winnerId}
-            candidateBudgets={gameState.candidateBudgets}
-            activeCandidateIds={gameState.participatingCandidateIds || gameState.activeCandidateIds}
-            defaultSpeed={ballotSpeed}
-            defaultAutoPlay={ballotAutoPlay}
-          />
-        </div>
-      </div>
+      <VoteRevealBoard 
+        tally={finalVoteTally} 
+        isFinalVote={true} 
+        eliminatedId={null}
+        winnerId={winnerId}
+        candidateBudgets={gameState.candidateBudgets}
+        activeCandidateIds={gameState.participatingCandidateIds || gameState.activeCandidateIds}
+        defaultSpeed={ballotSpeed}
+        defaultAutoPlay={ballotAutoPlay}
+        onComplete={onNextStep}
+      />
     );
   }
 

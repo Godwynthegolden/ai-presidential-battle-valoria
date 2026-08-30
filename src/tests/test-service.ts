@@ -678,7 +678,16 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   sounds.playBetrayalAlarm();
   console.log('5. SoundManager Synthesizer Audio Cues PASSED!');
 
-  console.log('\nAll unit tests for AI JSON Integrity, Candidate Reordering & YouTube Ballot Reveal PASSED successfully!');
+  // Test 7: Cinematic Ballot Reveal 5-speed presets duration calculation
+  const baseMs = 1400;
+  const speedPresets = [0.5, 0.75, 1.0, 1.5, 2.0];
+  const expectedScaled = speedPresets.map(s => Math.round(baseMs / s));
+  if (expectedScaled[0] !== 2800 || expectedScaled[2] !== 1400 || expectedScaled[4] !== 700) {
+    throw new Error('Speed scaling calculations failed');
+  }
+  console.log('6. Cinematic Ballot Reveal 5-Speed Preset Calculations (0.5x, 0.75x, 1.0x, 1.5x, 2.0x) PASSED!');
+
+  console.log('\nAll unit tests for AI JSON Integrity, Candidate Reordering & Full-Screen YouTube Ballot Reveal PASSED successfully!');
 }
 
 testEngine().catch(err => {

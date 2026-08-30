@@ -319,6 +319,7 @@ export default function AIPlaygroundPage() {
                 gameState={state}
                 onRetry={retryCurrentStep}
                 onRestart={restartGame}
+                onNextStep={nextStep}
                 onSelectCCTVFeed={selectCCTVFeed}
                 onPlaySpeechAudio={playSpeechAudio}
                 isSpeakingAudio={isSpeakingAudio}
