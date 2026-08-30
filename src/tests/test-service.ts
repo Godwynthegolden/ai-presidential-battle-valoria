@@ -367,7 +367,7 @@ Ideology: Direct algorithmic optimization of public resources.
     round: 1,
     activeCandidateIds: [speakerCand.id, targetCand.id],
   });
-  if (!antiFormulaAttackPrompt.userPrompt.includes('ANTI-FORMULA & STYLE RULES') || !antiFormulaAttackPrompt.userPrompt.includes('NEVER format your output as a script label')) {
+  if (!antiFormulaAttackPrompt.userPrompt.includes('ANTI-FORMULA') || !antiFormulaAttackPrompt.userPrompt.includes('NEVER format your output as a script label')) {
     throw new Error('Attack prompt failed to contain strict anti-formula and anti-script rules');
   }
   console.log('Dialogue Speech Sanitizer & Anti-Formula Prompt Guardrails PASSED!');
@@ -517,6 +517,29 @@ Ideology: Direct algorithmic optimization of public resources.
     throw new Error(`Candidate semantic healing failed: name=${healedFromName}, alias=${healedFromAlias}, surname=${healedFromSurname}`);
   }
   console.log('2. Semantic Candidate Name & Alias to ID Healing PASSED!');
+
+  // Test 3: DeepSeek reasoning_content output recovery & <think> tag stripping
+  console.log('Testing DeepSeek reasoning_content recovery & <think> tag stripping...');
+  const sampleDeepSeekReasoning = `1. The user asks for a campaign address in character as Arthur Sterling, maximum 40 words. Must react to General Marcus's statement ("Strength at the Border. Peace Through Power.") or earlier speakers, pivot to why Arthur is the answer. No name prefix, no colon, start directly with speech. Stay in character: boastful, smug, energetic, transactional, ROI, market growth, job creation, dealmaking, mock opponents. Word limit strict.
+
+Let's draft. Need to respond to "Strength at the Border. Peace Through Power." Contrast: that's empty rhetoric, not a business plan. Need to pivot to leadership on crisis: mobilize as a CEO would, cost-efficient security, ROI, dealmaking with neighbors or securing border as an asset. Keep under 40 words.
+
+Draft 1: "General, 'peace through power'? That's a slogan, not a balance sheet. I'll run this mobilization like a merger: secure the border, cut waste, and make Ostrov pay for the disruption. That's ROI, not rhetoric."
+
+Count: General, peace through power? (3) That's a slogan, not a balance sheet. (5) I'll run this mobilization like a merger: (6) secure the border, cut waste, (5) and make Ostrov pay for the disruption. (6) That's ROI, not rhetoric. (4)`;
+
+  const recoveredSpeech = (nineRouterService as any).extractOutputFromReasoning(sampleDeepSeekReasoning, false);
+  if (!recoveredSpeech.includes('That\'s a slogan, not a balance sheet') || !recoveredSpeech.includes('That\'s ROI, not rhetoric')) {
+    throw new Error(`Failed to recover drafted speech from reasoning_content: got '${recoveredSpeech}'`);
+  }
+
+  // Test <think>...</think> stripping
+  const contentWithThinking = '<think>I need to sound like Jax Alvarez and talk about steel mills.</think>Iron Valley built this country, and we will rebuild it again!';
+  const strippedContent = (nineRouterService as any).stripThinkingTags(contentWithThinking);
+  if (strippedContent !== 'Iron Valley built this country, and we will rebuild it again!') {
+    throw new Error(`Failed to strip <think> tags: got '${strippedContent}'`);
+  }
+  console.log('3. DeepSeek reasoning_content recovery & <think> tag stripping PASSED!');
 
   // =========================================================================
   // 🎬 YOUTUBE-READY SEQUENTIAL BALLOT REVEAL & BAILOUT SIMULATION TESTS

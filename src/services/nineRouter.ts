@@ -154,7 +154,7 @@ export class NineRouterService {
 
     const { systemPrompt, userPrompt, isJsonExpected } = this.buildPrompt(candidate, payload);
 
-    const maxTokens = payload.action === 'generate_character' ? 2000 : 500;
+    const maxTokens = payload.action === 'generate_character' ? 3000 : 2048;
 
     try {
       const rawText = await this.callChatCompletions(
@@ -347,8 +347,59 @@ export class NineRouterService {
   }
 
   /**
-   * OpenAI-compatible POST to /chat/completions endpoint on 9router
+   * Strips <think>...</think> tags emitted by reasoning models (DeepSeek R1, etc.)
    */
+  public stripThinkingTags(text: string): string {
+    if (!text) return '';
+    return text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  }
+
+  /**
+   * Resilient fallback parser that extracts intended content if an LLM (e.g. DeepSeek reasoning model)
+   * exhausts tokens inside reasoning_content or places its draft in reasoning_content.
+   */
+  public extractOutputFromReasoning(reasoning: string, isJsonExpected: boolean): string {
+    if (!reasoning || typeof reasoning !== 'string') return '';
+    const clean = reasoning.trim();
+
+    if (isJsonExpected) {
+      // 1. Try to find a JSON object in the reasoning text
+      const firstBrace = clean.indexOf('{');
+      const lastBrace = clean.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        return clean.substring(firstBrace, lastBrace + 1);
+      }
+    }
+
+    // 2. Search for explicit draft / final quote patterns, e.g. Draft: "...", Final: "...", etc.
+    const quoteMatches = Array.from(clean.matchAll(/["“]([^"”]{10,350})["”]/g));
+    if (quoteMatches.length > 0) {
+      // Pick the last substantial quote (usually the final drafted speech)
+      const candidateQuote = quoteMatches[quoteMatches.length - 1][1].trim();
+      if (candidateQuote.length >= 10) {
+        return candidateQuote;
+      }
+    }
+
+    // 3. Fallback: extract the last non-empty line / sentence that looks like dialogue
+    const lines = clean.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const nonMetaLines = lines.filter(l => 
+      !l.startsWith('1.') && 
+      !l.startsWith('2.') && 
+      !l.startsWith('3.') && 
+      !l.toLowerCase().startsWith('let\'s') && 
+      !l.toLowerCase().startsWith('need to') && 
+      !l.toLowerCase().startsWith('count:') &&
+      !l.toLowerCase().startsWith('the user asks')
+    );
+
+    if (nonMetaLines.length > 0) {
+      return nonMetaLines[nonMetaLines.length - 1].replace(/^["']|["']$/g, '');
+    }
+
+    return clean.slice(-200).replace(/^["']|["']$/g, '');
+  }
+
   /**
    * OpenAI-compatible POST to /chat/completions endpoint on 9router
    */
@@ -359,7 +410,7 @@ export class NineRouterService {
     baseUrl: string = this.defaultBaseUrl,
     apiKey: string = this.defaultApiKey,
     model: string = this.defaultModel,
-    maxTokens: number = 500
+    maxTokens: number = 2048
   ): Promise<string> {
     let endpoint = baseUrl.trim();
     if (!endpoint.endsWith('/chat/completions')) {
@@ -384,6 +435,7 @@ export class NineRouterService {
       ],
       temperature: 0.75,
       max_tokens: maxTokens,
+      max_completion_tokens: maxTokens,
       stream: false,
     };
 
@@ -430,7 +482,22 @@ export class NineRouterService {
       // 1. Try parsing as direct OpenAI JSON response
       try {
         const data = JSON.parse(rawResponseText);
-        const content = data?.choices?.[0]?.message?.content || data?.choices?.[0]?.text;
+        let content = data?.choices?.[0]?.message?.content || data?.choices?.[0]?.text || '';
+        const reasoningContent = data?.choices?.[0]?.message?.reasoning_content 
+                              || data?.choices?.[0]?.message?.reasoning
+                              || data?.choices?.[0]?.message?.thought
+                              || data?.choices?.[0]?.message?.thoughts;
+
+        if (typeof content === 'string') {
+          content = this.stripThinkingTags(content);
+        }
+
+        // If content is empty but reasoning_content exists (e.g. DeepSeek reasoning token exhaustion), recover output from reasoning
+        if ((!content || !content.trim()) && reasoningContent && typeof reasoningContent === 'string') {
+          console.warn('[9router]: Content was empty, recovering output from reasoning_content...');
+          content = this.extractOutputFromReasoning(reasoningContent, isJsonExpected);
+        }
+
         if (typeof content === 'string' && content.trim()) {
           return content.trim();
         }
@@ -442,6 +509,7 @@ export class NineRouterService {
       if (rawResponseText.includes('data:')) {
         const lines = rawResponseText.split('\n');
         let accumulatedContent = '';
+        let accumulatedReasoning = '';
 
         for (const line of lines) {
           const trimmed = line.trim();
@@ -453,13 +521,25 @@ export class NineRouterService {
               const delta = chunk?.choices?.[0]?.delta?.content 
                          || chunk?.choices?.[0]?.message?.content 
                          || chunk?.choices?.[0]?.text;
+              const reasoningDelta = chunk?.choices?.[0]?.delta?.reasoning_content
+                                  || chunk?.choices?.[0]?.message?.reasoning_content;
               if (delta) {
                 accumulatedContent += delta;
+              }
+              if (reasoningDelta) {
+                accumulatedReasoning += reasoningDelta;
               }
             } catch {
               // Ignore single malformed chunk
             }
           }
+        }
+
+        accumulatedContent = this.stripThinkingTags(accumulatedContent);
+
+        if (!accumulatedContent.trim() && accumulatedReasoning.trim()) {
+          console.warn('[9router]: Stream content was empty, recovering output from accumulated reasoning_content...');
+          accumulatedContent = this.extractOutputFromReasoning(accumulatedReasoning, isJsonExpected);
         }
 
         if (accumulatedContent.trim()) {
@@ -469,7 +549,7 @@ export class NineRouterService {
 
       // 3. Fallback: Check if the raw text is plain text
       if (rawResponseText.trim() && !rawResponseText.startsWith('<')) {
-        return rawResponseText.trim();
+        return this.stripThinkingTags(rawResponseText.trim());
       }
 
       throw new Error(`Malformed response from 9router API: "${rawResponseText.slice(0, 150)}"`);
@@ -801,7 +881,10 @@ In MAXIMUM 40 WORDS:
 - DO NOT default to attacking or rebutting the candidate who spoke before you. This round is for promoting YOUR platform and inspiring voters to support you.
 - (Optional): If you take a brief swipe, only aim it at your ideological opposites (${candidate.rivalArchetypes?.join(', ') || 'corrupt elites'}), but ensure the majority of your speech champions YOUR vision.
 - Do NOT use generic opening greetings ("Hello fellow citizens", "I stand before you"). Jump straight into your message with fierce conviction.
-- CRITICAL FORMAT RULE: NEVER prefix your output with your name, a character tag, or a colon (e.g. NEVER write "${candidate.name.split(' ')[0]}:"). Start directly with your spoken speech.
+- CRITICAL FORMAT & DIRECT OUTPUT RULES:
+  * Output ONLY your final spoken speech directly.
+  * Do NOT output internal reasoning, thinking steps, drafting notes, or preamble.
+  * NEVER prefix your output with your name, a character tag, or a colon (e.g. NEVER write "${candidate.name.split(' ')[0]}:").
 - Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle} - ${candidate.titleRole}).
 - Return clean speech text only, strictly under 40 words.`;
         break;
@@ -837,7 +920,8 @@ You are live on stage at the national televised presidential debate, publicly at
 Slogan: "${targetSlogan}"
 ${betrayalSnippet}${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
 
-ANTI-FORMULA & STYLE RULES (CRITICAL):
+ANTI-FORMULA & DIRECT OUTPUT RULES (CRITICAL):
+- Output ONLY the final spoken words directly. Do NOT output internal reasoning, drafts, preambles, or explanations.
 - NEVER format your output as a script label, character tag, or definition list (e.g. NEVER write "${targetFirstName}: [Explanation]", "${targetName}: ...", or "[Name]: [Adjective] person who...").
 - NEVER start your sentence with a name followed by a colon or dash.
 - Speak in authentic, fiery live debate rhetoric with dynamic sentence structure:
@@ -878,8 +962,9 @@ You want to coordinate your elimination votes against ONE target: [${allowedTarg
 You can offer a $20 BRIBE from your campaign treasury to secure their vote!
 ${contextSnippet}
 
-In MAXIMUM 25 WORDS:
-- Deliver a tense, high-stakes whispered proposal offering mutual benefit or offering a $20 cash bribe to take down the mutual rival.
+DIRECT OUTPUT RULES:
+- In MAXIMUM 25 WORDS: deliver a tense, high-stakes whispered proposal offering mutual benefit or offering a $20 cash bribe to take down the mutual rival.
+- Return ONLY the raw JSON object below. Do NOT include markdown fences, thinking process, or explanatory text.
 - Stay completely in character as ${candidate.name}.
 - Do NOT prefix with script labels or colons.
 
@@ -933,6 +1018,9 @@ Rules:
 3. Vote based on political survival, rival threats, backroom pacts, or tactical betrayals.
 ${pactContext}${contextSnippet}
 
+DIRECT OUTPUT RULES:
+- Return ONLY the raw JSON object below. Do NOT output markdown code blocks, reasoning steps, or notes.
+
 You MUST return a JSON object with this exact schema:
 {
   "vote": "candidate_id",
@@ -952,8 +1040,9 @@ You MUST return a JSON object with this exact schema:
         userPrompt = `You have just been ELIMINATED from the Presidential Race in Round ${payload.round} ${voteCountText}!
 ${betrayalSnippet}
 
-In MAXIMUM 30 WORDS:
-- Deliver your dramatic, authentic concession statement or parting words to Valoria's voters.
+DIRECT OUTPUT RULES:
+- In MAXIMUM 30 WORDS: Deliver your dramatic, authentic concession statement or parting words to Valoria's voters.
+- Output ONLY the final spoken words directly. Do NOT output internal reasoning, drafting notes, or preamble.
 - Reflect your archetype: bitter defiance, righteous warning of the Republic's doom, rallying your supporters, or graceful statesmanship.
 - CRITICAL: NEVER prefix with your name, script labels, or colons.
 - Stay in character as ${candidate.name}. Return clean text only, strictly under 30 words.`;
@@ -981,10 +1070,11 @@ You are delivering your CLOSING ARGUMENT to the Grand Jury of all participating 
 Your surviving rivals on stage: ${finalistsList}.${eliminatedSummary}
 NATIONAL CRISIS MANDATE: "${electionTopic}"
 
-In MAXIMUM 50 WORDS:
-- Explain why YOU must be inaugurated President of the Republic of Valoria.
+DIRECT OUTPUT RULES:
+- In MAXIMUM 50 WORDS: Explain why YOU must be inaugurated President of the Republic of Valoria.
 - Directly contrast your vision against the other two surviving finalists and explain why their plans are dangerous or bankrupt.
 - Demand the Grand Jury's vote with presidential gravitas.
+- Output ONLY the final spoken words directly. Do NOT output internal reasoning, drafts, or preamble.
 - CRITICAL: NEVER prefix with character names, speaker labels, or colons.
 - Stay in character as ${candidate.name}. Return clean speech text only, strictly under 50 words.`;
         break;
@@ -1017,6 +1107,9 @@ Rules:
 1. You CANNOT vote for yourself.
 2. Cast your vote based on who earned your respect, shared your policy goals, or vote against whoever betrayed/insulted you during the election.
 
+DIRECT OUTPUT RULES:
+- Return ONLY the raw JSON object below. Do NOT output markdown blocks, thinking tags, or conversational text.
+
 Return a JSON object:
 {
   "vote": "finalist_id",
@@ -1029,9 +1122,10 @@ Return a JSON object:
         userPrompt = `CONGRATULATIONS! You have won the election and are officially inaugurated as PRESIDENT OF THE REPUBLIC OF VALORIA!
 NATIONAL CRISIS MANDATE: "${electionTopic}"
 
-In MAXIMUM 50 WORDS:
-- Deliver your triumphant, commanding inaugural presidential victory address to the nation and the Grand Jury.
+DIRECT OUTPUT RULES:
+- In MAXIMUM 50 WORDS: Deliver your triumphant, commanding inaugural presidential victory address to the nation and the Grand Jury.
 - Acknowledge the grueling battle, address your defeated opponents, and proclaim your first executive decree.
+- Output ONLY the final spoken words directly. Do NOT output internal reasoning, drafts, or preamble.
 - CRITICAL: NEVER prefix with your name, speaker labels, or colons.
 - Stay completely in character as ${candidate.name}. Return clean speech text only, strictly under 50 words.`;
         break;
@@ -1045,7 +1139,7 @@ You MUST respond with a single, strictly valid JSON object.
 CRITICAL FORMATTING INSTRUCTIONS:
 - Return ONLY the raw JSON object starting with '{' and ending with '}'.
 - Do NOT wrap in markdown code fences (no \`\`\`json or \`\`\`).
-- Do NOT include any explanations, greetings, or conversational text.
+- Do NOT include any internal reasoning, draft commentary, explanations, greetings, or conversational text.
 - Strictly escape all quotation marks inside strings.
 - Do NOT leave trailing commas before closing brackets or braces.`;
 
