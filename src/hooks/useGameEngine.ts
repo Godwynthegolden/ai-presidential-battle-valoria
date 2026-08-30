@@ -1600,7 +1600,20 @@ export function useGameEngine(
               const privateStrategy = pPayload?.privateStrategy || `Maneuvering in round ${round} to eliminate rivals.`;
               updatedStrategies[proposer.id] = privateStrategy;
 
-              const agreedTargetId = pPayload?.agreedTargetId || activeCandidateIds.filter(id => id !== proposer.id && id !== receiver.id)[0] || activeCandidateIds[0];
+              // Dynamically bind to the partner chosen by the AI (targetCandidateId)
+              const chosenReceiverId = (pPayload?.targetCandidateId && pPayload.targetCandidateId !== proposer.id && activeCandidateIds.includes(pPayload.targetCandidateId))
+                ? pPayload.targetCandidateId
+                : receiver.id;
+
+              const actualReceiver = CANDIDATE_MAP.get(chosenReceiverId) || receiver;
+
+              // Dynamically bind elimination target (must not be proposer and must not be actualReceiver)
+              const validElimTargets = activeCandidateIds.filter(id => id !== proposer.id && id !== actualReceiver.id);
+              const rawAgreedTargetId = pPayload?.agreedTargetId;
+              const agreedTargetId = (rawAgreedTargetId && validElimTargets.includes(rawAgreedTargetId))
+                ? rawAgreedTargetId
+                : (validElimTargets[0] || activeCandidateIds.filter(id => id !== proposer.id)[0]);
+
               const receiverDecision = pPayload?.receiverDecision ?? 'accept';
               const offerPrice = pPayload?.offerPrice ?? 30;
 
@@ -1614,14 +1627,14 @@ export function useGameEngine(
                   bribeAccepted = receiverDecision === 'accept' || receiverDecision === 'accept_and_betray';
                   if (bribeAccepted) {
                     updatedBudgets[proposer.id] = Math.max((updatedBudgets[proposer.id] ?? 100) - 30, 0);
-                    updatedBudgets[receiver.id] = (updatedBudgets[receiver.id] ?? 100) + 15;
+                    updatedBudgets[actualReceiver.id] = (updatedBudgets[actualReceiver.id] ?? 100) + 15;
                     upfrontPaid = 15;
                     escrowPending = 15;
                     updatedEscrowContracts.push({
                       pactId: `pact-${round}-${i}-${Date.now()}`,
                       round,
                       proposerId: proposer.id,
-                      receiverId: receiver.id,
+                      receiverId: actualReceiver.id,
                       agreedTargetId,
                       actionType: 'bribe',
                       escrowAmount: 15,
@@ -1631,18 +1644,18 @@ export function useGameEngine(
                   bribeOffered = false;
                 }
               } else if (actionType === 'offer') {
-                const buyerBudget = updatedBudgets[receiver.id] ?? 100;
+                const buyerBudget = updatedBudgets[actualReceiver.id] ?? 100;
                 if (buyerBudget >= offerPrice) {
                   bribeAccepted = receiverDecision === 'accept' || receiverDecision === 'accept_and_betray';
                   if (bribeAccepted) {
                     upfrontPaid = Math.floor(offerPrice / 2);
                     escrowPending = offerPrice - upfrontPaid;
-                    updatedBudgets[receiver.id] = Math.max(buyerBudget - offerPrice, 0);
+                    updatedBudgets[actualReceiver.id] = Math.max(buyerBudget - offerPrice, 0);
                     updatedBudgets[proposer.id] = (updatedBudgets[proposer.id] ?? 100) + upfrontPaid;
                     updatedEscrowContracts.push({
                       pactId: `pact-${round}-${i}-${Date.now()}`,
                       round,
-                      proposerId: receiver.id,
+                      proposerId: actualReceiver.id,
                       receiverId: proposer.id,
                       agreedTargetId,
                       actionType: 'offer',
@@ -1656,7 +1669,7 @@ export function useGameEngine(
                 id: `pact-${round}-${i}-${Date.now()}`,
                 round,
                 proposerId: proposer.id,
-                receiverId: receiver.id,
+                receiverId: actualReceiver.id,
                 actionType,
                 agreedTargetId,
                 whisperText: pPrep.content,

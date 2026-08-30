@@ -244,6 +244,7 @@ export interface LLMRequestPayload {
 export interface LLMResponsePayload {
   text: string;
   voteTargetId?: string;
+  targetCandidateId?: string; // Resolved backroom partner/negotiator candidate ID
   agreedTargetId?: string;
   whisperText?: string;
   privateReason?: string;

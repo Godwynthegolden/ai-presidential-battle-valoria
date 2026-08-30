@@ -418,6 +418,23 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('2b. Confidential Strategy Memo Injection in Voting Prompt PASSED!');
 
+  // Test 2c: CCTV Whisper Dialogue Addressee Auto-Healing and Alignment
+  const rawPactJsonWithAddressee = JSON.stringify({
+    privateStrategy: 'Take down Arthur Sterling by allying with Chloe Mercer.',
+    actionType: 'bribe',
+    targetCandidateId: 'chloe-mercer',
+    agreedEliminationTargetId: 'art-sterling',
+    offerPrice: 30,
+    whisper: "Chloe, take thirty to bury Arthur's media empire. Vote him out.",
+    receiverDecision: 'accept'
+  });
+
+  const parsedPactAction = (nineRouterService as any).extractAndRepairJson(rawPactJsonWithAddressee);
+  if (!parsedPactAction.whisper.startsWith('Chloe') || parsedPactAction.targetCandidateId !== 'chloe-mercer') {
+    throw new Error('CCTV pact whisper addressee parsing failed.');
+  }
+  console.log('2c. CCTV Whisper Dialogue Addressee Alignment PASSED!');
+
   // 3. Import useGameEngine helpers
   const { resolveAttackTarget, resolveBailoutAuction } = await import('../hooks/useGameEngine');
 

@@ -192,15 +192,37 @@ export class NineRouterService {
         const validCandidates = payload.activeCandidateIds.filter(id => id !== candidate.id);
         const validTargets = payload.activeCandidateIds.filter(id => id !== candidate.id && id !== payload.targetId);
         
+        let rawWhisper = parsed?.whisper 
+          ? parsed.whisper.replace(/^["']|["']$/g, '').trim()
+          : (rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim() || '');
+
+        // Detect if whisper starts with or explicitly addresses a candidate by name (e.g. "Chloe, take..." or "Dmitri: let's...")
+        let detectedAddresseeId: string | null = null;
+        const vocativeMatch = rawWhisper.match(/^["']?([A-Za-z]+(?:\s+[A-Za-z]+)?)[,:\-—]/);
+        if (vocativeMatch && vocativeMatch[1]) {
+          const matchName = vocativeMatch[1].trim();
+          const matchedId = this.resolveCandidateIdFromNameOrAlias(matchName, validCandidates);
+          if (matchedId && validCandidates.includes(matchedId)) {
+            detectedAddresseeId = matchedId;
+          }
+        }
+
         // Resolve target candidate (person negotiated with)
         const rawTargetCandidate = parsed?.targetCandidateId || parsed?.targetId || payload.targetId;
-        const healedTargetCandId = rawTargetCandidate ? this.resolveCandidateIdFromNameOrAlias(rawTargetCandidate, validCandidates) : null;
+        let healedTargetCandId = rawTargetCandidate ? this.resolveCandidateIdFromNameOrAlias(rawTargetCandidate, validCandidates) : null;
+        if (detectedAddresseeId && validCandidates.includes(detectedAddresseeId)) {
+          healedTargetCandId = detectedAddresseeId;
+        }
         const targetCandidateId = healedTargetCandId || payload.targetId || validCandidates[0] || validTargets[0];
 
-        // Resolve elimination target candidate
-        const rawElimTarget = parsed?.agreedEliminationTargetId || parsed?.targetId || parsed?.agreedTargetId;
-        const healedElimTarget = rawElimTarget ? this.resolveCandidateIdFromNameOrAlias(rawElimTarget, validCandidates) : null;
-        const agreedTargetId = healedElimTarget || validTargets.find(id => id !== targetCandidateId) || validTargets[0] || validCandidates[0];
+        // Resolve elimination target candidate (must not be proposer and must not be targetCandidateId)
+        const validElimTargets = validCandidates.filter(id => id !== targetCandidateId);
+        const rawElimTarget = parsed?.agreedEliminationTargetId || parsed?.agreedTargetId;
+        let healedElimTarget = rawElimTarget ? this.resolveCandidateIdFromNameOrAlias(rawElimTarget, validCandidates) : null;
+        if (healedElimTarget === targetCandidateId || healedElimTarget === candidate.id) {
+          healedElimTarget = null;
+        }
+        const agreedTargetId = healedElimTarget || validElimTargets[0] || validTargets[0] || validCandidates[0];
 
         // Private strategy extraction
         const privateStrategy = parsed?.privateStrategy 
@@ -228,7 +250,6 @@ export class NineRouterService {
         // Enforce strict $30 treasury limit for bribes
         if (actionType === 'bribe') {
           if (proposerBudget < 30) {
-            // Cannot afford $30 bribe -> Fallback to offer or pass
             actionType = 'offer';
           }
         }
@@ -264,20 +285,35 @@ export class NineRouterService {
 
         const dealAccepted = (actionType === 'bribe' || actionType === 'offer') && (receiverDecision === 'accept' || receiverDecision === 'accept_and_betray');
 
-        let whisper = parsed?.whisper 
-          ? parsed.whisper.replace(/^["']|["']$/g, '').trim()
-          : (rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim() || (
-            actionType === 'bribe' 
-              ? `Take this $30 bribe. $15 now, $15 after we eliminate ${CANDIDATE_MAP.get(agreedTargetId)?.name || agreedTargetId}.`
-              : actionType === 'offer'
-              ? `Pay me $${offerPrice} and I'll deliver my vote against ${CANDIDATE_MAP.get(agreedTargetId)?.name || agreedTargetId}.`
-              : `I'm keeping my powder dry. ${CANDIDATE_MAP.get(agreedTargetId)?.name || agreedTargetId} won't see this coming.`
-          ));
+        const recipient = CANDIDATE_MAP.get(targetCandidateId);
+        const recipientFirstName = recipient?.name.split(' ')[0] || '';
+        const targetCand = CANDIDATE_MAP.get(agreedTargetId);
+        const targetFirstName = targetCand?.name.split(' ')[0] || '';
 
-        whisper = whisper.replace(/^[^:]+:\s*/, '').replace(/^["']|["']$/g, '').trim();
+        if (!rawWhisper) {
+          rawWhisper = actionType === 'bribe' 
+            ? `${recipientFirstName}, take this $30 bribe. $15 now, $15 after we vote out ${targetFirstName || 'our rival'}.`
+            : actionType === 'offer'
+            ? `${recipientFirstName}, pay me $${offerPrice} and I'll deliver my vote against ${targetFirstName || 'our rival'}.`
+            : `I'm keeping my powder dry. ${targetFirstName || 'Our rival'} won't see this coming.`;
+        }
+
+        let whisper = rawWhisper.replace(/^[^:]+:\s*/, '').replace(/^["']|["']$/g, '').trim();
+
+        // Ensure whisper dialogue matches targetCandidateId
+        if (vocativeMatch && vocativeMatch[1] && recipientFirstName) {
+          const addressedName = vocativeMatch[1].trim();
+          const addressedCand = this.resolveCandidateIdFromNameOrAlias(addressedName, validCandidates);
+          if (addressedCand && addressedCand !== targetCandidateId) {
+            whisper = whisper.replace(new RegExp(`^["']?${addressedName}[,:\-—]\\s*`, 'i'), `${recipientFirstName}, `);
+          }
+        } else if (recipientFirstName && !whisper.toLowerCase().startsWith(recipientFirstName.toLowerCase())) {
+          whisper = `${recipientFirstName}, ${whisper.charAt(0).toLowerCase() + whisper.slice(1)}`;
+        }
 
         return {
           text: whisper,
+          targetCandidateId,
           agreedTargetId,
           whisperText: whisper,
           privateStrategy,
@@ -286,8 +322,8 @@ export class NineRouterService {
           bribeAmount,
           upfrontPaid,
           escrowPending,
-          offerPrice: actionType === 'offer' ? offerPrice : undefined,
-          receiverDecision: (actionType === 'bribe' || actionType === 'offer') ? receiverDecision : undefined,
+          offerPrice,
+          receiverDecision,
           bribeAccepted: dealAccepted,
           modelUsed: model,
         };
@@ -1028,11 +1064,13 @@ YOUR STRATEGIC CHOICES:
 3. "pass" (Plot solo / observe).
    - Save your money for $40 vote bailouts during the ballot reveal or plan a solo ambush.
 
-DIRECT OUTPUT RULES:
+CRITICAL CONSISTENCY & ADDRESSING RULES:
+- "targetCandidateId": Pick the EXACT ID of the candidate you are privately approaching in the hallway from: [${allowedTargets}].
+- "agreedEliminationTargetId": Pick the EXACT ID of the rival candidate you want to eliminate together from: [${allowedTargets}] (must NOT be yourself or targetCandidateId).
+- "whisper": In MAXIMUM 25 WORDS, deliver your whispered pitch directly to your chosen partner. ALWAYS start by addressing targetCandidateId by their first name (e.g. "Elena, ...", "Chloe, ...", "Jackson, ...") and explicitly mention the rival you are targeting. NEVER address a different person!
 - Formulate your secret inner strategy ("privateStrategy") to calculate your optimal survival path.
 - Choose your action ("actionType": "bribe" | "offer" | "pass").
-- Deliver an authentic, tense whispered pitch ("whisper", max 25 words).
-- If negotiating with someone, model their likely reaction ("receiverDecision": "accept" | "decline" | "accept_and_betray").
+- If negotiating, model their likely reaction ("receiverDecision": "accept" | "decline" | "accept_and_betray").
 - Return ONLY the raw JSON object below. Do NOT output markdown fences or explanatory text.
 
 You MUST return a JSON object with this exact schema:
@@ -1042,7 +1080,7 @@ You MUST return a JSON object with this exact schema:
   "targetCandidateId": "candidate_id_to_negotiate_with",
   "agreedEliminationTargetId": "candidate_id_to_eliminate",
   "offerPrice": 30,
-  "whisper": "1-2 sentence whispered proposal or pitch (max 25 words)",
+  "whisper": "1-2 sentence whispered proposal addressing targetCandidateId by first name (max 25 words)",
   "receiverDecision": "accept"
 }`;
         break;

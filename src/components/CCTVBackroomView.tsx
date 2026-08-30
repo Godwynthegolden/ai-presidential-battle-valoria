@@ -100,12 +100,13 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
 
         {/* Multi-Feed Camera Switcher Matrix */}
         {totalFeeds > 1 && (
-          <div className="flex items-center gap-1.5 bg-black/80 p-1 rounded-xl border border-emerald-700/80 max-w-full overflow-x-auto">
+          <div className="flex items-center gap-1.5 bg-black/80 p-1 rounded-xl border border-emerald-700/80 max-w-full overflow-x-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <span className="text-[10px] text-slate-300 uppercase font-bold px-2 hidden lg:inline">
               CAM GRID:
             </span>
             {allPactsThisRound.map((p, idx) => {
               const p1 = CANDIDATE_MAP.get(p.proposerId);
+              const p2 = CANDIDATE_MAP.get(p.receiverId);
               const isActive = idx === activeFeedIndex;
               return (
                 <button
@@ -119,6 +120,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                       ? 'bg-emerald-400 text-black font-black shadow-md shadow-emerald-500/40'
                       : 'bg-emerald-950/80 text-emerald-300 hover:bg-emerald-900 border border-emerald-800/80'
                   }`}
+                  title={`CAM ${idx + 1}: ${p1?.name.split(' ')[0]} with ${p2?.name.split(' ')[0]}`}
                 >
                   <Video className="w-3.5 h-3.5" />
                   <span>CAM {idx + 1}: {p1?.name.split(' ')[0]}</span>
