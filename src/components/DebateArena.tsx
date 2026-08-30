@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { GameState } from '@/types/game';
-import { Candidate } from '@/types/candidate';
 import { CandidateAvatar } from './CandidateAvatar';
 import { VoteRevealBoard } from './VoteRevealBoard';
 import { WinnerPodium } from './WinnerPodium';
@@ -26,19 +25,13 @@ import {
   Volume2,
   Mic,
   RotateCcw,
-  Zap,
-  Play,
-  Settings
+  Zap
 } from 'lucide-react';
 
 interface DebateArenaProps {
   gameState: GameState;
-  candidates?: Candidate[];
   onRetry: () => void;
   onRestart: () => void;
-  onStartGame?: () => void;
-  onSetPresetRoster?: (preset: 'all' | 'top8' | 'top6' | 'quick4') => void;
-  onOpenCharactersManager?: () => void;
   onSelectCCTVFeed?: (feedIndex: number) => void;
   onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string) => void;
   isSpeakingAudio?: boolean;
@@ -51,12 +44,8 @@ interface DebateArenaProps {
 
 export const DebateArena: React.FC<DebateArenaProps> = ({
   gameState,
-  candidates = [],
   onRetry,
   onRestart,
-  onStartGame,
-  onSetPresetRoster,
-  onOpenCharactersManager,
   onSelectCCTVFeed,
   onPlaySpeechAudio,
   isSpeakingAudio = false,
@@ -144,8 +133,6 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             eliminatedCount={eliminatedCandidates.length}
             totalRounds={round}
             onRestart={onRestart}
-            onPlaySpeechAudio={onPlaySpeechAudio}
-            isSpeakingAudio={isSpeakingAudio}
           />
         </div>
       </div>
@@ -452,128 +439,24 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             </div>
           </div>
         ) : (
-          /* Presidential Briefing & Battle Launch Terminal */
-          <div className="flex flex-col items-center justify-center text-center max-w-2xl p-6 sm:p-8 animate-fade-in w-full">
-            {/* Top Glowing Emblem */}
-            <div className="relative mb-5">
-              <div className="absolute -inset-4 rounded-full bg-cyan-500/20 blur-xl animate-pulse" />
-              <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#0b1329] to-[#0e1c3a] border-2 border-cyan-500/50 flex items-center justify-center text-cyan-400 shadow-2xl shadow-cyan-500/30 relative">
-                <Crown className="w-10 h-10 drop-shadow-[0_0_15px_rgba(6,182,212,0.8)] text-cyan-300" />
-              </div>
+          /* Idle Start Screen */
+          <div className="flex flex-col items-center justify-center text-center max-w-xl p-8 animate-fade-in">
+            <div className="w-24 h-24 rounded-3xl bg-cyan-500/10 border-2 border-cyan-500/40 flex items-center justify-center text-cyan-400 mb-6 shadow-2xl shadow-cyan-500/20">
+              <Crown className="w-12 h-12 drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]" />
             </div>
-
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-white tracking-tight uppercase">
+            <h2 className="text-3xl sm:text-4xl font-display font-black text-white tracking-tight uppercase">
               Republic of Valoria
             </h2>
-            <span className="text-xs font-mono font-black text-cyan-400 uppercase tracking-widest mt-1 mb-4 flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+            <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest mt-1 mb-4 block">
               AI Presidential Reality Debate Arena
             </span>
-
-            {/* National Crisis Dossier Card */}
-            <div className="w-full text-left p-4 sm:p-5 rounded-2xl bg-slate-950/90 border border-slate-750 shadow-xl backdrop-blur-xl mb-5">
-              <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-800">
-                <span className="text-[11px] font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" /> Active Election Crisis Dossier
-                </span>
-                <span className="text-[10px] font-mono text-slate-400 uppercase px-2 py-0.5 rounded bg-slate-900 border border-slate-800">
-                  Round 1 Debate
-                </span>
-              </div>
-              <p className="text-sm font-sans text-slate-200 leading-relaxed font-medium">
-                {gameState.electionTopic}
-              </p>
-            </div>
-
-            {/* Contender Lineup Preview Row */}
-            <div className="w-full flex flex-col gap-2.5 p-4 rounded-2xl bg-[#090d17]/90 border border-slate-800 mb-6">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-300 font-bold uppercase tracking-wider">
-                  Active Contenders ({gameState.activeCandidateIds.length})
-                </span>
-                {onSetPresetRoster && (
-                  <div className="flex items-center gap-1">
-                    {[
-                      { key: 'quick4', label: 'Quick 4' },
-                      { key: 'top6', label: 'Top 6' },
-                      { key: 'top8', label: 'Top 8' },
-                      { key: 'all', label: 'All 11' },
-                    ].map(preset => {
-                      const count = preset.key === 'quick4' ? 4 : preset.key === 'top6' ? 6 : preset.key === 'top8' ? 8 : (candidates.length || 11);
-                      const isCurrent = gameState.activeCandidateIds.length === count;
-                      return (
-                        <button
-                          key={preset.key}
-                          type="button"
-                          onClick={() => onSetPresetRoster(preset.key as any)}
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold transition cursor-pointer ${
-                            isCurrent
-                              ? 'bg-cyan-500 text-black shadow-xs font-black'
-                              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                          }`}
-                        >
-                          {preset.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Horizontal Candidate Avatars Strip */}
-              <div className="flex items-center justify-center flex-wrap gap-2 pt-1">
-                {gameState.activeCandidateIds.map(id => {
-                  const c = CANDIDATE_MAP.get(id);
-                  if (!c) return null;
-                  const budget = gameState.candidateBudgets?.[id] ?? c.initialBudget ?? 100;
-                  return (
-                    <div 
-                      key={id} 
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950/80 border border-slate-800 shadow-sm"
-                      title={`${c.name} (${c.titleRole}) - Starting Treasury: $${budget}`}
-                    >
-                      <CandidateAvatar
-                        candidate={c}
-                        size="sm"
-                        showBadge={false}
-                      />
-                      <div className="flex flex-col text-left">
-                        <span className="text-[11px] font-display font-bold text-slate-200 leading-tight truncate max-w-[80px]">
-                          {c.name.split(' ')[0]}
-                        </span>
-                        <span className="text-[9px] font-mono font-black text-emerald-400">
-                          ${budget}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Launch Actions */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
-              {onStartGame && (
-                <button
-                  type="button"
-                  onClick={onStartGame}
-                  className="flex-1 w-full flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-display font-black text-sm uppercase tracking-wider shadow-xl shadow-cyan-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer animate-energy-pulse"
-                >
-                  <Play className="w-4 h-4 fill-current" />
-                  <span>Launch Presidential Battle</span>
-                </button>
-              )}
-
-              {onOpenCharactersManager && (
-                <button
-                  type="button"
-                  onClick={onOpenCharactersManager}
-                  className="px-5 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-mono font-bold uppercase transition flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Settings className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Lineup &amp; AI</span>
-                </button>
-              )}
+            <p className="text-base text-slate-200 leading-relaxed max-w-md mb-8 font-medium">
+              {stage.content || 'Autonomous political agents debate, attack, form secret backroom alliances, and face elimination until one emerges victorious.'}
+            </p>
+            <div className="flex items-center gap-3 text-xs text-slate-200 font-mono bg-slate-950/80 px-5 py-2.5 rounded-2xl border border-slate-800 shadow-lg">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Live AI Engine:</span>
+              <span className="text-cyan-300 font-bold">9router Configured</span>
             </div>
           </div>
         )}

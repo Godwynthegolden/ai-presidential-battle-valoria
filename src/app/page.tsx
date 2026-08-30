@@ -26,15 +26,7 @@ import {
   Users,
   Tv,
   Eye,
-  EyeOff,
-  Play,
-  Pause,
-  SkipForward,
-  Volume2,
-  VolumeX,
-  RotateCcw,
-  FileText,
-  Sparkles
+  EyeOff
 } from 'lucide-react';
 
 const STORAGE_KEY = 'ai_politics_9router_config';
@@ -53,35 +45,11 @@ export default function AIPlaygroundPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isIntelOpen, setIsIntelOpen] = useState(false);
   const [isCleanView, setIsCleanView] = useState(false);
-  const [showCleanDock, setShowCleanDock] = useState(false);
-  const cleanDockTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [candidateToEdit, setCandidateToEdit] = useState<Candidate | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
-
-  // Auto-hiding dock in Clean View
-  useEffect(() => {
-    if (!isCleanView) {
-      setShowCleanDock(false);
-      return;
-    }
-
-    const handleMouseMove = () => {
-      setShowCleanDock(true);
-      if (cleanDockTimeoutRef.current) clearTimeout(cleanDockTimeoutRef.current);
-      cleanDockTimeoutRef.current = setTimeout(() => {
-        setShowCleanDock(false);
-      }, 3500);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (cleanDockTimeoutRef.current) clearTimeout(cleanDockTimeoutRef.current);
-    };
-  }, [isCleanView]);
 
   // Set mounted flag to safely hydrate client-side custom candidate counts
   useEffect(() => {
@@ -349,12 +317,8 @@ export default function AIPlaygroundPage() {
             <div className="lg:col-span-6 h-full min-h-0 flex flex-col overflow-hidden">
               <DebateArena
                 gameState={state}
-                candidates={candidates}
                 onRetry={retryCurrentStep}
                 onRestart={restartGame}
-                onStartGame={startGame}
-                onSetPresetRoster={setPresetRoster}
-                onOpenCharactersManager={() => setActiveView('characters')}
                 onSelectCCTVFeed={selectCCTVFeed}
                 onPlaySpeechAudio={playSpeechAudio}
                 isSpeakingAudio={isSpeakingAudio}
@@ -384,87 +348,6 @@ export default function AIPlaygroundPage() {
               />
             </div>
           )}
-        </div>
-      )}
-
-      {/* Floating Clean Broadcast Quick-Action Creator Dock (Auto-Hides on Mouse Inactivity) */}
-      {isCleanView && activeView === 'arena' && (
-        <div 
-          onMouseEnter={() => setShowCleanDock(true)}
-          className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 flex items-center gap-2 p-2 px-3.5 rounded-2xl bg-slate-950/90 border border-slate-700/80 shadow-2xl backdrop-blur-2xl ${
-            showCleanDock ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
-          }`}
-        >
-          {state.phase === 'IDLE' ? (
-            <button
-              onClick={startGame}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-display font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/25 transition active:scale-95 cursor-pointer"
-            >
-              <Play className="w-3.5 h-3.5 fill-current" /> Start Battle
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={toggleAutoPlay}
-                className={`p-2 px-3 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  state.playback.autoPlay
-                    ? 'bg-emerald-950 text-emerald-300 border-emerald-600/70 shadow-sm'
-                    : 'bg-slate-900 text-slate-300 border-slate-700 hover:text-white'
-                }`}
-                title={state.playback.autoPlay ? 'Pause automatic round progression' : 'Enable auto-play'}
-              >
-                {state.playback.autoPlay ? <Pause className="w-3.5 h-3.5 text-emerald-400" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
-                <span className="hidden sm:inline">{state.playback.autoPlay ? 'Auto' : 'Paused'}</span>
-              </button>
-
-              <button
-                onClick={nextStep}
-                disabled={state.phase === 'WINNER' || state.stage.isLoading}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-cyan-950/90 hover:bg-cyan-900 text-cyan-300 border border-cyan-800/80 text-xs font-mono font-bold transition shadow-sm cursor-pointer disabled:opacity-40"
-                title="Next Step (Space)"
-              >
-                <SkipForward className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Next Step</span>
-              </button>
-            </>
-          )}
-
-          <div className="w-[1px] h-5 bg-slate-800" />
-
-          <button
-            onClick={toggleSound}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono transition cursor-pointer"
-            title={state.playback.soundEnabled ? 'Mute SFX' : 'Enable SFX'}
-          >
-            {state.playback.soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-cyan-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
-          </button>
-
-          <button
-            onClick={() => setIsIntelOpen(true)}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono transition cursor-pointer"
-            title="Open Intel & Backroom Leaks"
-          >
-            <FileText className="w-3.5 h-3.5 text-purple-400" />
-          </button>
-
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono transition cursor-pointer"
-            title="Open Settings"
-          >
-            <Settings className="w-3.5 h-3.5 text-slate-300" />
-          </button>
-
-          <div className="w-[1px] h-5 bg-slate-800" />
-
-          <button
-            onClick={() => setIsCleanView(false)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs font-mono transition cursor-pointer"
-            title="Exit Clean View (Press H)"
-          >
-            <EyeOff className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden md:inline">Exit Clean (H)</span>
-          </button>
         </div>
       )}
 

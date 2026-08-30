@@ -22,7 +22,18 @@ globs: ["src/**/*", "app/**/*"]
 - Character creation, parameter customization, avatar cropping, and election lineup selection belong exclusively in `CharactersManagerView.tsx`.
 - `CandidateRoster.tsx` and `DebateArena.tsx` must display only participating contenders and live debate statuses without inline configuration clutter.
 
-## 5. Post-Change Automated Git Commit & Push
+## 5. Candidate Treasury & Ballot Snapshot Invariant
+- When transitioning to `VOTE_REVEAL`, snapshot `initialBudgets: { ...state.candidateBudgets }` into `RoundVoteTally` before resolving the bailout auction.
+- `VoteRevealBoard.tsx` must always derive pre-auction treasury balances from `tally.initialBudgets?.[id] ?? candidateBudgets?.[id] ?? CANDIDATE_MAP.get(id)?.initialBudget ?? 100` so that no candidate displays `$0` prematurely before their bailout step executes.
+
+## 6. Anti-Formula Dialogue Speech Sanitization
+- Attack dialogue prompts must strictly forbid robotic formula prefixes (e.g. `Target Name: description`).
+- All raw dialogue strings must be passed through `sanitizeDialogueText` in `nineRouter.ts` before reaching Fish.Audio TTS synthesis to remove any stray prefixes or markdown tags.
+
+## 7. Windows PowerShell Binary Execution
+- On Windows systems, always invoke CLI tools using their `.cmd` or `.exe` wrappers (`npx.cmd`, `npm.cmd`, `git.exe`) to prevent PowerShell script execution policy errors.
+
+## 8. Post-Change Automated Git Commit & Push
 - After completing verified code modifications or feature additions in this project:
   1. Verify with tests (`npx.cmd tsx src/tests/test-service.ts`) and build (`npm.cmd run build`).
   2. Stage and commit changes: `git add .` && `git commit -m "<Description>"`.

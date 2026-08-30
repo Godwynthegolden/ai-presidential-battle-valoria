@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { Candidate } from '@/types/candidate';
 import { CandidateAvatar } from './CandidateAvatar';
-import { Crown, Sparkles, Award, RotateCcw, ShieldCheck, Quote, Volume2 } from 'lucide-react';
+import { Crown, Sparkles, Award, RotateCcw, ShieldCheck, Quote } from 'lucide-react';
 
 interface WinnerPodiumProps {
   winner: Candidate;
@@ -12,8 +12,6 @@ interface WinnerPodiumProps {
   eliminatedCount: number;
   totalRounds: number;
   onRestart: () => void;
-  onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string) => void;
-  isSpeakingAudio?: boolean;
 }
 
 export const WinnerPodium: React.FC<WinnerPodiumProps> = ({
@@ -22,8 +20,6 @@ export const WinnerPodium: React.FC<WinnerPodiumProps> = ({
   eliminatedCount,
   totalRounds,
   onRestart,
-  onPlaySpeechAudio,
-  isSpeakingAudio = false,
 }) => {
   useEffect(() => {
     // Launch celebratory fireworks/confetti
@@ -91,23 +87,11 @@ export const WinnerPodium: React.FC<WinnerPodiumProps> = ({
 
       {/* Inaugural Address Speech Box */}
       <div className="w-full relative rounded-3xl bg-slate-950/95 border-2 border-amber-400/50 p-6 md:p-9 shadow-2xl shadow-slate-950/90 text-left">
-        <div className="flex items-center justify-between gap-2 text-amber-400 text-xs font-mono font-bold uppercase tracking-wider mb-4 pb-3 border-b border-amber-500/20">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4" /> Inaugural Presidential Address:
-          </div>
-          {onPlaySpeechAudio && (
-            <button
-              type="button"
-              onClick={() => onPlaySpeechAudio(victorySpeech, winner?.voice?.voiceId, winner?.id)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-950/80 hover:bg-amber-900 text-amber-300 hover:text-white border border-amber-500/50 text-xs font-mono font-bold shadow-md transition active:scale-95 cursor-pointer"
-              title="Replay inaugural speech voice"
-            >
-              <Volume2 className={`w-3.5 h-3.5 text-amber-400 ${isSpeakingAudio ? 'animate-pulse' : ''}`} />
-              <span>{isSpeakingAudio ? 'Speaking...' : 'Replay Voice'}</span>
-            </button>
-          )}
+        <div className="flex items-center gap-2 text-amber-400 text-xs font-mono font-bold uppercase tracking-wider mb-4 pb-3 border-b border-amber-500/20">
+          <Sparkles className="w-4 h-4" /> Inaugural Presidential Address:
         </div>
         <div className="relative">
+          <Quote className="absolute -top-3 -left-3 w-10 h-10 text-amber-500/10 -z-0 pointer-events-none" />
           <p className="text-lg sm:text-xl md:text-2xl font-sans font-semibold text-white leading-relaxed relative z-10 italic">
             &ldquo;{victorySpeech}&rdquo;
           </p>

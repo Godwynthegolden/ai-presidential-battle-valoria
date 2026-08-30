@@ -51,31 +51,16 @@ body {
 }
 
 /* Animated Equalizer Bars */
-@keyframes eqBounce {
-  0%, 100% {
-    height: 4px;
-    opacity: 0.6;
-  }
-  50% {
-    height: 16px;
-    opacity: 1;
-  }
-}
-
-.animate-equalizer {
-  animation: eqBounce 0.65s ease-in-out infinite alternate;
-}
-
 .eq-bar-1 { animation-delay: 0.1s; }
-.eq-bar-2 { animation-delay: 0.35s; }
-.eq-bar-3 { animation-delay: 0.2s; }
-.eq-bar-4 { animation-delay: 0.5s; }
+.eq-bar-2 { animation-delay: 0.3s; }
+.eq-bar-3 { animation-delay: 0.5s; }
+.eq-bar-4 { animation-delay: 0.2s; }
 
 /* Impeccable Step Transition Motion */
 @keyframes stepSlideIn {
   0% {
     opacity: 0;
-    transform: translateY(10px) scale(0.99);
+    transform: translateY(12px) scale(0.985);
   }
   100% {
     opacity: 1;
@@ -85,45 +70,26 @@ body {
 
 @keyframes spotlightGlow {
   0% {
-    opacity: 0.35;
-    transform: scale(0.96);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.04);
+    opacity: 0.5;
+    transform: scale(0.95);
   }
   100% {
-    opacity: 0.35;
-    transform: scale(0.96);
-  }
-}
-
-@keyframes energyPulse {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(6, 182, 212, 0.55);
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
 .animate-step-transition {
-  animation: stepSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: stepSlideIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-spotlight-sweep {
-  animation: spotlightGlow 4s ease-in-out infinite;
-}
-
-.animate-energy-pulse {
-  animation: energyPulse 2.5s ease-in-out infinite;
+  animation: spotlightGlow 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-step-transition,
-  .animate-spotlight-sweep,
-  .animate-equalizer,
-  .animate-energy-pulse {
+  .animate-spotlight-sweep {
     animation: none;
     transform: none;
   }
