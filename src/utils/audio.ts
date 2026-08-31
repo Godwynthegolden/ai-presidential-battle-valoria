@@ -1675,22 +1675,28 @@ class SoundManager {
         this.playSwapWhoosh();
         break;
 
-      // 20 New Presidential Candidates
+      // 20 New Presidential Candidates (and legacy ID support)
+      case 'ray-callahan':
       case 'raymond-callahan':
         this.playBorderGovernorHammerGate();
         break;
+      case 'vivienne-zhao':
       case 'vivienne-chen':
         this.playNeurotechSynapseChime();
         break;
+      case 'garrick-stone':
       case 'sterling-archer':
         this.playCartelProsecutorHandcuffSnap();
         break;
+      case 'elijah-haddon':
       case 'elijah-vance':
         this.playTelevangelistPipeOrganSwell();
         break;
+      case 'kendra-vane':
       case 'kendra-sterling':
         this.playDistressedDebtCashStack();
         break;
+      case 'colt-briggs':
       case 'colton-briggs':
         this.playRuralSheriffBootSpur();
         break;
@@ -1700,27 +1706,33 @@ class SoundManager {
       case 'declan-hayes':
         this.playCoalMayorPickaxeStrike();
         break;
+      case 'jonathan-richter':
       case 'jonathan-sterling':
         this.playBigPharmaVialClick();
         break;
+      case 'tariq-fassi':
       case 'tariq-al-fassi':
         this.playSovereignWealthVaultDoor();
         break;
       case 'gia-moretti':
         this.playViralPodcasterLivestreamBeep();
         break;
+      case 'roland-price':
       case 'arthur-price':
         this.playSpecialOpsRifleBolt();
         break;
+      case 'diana-albright':
       case 'diana-ross':
         this.playDeficitHawkRedPenStamp();
         break;
+      case 'henrik-falken':
       case 'henrik-von-falken':
         this.playEnergyDynastHarpsichordChime();
         break;
       case 'sora-kim':
         this.playEthicalHackerKeyboardClack();
         break;
+      case 'douglas-wade':
       case 'douglas-mercer':
         this.playAirlineChiefCabinChime();
         break;
@@ -1733,6 +1745,7 @@ class SoundManager {
       case 'victoria-sterling':
         this.playPopulistHeiressFlashbulb();
         break;
+      case 'cassian-drake':
       case 'victor-thorne':
         this.playSpaceAdmiralThrusterPulse();
         break;

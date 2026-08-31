@@ -18,12 +18,50 @@ async function testEngine() {
     throw new Error(`Expected 31 candidates, got ${CANDIDATES.length}`);
   }
 
-  // Check candidate fields
+  // Check candidate fields & strict naming rules
+  const firstNames = new Set<string>();
+  const lastNames = new Map<string, string[]>(); // lastName -> candidate names
+
   for (const c of CANDIDATES) {
     if (!c.id || !c.name || !c.titleRole || !c.slogan || !c.systemPrompt) {
       throw new Error(`Candidate ${c.id} missing required fields.`);
     }
+
+    const words = c.name.trim().split(/\s+/);
+    if (words.length > 2) {
+      throw new Error(`Candidate name "${c.name}" has more than 2 words (${words.length} words).`);
+    }
+
+    const firstName = words[0];
+    const lastName = words.length > 1 ? words[1] : '';
+
+    if (firstNames.has(firstName)) {
+      throw new Error(`Duplicate first name detected: "${firstName}" in candidate "${c.name}".`);
+    }
+    firstNames.add(firstName);
+
+    if (lastName) {
+      if (!lastNames.has(lastName)) {
+        lastNames.set(lastName, []);
+      }
+      lastNames.get(lastName)!.push(c.name);
+    }
   }
+
+  // Check last name uniqueness (only 'Sterling' allowed between Arthur & Victoria)
+  for (const [lastName, names] of lastNames.entries()) {
+    if (names.length > 1) {
+      if (lastName === 'Sterling') {
+        const isArthurAndVictoria = names.includes('Arthur Sterling') && names.includes('Victoria Sterling') && names.length === 2;
+        if (!isArthurAndVictoria) {
+          throw new Error(`Unexpected shared last name Sterling among: ${names.join(', ')}`);
+        }
+      } else {
+        throw new Error(`Duplicate unrelated last name detected: "${lastName}" among: ${names.join(', ')}`);
+      }
+    }
+  }
+  console.log('All 31 candidates have strictly <=2 word names with 0 first name collisions and 0 unrelated last name collisions!');
   console.log('All 31 candidate dossiers & titleRoles verified successfully!');
 
   // Verify CURATED_VOICES count and completeness

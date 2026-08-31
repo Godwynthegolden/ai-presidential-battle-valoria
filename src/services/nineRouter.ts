@@ -667,9 +667,13 @@ export class NineRouterService {
       if (clean === candName || clean === candCodename) return id;
       if (candName.includes(clean) || clean.includes(candName)) return id;
       
-      // Match individual name parts (e.g. "Alvarez", "Rostova", "Vance", "Voronin", "Sterling", "Jax")
+      // Match individual name parts (e.g. "Alvarez", "Rostova", "Vance", "Voronin", "Sterling", "Jackson")
       const nameParts = candName.replace(/["']/g, '').split(/\s+/).filter(p => p.length >= 3);
       if (nameParts.some(part => clean.includes(part.toLowerCase()) || part.toLowerCase().includes(clean))) return id;
+
+      // Match ID parts (e.g. "jax", "alvarez", "art", "sterling", "dmitri", "voronin")
+      const idParts = id.toLowerCase().split(/[-_]/).filter(p => p.length >= 3);
+      if (idParts.some(part => clean.includes(part) || part.includes(clean))) return id;
 
       // Check codename parts
       const codeParts = candCodename.split(/\s+/).filter(p => p.length >= 3);

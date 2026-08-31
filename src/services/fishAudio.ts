@@ -152,7 +152,7 @@ export const CURATED_VOICES: FishVoiceModel[] = [
   },
   {
     id: '4c6a6762e4ac4bdebdb4fa8525d054a2',
-    name: 'Archer (Cartel Prosecutor)',
+    name: 'Stone (Cartel Prosecutor)',
     gender: 'male',
     category: 'Authoritative',
     description: 'Relentless, piercing courtroom prosecutor cross-examining oligarchic corruption.',
@@ -161,7 +161,7 @@ export const CURATED_VOICES: FishVoiceModel[] = [
   },
   {
     id: '1936333080804be19655c6749b2ae7b2',
-    name: 'Pastor Vance (Gospel Orator)',
+    name: 'Pastor Haddon (Gospel Orator)',
     gender: 'male',
     category: 'Authoritative',
     description: 'Booming, warm, and soaring pastoral cadence inspiring moral renewal and civic duty.',
@@ -206,7 +206,7 @@ export const CURATED_VOICES: FishVoiceModel[] = [
   },
   {
     id: '5196af35f6ff4a0dbf541793fc9f2157',
-    name: 'Jonathan (Biotech Executive)',
+    name: 'Richter (Biotech Executive)',
     gender: 'male',
     category: 'Professional',
     description: 'Suave, aristocratic biotech tycoon defending pharmaceutical patent innovation.',
@@ -242,7 +242,7 @@ export const CURATED_VOICES: FishVoiceModel[] = [
   },
   {
     id: 'b545c585f631496c914815291da4e893',
-    name: 'Diana (Budget Auditor)',
+    name: 'Albright (Budget Auditor)',
     gender: 'female',
     category: 'Professional',
     description: 'Stern, numerical, and razor-sharp fiscal auditor slashing public deficit waste.',
@@ -260,7 +260,7 @@ export const CURATED_VOICES: FishVoiceModel[] = [
   },
   {
     id: 'e9e9d36027424e55ac3faa620f78a72b',
-    name: 'Glitch (Cyber Prodigy)',
+    name: 'Sora (Cyber Prodigy)',
     gender: 'male',
     category: 'Wildcard',
     description: 'Snappy, hyper-literate whitehat hacker patching obsolete political architecture.',
@@ -269,7 +269,7 @@ export const CURATED_VOICES: FishVoiceModel[] = [
   },
   {
     id: 'f8dfe9c83081432386f143e2fe9767ef',
-    name: 'Douglas (Airline Captain)',
+    name: 'Wade (Airline Captain)',
     gender: 'male',
     category: 'Deep & Serious',
     description: 'Calm, deep, and steady airline captain guiding working families through turbulence.',
@@ -296,7 +296,7 @@ export const CURATED_VOICES: FishVoiceModel[] = [
   },
   {
     id: '59e9dc1cb20c452584788a2690c80970',
-    name: 'Vicky (Populist Heiress)',
+    name: 'Victoria (Populist Heiress)',
     gender: 'female',
     category: 'Passionate',
     description: 'Magnetic, glamorous, and rebellious heiress funding the progressive youth revolution.',
@@ -305,7 +305,7 @@ export const CURATED_VOICES: FishVoiceModel[] = [
   },
   {
     id: 'bf322df2096a46f18c579d0baa36f41d',
-    name: 'Victor (Space Admiral)',
+    name: 'Drake (Space Admiral)',
     gender: 'male',
     category: 'Deep & Serious',
     description: 'Visionary aerospace admiral securing asteroid mineral wealth and orbital defense.',
