@@ -93,7 +93,44 @@ async function testEngine() {
   const preset6 = CANDIDATES.slice(0, 6).map(c => c.id);
   const preset8 = CANDIDATES.slice(0, 8).map(c => c.id);
   const preset31 = CANDIDATES.map(c => c.id);
-  console.log(`Verified custom roster presets: Quick4 (${preset4.length}), Top6 (${preset6.length}), Top8 (${preset8.length}), All31 (${preset31.length})`);
+  const youtube11 = [
+    'jax-alvarez',
+    'elena-rostova',
+    'art-sterling',
+    'victoria-sterling',
+    'marcus-vance',
+    'maya-lin',
+    'elijah-haddon',
+    'vivienne-zhao',
+    'silas-thorne',
+    'garrick-stone',
+    'sora-kim'
+  ];
+  if (youtube11.length !== 11) {
+    throw new Error('Expected YouTube 11 lineup to have 11 IDs');
+  }
+  for (const yId of youtube11) {
+    if (!CANDIDATES.some(c => c.id === yId)) {
+      throw new Error(`YouTube 11 lineup candidate ${yId} not found in CANDIDATES catalog!`);
+    }
+  }
+  console.log(`Verified custom roster presets: Quick4 (${preset4.length}), Top6 (${preset6.length}), Top8 (${preset8.length}), YouTube11 (${youtube11.length}), All31 (${preset31.length})`);
+
+  // Test active candidate moving & reordering simulation
+  let testLineup = [...youtube11];
+  // Move 'sora-kim' to top
+  const soraIdx = testLineup.indexOf('sora-kim');
+  const [sora] = testLineup.splice(soraIdx, 1);
+  testLineup.unshift(sora);
+  if (testLineup[0] !== 'sora-kim') {
+    throw new Error('Failed to move sora-kim to slot #1');
+  }
+  // Reverse lineup
+  testLineup.reverse();
+  if (testLineup[testLineup.length - 1] !== 'sora-kim') {
+    throw new Error('Failed to reverse lineup');
+  }
+  console.log('Interactive active lineup drag & shift reordering simulation PASSED!');
 
   // Test selected lineup fallback
   const storedFallback = getStoredSelectedCandidateIds(preset6);

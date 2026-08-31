@@ -637,12 +637,33 @@ export function useGameEngine(
     }));
   };
 
-  const setPresetRoster = (preset: 'all' | 'top8' | 'top6' | 'quick4') => {
+  const YOUTUBE_11_ORDER = [
+    'jax-alvarez',
+    'elena-rostova',
+    'art-sterling',
+    'victoria-sterling',
+    'marcus-vance',
+    'maya-lin',
+    'elijah-haddon',
+    'vivienne-zhao',
+    'silas-thorne',
+    'garrick-stone',
+    'sora-kim'
+  ];
+
+  const setPresetRoster = (preset: 'all' | 'top8' | 'top6' | 'quick4' | 'youtube11') => {
     if (state.phase !== 'IDLE') return;
     const currentIds = candidates.map(c => c.id);
     let selected: string[] = [];
 
     switch (preset) {
+      case 'youtube11':
+        // Filter against existing candidates in case any were removed
+        selected = YOUTUBE_11_ORDER.filter(id => currentIds.includes(id));
+        if (selected.length < 4) {
+          selected = currentIds.slice(0, 11);
+        }
+        break;
       case 'quick4':
         selected = currentIds.slice(0, 4);
         break;
@@ -659,6 +680,52 @@ export function useGameEngine(
     }
 
     setSelectedCandidateIds(selected);
+  };
+
+  const reorderActiveCandidates = (newOrderedIds: string[]) => {
+    if (state.phase !== 'IDLE') return;
+    setSelectedCandidateIds(newOrderedIds);
+  };
+
+  const moveActiveCandidate = (candidateId: string, direction: 'up' | 'down' | 'top' | 'bottom') => {
+    if (state.phase !== 'IDLE') return;
+    const current = [...(state.participatingCandidateIds || state.activeCandidateIds)];
+    const idx = current.indexOf(candidateId);
+    if (idx === -1) return;
+
+    if (direction === 'up' && idx > 0) {
+      const [item] = current.splice(idx, 1);
+      current.splice(idx - 1, 0, item);
+    } else if (direction === 'down' && idx < current.length - 1) {
+      const [item] = current.splice(idx, 1);
+      current.splice(idx + 1, 0, item);
+    } else if (direction === 'top' && idx > 0) {
+      const [item] = current.splice(idx, 1);
+      current.unshift(item);
+    } else if (direction === 'bottom' && idx < current.length - 1) {
+      const [item] = current.splice(idx, 1);
+      current.push(item);
+    } else {
+      return;
+    }
+
+    setSelectedCandidateIds(current);
+  };
+
+  const shuffleActiveCandidates = () => {
+    if (state.phase !== 'IDLE') return;
+    const current = [...(state.participatingCandidateIds || state.activeCandidateIds)];
+    for (let i = current.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [current[i], current[j]] = [current[j], current[i]];
+    }
+    setSelectedCandidateIds(current);
+  };
+
+  const reverseActiveCandidates = () => {
+    if (state.phase !== 'IDLE') return;
+    const current = [...(state.participatingCandidateIds || state.activeCandidateIds)].reverse();
+    setSelectedCandidateIds(current);
   };
 
   // -----------------------------------------------------------------
@@ -3045,5 +3112,9 @@ export function useGameEngine(
     resetAllCandidatesToDefault,
     reorderCandidates,
     moveCandidate,
+    reorderActiveCandidates,
+    moveActiveCandidate,
+    shuffleActiveCandidates,
+    reverseActiveCandidates,
   };
 }

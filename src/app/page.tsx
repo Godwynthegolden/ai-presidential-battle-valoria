@@ -121,6 +121,10 @@ export default function AIPlaygroundPage() {
     resetAllCandidatesToDefault,
     reorderCandidates,
     moveCandidate,
+    reorderActiveCandidates,
+    moveActiveCandidate,
+    shuffleActiveCandidates,
+    reverseActiveCandidates,
   } = useGameEngine(nineRouterConfig, () => setIsSettingsOpen(true));
 
   // Global hotkeys: 'H' for Clean View, ArrowRight / ArrowDown / Enter for Start & Next Step
@@ -272,6 +276,10 @@ export default function AIPlaygroundPage() {
             onResetAllToDefault={resetAllCandidatesToDefault}
             onMoveCandidate={moveCandidate}
             onReorderCandidates={reorderCandidates}
+            onMoveActiveCandidate={moveActiveCandidate}
+            onReorderActiveCandidates={reorderActiveCandidates}
+            onShuffleActiveCandidates={shuffleActiveCandidates}
+            onReverseActiveCandidates={reverseActiveCandidates}
             onBackToArena={() => setActiveView('arena')}
             nineRouterConfig={nineRouterConfig}
             onOpenSettings={() => setIsSettingsOpen(true)}
@@ -310,6 +318,8 @@ export default function AIPlaygroundPage() {
                 candidates={candidates}
                 onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
                 onOpenCharactersManager={() => setActiveView('characters')}
+                onMoveCandidate={moveActiveCandidate}
+                onSetPresetRoster={setPresetRoster}
               />
             </div>
 
