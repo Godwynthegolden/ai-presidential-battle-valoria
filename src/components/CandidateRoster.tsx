@@ -4,6 +4,7 @@ import React from 'react';
 import { Candidate } from '@/types/candidate';
 import { GameState } from '@/types/game';
 import { CandidateAvatar } from './CandidateAvatar';
+import { CANDIDATE_MAP } from '@/data/candidates';
 import { 
   Shield, 
   Sparkles, 
@@ -40,12 +41,14 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
   const { activeCandidateIds, eliminatedCandidates, stage, winnerId, phase } = gameState;
   const isPreGame = phase === 'IDLE';
 
-  // In pre-game, preserve exact activeCandidateIds order
-  const participatingCandidates = isPreGame 
-    ? activeCandidateIds
-        .map(id => candidates.find(c => c.id === id))
-        .filter((c): c is Candidate => Boolean(c))
-    : candidates.filter(c => activeCandidateIds.includes(c.id) || eliminatedCandidates.some(e => e.candidateId === c.id));
+  // Always preserve exact speaking/lineup sequence during both pre-game AND active gameplay!
+  const orderedIds = (gameState.participatingCandidateIds && gameState.participatingCandidateIds.length > 0)
+    ? gameState.participatingCandidateIds
+    : activeCandidateIds;
+
+  const participatingCandidates = orderedIds
+    .map(id => CANDIDATE_MAP.get(id) || candidates.find(c => c.id === id))
+    .filter((c): c is Candidate => Boolean(c));
 
   return (
     <div className="flex flex-col gap-3 h-full min-h-0">
@@ -55,7 +58,7 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-cyan-400" />
             <span className="text-xs font-display font-black tracking-wider text-slate-100 uppercase">
-              {isPreGame ? 'Debate Speaking Order' : 'Active Contenders'}
+              {isPreGame ? 'Debate Speaking Order' : 'Debate Lineup Order'}
             </span>
           </div>
 
@@ -136,21 +139,21 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                 }}
               />
 
-              {/* In Pre-game: Slot Badge */}
-              {isPreGame && (
-                <div 
-                  className={`flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-mono font-black shrink-0 ${
-                    isFirst 
-                      ? 'bg-amber-500 text-black' 
-                      : isLast 
-                      ? 'bg-purple-900 text-purple-200 border border-purple-700' 
-                      : 'bg-slate-950 text-cyan-300 border border-slate-800'
-                  }`}
-                  title={`Slot #${idx + 1} in speaking sequence`}
-                >
-                  #{idx + 1}
-                </div>
-              )}
+              {/* Speaking Order Slot Badge */}
+              <div 
+                className={`flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-mono font-black shrink-0 transition-transform duration-200 ${
+                  isSpeaking
+                    ? 'bg-cyan-400 text-black shadow-md shadow-cyan-400/50 scale-110 font-black'
+                    : isFirst 
+                    ? 'bg-amber-500 text-black' 
+                    : isLast 
+                    ? 'bg-purple-900 text-purple-200 border border-purple-700' 
+                    : 'bg-slate-950 text-cyan-300 border border-slate-800'
+                }`}
+                title={`Slot #${idx + 1} in debate speaking sequence`}
+              >
+                #{idx + 1}
+              </div>
 
               {/* Avatar Icon / Custom Image */}
               <CandidateAvatar

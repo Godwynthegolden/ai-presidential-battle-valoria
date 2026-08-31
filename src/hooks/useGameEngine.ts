@@ -2398,11 +2398,12 @@ export function useGameEngine(
           sounds.playGavel();
           const nextRound = round + 1;
           const firstAttacker = CANDIDATE_MAP.get(activeCandidateIds[0])!;
-          const possibleTargets = activeCandidateIds.filter(id => id !== firstAttacker.id);
-          const preferredTargetId = possibleTargets.find(id => {
-            const c = CANDIDATE_MAP.get(id);
-            return c && firstAttacker.rivalArchetypes.includes(c.archetype);
-          }) || possibleTargets[0];
+          const preferredTargetId = resolveAttackTarget(firstAttacker.id, activeCandidateIds, {
+            attacksByRound: state.attacksByRound,
+            pactsByRound: state.pactsByRound,
+            votesByRound: state.votesByRound,
+            round: nextRound,
+          });
           const targetCand = CANDIDATE_MAP.get(preferredTargetId);
 
           setState(prev => ({
