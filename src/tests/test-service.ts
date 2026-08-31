@@ -2,6 +2,7 @@ import { nineRouterService } from '../services/nineRouter';
 import { 
   CANDIDATES, 
   CANDIDATE_MAP, 
+  getStoredCandidates,
   getStoredSelectedCandidateIds, 
   saveStoredSelectedCandidateIds 
 } from '../data/candidates';
@@ -9,6 +10,7 @@ import { Candidate } from '../types/candidate';
 import { VoteRecord, BailoutTransaction, RoundVoteTally } from '../types/game';
 import { sounds } from '../utils/audio';
 import { COLOR_PRESETS, createColorTheme, hexToRgb } from '../components/CharacterEditorModal';
+import { CURATED_VOICES } from '../services/fishAudio';
 
 async function testEngine() {
   console.log('Testing 31 Republic of Valoria Candidates loaded:', CANDIDATES.length);
@@ -23,6 +25,25 @@ async function testEngine() {
     }
   }
   console.log('All 31 candidate dossiers & titleRoles verified successfully!');
+
+  // Verify CURATED_VOICES count and completeness
+  console.log('Testing Curated TTS Voice Models:', CURATED_VOICES.length);
+  if (CURATED_VOICES.length < 30) {
+    throw new Error(`Expected at least 30 curated TTS voices, got ${CURATED_VOICES.length}`);
+  }
+  for (const v of CURATED_VOICES) {
+    if (!v.id || !v.name || !v.category || !v.description) {
+      throw new Error(`Voice model ${v.id} missing fields.`);
+    }
+  }
+  console.log('All Curated TTS Voice Models verified successfully!');
+
+  // Test getStoredCandidates
+  const storedCandidates = getStoredCandidates();
+  if (storedCandidates.length !== 31) {
+    throw new Error(`Expected getStoredCandidates to return 31 candidates, got ${storedCandidates.length}`);
+  }
+  console.log('getStoredCandidates default and auto-merge verified successfully!');
 
   // Test isConfigured
   console.log('Testing isConfigured check:');

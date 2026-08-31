@@ -1237,7 +1237,7 @@ export function useGameEngine(
 
         const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
-        sounds.playSpeechBeep();
+        sounds.playCandidateSignature(firstCandidate.id, 'speech');
         if (audioBlobUrl) {
           playAudioUrl(audioBlobUrl);
         } else {
@@ -1335,7 +1335,7 @@ export function useGameEngine(
 
           const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
-          sounds.playSpeechBeep();
+          sounds.playCandidateSignature(speaker.id, 'speech');
           if (audioBlobUrl) {
             playAudioUrl(audioBlobUrl);
           } else {
@@ -1435,7 +1435,7 @@ export function useGameEngine(
 
           const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
-          sounds.playAttackSting();
+          sounds.playCandidateSignature(firstAttacker.id, 'action');
           if (audioBlobUrl) {
             playAudioUrl(audioBlobUrl);
           } else {
@@ -1585,7 +1585,7 @@ export function useGameEngine(
 
           const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
-          sounds.playAttackSting();
+          sounds.playCandidateSignature(attacker.id, 'action');
           if (audioBlobUrl) {
             playAudioUrl(audioBlobUrl);
           } else {
@@ -2274,7 +2274,7 @@ export function useGameEngine(
 
         const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
-        sounds.playSpeechBeep();
+        sounds.playCandidateSignature(eliminatedCandidate.id, 'speech');
         if (audioBlobUrl) {
           playAudioUrl(audioBlobUrl);
         } else {
@@ -2519,7 +2519,7 @@ export function useGameEngine(
 
           const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
-          sounds.playSpeechBeep();
+          sounds.playCandidateSignature(firstFinalist.id, 'speech');
           if (audioBlobUrl) {
             playAudioUrl(audioBlobUrl);
           } else {
@@ -2613,7 +2613,7 @@ export function useGameEngine(
 
           const { content, audioBlobUrl } = await fetchOrConsumeStep(stepDescriptor);
 
-          sounds.playSpeechBeep();
+          sounds.playCandidateSignature(finalist.id, 'speech');
           if (audioBlobUrl) {
             playAudioUrl(audioBlobUrl);
           } else {

@@ -134,12 +134,12 @@ export const CharactersManagerView: React.FC<CharactersManagerViewProps> = ({
 
           <button
             onClick={() => {
-              if (confirm('Reset all characters to the official Republic of Valoria default 11 roster? All custom characters will be removed.')) {
+              if (confirm('Reset all characters to the official Republic of Valoria default 31 roster? All custom characters will be removed.')) {
                 onResetAllToDefault();
               }
             }}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs font-mono transition"
-            title="Reset to default 11 candidates"
+            title="Reset to default 31 candidates"
           >
             <RotateCcw className="w-3.5 h-3.5" /> Reset Defaults
           </button>

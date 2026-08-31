@@ -1564,24 +1564,61 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
 
 export const DEFAULT_CANDIDATES = CANDIDATES;
 
-export const CANDIDATE_STORAGE_KEY = 'valoria_custom_candidates_v2';
-export const SELECTED_CANDIDATES_STORAGE_KEY = 'ai_politics_selected_candidates';
+export const CANDIDATE_STORAGE_KEY = 'valoria_custom_candidates_v3';
+export const SELECTED_CANDIDATES_STORAGE_KEY = 'ai_politics_selected_candidates_v3';
 
 export function getStoredCandidates(): Candidate[] {
   if (typeof window === 'undefined') return DEFAULT_CANDIDATES;
   try {
-    const raw = localStorage.getItem(CANDIDATE_STORAGE_KEY);
-    if (!raw) return DEFAULT_CANDIDATES;
+    const raw = localStorage.getItem(CANDIDATE_STORAGE_KEY) || localStorage.getItem('valoria_custom_candidates_v2');
+    if (!raw) {
+      DEFAULT_CANDIDATES.forEach(c => CANDIDATE_MAP.set(c.id, c));
+      return DEFAULT_CANDIDATES;
+    }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed.map(c => ({
-        ...c,
-        initialBudget: typeof c.initialBudget === 'number' ? c.initialBudget : 100,
-      }));
+      const storedMap = new Map<string, Candidate>();
+      const userCustomCandidates: Candidate[] = [];
+
+      parsed.forEach((c: any) => {
+        if (c.isCustom) {
+          userCustomCandidates.push({
+            ...c,
+            initialBudget: typeof c.initialBudget === 'number' ? c.initialBudget : 100,
+          });
+        } else {
+          storedMap.set(c.id, {
+            ...c,
+            initialBudget: typeof c.initialBudget === 'number' ? c.initialBudget : 100,
+          });
+        }
+      });
+
+      // Merge all DEFAULT_CANDIDATES (using stored user edits if available) + custom candidates
+      const mergedList: Candidate[] = DEFAULT_CANDIDATES.map(def => {
+        const storedOverride = storedMap.get(def.id);
+        if (storedOverride) {
+          return {
+            ...def,
+            ...storedOverride,
+            initialBudget: typeof storedOverride.initialBudget === 'number' ? storedOverride.initialBudget : (def.initialBudget ?? 100),
+          };
+        }
+        return def;
+      });
+
+      // Append any user-created custom candidates
+      mergedList.push(...userCustomCandidates);
+
+      // Sync global map
+      mergedList.forEach(c => CANDIDATE_MAP.set(c.id, c));
+
+      return mergedList;
     }
   } catch (err) {
     console.warn('[Error loading custom candidates from storage]:', err);
   }
+  DEFAULT_CANDIDATES.forEach(c => CANDIDATE_MAP.set(c.id, c));
   return DEFAULT_CANDIDATES;
 }
 
@@ -1602,7 +1639,9 @@ export function resetStoredCandidates(): Candidate[] {
   if (typeof window !== 'undefined') {
     try {
       localStorage.removeItem(CANDIDATE_STORAGE_KEY);
+      localStorage.removeItem('valoria_custom_candidates_v2');
       localStorage.removeItem(SELECTED_CANDIDATES_STORAGE_KEY);
+      localStorage.removeItem('ai_politics_selected_candidates');
     } catch {}
   }
   CANDIDATE_MAP.clear();
@@ -1615,7 +1654,7 @@ export function getStoredSelectedCandidateIds(availableCandidateIds?: string[]):
     return availableCandidateIds || DEFAULT_CANDIDATES.map(c => c.id);
   }
   try {
-    const raw = localStorage.getItem(SELECTED_CANDIDATES_STORAGE_KEY);
+    const raw = localStorage.getItem(SELECTED_CANDIDATES_STORAGE_KEY) || localStorage.getItem('ai_politics_selected_candidates');
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length >= 4) {
@@ -1645,3 +1684,4 @@ export function saveStoredSelectedCandidateIds(ids: string[]): void {
 export const CANDIDATE_MAP = new Map<string, Candidate>(
   CANDIDATES.map(c => [c.id, c])
 );
+
