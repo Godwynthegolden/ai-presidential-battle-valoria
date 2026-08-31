@@ -1,7 +1,8 @@
 /**
- * Studio-Grade Cinematic Web Audio API Synthesizer
+ * Velvety, Warm & Cinematic YouTube Video Sound Design Engine
  * Republic of Valoria - Presidential Battle Engine
  * 100% self-contained procedural audio, zero external asset dependencies.
+ * Specially engineered for luxury YouTube video motion graphics & documentaries (Vox, Lemmino style).
  */
 
 class SoundManager {
@@ -9,6 +10,7 @@ class SoundManager {
   public enabled: boolean = true;
   private noiseBuffer: AudioBuffer | null = null;
   private masterGain: GainNode | null = null;
+  private masterWarmthFilter: BiquadFilterNode | null = null;
   private masterCompressor: DynamicsCompressorNode | null = null;
   private masterWaveshaper: WaveShaperNode | null = null;
 
@@ -29,15 +31,22 @@ class SoundManager {
       }
 
       // Initialize Studio Mastering Bus if not already created
-      if (!this.masterGain || !this.masterCompressor || !this.masterWaveshaper) {
+      if (!this.masterGain || !this.masterCompressor || !this.masterWaveshaper || !this.masterWarmthFilter) {
         this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.setValueAtTime(0.85, this.ctx.currentTime);
+        // Controlled master gain for velvety background mix levels
+        this.masterGain.gain.setValueAtTime(0.65, this.ctx.currentTime);
 
-        // Warm Analog Soft-Knee Waveshaper (Gentle Sigmoid Tube Saturation)
+        // Master Warmth Lowpass Filter (Rolls off all harsh digital frequencies > 3.8kHz)
+        this.masterWarmthFilter = this.ctx.createBiquadFilter();
+        this.masterWarmthFilter.type = 'lowpass';
+        this.masterWarmthFilter.frequency.setValueAtTime(3800, this.ctx.currentTime);
+        this.masterWarmthFilter.Q.setValueAtTime(0.7, this.ctx.currentTime);
+
+        // Warm Analog Soft-Knee Waveshaper (Gentle Sigmoid Tube Saturation for deep low-end warmth)
         this.masterWaveshaper = this.ctx.createWaveShaper();
         const curveSamples = 1024;
         const curve = new Float32Array(curveSamples);
-        const k = 1.35; // Gentle saturation factor
+        const k = 1.15; // Gentle warm saturation
         for (let i = 0; i < curveSamples; i++) {
           const x = (i * 2) / curveSamples - 1;
           curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x));
@@ -45,16 +54,17 @@ class SoundManager {
         this.masterWaveshaper.curve = curve;
         this.masterWaveshaper.oversample = '2x';
 
-        // Hollywood Mastering Dynamics Compressor
+        // Gentle Studio Mastering Compressor (Smooth dynamics, no harsh clipping)
         this.masterCompressor = this.ctx.createDynamicsCompressor();
-        this.masterCompressor.threshold.setValueAtTime(-16, this.ctx.currentTime);
-        this.masterCompressor.knee.setValueAtTime(10, this.ctx.currentTime);
-        this.masterCompressor.ratio.setValueAtTime(4, this.ctx.currentTime);
-        this.masterCompressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
-        this.masterCompressor.release.setValueAtTime(0.22, this.ctx.currentTime);
+        this.masterCompressor.threshold.setValueAtTime(-18, this.ctx.currentTime);
+        this.masterCompressor.knee.setValueAtTime(12, this.ctx.currentTime);
+        this.masterCompressor.ratio.setValueAtTime(3.0, this.ctx.currentTime);
+        this.masterCompressor.attack.setValueAtTime(0.012, this.ctx.currentTime);
+        this.masterCompressor.release.setValueAtTime(0.25, this.ctx.currentTime);
 
-        // Chain: Inputs -> masterGain -> waveshaper -> compressor -> destination
-        this.masterGain.connect(this.masterWaveshaper);
+        // Chain: Inputs -> masterGain -> masterWarmthFilter -> waveshaper -> compressor -> destination
+        this.masterGain.connect(this.masterWarmthFilter);
+        this.masterWarmthFilter.connect(this.masterWaveshaper);
         this.masterWaveshaper.connect(this.masterCompressor);
         this.masterCompressor.connect(this.ctx.destination);
       }
@@ -66,7 +76,7 @@ class SoundManager {
   }
 
   /**
-   * Cached high-definition white noise buffer for physical modeling, squelches, and textures.
+   * Cached smooth low-passed noise buffer for organic tactile textures.
    */
   private getNoiseBuffer(ctx: AudioContext): AudioBuffer {
     if (this.noiseBuffer && this.noiseBuffer.sampleRate === ctx.sampleRate) {
@@ -83,8 +93,8 @@ class SoundManager {
   }
 
   /**
-   * 1. Presidential Mahogany Assembly Gavel Strike
-   * Multi-layer: Sharp wood impact click + mahogany chamber formants + 42Hz floor sub-thump.
+   * 1. Muffled Mahogany Wood Block / Assembly Thud (Gavel)
+   * Warm, deep, rounded wooden knock with rich 42Hz floor sub-thump. Zero harsh crackle.
    */
   public playGavel() {
     if (!this.enabled) return;
@@ -93,60 +103,50 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: High-pass Wood Impact Transient
-    const noiseSource = ctx.createBufferSource();
-    noiseSource.buffer = this.getNoiseBuffer(ctx);
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(2800, now);
-    noiseFilter.Q.setValueAtTime(4.0, now);
+    // Layer 1: Warm Wood Knock Body (95Hz Triangle through 350Hz steep lowpass)
+    const bodyOsc = ctx.createOscillator();
+    const bodyFilter = ctx.createBiquadFilter();
+    const bodyGain = ctx.createGain();
 
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.7, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
+    bodyOsc.type = 'triangle';
+    bodyOsc.frequency.setValueAtTime(115, now);
+    bodyOsc.frequency.exponentialRampToValueAtTime(75, now + 0.22);
 
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(masterOut);
-    noiseSource.start(now);
-    noiseSource.stop(now + 0.02);
+    bodyFilter.type = 'lowpass';
+    bodyFilter.frequency.setValueAtTime(350, now);
+    bodyFilter.Q.setValueAtTime(1.5, now);
 
-    // Layer 2: Dual Mahogany Hollow Chamber Formants (142Hz & 228Hz)
-    [142, 228].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = idx === 0 ? 'triangle' : 'sine';
-      osc.frequency.setValueAtTime(freq, now);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.7, now + 0.35);
+    bodyGain.gain.setValueAtTime(0.001, now);
+    bodyGain.gain.linearRampToValueAtTime(0.65, now + 0.008);
+    bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
 
-      gain.gain.setValueAtTime(0.55 - idx * 0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+    bodyOsc.connect(bodyFilter);
+    bodyFilter.connect(bodyGain);
+    bodyGain.connect(masterOut);
+    bodyOsc.start(now);
+    bodyOsc.stop(now + 0.3);
 
-      osc.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now);
-      osc.stop(now + 0.4);
-    });
-
-    // Layer 3: Acoustic Floor Sub-Thump
+    // Layer 2: Deep 42Hz Cinematic Floor Sub-Thump
     const subOsc = ctx.createOscillator();
     const subGain = ctx.createGain();
-    subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(75, now);
-    subOsc.frequency.exponentialRampToValueAtTime(38, now + 0.4);
 
-    subGain.gain.setValueAtTime(0.8, now);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(65, now);
+    subOsc.frequency.exponentialRampToValueAtTime(38, now + 0.35);
+
+    subGain.gain.setValueAtTime(0.001, now);
+    subGain.gain.linearRampToValueAtTime(0.75, now + 0.01);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
 
     subOsc.connect(subGain);
     subGain.connect(masterOut);
     subOsc.start(now);
-    subOsc.stop(now + 0.6);
+    subOsc.stop(now + 0.5);
   }
 
   /**
-   * 2. Hollywood Action Trailer Braam & Energy Clash
-   * Multi-layer: FM cyber laser slice + detuned low-brass supersaw chord + cinema sub-drop.
+   * 2. Cinematic Bass Drop & Dark Trailer Swell (Attack Sting)
+   * Dark, velvety, warm trailer braam & 808 sub drop. Zero piercing lasers.
    */
   public playAttackSting() {
     if (!this.enabled) return;
@@ -155,82 +155,53 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: FM Cyber Laser Slice Transient (Cutting high-end impact)
-    const carrier = ctx.createOscillator();
-    const modulator = ctx.createOscillator();
-    const modGain = ctx.createGain();
-    const carrierGain = ctx.createGain();
-
-    carrier.type = 'sawtooth';
-    carrier.frequency.setValueAtTime(2400, now);
-    carrier.frequency.exponentialRampToValueAtTime(180, now + 0.12);
-
-    modulator.type = 'sine';
-    modulator.frequency.setValueAtTime(600, now);
-    modulator.frequency.exponentialRampToValueAtTime(120, now + 0.12);
-
-    modGain.gain.setValueAtTime(1400, now);
-    modGain.gain.exponentialRampToValueAtTime(50, now + 0.12);
-
-    carrierGain.gain.setValueAtTime(0.45, now);
-    carrierGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-
-    modulator.connect(modGain);
-    modGain.connect(carrier.frequency);
-    carrier.connect(carrierGain);
-    carrierGain.connect(masterOut);
-
-    modulator.start(now);
-    carrier.start(now);
-    modulator.stop(now + 0.16);
-    carrier.stop(now + 0.16);
-
-    // Layer 2: Hollywood Low-Brass Trailer "BRAAM" (Detuned Supersaw Quad Chord)
-    const braamNotes = [65.4, 98.0, 130.8, 164.8]; // C2, G2, C3, E3
-    braamNotes.forEach((freq, idx) => {
+    // Layer 1: Warm Detuned Low-Brass Swell (C2 [65Hz] & G2 [98Hz] through 420Hz lowpass)
+    [65.4, 98.0, 130.8].forEach((freq, idx) => {
       const osc = ctx.createOscillator();
       const filter = ctx.createBiquadFilter();
       const gain = ctx.createGain();
 
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(freq * (1 + (idx % 2 === 0 ? 0.008 : -0.008)), now);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.94, now + 0.8);
+      osc.type = idx === 0 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime(freq * (1 + (idx === 1 ? 0.006 : -0.006)), now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.95, now + 0.7);
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(3200, now);
-      filter.frequency.exponentialRampToValueAtTime(350, now + 0.85);
-      filter.Q.setValueAtTime(3.5, now);
+      filter.frequency.setValueAtTime(420, now);
+      filter.frequency.exponentialRampToValueAtTime(180, now + 0.7);
 
-      gain.gain.setValueAtTime(0.32, now + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.35 - idx * 0.08, now + 0.035);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(masterOut);
 
-      osc.start(now + 0.01);
-      osc.stop(now + 0.95);
+      osc.start(now);
+      osc.stop(now + 0.8);
     });
 
-    // Layer 3: Cinema Sub-Drop Shockwave
+    // Layer 2: 808-Style Cinematic Sub-Bass Drop (85Hz -> 28Hz with smooth decay)
     const subOsc = ctx.createOscillator();
     const subGain = ctx.createGain();
-    subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(95, now + 0.05);
-    subOsc.frequency.exponentialRampToValueAtTime(24, now + 0.85);
 
-    subGain.gain.setValueAtTime(0.85, now + 0.05);
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(85, now + 0.02);
+    subOsc.frequency.exponentialRampToValueAtTime(28, now + 0.85);
+
+    subGain.gain.setValueAtTime(0.001, now + 0.02);
+    subGain.gain.linearRampToValueAtTime(0.85, now + 0.05);
     subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
 
     subOsc.connect(subGain);
     subGain.connect(masterOut);
-    subOsc.start(now + 0.05);
+    subOsc.start(now + 0.02);
     subOsc.stop(now + 0.95);
   }
 
   /**
-   * 3. Celestial Crystal Glass Chime
-   * Multi-layer: Non-integer metallic chime overtones + Major 9th pad bloom + warm body anchor.
+   * 3. Warm Ethereal Glass / Rhodes Chime (Vote Reveal Ding)
+   * Soft, dreamy, round crystal chime (Apple UI / luxury motion graphic style). Zero piercing highs.
    */
   public playVoteRevealDing() {
     if (!this.enabled) return;
@@ -239,62 +210,49 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: Inharmonic Metallic Chime Ratios (1046.5Hz, 2888Hz, 5651Hz, 9345Hz)
-    const bellRatios = [1.0, 2.76, 5.4, 8.93];
-    const baseFreq = 1046.5; // C6
-    bellRatios.forEach((ratio, idx) => {
+    // Pure warm sine triad (C6 [1046Hz], E6 [1318Hz], G6 [1568Hz]) through 2.4kHz lowpass
+    const chord = [1046.5, 1318.5, 1567.98];
+    chord.forEach((freq, idx) => {
       const osc = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
       const gain = ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(baseFreq * ratio, now);
-
-      const amp = (0.28 / (idx + 1));
-      gain.gain.setValueAtTime(amp, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + (0.9 - idx * 0.15));
-
-      osc.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now);
-      osc.stop(now + 0.95);
-    });
-
-    // Layer 2: Celestial Shimmering Major 9th Chord Bloom (C6, E6, G6, B6, D7)
-    const chordFreqs = [1046.5, 1318.5, 1567.98, 1975.5, 2349.3];
-    chordFreqs.forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now + idx * 0.025);
 
-      gain.gain.setValueAtTime(0.001, now + idx * 0.025);
-      gain.gain.linearRampToValueAtTime(0.12, now + idx * 0.025 + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.025 + 1.2);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(2400, now);
 
-      osc.connect(gain);
+      gain.gain.setValueAtTime(0.001, now + idx * 0.025);
+      gain.gain.linearRampToValueAtTime(0.18, now + idx * 0.025 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.025 + 0.8);
+
+      osc.connect(filter);
+      filter.connect(gain);
       gain.connect(masterOut);
+
       osc.start(now + idx * 0.025);
-      osc.stop(now + idx * 0.025 + 1.25);
+      osc.stop(now + idx * 0.025 + 0.85);
     });
 
-    // Layer 3: Warm Acoustic Foundation
-    const subOsc = ctx.createOscillator();
-    const subGain = ctx.createGain();
-    subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(155, now);
-    subGain.gain.setValueAtTime(0.25, now);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    // Warm Rhodes-Style Body Undertone
+    const bodyOsc = ctx.createOscillator();
+    const bodyGain = ctx.createGain();
+    bodyOsc.type = 'sine';
+    bodyOsc.frequency.setValueAtTime(140, now);
+    bodyGain.gain.setValueAtTime(0.001, now);
+    bodyGain.gain.linearRampToValueAtTime(0.2, now + 0.015);
+    bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
 
-    subOsc.connect(subGain);
-    subGain.connect(masterOut);
-    subOsc.start(now);
-    subOsc.stop(now + 0.55);
+    bodyOsc.connect(bodyGain);
+    bodyGain.connect(masterOut);
+    bodyOsc.start(now);
+    bodyOsc.stop(now + 0.5);
   }
 
   /**
-   * 4. Digital EMP Shutdown & Heavy Reality Doom
-   * Multi-layer: Electrical glitch spark + resonant power-down plunge + 35Hz doom sub-drop.
+   * 4. Dark Cinematic Sub Boom & Tape Stop (Elimination Buzzer)
+   * Deep 38Hz reality-show sub boom + smooth tape-stop pitch dive. Zero harsh glitch.
    */
   public playEliminationBuzzer() {
     if (!this.enabled) return;
@@ -303,65 +261,50 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: Digital EMP Electrical Glitch Burst
-    const noiseSource = ctx.createBufferSource();
-    noiseSource.buffer = this.getNoiseBuffer(ctx);
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'highpass';
-    noiseFilter.frequency.setValueAtTime(4200, now);
+    // Layer 1: Filtered Tape-Stop Drop (160Hz -> 30Hz through 280Hz lowpass)
+    const tapeOsc = ctx.createOscillator();
+    const tapeFilter = ctx.createBiquadFilter();
+    const tapeGain = ctx.createGain();
 
-    const glitchGain = ctx.createGain();
-    glitchGain.gain.setValueAtTime(0.65, now);
-    glitchGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+    tapeOsc.type = 'triangle';
+    tapeOsc.frequency.setValueAtTime(160, now);
+    tapeOsc.frequency.exponentialRampToValueAtTime(30, now + 0.65);
 
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(glitchGain);
-    glitchGain.connect(masterOut);
-    noiseSource.start(now);
-    noiseSource.stop(now + 0.09);
+    tapeFilter.type = 'lowpass';
+    tapeFilter.frequency.setValueAtTime(280, now);
+    tapeFilter.frequency.exponentialRampToValueAtTime(80, now + 0.65);
 
-    // Layer 2: Power-Down Pitch Collapse (Resonant Sawtooth Dive)
-    const sawOsc = ctx.createOscillator();
-    const sawFilter = ctx.createBiquadFilter();
-    const sawGain = ctx.createGain();
+    tapeGain.gain.setValueAtTime(0.001, now);
+    tapeGain.gain.linearRampToValueAtTime(0.45, now + 0.02);
+    tapeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
 
-    sawOsc.type = 'sawtooth';
-    sawOsc.frequency.setValueAtTime(220, now);
-    sawOsc.frequency.exponentialRampToValueAtTime(28, now + 0.75);
+    tapeOsc.connect(tapeFilter);
+    tapeFilter.connect(tapeGain);
+    tapeGain.connect(masterOut);
+    tapeOsc.start(now);
+    tapeOsc.stop(now + 0.8);
 
-    sawFilter.type = 'lowpass';
-    sawFilter.frequency.setValueAtTime(1800, now);
-    sawFilter.frequency.exponentialRampToValueAtTime(120, now + 0.75);
-    sawFilter.Q.setValueAtTime(5.5, now);
-
-    sawGain.gain.setValueAtTime(0.55, now);
-    sawGain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
-
-    sawOsc.connect(sawFilter);
-    sawFilter.connect(sawGain);
-    sawGain.connect(masterOut);
-    sawOsc.start(now);
-    sawOsc.stop(now + 0.9);
-
-    // Layer 3: Cinema Sub Doom Drop (Heavy Floor Impact)
+    // Layer 2: Deep 38Hz Cinematic Reality Sub Boom
     const subOsc = ctx.createOscillator();
     const subGain = ctx.createGain();
-    subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(80, now + 0.05);
-    subOsc.frequency.exponentialRampToValueAtTime(32, now + 1.2);
 
-    subGain.gain.setValueAtTime(0.9, now + 0.05);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(70, now + 0.04);
+    subOsc.frequency.exponentialRampToValueAtTime(32, now + 1.1);
+
+    subGain.gain.setValueAtTime(0.001, now + 0.04);
+    subGain.gain.linearRampToValueAtTime(0.85, now + 0.08);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
 
     subOsc.connect(subGain);
     subGain.connect(masterOut);
-    subOsc.start(now + 0.05);
-    subOsc.stop(now + 1.45);
+    subOsc.start(now + 0.04);
+    subOsc.stop(now + 1.25);
   }
 
   /**
-   * 5. Classified Intelligence Wiretap & CRT Monitor Blip
-   * Multi-layer: Tactical radio squelch static + dual CRT flyback chirp + optical lens tick.
+   * 5. Muffled Tape Deck / Camera Shutter Click (CCTV Beep)
+   * Tactile, quiet, authentic cassette tape click & soft optical blip (ASMR documentary style).
    */
   public playCCTVBeep() {
     if (!this.enabled) return;
@@ -370,59 +313,45 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: Tactical Radio Squelch Static Burst
-    const noiseSource = ctx.createBufferSource();
-    noiseSource.buffer = this.getNoiseBuffer(ctx);
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(3400, now);
-    noiseFilter.Q.setValueAtTime(3.5, now);
+    // Tactile Muffled Mechanical Click (Filtered at 1.4kHz, 12ms)
+    const clickOsc = ctx.createOscillator();
+    const clickFilter = ctx.createBiquadFilter();
+    const clickGain = ctx.createGain();
 
-    const squelchGain = ctx.createGain();
-    squelchGain.gain.setValueAtTime(0.35, now);
-    squelchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+    clickOsc.type = 'triangle';
+    clickOsc.frequency.setValueAtTime(780, now);
+    clickOsc.frequency.exponentialRampToValueAtTime(180, now + 0.035);
 
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(squelchGain);
-    squelchGain.connect(masterOut);
-    noiseSource.start(now);
-    noiseSource.stop(now + 0.03);
+    clickFilter.type = 'lowpass';
+    clickFilter.frequency.setValueAtTime(1400, now);
 
-    // Layer 2: Dual CRT Flyback Chirp (1850Hz & 2650Hz)
-    [1850, 2650].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+    clickGain.gain.setValueAtTime(0.001, now);
+    clickGain.gain.linearRampToValueAtTime(0.12, now + 0.004);
+    clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now + idx * 0.01);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.65, now + idx * 0.01 + 0.045);
+    clickOsc.connect(clickFilter);
+    clickFilter.connect(clickGain);
+    clickGain.connect(masterOut);
+    clickOsc.start(now);
+    clickOsc.stop(now + 0.05);
 
-      gain.gain.setValueAtTime(0.2, now + idx * 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.01 + 0.05);
-
-      osc.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now + idx * 0.01);
-      osc.stop(now + idx * 0.01 + 0.055);
-    });
-
-    // Layer 3: 60Hz Ground Loop Line Hum Pulse
+    // Warm Lowline Hum Pulse (60Hz, 40ms)
     const humOsc = ctx.createOscillator();
     const humGain = ctx.createGain();
     humOsc.type = 'sine';
     humOsc.frequency.setValueAtTime(60, now);
-    humGain.gain.setValueAtTime(0.18, now);
-    humGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+    humGain.gain.setValueAtTime(0.08, now);
+    humGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
     humOsc.connect(humGain);
     humGain.connect(masterOut);
     humOsc.start(now);
-    humOsc.stop(now + 0.07);
+    humOsc.stop(now + 0.06);
   }
 
   /**
-   * 6. Psycho Thriller Horror Sting (Bernard Herrmann Microtonal Cluster)
-   * Multi-layer: Microtonal screech cluster (C#6/D6/G6/G#6) + metallic blade strike + abyss sub-drop.
+   * 6. Dark Cello Swell & Low Ominous Drone (Betrayal Stab)
+   * Deep D Minor chord swell (D2, A2, F3) through 380Hz lowpass + deep 50Hz sub tremor. No high screech.
    */
   public playBetrayalStab() {
     if (!this.enabled) return;
@@ -431,60 +360,41 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: Microtonal Screeching Cluster (C#6 [1108Hz], D6 [1174Hz], G6 [1567Hz], G#6 [1661Hz])
-    const clusterFreqs = [1108.7, 1174.6, 1567.98, 1661.2];
-    clusterFreqs.forEach((freq, idx) => {
+    // Dark D Minor Low String Swell (D2 [73.4Hz], A2 [110Hz], F3 [174.6Hz])
+    const chord = [73.4, 110.0, 174.6];
+    chord.forEach((freq, idx) => {
       const osc = ctx.createOscillator();
-      const lfo = ctx.createOscillator();
-      const lfoGain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
       const gain = ctx.createGain();
 
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(freq, now);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.88, now + 0.6);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq * (1 + (idx === 1 ? 0.004 : -0.004)), now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.96, now + 0.7);
 
-      // 12Hz Shiver Pitch Jitter LFO
-      lfo.type = 'sine';
-      lfo.frequency.setValueAtTime(12 + idx * 2, now);
-      lfoGain.gain.setValueAtTime(18, now);
-      lfo.connect(lfoGain);
-      lfoGain.connect(osc.frequency);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(380, now);
 
-      gain.gain.setValueAtTime(0.24, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.32 - idx * 0.06, now + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
 
-      osc.connect(gain);
+      osc.connect(filter);
+      filter.connect(gain);
       gain.connect(masterOut);
 
-      lfo.start(now);
       osc.start(now);
-      lfo.stop(now + 0.7);
-      osc.stop(now + 0.7);
+      osc.stop(now + 0.8);
     });
 
-    // Layer 2: Metallic Blade Strike Clash Transient
-    const bladeOsc = ctx.createOscillator();
-    const bladeGain = ctx.createGain();
-    bladeOsc.type = 'square';
-    bladeOsc.frequency.setValueAtTime(3200, now);
-    bladeOsc.frequency.exponentialRampToValueAtTime(450, now + 0.08);
-
-    bladeGain.gain.setValueAtTime(0.4, now);
-    bladeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-
-    bladeOsc.connect(bladeGain);
-    bladeGain.connect(masterOut);
-    bladeOsc.start(now);
-    bladeOsc.stop(now + 0.1);
-
-    // Layer 3: Abyss Sub-Drop & Panic Heart-Drop
+    // Deep Sub Tremor (50Hz -> 22Hz)
     const subOsc = ctx.createOscillator();
     const subGain = ctx.createGain();
     subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(75, now);
+    subOsc.frequency.setValueAtTime(55, now);
     subOsc.frequency.exponentialRampToValueAtTime(22, now + 0.8);
 
-    subGain.gain.setValueAtTime(0.85, now);
+    subGain.gain.setValueAtTime(0.001, now);
+    subGain.gain.linearRampToValueAtTime(0.75, now + 0.03);
     subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
 
     subOsc.connect(subGain);
@@ -494,8 +404,8 @@ class SoundManager {
   }
 
   /**
-   * 7. Tactical Breach Klaxon Siren (Crimson Alarm)
-   * Multi-layer: Devil's interval sweeping tritone siren (440Hz <-> 622Hz) + industrial distortion.
+   * 7. Tactical Muffled Sonar Ping (Betrayal Alarm)
+   * Smooth, rhythmic 520Hz sine ping with synchronized 45Hz gentle heartbeat thud.
    */
   public playBetrayalAlarm() {
     if (!this.enabled) return;
@@ -504,61 +414,45 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: Sweeping Tritone Siren (A4 [440Hz] <-> D#5 [622Hz])
-    const freqs = [440, 622.25];
-    freqs.forEach(f => {
-      const osc = ctx.createOscillator();
-      const lfo = ctx.createOscillator();
-      const lfoGain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
+    // Smooth Sonar Ping (520Hz with 15ms soft attack)
+    const pingOsc = ctx.createOscillator();
+    const pingFilter = ctx.createBiquadFilter();
+    const pingGain = ctx.createGain();
 
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(f, now);
+    pingOsc.type = 'sine';
+    pingOsc.frequency.setValueAtTime(520, now);
+    pingOsc.frequency.exponentialRampToValueAtTime(380, now + 0.28);
 
-      // 8Hz Triangle Modulation
-      lfo.type = 'triangle';
-      lfo.frequency.setValueAtTime(8, now);
-      lfoGain.gain.setValueAtTime(90, now);
-      lfo.connect(lfoGain);
-      lfoGain.connect(osc.frequency);
+    pingFilter.type = 'lowpass';
+    pingFilter.frequency.setValueAtTime(1200, now);
 
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(1200, now);
-      filter.Q.setValueAtTime(2.5, now);
+    pingGain.gain.setValueAtTime(0.001, now);
+    pingGain.gain.linearRampToValueAtTime(0.24, now + 0.015);
+    pingGain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
 
-      gain.gain.setValueAtTime(0.28, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+    pingOsc.connect(pingFilter);
+    pingFilter.connect(pingGain);
+    pingGain.connect(masterOut);
+    pingOsc.start(now);
+    pingOsc.stop(now + 0.35);
 
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterOut);
-
-      lfo.start(now);
-      osc.start(now);
-      lfo.stop(now + 0.5);
-      osc.stop(now + 0.5);
-    });
-
-    // Layer 2: Synchronized Rhythmic Heartbeat Thump
+    // Subtle 45Hz Heartbeat Sub-Pulse
     const subOsc = ctx.createOscillator();
     const subGain = ctx.createGain();
     subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(55, now);
-    subOsc.frequency.exponentialRampToValueAtTime(30, now + 0.25);
-
-    subGain.gain.setValueAtTime(0.65, now);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    subOsc.frequency.setValueAtTime(45, now);
+    subGain.gain.setValueAtTime(0.45, now);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
 
     subOsc.connect(subGain);
     subGain.connect(masterOut);
     subOsc.start(now);
-    subOsc.stop(now + 0.35);
+    subOsc.stop(now + 0.25);
   }
 
   /**
-   * 8. Diplomatic Parchment & Heavy Iron Stamp (Ballot Drop)
-   * Multi-layer: Textured paper unseal friction + mechanical iron stamp slam + 52Hz box resonance.
+   * 8. Tactile Card / Paper Plop (Ballot Drop)
+   * Tactile ASMR-style thick paper card placement / soft leather stamp plop.
    */
   public playBallotDrop() {
     if (!this.enabled) return;
@@ -567,56 +461,45 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: Parchment Friction Noise Impulse
-    const noiseSource = ctx.createBufferSource();
-    noiseSource.buffer = this.getNoiseBuffer(ctx);
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(2800, now);
-    noiseFilter.Q.setValueAtTime(3.0, now);
+    // Mechanical Card Plop (140Hz -> 60Hz triangle with 45ms decay)
+    const plopOsc = ctx.createOscillator();
+    const plopFilter = ctx.createBiquadFilter();
+    const plopGain = ctx.createGain();
 
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.45, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+    plopOsc.type = 'triangle';
+    plopOsc.frequency.setValueAtTime(140, now);
+    plopOsc.frequency.exponentialRampToValueAtTime(60, now + 0.06);
 
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(masterOut);
-    noiseSource.start(now);
-    noiseSource.stop(now + 0.025);
+    plopFilter.type = 'lowpass';
+    plopFilter.frequency.setValueAtTime(450, now);
 
-    // Layer 2: Iron Stamp Mechanical Slam (260Hz -> 75Hz punch)
-    const punchOsc = ctx.createOscillator();
-    const punchGain = ctx.createGain();
-    punchOsc.type = 'triangle';
-    punchOsc.frequency.setValueAtTime(260, now);
-    punchOsc.frequency.exponentialRampToValueAtTime(75, now + 0.08);
+    plopGain.gain.setValueAtTime(0.001, now);
+    plopGain.gain.linearRampToValueAtTime(0.55, now + 0.006);
+    plopGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
-    punchGain.gain.setValueAtTime(0.7, now);
-    punchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+    plopOsc.connect(plopFilter);
+    plopFilter.connect(plopGain);
+    plopGain.connect(masterOut);
+    plopOsc.start(now);
+    plopOsc.stop(now + 0.09);
 
-    punchOsc.connect(punchGain);
-    punchGain.connect(masterOut);
-    punchOsc.start(now);
-    punchOsc.stop(now + 0.1);
-
-    // Layer 3: Mahogany Ballot Box Resonator (52Hz Sub Thud)
+    // Subtle 48Hz Box Bottom Resonator
     const boxOsc = ctx.createOscillator();
     const boxGain = ctx.createGain();
     boxOsc.type = 'sine';
-    boxOsc.frequency.setValueAtTime(52, now);
-    boxGain.gain.setValueAtTime(0.75, now);
-    boxGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    boxOsc.frequency.setValueAtTime(48, now);
+    boxGain.gain.setValueAtTime(0.45, now);
+    boxGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
 
     boxOsc.connect(boxGain);
     boxGain.connect(masterOut);
     boxOsc.start(now);
-    boxOsc.stop(now + 0.25);
+    boxOsc.stop(now + 0.18);
   }
 
   /**
-   * 9. Golden Treasury Mint & Casino Bailout Cascade (Cash Chime)
-   * Multi-layer: 5-coin staggered cascade + golden ratio bell bloom (1.0 : 2.76 : 5.4) + vault lock click.
+   * 9. Delicate Luxury Gold Chime (Cash Chime)
+   * Soft staggered sine taps (1.8k, 2.4k, 3.2k) with golden ratio shimmer & 2.8kHz lowpass warmth.
    */
   public playCashChime() {
     if (!this.enabled) return;
@@ -625,65 +508,58 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: 5-Coin Solid Gold Staggered Cascade
-    const coinTimes = [0.00, 0.022, 0.050, 0.085, 0.125];
-    const coinFreqs = [2200, 3100, 4400, 5800, 7200];
+    // Staggered Warm Coin Taps (Filtered at 2.8kHz)
+    const coinTimes = [0.00, 0.035, 0.075];
+    const coinFreqs = [1800, 2400, 3100];
 
-    coinTimes.forEach((timeOffset, idx) => {
+    coinTimes.forEach((t, idx) => {
       const osc = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
       const gain = ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(coinFreqs[idx], now + timeOffset);
-      osc.frequency.exponentialRampToValueAtTime(coinFreqs[idx] * 0.95, now + timeOffset + 0.12);
+      osc.frequency.setValueAtTime(coinFreqs[idx], now + t);
+      osc.frequency.exponentialRampToValueAtTime(coinFreqs[idx] * 0.96, now + t + 0.15);
 
-      gain.gain.setValueAtTime(0.22, now + timeOffset);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + timeOffset + 0.14);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(2800, now);
 
-      osc.connect(gain);
+      gain.gain.setValueAtTime(0.001, now + t);
+      gain.gain.linearRampToValueAtTime(0.16, now + t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + t + 0.18);
+
+      osc.connect(filter);
+      filter.connect(gain);
       gain.connect(masterOut);
-      osc.start(now + timeOffset);
-      osc.stop(now + timeOffset + 0.15);
+      osc.start(now + t);
+      osc.stop(now + t + 0.2);
     });
 
-    // Layer 2: Golden Ratio Metallic Bell Bloom (1.0 : 2.76 : 5.4)
-    const bellRatios = [1.0, 2.76, 5.4];
-    const fundamental = 1567.98; // G6
-    bellRatios.forEach((r, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+    // Warm Velvet Bell Bloom (1.5kHz with long soft decay)
+    const bellOsc = ctx.createOscillator();
+    const bellFilter = ctx.createBiquadFilter();
+    const bellGain = ctx.createGain();
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(fundamental * r, now + 0.12);
+    bellOsc.type = 'sine';
+    bellOsc.frequency.setValueAtTime(1567.98, now + 0.07); // G6
 
-      gain.gain.setValueAtTime(0.25 / (idx + 1), now + 0.12);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12 + 1.2);
+    bellFilter.type = 'lowpass';
+    bellFilter.frequency.setValueAtTime(2400, now);
 
-      osc.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now + 0.12);
-      osc.stop(now + 0.12 + 1.25);
-    });
+    bellGain.gain.setValueAtTime(0.001, now + 0.07);
+    bellGain.gain.linearRampToValueAtTime(0.18, now + 0.07 + 0.02);
+    bellGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07 + 0.85);
 
-    // Layer 3: Vault Lock Mechanism Snap Click
-    const clickOsc = ctx.createOscillator();
-    const clickGain = ctx.createGain();
-    clickOsc.type = 'triangle';
-    clickOsc.frequency.setValueAtTime(320, now + 0.12);
-    clickOsc.frequency.exponentialRampToValueAtTime(90, now + 0.15);
-
-    clickGain.gain.setValueAtTime(0.4, now + 0.12);
-    clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-
-    clickOsc.connect(clickGain);
-    clickGain.connect(masterOut);
-    clickOsc.start(now + 0.12);
-    clickOsc.stop(now + 0.17);
+    bellOsc.connect(bellFilter);
+    bellFilter.connect(bellGain);
+    bellGain.connect(masterOut);
+    bellOsc.start(now + 0.07);
+    bellOsc.stop(now + 0.95);
   }
 
   /**
-   * 10. Cinema Air-Displacement Doppler Swoosh (Swap Whoosh)
-   * Multi-layer: Swept aerodynamic bandpass noise + tonal air-cutter pitch curve + 3D stereo panner.
+   * 10. Velvety Smooth Bass Whoosh (Swap Whoosh)
+   * Low-frequency air displacement swept 120Hz -> 950Hz -> 160Hz + 65Hz sub whoosh with stereo pan.
    */
   public playSwapWhoosh() {
     if (!this.enabled) return;
@@ -692,28 +568,28 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: Aerodynamic Swept Bandpass White Noise
+    // Layer 1: Smooth Aerodynamic Noise Sweep (120Hz -> 950Hz -> 160Hz)
     const noiseSource = ctx.createBufferSource();
     noiseSource.buffer = this.getNoiseBuffer(ctx);
 
     const noiseFilter = ctx.createBiquadFilter();
     noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(180, now);
-    noiseFilter.frequency.exponentialRampToValueAtTime(3800, now + 0.12);
-    noiseFilter.frequency.exponentialRampToValueAtTime(280, now + 0.28);
-    noiseFilter.Q.setValueAtTime(4.0, now);
+    noiseFilter.frequency.setValueAtTime(120, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(950, now + 0.12);
+    noiseFilter.frequency.exponentialRampToValueAtTime(160, now + 0.28);
+    noiseFilter.Q.setValueAtTime(2.0, now);
 
     const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.01, now);
-    noiseGain.gain.linearRampToValueAtTime(0.45, now + 0.12);
+    noiseGain.gain.setValueAtTime(0.001, now);
+    noiseGain.gain.linearRampToValueAtTime(0.35, now + 0.12);
     noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
 
-    // 3D Stereo Panner Sweep (Left -0.85 -> Right +0.85)
+    // Smooth Stereo Panning Sweep
     let panner: StereoPannerNode | null = null;
     if (typeof (ctx as any).createStereoPanner === 'function') {
       panner = ctx.createStereoPanner();
-      panner.pan.setValueAtTime(-0.85, now);
-      panner.pan.linearRampToValueAtTime(0.85, now + 0.28);
+      panner.pan.setValueAtTime(-0.65, now);
+      panner.pan.linearRampToValueAtTime(0.65, now + 0.28);
     }
 
     noiseSource.connect(noiseFilter);
@@ -728,27 +604,27 @@ class SoundManager {
     noiseSource.start(now);
     noiseSource.stop(now + 0.32);
 
-    // Layer 2: Tonal Air-Blade Pitch Curve
-    const toneOsc = ctx.createOscillator();
-    const toneGain = ctx.createGain();
-    toneOsc.type = 'sine';
-    toneOsc.frequency.setValueAtTime(220, now);
-    toneOsc.frequency.exponentialRampToValueAtTime(680, now + 0.12);
-    toneOsc.frequency.exponentialRampToValueAtTime(140, now + 0.28);
+    // Layer 2: 65Hz Sub-Bass Whoosh Body
+    const subOsc = ctx.createOscillator();
+    const subGain = ctx.createGain();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(80, now);
+    subOsc.frequency.exponentialRampToValueAtTime(140, now + 0.12);
+    subOsc.frequency.exponentialRampToValueAtTime(50, now + 0.28);
 
-    toneGain.gain.setValueAtTime(0.01, now);
-    toneGain.gain.linearRampToValueAtTime(0.25, now + 0.12);
-    toneGain.gain.exponentialRampToValueAtTime(0.001, now + 0.29);
+    subGain.gain.setValueAtTime(0.001, now);
+    subGain.gain.linearRampToValueAtTime(0.45, now + 0.12);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
 
-    toneOsc.connect(toneGain);
-    toneGain.connect(masterOut);
-    toneOsc.start(now);
-    toneOsc.stop(now + 0.31);
+    subOsc.connect(subGain);
+    subGain.connect(masterOut);
+    subOsc.start(now);
+    subOsc.stop(now + 0.32);
   }
 
   /**
-   * 11. Broadcast Studio Mic Activation Cue (Speech Beep)
-   * Multi-layer: Pure 880Hz (A5) studio fundamental with raised-cosine anti-click envelope + 2640Hz harmonic sheen.
+   * 11. Subtle UI Pop / Studio Cue (Speech Beep)
+   * Understated, soft organic 540Hz warm wooden UI bubble at low gain (0.05).
    */
   public playSpeechBeep() {
     if (!this.enabled) return;
@@ -757,41 +633,31 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: Studio Fundamental Sine (880Hz A5)
     const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
     const gain = ctx.createGain();
+
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.setValueAtTime(540, now);
+    osc.frequency.exponentialRampToValueAtTime(420, now + 0.06);
 
-    // Raised-cosine envelope: 8ms soft attack, 85ms decay
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1200, now);
+
     gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(0.16, now + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+    gain.gain.linearRampToValueAtTime(0.08, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
 
-    osc.connect(gain);
+    osc.connect(filter);
+    filter.connect(gain);
     gain.connect(masterOut);
     osc.start(now);
-    osc.stop(now + 0.1);
-
-    // Layer 2: High-register Sheen (2640Hz E7 at -22dB)
-    const overtone = ctx.createOscillator();
-    const overGain = ctx.createGain();
-    overtone.type = 'sine';
-    overtone.frequency.setValueAtTime(2640, now);
-
-    overGain.gain.setValueAtTime(0.001, now);
-    overGain.gain.linearRampToValueAtTime(0.035, now + 0.008);
-    overGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-    overtone.connect(overGain);
-    overGain.connect(masterOut);
-    overtone.start(now);
-    overtone.stop(now + 0.09);
+    osc.stop(now + 0.08);
   }
 
   /**
-   * 12. Grand Presidential Inauguration Brass Symphony (Fanfare)
-   * Multi-layer: 6-voice polyphonic brass section (trumpets/horns) + 4-chord C Major progression + 45Hz timpani boom.
+   * 12. Majestic French Horn & Warm Brass Swell (Fanfare)
+   * Warm Hans Zimmer style French horn chords filtered at 750Hz + 42Hz timpani drum booms.
    */
   public playFanfare() {
     if (!this.enabled) return;
@@ -800,72 +666,37 @@ class SoundManager {
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // 4-Chord Triumphant Presidential Progression:
-    // Call: G4 (0.0s) -> C5 (0.18s) -> E5 (0.36s)
-    // Chord 1 (I - C Major): 0.54s [C3, G3, C4, E4, G4, C5]
-    // Chord 2 (IV - F Major): 1.05s [F3, A3, C4, F4, A4, F5]
-    // Chord 3 (V - G Major): 1.55s [G3, B3, D4, G4, B4, G5]
-    // Chord 4 (Grand I - C Royal): 2.10s [C3, G3, E4, G4, C5, E5, G5, C6] sustained 2.4s
-
+    // Warm French Horn Chords in C Major:
+    // Chord 1 (C Major): [130.8Hz, 196.0Hz, 261.6Hz, 329.6Hz]
+    // Chord 2 (F Major): [174.6Hz, 220.0Hz, 261.6Hz, 349.2Hz]
+    // Chord 3 (G Major): [196.0Hz, 246.9Hz, 293.7Hz, 392.0Hz]
+    // Chord 4 (Grand C): [130.8Hz, 196.0Hz, 261.6Hz, 329.6Hz, 523.2Hz] sustained 2.0s
     const chords = [
-      { time: 0.54, dur: 0.45, notes: [130.8, 196.0, 261.6, 329.6, 392.0, 523.2] },
-      { time: 1.05, dur: 0.45, notes: [174.6, 220.0, 261.6, 349.2, 440.0, 698.4] },
-      { time: 1.55, dur: 0.50, notes: [196.0, 246.9, 293.7, 392.0, 493.9, 784.0] },
-      { time: 2.10, dur: 2.20, notes: [130.8, 196.0, 329.6, 392.0, 523.2, 659.2, 783.9, 1046.5] },
+      { time: 0.00, dur: 0.55, notes: [130.8, 196.0, 261.6, 329.6] },
+      { time: 0.60, dur: 0.55, notes: [174.6, 220.0, 261.6, 349.2] },
+      { time: 1.20, dur: 0.60, notes: [196.0, 246.9, 293.7, 392.0] },
+      { time: 1.85, dur: 1.90, notes: [130.8, 196.0, 261.6, 329.6, 523.2] },
     ];
 
-    // Opening Trumpet Fanfare Call
-    const callNotes = [
-      { f: 392.0, t: 0.00, d: 0.16 }, // G4
-      { f: 523.25, t: 0.18, d: 0.16 }, // C5
-      { f: 659.25, t: 0.36, d: 0.16 }, // E5
-    ];
-
-    callNotes.forEach(n => {
-      const osc = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(n.f, now + n.t);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(2800, now + n.t);
-      filter.frequency.exponentialRampToValueAtTime(1200, now + n.t + n.d);
-
-      gain.gain.setValueAtTime(0.001, now + n.t);
-      gain.gain.linearRampToValueAtTime(0.28, now + n.t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterOut);
-
-      osc.start(now + n.t);
-      osc.stop(now + n.t + n.d + 0.05);
-    });
-
-    // Polyphonic Brass Chord Voicings
     chords.forEach(c => {
       c.notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const filter = ctx.createBiquadFilter();
         const gain = ctx.createGain();
 
-        osc.type = idx < 2 ? 'sawtooth' : 'triangle';
-        // Subtle detuning for lush orchestral ensemble width
-        const detune = (idx % 2 === 0 ? 0.006 : -0.006);
+        osc.type = idx === 0 ? 'sine' : 'triangle';
+        const detune = (idx % 2 === 0 ? 0.004 : -0.004);
         osc.frequency.setValueAtTime(freq * (1 + detune), now + c.time);
 
-        // Brass Lip-Pressure Dynamic Filter Sweep
+        // Warm French Horn Filter Sweep (Filtered at 750Hz)
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1400, now + c.time);
-        filter.frequency.linearRampToValueAtTime(3600, now + c.time + 0.06);
-        filter.frequency.exponentialRampToValueAtTime(1600, now + c.time + c.dur);
+        filter.frequency.setValueAtTime(450, now + c.time);
+        filter.frequency.linearRampToValueAtTime(750, now + c.time + 0.08);
+        filter.frequency.exponentialRampToValueAtTime(320, now + c.time + c.dur);
 
-        const amp = (0.24 / Math.sqrt(c.notes.length));
+        const amp = (0.22 / Math.sqrt(c.notes.length));
         gain.gain.setValueAtTime(0.001, now + c.time);
-        gain.gain.linearRampToValueAtTime(amp, now + c.time + 0.04);
+        gain.gain.linearRampToValueAtTime(amp, now + c.time + 0.06);
         gain.gain.exponentialRampToValueAtTime(0.001, now + c.time + c.dur);
 
         osc.connect(filter);
@@ -873,17 +704,17 @@ class SoundManager {
         gain.connect(masterOut);
 
         osc.start(now + c.time);
-        osc.stop(now + c.time + c.dur + 0.08);
+        osc.stop(now + c.time + c.dur + 0.1);
       });
 
-      // Orchestral Timpani Drum Boom on Grand Cadences
+      // Warm 42Hz Orchestral Timpani Drum Boom
       const drumOsc = ctx.createOscillator();
       const drumGain = ctx.createGain();
       drumOsc.type = 'sine';
-      drumOsc.frequency.setValueAtTime(90, now + c.time);
-      drumOsc.frequency.exponentialRampToValueAtTime(42, now + c.time + 0.35);
+      drumOsc.frequency.setValueAtTime(80, now + c.time);
+      drumOsc.frequency.exponentialRampToValueAtTime(38, now + c.time + 0.35);
 
-      drumGain.gain.setValueAtTime(0.75, now + c.time);
+      drumGain.gain.setValueAtTime(0.55, now + c.time);
       drumGain.gain.exponentialRampToValueAtTime(0.001, now + c.time + 0.45);
 
       drumOsc.connect(drumGain);
@@ -895,3 +726,4 @@ class SoundManager {
 }
 
 export const sounds = new SoundManager();
+
