@@ -976,14 +976,15 @@ In MAXIMUM 40 WORDS:
       }
 
       case 'attack': {
-        const targetCandidate = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
+        const targetCandidate = payload.targetId ? (CANDIDATE_MAP.get(payload.targetId) || DEFAULT_CANDIDATES.find(c => c.id === payload.targetId)) : null;
         const targetName = targetCandidate ? targetCandidate.name : 'your opponent';
         const targetFirstName = targetCandidate ? targetCandidate.name.split(' ')[0] : 'Rival';
+        const targetLastName = targetCandidate ? (targetCandidate.name.split(' ')[1] || '') : '';
         const targetRole = targetCandidate ? `${targetCandidate.archetypeTitle} (${targetCandidate.titleRole})` : 'an opponent';
         const targetSlogan = targetCandidate ? targetCandidate.slogan : '';
+        const targetIdeology = targetCandidate ? targetCandidate.ideology : '';
         const targetQuote = ctx.targetSpeechQuote || '';
         const targetWeaknesses = ctx.targetWeaknesses || targetCandidate?.weaknesses || [];
-        const targetTreasury = ctx.targetTreasuryBalance ?? ctx.candidateTreasuries?.[payload.targetId || ''] ?? 100;
         const targetHeat = ctx.targetHeatScore ?? 0;
 
         let betrayalSnippet = '';
@@ -996,10 +997,12 @@ In MAXIMUM 40 WORDS:
 
         let rebuttalSnippet = '';
         if (ctx.activeAccusationOnSpeaker) {
+          const accuserName = ctx.activeAccusationOnSpeaker.attackerName;
+          const accuserFirstName = accuserName.split(' ')[0];
           rebuttalSnippet = `
 ⚠️ ACTIVE ACCUSATION AGAINST YOU:
-${ctx.activeAccusationOnSpeaker.attackerName} attacked you earlier on stage, saying: "${ctx.activeAccusationOnSpeaker.text}"
-REBUTTAL RULE: You MUST open your speech with a brief, sharp defense deflecting ${ctx.activeAccusationOnSpeaker.attackerName.split(' ')[0]}'s accusation before turning the room's fire onto ${targetName}!
+${accuserName} attacked you earlier on stage, saying: "${ctx.activeAccusationOnSpeaker.text}"
+REBUTTAL RULE: You MUST open your speech with a brief, sharp defense deflecting ${accuserFirstName}'s accusation before turning the room's fire onto ${targetName}!
 `;
         }
 
@@ -1012,14 +1015,21 @@ REBUTTAL RULE: You MUST open your speech with a brief, sharp defense deflecting 
         }
 
         userPrompt = `Round ${payload.round}: LIVE EMERGENCY MEETING // DEBATE ATTACK ROUND.
-You are live on stage facing the assembly. You are building a strategic case to rally the room against: ${targetName} (${targetRole}).
+NATIONAL CRISIS TOPIC: "${electionTopic}"
+
+TARGET TO ATTACK: "${targetName}" (${targetRole})
 Target Slogan: "${targetSlogan}"
-Target Treasury: $${targetTreasury} (Can buy ${Math.floor(targetTreasury / 40)} vote bailouts)
-${targetHeat > 0 ? `Target Debate Heat: ${targetHeat} prior accusation(s) this round.\n` : ''}${rebuttalSnippet}${betrayalSnippet}${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
+${targetIdeology ? `Target Ideology: ${targetIdeology}\n` : ''}${targetHeat > 0 ? `Target Debate Heat: ${targetHeat} prior accusation(s) this round.\n` : ''}${rebuttalSnippet}${betrayalSnippet}${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
+
+MANDATORY TARGET NAMING & CONVERSATIONAL RULES:
+- You are attacking ONLY "${targetName}".
+- You MUST refer to your target as "${targetName}", "${targetFirstName}", or "${targetLastName}".
+- NEVER call your target by an incorrect name, nickname, raw ID, or alias.
+- DO NOT obsess over dollar amounts, treasury balances, or bank accounts unless directly attacking corporate greed. Focus primarily on their political hypocrisy, dangerous policies, broken track record, incompetence, or corrupt character!
 
 STRATEGIC 3-PART "EMERGENCY MEETING" SPEECH FORMULA:
 1. [REBUTTAL DEFENSE]: (If accused above) Dismiss the accusation against you in 1 punchy sentence.
-2. [EVIDENCE / THREAT]: Call out ${targetName}'s concrete threat to the room (e.g. hoarding a $${targetTreasury} war chest to buyout the election, secret CCTV dealings, or dangerous policies).
+2. [EVIDENCE / IDEOLOGICAL ATTACK]: Attack ${targetName}'s specific policy failures, hypocrisy, dangerous platform for Valoria, or untrustworthy track record.
 3. [CALL TO ACTION / VOTE CALL]: Explicitly rally the room and the voters to ELIMINATE ${targetName} on this round's ballot (e.g. "We must unite and vote out ${targetFirstName}!", "Join me in eliminating ${targetFirstName} tonight!").
 
 ANTI-FORMULA & DIRECT OUTPUT RULES (CRITICAL):
@@ -1094,7 +1104,7 @@ YOUR STRATEGIC CHOICES:
 CRITICAL CONSISTENCY & ADDRESSING RULES:
 - "targetCandidateId": Pick the EXACT ID of the candidate you are privately approaching in the hallway from: [${allowedTargets}].
 - "agreedEliminationTargetId": Pick the EXACT ID of the rival candidate you want to eliminate together from: [${allowedTargets}] (must NOT be yourself or targetCandidateId).
-- "whisper": In MAXIMUM 25 WORDS, deliver your whispered pitch directly to your chosen partner. ALWAYS start by addressing targetCandidateId by their first name (e.g. "Elena, ...", "Chloe, ...", "Jackson, ...") and explicitly mention the rival you are targeting. NEVER address a different person!
+- "whisper": In MAXIMUM 25 WORDS, deliver your whispered pitch directly to your chosen partner. ALWAYS start by addressing targetCandidateId by their first name (e.g. "Elena, ...", "Arthur, ...", "Jackson, ...") and explicitly mention the rival you are targeting. NEVER address a different person!
 - Formulate your secret inner strategy ("privateStrategy") to calculate your optimal survival path.
 - Choose your action ("actionType": "bribe" | "offer" | "pass").
 - If negotiating, model their likely reaction ("receiverDecision": "accept" | "decline" | "accept_and_betray").

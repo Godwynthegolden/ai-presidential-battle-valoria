@@ -74,8 +74,7 @@ export function resolveAttackTarget(
   const attacker = CANDIDATE_MAP.get(attackerId);
 
   // 1. Prioritize surviving bribe betrayers:
-  // If another candidate took a $30 bribe from attackerId (or in a pact involving attackerId) and wasBetrayedByReceiver,
-  // and that betrayer is still active in possibleTargets, TARGET THEM FIRST!
+  // If another candidate took a bribe from attackerId and wasBetrayedByReceiver, target them first!
   for (let r = 1; r <= history.round; r++) {
     const pacts = history.pactsByRound[r] || [];
     for (const p of pacts) {
@@ -95,29 +94,7 @@ export function resolveAttackTarget(
     return retaliationTarget;
   }
 
-  // 3. Strategic Threat Assessment based on Archetype & Treasury
-  if (history.candidateBudgets && attacker) {
-    const budgets = history.candidateBudgets;
-    const sortedByBudgetDesc = [...possibleTargets].sort((a, b) => (budgets[b] ?? 100) - (budgets[a] ?? 100));
-    const highestTreasuryTarget = sortedByBudgetDesc[0];
-    const lowestTreasuryTarget = sortedByBudgetDesc[sortedByBudgetDesc.length - 1];
-
-    // Populists, Reformers, Traditionalists, Technocrats target the richest contender (hoarding $120+ war chest)
-    if (['populist', 'reformer', 'traditionalist', 'technocrat'].includes(attacker.archetype)) {
-      if ((budgets[highestTreasuryTarget] ?? 100) >= 120) {
-        return highestTreasuryTarget;
-      }
-    }
-
-    // Capitalists, Careerists, Wildcards target the most vulnerable contender (<= $40) for an easy kill
-    if (['capitalist', 'careerist', 'wildcard'].includes(attacker.archetype)) {
-      if ((budgets[lowestTreasuryTarget] ?? 100) <= 40) {
-        return lowestTreasuryTarget;
-      }
-    }
-  }
-
-  // 4. Rival archetypes
+  // 3. Ideological Rival Archetypes (High-Stakes Political Drama!)
   if (attacker) {
     const rivalTarget = possibleTargets.find(id => {
       const c = CANDIDATE_MAP.get(id);
@@ -126,7 +103,7 @@ export function resolveAttackTarget(
     if (rivalTarget) return rivalTarget;
   }
 
-  // 5. Default to first possible target
+  // 4. Default to first possible target
   return possibleTargets[0];
 }
 
@@ -479,9 +456,26 @@ export function useGameEngine(
   };
 
   /**
+   * Clears lookahead buffers when candidate roster, lineup, or order changes
+   */
+  const clearLookaheadBuffers = useCallback(() => {
+    preparedStepsRef.current.forEach(step => {
+      if (step.audioBlobUrl) {
+        try { URL.revokeObjectURL(step.audioBlobUrl); } catch {}
+      }
+    });
+    preparedStepsRef.current.clear();
+    lookaheadBufferRef.current.clear();
+    setLookaheadBufferCount(0);
+    setIsBufferingLookahead(false);
+    setBufferingStatus('');
+  }, []);
+
+  /**
    * Candidate Management Methods
    */
   const saveCandidate = (candidate: Candidate) => {
+    clearLookaheadBuffers();
     const updated = candidates.some(c => c.id === candidate.id)
       ? candidates.map(c => (c.id === candidate.id ? candidate : c))
       : [...candidates, candidate];
@@ -511,6 +505,7 @@ export function useGameEngine(
   };
 
   const deleteCandidate = (candidateId: string) => {
+    clearLookaheadBuffers();
     const updated = candidates.filter(c => c.id !== candidateId);
     setCandidates(updated);
     saveStoredCandidates(updated);
@@ -534,6 +529,7 @@ export function useGameEngine(
   };
 
   const resetAllCandidatesToDefault = () => {
+    clearLookaheadBuffers();
     const defaults = resetStoredCandidates();
     setCandidates(defaults);
     const defIds = defaults.map(c => c.id);
@@ -542,6 +538,7 @@ export function useGameEngine(
   };
 
   const reorderCandidates = (newOrder: Candidate[]) => {
+    clearLookaheadBuffers();
     setCandidates(newOrder);
     saveStoredCandidates(newOrder);
 
@@ -580,6 +577,7 @@ export function useGameEngine(
    */
   const toggleCandidateSelection = (candidateId: string) => {
     if (state.phase !== 'IDLE') return;
+    clearLookaheadBuffers();
 
     setState(prev => {
       const current = prev.activeCandidateIds;
@@ -616,6 +614,7 @@ export function useGameEngine(
 
   const setSelectedCandidateIds = (ids: string[]) => {
     if (state.phase !== 'IDLE') return;
+    clearLookaheadBuffers();
     saveStoredSelectedCandidateIds(ids);
 
     const nextBudgets: Record<string, number> = {};
@@ -653,6 +652,7 @@ export function useGameEngine(
 
   const setPresetRoster = (preset: 'all' | 'top8' | 'top6' | 'quick4' | 'youtube11') => {
     if (state.phase !== 'IDLE') return;
+    clearLookaheadBuffers();
     const currentIds = candidates.map(c => c.id);
     let selected: string[] = [];
 
@@ -684,11 +684,13 @@ export function useGameEngine(
 
   const reorderActiveCandidates = (newOrderedIds: string[]) => {
     if (state.phase !== 'IDLE') return;
+    clearLookaheadBuffers();
     setSelectedCandidateIds(newOrderedIds);
   };
 
   const moveActiveCandidate = (candidateId: string, direction: 'up' | 'down' | 'top' | 'bottom') => {
     if (state.phase !== 'IDLE') return;
+    clearLookaheadBuffers();
     const current = [...(state.participatingCandidateIds || state.activeCandidateIds)];
     const idx = current.indexOf(candidateId);
     if (idx === -1) return;
@@ -714,6 +716,7 @@ export function useGameEngine(
 
   const shuffleActiveCandidates = () => {
     if (state.phase !== 'IDLE') return;
+    clearLookaheadBuffers();
     const current = [...(state.participatingCandidateIds || state.activeCandidateIds)];
     for (let i = current.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -724,6 +727,7 @@ export function useGameEngine(
 
   const reverseActiveCandidates = () => {
     if (state.phase !== 'IDLE') return;
+    clearLookaheadBuffers();
     const current = [...(state.participatingCandidateIds || state.activeCandidateIds)].reverse();
     setSelectedCandidateIds(current);
   };
@@ -2986,12 +2990,18 @@ export function useGameEngine(
       return;
     }
 
+    // Clear any prior buffered steps to guarantee exact sequence fidelity
+    clearLookaheadBuffers();
+
     const selectedTopicObj = getRandomDebateTopic();
     const freshTopic = `${selectedTopicObj.title}: ${selectedTopicObj.crisisSummary}`;
+    const orderedActiveIds = [...state.activeCandidateIds];
 
     const startingState: GameState = {
       ...state,
       electionTopic: freshTopic,
+      participatingCandidateIds: orderedActiveIds,
+      activeCandidateIds: orderedActiveIds,
     };
     setState(startingState);
 

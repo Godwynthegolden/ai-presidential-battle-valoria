@@ -854,10 +854,12 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   if (!attackPromptRes.userPrompt.includes('EMERGENCY MEETING') || 
       !attackPromptRes.userPrompt.includes('ACTIVE ACCUSATION AGAINST YOU') ||
       !attackPromptRes.userPrompt.includes('REBUTTAL RULE') ||
-      !attackPromptRes.userPrompt.includes('Target Treasury: $120')) {
-    throw new Error('3-Part Emergency Meeting Attack Prompt failed to include rebuttal context or treasury threat!');
+      !attackPromptRes.userPrompt.includes('TARGET TO ATTACK: "Marcus Vance"') ||
+      !attackPromptRes.userPrompt.includes('MANDATORY TARGET NAMING') ||
+      !attackPromptRes.userPrompt.includes('DO NOT obsess over dollar amounts')) {
+    throw new Error('3-Part Emergency Meeting Attack Prompt failed to include rebuttal context, target naming, or anti-money rules!');
   }
-  console.log('8. 3-Part "Emergency Meeting" Attack Prompt (Rebuttal, Evidence, Vote Call) PASSED!');
+  console.log('8. 3-Part "Emergency Meeting" Attack Prompt (Rebuttal, Target Naming, Policy Attack, Vote Call) PASSED!');
 
   // Test 10: Debate Heat Accumulation and Consensus Leader Computation
   const mockHeatMap: Record<string, any> = {
@@ -939,13 +941,13 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
     throw new Error(`Expected Elena to retaliate against Arthur Sterling, got ${elenaTarget}`);
   }
 
-  // Populist/Reformer (without active retaliation) should target the richest player ($120 Marcus Vance)
+  // Without active retaliation, Technocrat Elena should target ideological rival (Arthur Sterling - Capitalist)
   const neutralHistory = { ...threatHistory, attacksByRound: {} };
-  const populistTarget = resolveAttackTarget('elena-rostova', ['elena-rostova', 'marcus-vance', 'art-sterling', 'jax-alvarez'], neutralHistory);
-  if (populistTarget !== 'marcus-vance') {
-    throw new Error(`Expected Reformer Elena to target highest treasury Marcus ($120), got ${populistTarget}`);
+  const ideologicalTarget = resolveAttackTarget('elena-rostova', ['elena-rostova', 'marcus-vance', 'art-sterling', 'jax-alvarez'], neutralHistory);
+  if (ideologicalTarget !== 'art-sterling') {
+    throw new Error(`Expected Technocrat Elena to target ideological rival Arthur, got ${ideologicalTarget}`);
   }
-  console.log('11. Threat-Aware & Retaliation Target Selection in resolveAttackTarget PASSED!');
+  console.log('11. Ideological Rival & Retaliation Target Selection in resolveAttackTarget PASSED!');
 
   console.log('\nAll unit tests for Among Us Emergency Meeting & Debate-to-Vote Causal Influence Engine PASSED successfully!');
 }
