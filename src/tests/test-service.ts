@@ -670,13 +670,21 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   }
   console.log('4. Sequential Ballot & Bailout Snapshot Steps PASSED!');
 
-  // Test 6: SoundManager new methods verification
+  // Test 6: SoundManager all 12 studio-grade cinematic sound methods verification
   sounds.enabled = true;
+  sounds.playGavel();
+  sounds.playSpeechBeep();
+  sounds.playAttackSting();
+  sounds.playVoteRevealDing();
+  sounds.playEliminationBuzzer();
+  sounds.playCCTVBeep();
+  sounds.playBetrayalStab();
+  sounds.playBetrayalAlarm();
   sounds.playBallotDrop();
   sounds.playCashChime();
   sounds.playSwapWhoosh();
-  sounds.playBetrayalAlarm();
-  console.log('5. SoundManager Synthesizer Audio Cues PASSED!');
+  sounds.playFanfare();
+  console.log('5. Studio-Grade SoundManager (All 12 Cinematic Synthesizers) PASSED!');
 
   // Test 7: Cinematic Ballot Reveal 5-speed presets duration calculation
   const baseMs = 1400;
