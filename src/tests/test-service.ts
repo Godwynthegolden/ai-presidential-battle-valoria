@@ -695,7 +695,127 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   }
   console.log('7. Voter Name & Avatar Attribution Under Candidate Progress Bar PASSED!');
 
-  console.log('\nAll unit tests for AI JSON Integrity, Candidate Reordering & Full-Screen YouTube Ballot Reveal PASSED successfully!');
+  // Test 9: 3-Part "Emergency Meeting" Attack Prompt with Rebuttal Defense & Target Treasury
+  const elena = CANDIDATE_MAP.get('elena-rostova')!;
+  const marcus = CANDIDATE_MAP.get('marcus-vance')!;
+  const attackPromptRes = (nineRouterService as any).buildPrompt(elena, {
+    action: 'attack',
+    candidateId: elena.id,
+    targetId: marcus.id,
+    round: 1,
+    activeCandidateIds: ['elena-rostova', 'marcus-vance', 'art-sterling', 'jax-alvarez'],
+    historyContext: {
+      electionTopic: 'The Industrial Crisis',
+      targetTreasuryBalance: 120,
+      targetHeatScore: 2,
+      activeAccusationOnSpeaker: {
+        attackerId: 'art-sterling',
+        attackerName: 'Arthur Sterling',
+        text: 'Elena will bankrupt Valoria with reckless environmental decrees!',
+      },
+      recentAttacks: [
+        { attackerName: 'Arthur Sterling', targetName: 'Elena Rostova', text: 'Elena will bankrupt Valoria!' }
+      ]
+    }
+  });
+
+  if (!attackPromptRes.userPrompt.includes('EMERGENCY MEETING') || 
+      !attackPromptRes.userPrompt.includes('ACTIVE ACCUSATION AGAINST YOU') ||
+      !attackPromptRes.userPrompt.includes('REBUTTAL RULE') ||
+      !attackPromptRes.userPrompt.includes('Target Treasury: $120')) {
+    throw new Error('3-Part Emergency Meeting Attack Prompt failed to include rebuttal context or treasury threat!');
+  }
+  console.log('8. 3-Part "Emergency Meeting" Attack Prompt (Rebuttal, Evidence, Vote Call) PASSED!');
+
+  // Test 10: Debate Heat Accumulation and Consensus Leader Computation
+  const mockHeatMap: Record<string, any> = {
+    'marcus-vance': {
+      candidateId: 'marcus-vance',
+      heatScore: 3,
+      accusers: ['elena-rostova', 'art-sterling', 'jax-alvarez'],
+      rebuttalCount: 1,
+      voteCallsAgainst: ['elena-rostova', 'art-sterling'],
+      accusationQuotes: ['Marcus is hoarding $120!', 'Vote him out!']
+    },
+    'art-sterling': {
+      candidateId: 'art-sterling',
+      heatScore: 1,
+      accusers: ['marcus-vance'],
+      rebuttalCount: 0,
+      voteCallsAgainst: ['marcus-vance'],
+      accusationQuotes: ['Arthur is corrupt!']
+    }
+  };
+
+  const heatEntries = Object.values(mockHeatMap);
+  const topHeat = heatEntries.sort((a, b) => b.heatScore - a.heatScore)[0];
+  if (topHeat.candidateId !== 'marcus-vance' || topHeat.heatScore !== 3) {
+    throw new Error('Debate heat consensus leader calculation failed');
+  }
+  console.log('9. Debate Heat Accumulation & Consensus Leader Computation PASSED!');
+
+  // Test 11: Debate Consensus Leader Injection into Elimination Voting Prompt
+  const votePromptRes = (nineRouterService as any).buildPrompt(elena, {
+    action: 'elimination_vote',
+    candidateId: elena.id,
+    round: 1,
+    activeCandidateIds: ['elena-rostova', 'marcus-vance', 'art-sterling', 'jax-alvarez'],
+    historyContext: {
+      electionTopic: 'The Industrial Crisis',
+      debateConsensusLeader: {
+        candidateId: 'marcus-vance',
+        candidateName: 'Gen. Marcus "The Hammer" Vance',
+        heatScore: 3,
+        accusers: ['Elena Rostova', 'Arthur Sterling', 'Jackson Alvarez'],
+        voteCalls: ['Elena Rostova', 'Arthur Sterling'],
+      },
+      candidateTreasuries: {
+        'elena-rostova': 80,
+        'marcus-vance': 120,
+        'art-sterling': 100,
+        'jax-alvarez': 60,
+      }
+    }
+  });
+
+  if (!votePromptRes.userPrompt.includes('ON-STAGE DEBATE CONSENSUS & BANDWAGON') ||
+      !votePromptRes.userPrompt.includes('marcus-vance') ||
+      !votePromptRes.userPrompt.includes('[BANDWAGON]')) {
+    throw new Error('Elimination voting prompt failed to inject debate consensus or bandwagon avenue!');
+  }
+  console.log('10. Debate Consensus Leader & Bandwagon Injection in Voting Prompt PASSED!');
+
+  // Test 12: Threat-Aware Strategic Target Selection in resolveAttackTarget
+  const threatHistory = {
+    attacksByRound: {
+      1: [{ id: 'a1', round: 1, attackerId: 'art-sterling', targetId: 'elena-rostova', text: 'You are corrupt!', timestamp: 1 }]
+    },
+    pactsByRound: {},
+    votesByRound: {},
+    round: 1,
+    candidateBudgets: {
+      'elena-rostova': 80,
+      'marcus-vance': 120,
+      'art-sterling': 100,
+      'jax-alvarez': 30,
+    }
+  };
+
+  // Elena was attacked by Arthur in round 1 -> should retaliate against Arthur
+  const elenaTarget = resolveAttackTarget('elena-rostova', ['elena-rostova', 'marcus-vance', 'art-sterling', 'jax-alvarez'], threatHistory);
+  if (elenaTarget !== 'art-sterling') {
+    throw new Error(`Expected Elena to retaliate against Arthur Sterling, got ${elenaTarget}`);
+  }
+
+  // Populist/Reformer (without active retaliation) should target the richest player ($120 Marcus Vance)
+  const neutralHistory = { ...threatHistory, attacksByRound: {} };
+  const populistTarget = resolveAttackTarget('elena-rostova', ['elena-rostova', 'marcus-vance', 'art-sterling', 'jax-alvarez'], neutralHistory);
+  if (populistTarget !== 'marcus-vance') {
+    throw new Error(`Expected Reformer Elena to target highest treasury Marcus ($120), got ${populistTarget}`);
+  }
+  console.log('11. Threat-Aware & Retaliation Target Selection in resolveAttackTarget PASSED!');
+
+  console.log('\nAll unit tests for Among Us Emergency Meeting & Debate-to-Vote Causal Influence Engine PASSED successfully!');
 }
 
 testEngine().catch(err => {

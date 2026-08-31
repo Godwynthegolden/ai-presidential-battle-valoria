@@ -22,12 +22,24 @@ export interface SpeechEvent {
   timestamp: number;
 }
 
+export interface CandidateDebateHeat {
+  candidateId: string;
+  heatScore: number;                 // Total accusations accumulated this round (1 accusation = +1 heat)
+  accusers: string[];                // Candidate IDs of contenders who attacked them
+  rebuttalCount: number;             // Times this candidate defended themselves
+  voteCallsAgainst: string[];        // Candidate IDs who explicitly called to eliminate them
+  accusationQuotes: string[];        // Snippets of spoken accusations for prompt context
+}
+
 export interface AttackEvent {
   id: string;
   round: number;
   attackerId: string;
   targetId: string;
   text: string;
+  isRebuttal?: boolean;              // True if attacker is defending against a prior accusation
+  rebuttalAgainstId?: string;        // Who they are rebutting
+  voteCallTargetId?: string;         // Who they are calling on the room to vote out
   timestamp: number;
 }
 
@@ -130,6 +142,7 @@ export interface GameState {
   campaignSpeeches: Record<string, string>; // candidateId -> text
   finalSpeeches: Record<string, string>;    // candidateId -> text
   attacksByRound: Record<number, AttackEvent[]>;
+  debateHeatByRound?: Record<number, Record<string, CandidateDebateHeat>>; // Candidate ID -> Debate heat stats
   pactsByRound: Record<number, BackroomPact[]>;
   votesByRound: Record<number, RoundVoteTally>;
   finalVoteTally: RoundVoteTally | null;
@@ -209,6 +222,21 @@ export interface LLMRequestPayload {
     activePactsForVoter?: BackroomPact[];
     candidateSecretStrategy?: string; // Secret strategy memo to remind the voter
     candidateTreasuries?: Record<string, number>; // Full treasury balances of all candidates
+    targetTreasuryBalance?: number; // Dollar balance of target being attacked
+    targetHeatScore?: number; // Number of accusations accumulated by target
+    activeAccusationOnSpeaker?: { // Prior accusation against the speaker in this round (for rebuttal)
+      attackerId: string;
+      attackerName: string;
+      text: string;
+    };
+    debateConsensusLeader?: { // Candidate with the most debate heat on stage
+      candidateId: string;
+      candidateName: string;
+      heatScore: number;
+      accusers: string[];
+      voteCalls: string[];
+    };
+    allDebateHeat?: Record<string, { heatScore: number; accusers: string[] }>;
     betrayalContext?: { 
       wasBetrayed: boolean; 
       betrayedByCandidateName?: string; 

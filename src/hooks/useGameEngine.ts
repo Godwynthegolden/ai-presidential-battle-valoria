@@ -8,6 +8,7 @@ import {
   RoundVoteTally, 
   VoteRecord, 
   AttackEvent, 
+  CandidateDebateHeat,
   BackroomPact, 
   BailoutTransaction,
   EscrowContract,
@@ -63,6 +64,7 @@ export function resolveAttackTarget(
     pactsByRound: Record<number, BackroomPact[]>;
     votesByRound: Record<number, RoundVoteTally>;
     round: number;
+    candidateBudgets?: Record<string, number>;
   }
 ): string {
   const possibleTargets = activeCandidateIds.filter(id => id !== attackerId);
@@ -72,7 +74,7 @@ export function resolveAttackTarget(
   const attacker = CANDIDATE_MAP.get(attackerId);
 
   // 1. Prioritize surviving bribe betrayers:
-  // If another candidate took a $20 bribe from attackerId (or in a pact involving attackerId) and wasBetrayedByReceiver,
+  // If another candidate took a $30 bribe from attackerId (or in a pact involving attackerId) and wasBetrayedByReceiver,
   // and that betrayer is still active in possibleTargets, TARGET THEM FIRST!
   for (let r = 1; r <= history.round; r++) {
     const pacts = history.pactsByRound[r] || [];
@@ -86,14 +88,36 @@ export function resolveAttackTarget(
     }
   }
 
-  // 2. Retaliation: Whoever attacked this candidate in this or previous rounds
+  // 2. Retaliation: Whoever attacked this candidate in this round (immediate counter-rebuttal)
   const recentAttacksThisRound = history.attacksByRound[history.round] || [];
   const retaliationTarget = recentAttacksThisRound.find(a => a.targetId === attackerId)?.attackerId;
   if (retaliationTarget && possibleTargets.includes(retaliationTarget)) {
     return retaliationTarget;
   }
 
-  // 3. Rival archetypes
+  // 3. Strategic Threat Assessment based on Archetype & Treasury
+  if (history.candidateBudgets && attacker) {
+    const budgets = history.candidateBudgets;
+    const sortedByBudgetDesc = [...possibleTargets].sort((a, b) => (budgets[b] ?? 100) - (budgets[a] ?? 100));
+    const highestTreasuryTarget = sortedByBudgetDesc[0];
+    const lowestTreasuryTarget = sortedByBudgetDesc[sortedByBudgetDesc.length - 1];
+
+    // Populists, Reformers, Traditionalists, Technocrats target the richest contender (hoarding $120+ war chest)
+    if (['populist', 'reformer', 'traditionalist', 'technocrat'].includes(attacker.archetype)) {
+      if ((budgets[highestTreasuryTarget] ?? 100) >= 120) {
+        return highestTreasuryTarget;
+      }
+    }
+
+    // Capitalists, Careerists, Wildcards target the most vulnerable contender (<= $40) for an easy kill
+    if (['capitalist', 'careerist', 'wildcard'].includes(attacker.archetype)) {
+      if ((budgets[lowestTreasuryTarget] ?? 100) <= 40) {
+        return lowestTreasuryTarget;
+      }
+    }
+  }
+
+  // 4. Rival archetypes
   if (attacker) {
     const rivalTarget = possibleTargets.find(id => {
       const c = CANDIDATE_MAP.get(id);
@@ -102,7 +126,7 @@ export function resolveAttackTarget(
     if (rivalTarget) return rivalTarget;
   }
 
-  // 4. Default to first possible target
+  // 5. Default to first possible target
   return possibleTargets[0];
 }
 
@@ -856,14 +880,23 @@ export function useGameEngine(
             pactsByRound: currentState.pactsByRound,
             votesByRound: currentState.votesByRound,
             round: simRound,
+            candidateBudgets: currentState.candidateBudgets,
           });
           const targetCand = CANDIDATE_MAP.get(preferredTargetId);
 
-          const recentAttackContext = (currentState.attacksByRound[simRound] || []).map(a => ({
+          const roundAttacks = currentState.attacksByRound[simRound] || [];
+          const recentAttackContext = roundAttacks.map(a => ({
             attackerName: CANDIDATE_MAP.get(a.attackerId)?.name || a.attackerId,
             targetName: CANDIDATE_MAP.get(a.targetId)?.name || a.targetId,
             text: a.text,
           }));
+
+          const priorAccusation = roundAttacks.find(a => a.targetId === attacker.id);
+          const activeAccusationOnSpeaker = priorAccusation ? {
+            attackerId: priorAccusation.attackerId,
+            attackerName: CANDIDATE_MAP.get(priorAccusation.attackerId)?.name || priorAccusation.attackerId,
+            text: priorAccusation.text,
+          } : undefined;
 
           steps.push({
             stepKey: `attack-r${simRound}-${simSpeakerIndex}-${attacker.id}`,
@@ -884,6 +917,9 @@ export function useGameEngine(
                 campaignSpeeches: currentState.campaignSpeeches,
                 targetSpeechQuote: currentState.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
                 targetWeaknesses: targetCand?.weaknesses,
+                targetTreasuryBalance: currentState.candidateBudgets[preferredTargetId] ?? 100,
+                targetHeatScore: currentState.debateHeatByRound?.[simRound]?.[preferredTargetId]?.heatScore ?? 0,
+                activeAccusationOnSpeaker,
                 recentAttacks: recentAttackContext,
               },
             }
@@ -908,6 +944,17 @@ export function useGameEngine(
             text: a.text,
           }));
 
+          const roundHeat = currentState.debateHeatByRound?.[simRound] || {};
+          const heatEntries = Object.values(roundHeat);
+          const topHeat = heatEntries.sort((a, b) => b.heatScore - a.heatScore)[0];
+          const debateConsensusLeader = (topHeat && topHeat.heatScore > 0) ? {
+            candidateId: topHeat.candidateId,
+            candidateName: CANDIDATE_MAP.get(topHeat.candidateId)?.name || topHeat.candidateId,
+            heatScore: topHeat.heatScore,
+            accusers: topHeat.accusers.map(id => CANDIDATE_MAP.get(id)?.name || id),
+            voteCalls: topHeat.voteCallsAgainst.map(id => CANDIDATE_MAP.get(id)?.name || id),
+          } : undefined;
+
           steps.push({
             stepKey: `cctv-r${simRound}-${simSpeakerIndex}-${p1.id}`,
             phase: 'CCTV_BACKROOM',
@@ -925,6 +972,7 @@ export function useGameEngine(
               historyContext: {
                 electionTopic,
                 recentAttacks: recentAttackContext,
+                debateConsensusLeader,
                 proposerBudget: currentState.candidateBudgets[p1.id] ?? 100,
                 receiverBudget: currentState.candidateBudgets[p2.id] ?? 100,
                 candidateTreasuries: currentState.candidateBudgets,
@@ -1378,6 +1426,8 @@ export function useGameEngine(
                 campaignSpeeches: state.campaignSpeeches,
                 targetSpeechQuote: state.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
                 targetWeaknesses: targetCand?.weaknesses,
+                targetTreasuryBalance: state.candidateBudgets[preferredTargetId] ?? 100,
+                targetHeatScore: 0,
                 recentAttacks: [],
               },
             }
@@ -1398,7 +1448,20 @@ export function useGameEngine(
             attackerId: firstAttacker.id,
             targetId: preferredTargetId,
             text: content,
+            isRebuttal: false,
+            voteCallTargetId: preferredTargetId,
             timestamp: Date.now(),
+          };
+
+          const round1Heat: Record<string, CandidateDebateHeat> = {
+            [preferredTargetId]: {
+              candidateId: preferredTargetId,
+              heatScore: 1,
+              accusers: [firstAttacker.id],
+              rebuttalCount: 0,
+              voteCallsAgainst: [firstAttacker.id],
+              accusationQuotes: [content.slice(0, 80)],
+            }
           };
 
           setState(prev => ({
@@ -1406,6 +1469,10 @@ export function useGameEngine(
             attacksByRound: {
               ...prev.attacksByRound,
               [1]: [...(prev.attacksByRound[1] || []), attackEvent],
+            },
+            debateHeatByRound: {
+              ...(prev.debateHeatByRound || {}),
+              [1]: round1Heat,
             },
             stage: {
               ...prev.stage,
@@ -1416,7 +1483,7 @@ export function useGameEngine(
               {
                 id: `tick-${Date.now()}`,
                 type: 'attack',
-                message: `💥 ${firstAttacker.name} attacked ${CANDIDATE_MAP.get(preferredTargetId)?.name}: "${content.slice(0, 80)}..."`,
+                message: `💥 ${firstAttacker.name} attacked ${CANDIDATE_MAP.get(preferredTargetId)?.name} (Heat: 1): "${content.slice(0, 80)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
@@ -1430,6 +1497,10 @@ export function useGameEngine(
             attacksByRound: {
               ...state.attacksByRound,
               [1]: [attackEvent],
+            },
+            debateHeatByRound: {
+              ...(state.debateHeatByRound || {}),
+              [1]: round1Heat,
             }
           });
         }
@@ -1452,8 +1523,16 @@ export function useGameEngine(
             pactsByRound: state.pactsByRound,
             votesByRound: state.votesByRound,
             round,
+            candidateBudgets: state.candidateBudgets,
           });
           const targetCand = CANDIDATE_MAP.get(preferredTargetId);
+
+          const priorAccusation = recentAttacksThisRound.find(a => a.targetId === attacker.id);
+          const activeAccusationOnSpeaker = priorAccusation ? {
+            attackerId: priorAccusation.attackerId,
+            attackerName: CANDIDATE_MAP.get(priorAccusation.attackerId)?.name || priorAccusation.attackerId,
+            text: priorAccusation.text,
+          } : undefined;
 
           setState(prev => ({
             ...prev,
@@ -1496,6 +1575,9 @@ export function useGameEngine(
                 campaignSpeeches: state.campaignSpeeches,
                 targetSpeechQuote: state.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
                 targetWeaknesses: targetCand?.weaknesses,
+                targetTreasuryBalance: state.candidateBudgets[preferredTargetId] ?? 100,
+                targetHeatScore: state.debateHeatByRound?.[round]?.[preferredTargetId]?.heatScore ?? 0,
+                activeAccusationOnSpeaker,
                 recentAttacks: recentAttackContext,
               },
             }
@@ -1510,16 +1592,51 @@ export function useGameEngine(
             playSpeechAudio(content, attacker.voice?.voiceId, attacker.id);
           }
 
+          const isRebuttal = !!priorAccusation;
           const attackEvent: AttackEvent = {
             id: `atk-${Date.now()}`,
             round,
             attackerId: attacker.id,
             targetId: preferredTargetId,
             text: content,
+            isRebuttal,
+            rebuttalAgainstId: priorAccusation?.attackerId,
+            voteCallTargetId: preferredTargetId,
             timestamp: Date.now(),
           };
 
           const updatedAttacks = [...(state.attacksByRound[round] || []), attackEvent];
+
+          // Update debate heat by round
+          const currentRoundHeat = { ...(state.debateHeatByRound?.[round] || {}) };
+          const prevTargetHeat = currentRoundHeat[preferredTargetId] || {
+            candidateId: preferredTargetId,
+            heatScore: 0,
+            accusers: [],
+            rebuttalCount: 0,
+            voteCallsAgainst: [],
+            accusationQuotes: [],
+          };
+
+          const updatedTargetHeat: CandidateDebateHeat = {
+            ...prevTargetHeat,
+            heatScore: prevTargetHeat.heatScore + 1,
+            accusers: Array.from(new Set([...prevTargetHeat.accusers, attacker.id])),
+            voteCallsAgainst: Array.from(new Set([...prevTargetHeat.voteCallsAgainst, attacker.id])),
+            accusationQuotes: [...prevTargetHeat.accusationQuotes, content.slice(0, 80)],
+          };
+
+          if (isRebuttal && currentRoundHeat[attacker.id]) {
+            currentRoundHeat[attacker.id] = {
+              ...currentRoundHeat[attacker.id],
+              rebuttalCount: (currentRoundHeat[attacker.id].rebuttalCount || 0) + 1,
+            };
+          }
+          currentRoundHeat[preferredTargetId] = updatedTargetHeat;
+          const updatedDebateHeat = {
+            ...(state.debateHeatByRound || {}),
+            [round]: currentRoundHeat,
+          };
 
           setState(prev => ({
             ...prev,
@@ -1527,6 +1644,7 @@ export function useGameEngine(
               ...prev.attacksByRound,
               [round]: updatedAttacks,
             },
+            debateHeatByRound: updatedDebateHeat,
             stage: {
               ...prev.stage,
               content,
@@ -1536,7 +1654,9 @@ export function useGameEngine(
               {
                 id: `tick-${Date.now()}`,
                 type: 'attack',
-                message: `💥 ${attacker.name} challenged ${CANDIDATE_MAP.get(preferredTargetId)?.name}: "${content.slice(0, 80)}..."`,
+                message: isRebuttal
+                  ? `💥🛡️ ${attacker.name} countered accusations and rallied room against ${CANDIDATE_MAP.get(preferredTargetId)?.name} (Heat: ${updatedTargetHeat.heatScore}): "${content.slice(0, 80)}..."`
+                  : `💥 ${attacker.name} challenged ${CANDIDATE_MAP.get(preferredTargetId)?.name} (Heat: ${updatedTargetHeat.heatScore}): "${content.slice(0, 80)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
@@ -1544,13 +1664,14 @@ export function useGameEngine(
           }));
 
           dispatchBackgroundPreload({
-...state,
+            ...state,
             phase: 'ATTACK',
             currentSpeakerIndex: nextIndex,
             attacksByRound: {
               ...state.attacksByRound,
               [round]: updatedAttacks,
-            }
+            },
+            debateHeatByRound: updatedDebateHeat,
           });
         } else {
           // All active candidates attacked! Transition to CCTV_BACKROOM (Leaked private pacts)
@@ -1566,6 +1687,17 @@ export function useGameEngine(
             targetName: CANDIDATE_MAP.get(a.targetId)?.name || a.targetId,
             text: a.text,
           }));
+
+          const roundHeat = state.debateHeatByRound?.[round] || {};
+          const heatEntries = Object.values(roundHeat);
+          const topHeat = heatEntries.sort((a, b) => b.heatScore - a.heatScore)[0];
+          const debateConsensusLeader = (topHeat && topHeat.heatScore > 0) ? {
+            candidateId: topHeat.candidateId,
+            candidateName: CANDIDATE_MAP.get(topHeat.candidateId)?.name || topHeat.candidateId,
+            heatScore: topHeat.heatScore,
+            accusers: topHeat.accusers.map(id => CANDIDATE_MAP.get(id)?.name || id),
+            voteCalls: topHeat.voteCallsAgainst.map(id => CANDIDATE_MAP.get(id)?.name || id),
+          } : undefined;
 
           // Generate CCTV leaked feeds for ALL active candidates
           for (let i = 0; i < activeCandidateIds.length; i++) {
@@ -1589,6 +1721,7 @@ export function useGameEngine(
                 historyContext: {
                   electionTopic: state.electionTopic || DEFAULT_TOPIC,
                   recentAttacks: recentAttackContext,
+                  debateConsensusLeader,
                   proposerBudget: updatedBudgets[proposer.id] ?? 100,
                   receiverBudget: updatedBudgets[receiver.id] ?? 100,
                   candidateTreasuries: updatedBudgets,
@@ -1871,6 +2004,17 @@ export function useGameEngine(
           text: a.text,
         }));
 
+        const roundHeat = state.debateHeatByRound?.[round] || {};
+        const heatEntries = Object.values(roundHeat);
+        const topHeat = heatEntries.sort((a, b) => b.heatScore - a.heatScore)[0];
+        const debateConsensusLeader = (topHeat && topHeat.heatScore > 0) ? {
+          candidateId: topHeat.candidateId,
+          candidateName: CANDIDATE_MAP.get(topHeat.candidateId)?.name || topHeat.candidateId,
+          heatScore: topHeat.heatScore,
+          accusers: topHeat.accusers.map(id => CANDIDATE_MAP.get(id)?.name || id),
+          voteCalls: topHeat.voteCallsAgainst.map(id => CANDIDATE_MAP.get(id)?.name || id),
+        } : undefined;
+
         const votePromises = activeCandidateIds.map(async (voterId) => {
           // Find all pacts involving this voter
           const voterPacts = pactsThisRound.filter(p => p.proposerId === voterId || p.receiverId === voterId);
@@ -1886,6 +2030,7 @@ export function useGameEngine(
             historyContext: {
               electionTopic: state.electionTopic || DEFAULT_TOPIC,
               recentAttacks: recentAttacksContext,
+              debateConsensusLeader,
               candidateSecretStrategy: state.candidateStrategies?.[voterId],
               candidateTreasuries: state.candidateBudgets,
               activePactsForVoter: voterPacts,
@@ -2235,6 +2380,8 @@ export function useGameEngine(
                 campaignSpeeches: state.campaignSpeeches,
                 targetSpeechQuote: state.campaignSpeeches[preferredTargetId] || targetCand?.slogan,
                 targetWeaknesses: targetCand?.weaknesses,
+                targetTreasuryBalance: state.candidateBudgets[preferredTargetId] ?? 100,
+                targetHeatScore: 0,
                 recentAttacks: [],
               },
             }
@@ -2255,7 +2402,20 @@ export function useGameEngine(
             attackerId: firstAttacker.id,
             targetId: preferredTargetId,
             text: content,
+            isRebuttal: false,
+            voteCallTargetId: preferredTargetId,
             timestamp: Date.now(),
+          };
+
+          const roundHeat: Record<string, CandidateDebateHeat> = {
+            [preferredTargetId]: {
+              candidateId: preferredTargetId,
+              heatScore: 1,
+              accusers: [firstAttacker.id],
+              rebuttalCount: 0,
+              voteCallsAgainst: [firstAttacker.id],
+              accusationQuotes: [content.slice(0, 80)],
+            }
           };
 
           setState(prev => ({
@@ -2263,6 +2423,10 @@ export function useGameEngine(
             attacksByRound: {
               ...prev.attacksByRound,
               [nextRound]: [attackEvent],
+            },
+            debateHeatByRound: {
+              ...(prev.debateHeatByRound || {}),
+              [nextRound]: roundHeat,
             },
             stage: {
               ...prev.stage,
@@ -2273,7 +2437,7 @@ export function useGameEngine(
               {
                 id: `tick-${Date.now()}`,
                 type: 'attack',
-                message: `💥 ${firstAttacker.name} challenged ${CANDIDATE_MAP.get(preferredTargetId)?.name}: "${content.slice(0, 80)}..."`,
+                message: `💥 ${firstAttacker.name} challenged ${CANDIDATE_MAP.get(preferredTargetId)?.name} (Heat: 1): "${content.slice(0, 80)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
@@ -2288,6 +2452,10 @@ export function useGameEngine(
             attacksByRound: {
               ...state.attacksByRound,
               [nextRound]: [attackEvent],
+            },
+            debateHeatByRound: {
+              ...(state.debateHeatByRound || {}),
+              [nextRound]: roundHeat,
             }
           });
         } else {

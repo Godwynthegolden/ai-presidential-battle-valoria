@@ -979,38 +979,52 @@ In MAXIMUM 40 WORDS:
         const targetSlogan = targetCandidate ? targetCandidate.slogan : '';
         const targetQuote = ctx.targetSpeechQuote || '';
         const targetWeaknesses = ctx.targetWeaknesses || targetCandidate?.weaknesses || [];
+        const targetTreasury = ctx.targetTreasuryBalance ?? ctx.candidateTreasuries?.[payload.targetId || ''] ?? 100;
+        const targetHeat = ctx.targetHeatScore ?? 0;
 
         let betrayalSnippet = '';
         if (ctx.bribeBetrayals && ctx.bribeBetrayals.length > 0) {
           const betrayalOnTarget = ctx.bribeBetrayals.find(b => b.betrayerId === payload.targetId);
           if (betrayalOnTarget) {
-            betrayalSnippet = `\n⚠️ SCANDALOUS BETRAYAL: ${targetName} took a $${betrayalOnTarget.bribeAmount} bribe from ${betrayalOnTarget.victimName} in the Capitol backroom and stabbed them in the back!\n`;
+            betrayalSnippet = `\n⚠️ CORRIDOR BETRAYAL EVIDENCE: ${targetName} pocketed a $${betrayalOnTarget.bribeAmount} bribe from ${betrayalOnTarget.victimName} and stabbed them in the back!\n`;
           }
+        }
+
+        let rebuttalSnippet = '';
+        if (ctx.activeAccusationOnSpeaker) {
+          rebuttalSnippet = `
+⚠️ ACTIVE ACCUSATION AGAINST YOU:
+${ctx.activeAccusationOnSpeaker.attackerName} attacked you earlier on stage, saying: "${ctx.activeAccusationOnSpeaker.text}"
+REBUTTAL RULE: You MUST open your speech with a brief, sharp defense deflecting ${ctx.activeAccusationOnSpeaker.attackerName.split(' ')[0]}'s accusation before turning the room's fire onto ${targetName}!
+`;
         }
 
         let contextSnippet = '';
         if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
-          contextSnippet = `\nRecent Clashes in this round:\n` + ctx.recentAttacks
+          contextSnippet = `\nDebate Clashes this Round:\n` + ctx.recentAttacks
             .slice(-4)
             .map(a => `- ${a.attackerName} challenged ${a.targetName}: "${a.text}"`)
             .join('\n');
         }
 
-        userPrompt = `Round ${payload.round}: LIVE ATTACK ROUND.
-You are live on stage at the national televised presidential debate, publicly attacking your rival: ${targetName} (${targetRole}).
-Slogan: "${targetSlogan}"
-${betrayalSnippet}${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
+        userPrompt = `Round ${payload.round}: LIVE EMERGENCY MEETING // DEBATE ATTACK ROUND.
+You are live on stage facing the assembly. You are building a strategic case to rally the room against: ${targetName} (${targetRole}).
+Target Slogan: "${targetSlogan}"
+Target Treasury: $${targetTreasury} (Can buy ${Math.floor(targetTreasury / 40)} vote bailouts)
+${targetHeat > 0 ? `Target Debate Heat: ${targetHeat} prior accusation(s) this round.\n` : ''}${rebuttalSnippet}${betrayalSnippet}${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
+
+STRATEGIC 3-PART "EMERGENCY MEETING" SPEECH FORMULA:
+1. [REBUTTAL DEFENSE]: (If accused above) Dismiss the accusation against you in 1 punchy sentence.
+2. [EVIDENCE / THREAT]: Call out ${targetName}'s concrete threat to the room (e.g. hoarding a $${targetTreasury} war chest to buyout the election, secret CCTV dealings, or dangerous policies).
+3. [CALL TO ACTION / VOTE CALL]: Explicitly rally the room and the voters to ELIMINATE ${targetName} on this round's ballot (e.g. "We must unite and vote out ${targetFirstName}!", "Join me in eliminating ${targetFirstName} tonight!").
 
 ANTI-FORMULA & DIRECT OUTPUT RULES (CRITICAL):
-- Output ONLY the final spoken words directly. Do NOT output internal reasoning, drafts, preambles, or explanations.
-- NEVER format your output as a script label, character tag, or definition list (e.g. NEVER write "${targetFirstName}: [Explanation]", "${targetName}: ...", or "[Name]: [Adjective] person who...").
+- Output ONLY the final spoken words directly. Do NOT output internal reasoning, drafting notes, or explanations.
+- NEVER format your output as a script label, character tag, or definition list (e.g. NEVER write "${candidate.name.split(' ')[0]}:").
 - NEVER start your sentence with a name followed by a colon or dash.
-- Speak in authentic, fiery live debate rhetoric with dynamic sentence structure:
-  * Either confront them directly ("You stood on this stage and claimed...", "Don't let them deceive you...", "Your voting record is a betrayal to our families...")
-  * Or call them out to the voters ("Look at what they did to Iron Valley...", "Their economic fantasy will bankrupt every household in Valoria...", "Behind closed doors, they took millions from...").
-- Ruthlessly attack ${targetName}'s exact words, economic hypocrisy, donor ties, or fitness to lead Valoria.
-- Stay completely in character as ${candidate.name} (${candidate.archetypeTitle}).
-- Return clean, spoken attack speech text only. MAXIMUM 30 WORDS.`;
+- Speak with fierce conviction, calculating game-theory intelligence, and authentic live debate fire.
+- Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle}).
+- MAXIMUM 35 WORDS.`;
         break;
       }
 
@@ -1040,6 +1054,15 @@ ANTI-FORMULA & DIRECT OUTPUT RULES (CRITICAL):
         const proposerBudget = ctx.proposerBudget ?? candidateTreasuries[candidate.id] ?? 100;
         const affordableBribes = Math.floor(proposerBudget / 30);
 
+        let debateConsensusSnippet = '';
+        if (ctx.debateConsensusLeader && ctx.debateConsensusLeader.heatScore > 0) {
+          debateConsensusSnippet = `
+🔥 ON-STAGE DEBATE CONSENSUS:
+${ctx.debateConsensusLeader.candidateName} is under heavy fire on stage with ${ctx.debateConsensusLeader.heatScore} accusations from (${ctx.debateConsensusLeader.accusers.join(', ')}).
+Strategic Angle: You can coordinate with your partner to seal ${ctx.debateConsensusLeader.candidateName.split(' ')[0]}'s elimination, or orchestrate a secret counter-blindside!
+`;
+        }
+
         let contextSnippet = '';
         if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
           contextSnippet = `\nRecent Debate Clashes:\n` + ctx.recentAttacks
@@ -1053,7 +1076,7 @@ You are ${candidate.name} (${candidate.archetypeTitle}, Balance: $${proposerBudg
 Surveillance is recording unmonitored Capitol hallways. All active candidates are maneuvering before the secret ballot:
 Active Candidates & Treasuries:
   - ${activeCandidatesList}
-${contextSnippet}
+${debateConsensusSnippet}${contextSnippet}
 
 YOUR STRATEGIC CHOICES:
 1. "bribe" (Costs $30 total: $15 upfront to receiver + $15 held in escrow until they vote for your target).
@@ -1082,7 +1105,7 @@ You MUST return a JSON object with this exact schema:
   "offerPrice": 30,
   "whisper": "1-2 sentence whispered proposal addressing targetCandidateId by first name (max 25 words)",
   "receiverDecision": "accept"
-}`;
+} `;
         break;
       }
 
@@ -1092,9 +1115,19 @@ You MUST return a JSON object with this exact schema:
         const candidatesToVote = allowedTargets
           .map(id => {
             const c = CANDIDATE_MAP.get(id);
-            return `"${id}" (${c?.name} - ${c?.archetypeTitle})`;
+            const bal = ctx.candidateTreasuries?.[id] ?? 100;
+            return `"${id}" (${c?.name} - ${c?.archetypeTitle}, $${bal})`;
           })
           .join(', ');
+
+        let debateConsensusSnippet = '';
+        if (ctx.debateConsensusLeader && ctx.debateConsensusLeader.heatScore > 0) {
+          debateConsensusSnippet = `
+🔥 ON-STAGE DEBATE CONSENSUS & BANDWAGON:
+Primary Debate Target: "${ctx.debateConsensusLeader.candidateId}" (${ctx.debateConsensusLeader.candidateName}) with ${ctx.debateConsensusLeader.heatScore} accusations on stage.
+Contenders who called for their elimination: ${ctx.debateConsensusLeader.accusers.join(', ')}.
+`;
+        }
 
         let contextSnippet = '';
         if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
@@ -1146,20 +1179,26 @@ You shook hands with ${ally?.name} (${ally?.titleRole}) to coordinate votes agai
 
         userPrompt = `Round ${payload.round}: CONFIDENTIAL ELIMINATION BALLOT.
 You must secretly vote to ELIMINATE ONE candidate from the presidential race.
-Rules:
-1. You CANNOT vote for yourself (${candidate.id}).
-2. You MUST pick exactly ONE ID from: [${candidatesToVote}].
-3. Vote based on political survival, rival threats, backroom pacts, or tactical betrayals.
-${strategyContext}${pactContext}${contextSnippet}
+Contenders available to vote against:
+  [${candidatesToVote}]
+
+${debateConsensusSnippet}${strategyContext}${pactContext}${contextSnippet}
+
+YOUR STRATEGIC VOTING AVENUES:
+1. [BANDWAGON]: Join the on-stage debate consensus and vote to eliminate the primary debate target (${ctx.debateConsensusLeader?.candidateName || 'the leading target'}).
+2. [HONOR CONTRACT]: Fulfill your secret $30 corridor pact to secure the remaining escrow cash payout.
+3. [BLINDSIDE / RETALIATION]: Blindside the richest contender to drain their treasury, or strike back at someone who attacked you in the debate!
 
 DIRECT OUTPUT RULES:
 - Return ONLY the raw JSON object below. Do NOT output markdown code blocks, reasoning steps, or notes.
+- You CANNOT vote for yourself (${candidate.id}).
 
 You MUST return a JSON object with this exact schema:
 {
   "vote": "candidate_id",
   "reason": "sharp, authentic private political calculation (max 20 words)"
-}`;
+}
+`;
         break;
       }
 

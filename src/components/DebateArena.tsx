@@ -25,7 +25,9 @@ import {
   Volume2,
   Mic,
   RotateCcw,
-  Zap
+  Zap,
+  Shield,
+  Crosshair
 } from 'lucide-react';
 
 interface DebateArenaProps {
@@ -232,94 +234,126 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             </button>
           </div>
         ) : stage.actionType === 'attack' && speaker && target ? (
-          /* Attack Showdown View: Attacker vs Target */
-          <div 
-            key={`attack-${speaker.id}-${target.id}-${gameState.currentSpeakerIndex}-${gameState.round}`}
-            className="w-full flex flex-col items-center gap-6 max-w-3xl animate-step-transition"
-          >
-            <div className="flex items-center justify-between w-full max-w-xl px-4 pt-3">
-              {/* Attacker Podium */}
-              <div className="flex flex-col items-center gap-2.5">
-                <CandidateAvatar
-                  candidate={speaker}
-                  size="xl"
-                  isSpeaking={true}
-                  isAttacking={true}
-                />
-                <div className="text-center">
-                  <span className="text-base font-display font-black text-white tracking-wide block">
-                    {speaker.name}
-                  </span>
-                  <span className="text-[11px] font-mono font-bold text-red-400 uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-950/80 border border-red-800/60 inline-block mt-1">
-                    Attacker ({speaker.codename})
-                  </span>
+          /* Attack Showdown View: Attacker vs Target (Among Us Emergency Meeting HUD) */
+          (() => {
+            const currentAttacks = gameState.attacksByRound[gameState.round] || [];
+            const currentAttack = currentAttacks.find(a => a.attackerId === speaker.id);
+            const isRebuttal = currentAttack?.isRebuttal || (gameState.debateHeatByRound?.[gameState.round]?.[speaker.id]?.rebuttalCount || 0) > 0;
+            const targetHeat = gameState.debateHeatByRound?.[gameState.round]?.[target.id]?.heatScore ?? 1;
+            const targetBudget = gameState.candidateBudgets[target.id] ?? 100;
+            const targetBailouts = Math.floor(targetBudget / 40);
+
+            return (
+              <div 
+                key={`attack-${speaker.id}-${target.id}-${gameState.currentSpeakerIndex}-${gameState.round}`}
+                className="w-full flex flex-col items-center gap-6 max-w-3xl animate-step-transition"
+              >
+                <div className="flex items-center justify-between w-full max-w-xl px-4 pt-3">
+                  {/* Attacker Podium */}
+                  <div className="flex flex-col items-center gap-2.5">
+                    <CandidateAvatar
+                      candidate={speaker}
+                      size="xl"
+                      isSpeaking={true}
+                      isAttacking={true}
+                    />
+                    <div className="text-center flex flex-col items-center">
+                      <span className="text-base font-display font-black text-white tracking-wide block">
+                        {speaker.name}
+                      </span>
+                      {isRebuttal ? (
+                        <span className="text-[11px] font-mono font-bold text-emerald-400 uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/60 inline-flex items-center gap-1 mt-1 shadow-md shadow-emerald-950/50">
+                          <Shield className="w-3 h-3 text-emerald-400" /> Rebuttal Defense
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-mono font-bold text-red-400 uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-950/80 border border-red-800/60 inline-block mt-1">
+                          Accuser ({speaker.codename})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Clash Energy Beam Icon */}
+                  <div className="flex flex-col items-center justify-center gap-1.5 px-4 text-red-500">
+                    <div className="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/40 flex items-center justify-center shadow-lg shadow-red-500/20 animate-pulse">
+                      <Swords className="w-6 h-6 text-red-400" />
+                    </div>
+                    <span className="text-[11px] font-display font-black uppercase tracking-widest bg-red-950 px-2.5 py-0.5 rounded-md border border-red-700 text-red-200">
+                      VS
+                    </span>
+                  </div>
+
+                  {/* Target Podium */}
+                  <div className="flex flex-col items-center gap-2.5">
+                    <CandidateAvatar
+                      candidate={target}
+                      size="xl"
+                      isTarget={true}
+                    />
+                    <div className="text-center flex flex-col items-center">
+                      <span className="text-base font-display font-black text-white tracking-wide block">
+                        {target.name}
+                      </span>
+                      {/* Suspicion & Heat Meter Badge */}
+                      {targetHeat >= 3 ? (
+                        <span className="text-[11px] font-mono font-black text-red-300 uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-950 border border-red-500 animate-pulse inline-flex items-center gap-1 mt-1 shadow-lg shadow-red-500/30">
+                          <Crosshair className="w-3 h-3 text-red-400" /> Prime Target ({targetHeat} Clashes)
+                        </span>
+                      ) : targetHeat === 2 ? (
+                        <span className="text-[11px] font-mono font-bold text-orange-300 uppercase tracking-wider px-2 py-0.5 rounded-full bg-orange-950/80 border border-orange-500/60 inline-flex items-center gap-1 mt-1">
+                          <Flame className="w-3 h-3 text-orange-400" /> Suspect ({targetHeat} Accusations)
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-mono font-bold text-amber-400 uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-950/80 border border-amber-800/60 inline-block mt-1">
+                          Targeted ($ {targetBudget})
+                        </span>
+                      )}
+                      <span className="text-[10px] font-mono text-slate-400 mt-0.5">
+                        💰 War Chest: ${targetBudget} {targetBailouts > 0 ? `(${targetBailouts} Bailouts)` : '(Vulnerable)'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Attack Speech Box */}
+                <div className="w-full relative rounded-3xl bg-slate-950/95 border-2 border-red-500/80 p-6 md:p-8 shadow-2xl shadow-red-950/70 backdrop-blur-xl">
+                  <div className="flex items-center justify-between absolute -top-3.5 left-6 right-6">
+                    <div className={`px-3.5 py-1 rounded-md text-white text-xs font-display font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5 ${isRebuttal ? 'bg-emerald-600 border border-emerald-400/50' : 'bg-red-600 border border-red-400/50'}`}>
+                      {isRebuttal ? <Shield className="w-3.5 h-3.5" /> : <Flame className="w-3.5 h-3.5" />}
+                      {isRebuttal ? 'Rebuttal & Vote Call' : 'Emergency Accusation'}
+                    </div>
+
+                    {!stage.isLoading && onPlaySpeechAudio && (
+                      <button
+                        type="button"
+                        onClick={() => onPlaySpeechAudio(stage.content, speaker?.voice?.voiceId, speaker?.id)}
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900/90 hover:bg-slate-800 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-mono font-bold shadow-md transition active:scale-95 cursor-pointer"
+                        title="Replay candidate's attack voice"
+                      >
+                        <Volume2 className="w-3.5 h-3.5 text-purple-400" />
+                        <span>{isSpeakingAudio ? 'Speaking...' : 'Replay Voice'}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {stage.isLoading ? (
+                    <div className="flex items-center justify-center py-8 gap-3 text-red-400">
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                      <span className="text-sm font-mono tracking-wider">
+                        Formulating strategic debate argument via 9router AI...
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <p className="text-lg sm:text-xl md:text-2xl font-sans font-semibold text-white leading-relaxed italic">
+                        &ldquo;{stage.content}&rdquo;
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Clash Energy Beam Icon */}
-              <div className="flex flex-col items-center justify-center gap-1.5 px-4 text-red-500">
-                <div className="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/40 flex items-center justify-center shadow-lg shadow-red-500/20 animate-pulse">
-                  <Swords className="w-6 h-6 text-red-400" />
-                </div>
-                <span className="text-[11px] font-display font-black uppercase tracking-widest bg-red-950 px-2.5 py-0.5 rounded-md border border-red-700 text-red-200">
-                  VS
-                </span>
-              </div>
-
-              {/* Target Podium */}
-              <div className="flex flex-col items-center gap-2.5">
-                <CandidateAvatar
-                  candidate={target}
-                  size="xl"
-                  isTarget={true}
-                />
-                <div className="text-center">
-                  <span className="text-base font-display font-black text-white tracking-wide block">
-                    {target.name}
-                  </span>
-                  <span className="text-[11px] font-mono font-bold text-amber-400 uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-950/80 border border-amber-800/60 inline-block mt-1">
-                    Target ({target.codename})
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Attack Speech Box */}
-            <div className="w-full relative rounded-3xl bg-slate-950/95 border-2 border-red-500/80 p-6 md:p-8 shadow-2xl shadow-red-950/70 backdrop-blur-xl">
-              <div className="flex items-center justify-between absolute -top-3.5 left-6 right-6">
-                <div className="px-3.5 py-1 rounded-md bg-red-600 text-white text-xs font-display font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-                  <Flame className="w-3.5 h-3.5" /> Public Denunciation
-                </div>
-
-                {!stage.isLoading && onPlaySpeechAudio && (
-                  <button
-                    type="button"
-                    onClick={() => onPlaySpeechAudio(stage.content, speaker?.voice?.voiceId, speaker?.id)}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900/90 hover:bg-slate-800 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-mono font-bold shadow-md transition active:scale-95 cursor-pointer"
-                    title="Replay candidate's attack voice"
-                  >
-                    <Volume2 className="w-3.5 h-3.5 text-purple-400" />
-                    <span>{isSpeakingAudio ? 'Speaking...' : 'Replay Voice'}</span>
-                  </button>
-                )}
-              </div>
-
-              {stage.isLoading ? (
-                <div className="flex items-center justify-center py-8 gap-3 text-red-400">
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                  <span className="text-sm font-mono tracking-wider">
-                    Formulating attack via 9router AI...
-                  </span>
-                </div>
-              ) : (
-                <div className="relative">
-                  <p className="text-lg sm:text-xl md:text-2xl font-sans font-semibold text-white leading-relaxed italic">
-                    &ldquo;{stage.content}&rdquo;
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+            );
+          })()
         ) : speaker ? (
           /* Single Speaker Podium View (Campaign, Final Speech, Elimination) */
           <div 
