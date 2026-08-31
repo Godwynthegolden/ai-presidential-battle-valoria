@@ -11,9 +11,9 @@ import { sounds } from '../utils/audio';
 import { COLOR_PRESETS, createColorTheme, hexToRgb } from '../components/CharacterEditorModal';
 
 async function testEngine() {
-  console.log('Testing 11 Republic of Valoria Candidates loaded:', CANDIDATES.length);
-  if (CANDIDATES.length !== 11) {
-    throw new Error(`Expected 11 candidates, got ${CANDIDATES.length}`);
+  console.log('Testing 31 Republic of Valoria Candidates loaded:', CANDIDATES.length);
+  if (CANDIDATES.length !== 31) {
+    throw new Error(`Expected 31 candidates, got ${CANDIDATES.length}`);
   }
 
   // Check candidate fields
@@ -22,7 +22,7 @@ async function testEngine() {
       throw new Error(`Candidate ${c.id} missing required fields.`);
     }
   }
-  console.log('All 11 candidate dossiers & titleRoles verified successfully!');
+  console.log('All 31 candidate dossiers & titleRoles verified successfully!');
 
   // Test isConfigured
   console.log('Testing isConfigured check:');
@@ -33,8 +33,8 @@ async function testEngine() {
   const preset4 = CANDIDATES.slice(0, 4).map(c => c.id);
   const preset6 = CANDIDATES.slice(0, 6).map(c => c.id);
   const preset8 = CANDIDATES.slice(0, 8).map(c => c.id);
-  const preset11 = CANDIDATES.map(c => c.id);
-  console.log(`Verified custom roster presets: Quick4 (${preset4.length}), Top6 (${preset6.length}), Top8 (${preset8.length}), All11 (${preset11.length})`);
+  const preset31 = CANDIDATES.map(c => c.id);
+  console.log(`Verified custom roster presets: Quick4 (${preset4.length}), Top6 (${preset6.length}), Top8 (${preset8.length}), All31 (${preset31.length})`);
 
   // Test selected lineup fallback
   const storedFallback = getStoredSelectedCandidateIds(preset6);
@@ -670,7 +670,7 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   }
   console.log('4. Sequential Ballot & Bailout Snapshot Steps PASSED!');
 
-  // Test 6: SoundManager all 12 studio-grade cinematic sound methods verification
+  // Test 6: SoundManager all 12 core sound methods + 20 new character sound synthesizers
   sounds.enabled = true;
   sounds.playGavel();
   sounds.playSpeechBeep();
@@ -684,7 +684,35 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   sounds.playCashChime();
   sounds.playSwapWhoosh();
   sounds.playFanfare();
-  console.log('5. Studio-Grade SoundManager (All 12 Cinematic Synthesizers) PASSED!');
+
+  // Test 20 new character sound synthesizers
+  sounds.playBorderGovernorHammerGate();
+  sounds.playNeurotechSynapseChime();
+  sounds.playCartelProsecutorHandcuffSnap();
+  sounds.playTelevangelistPipeOrganSwell();
+  sounds.playDistressedDebtCashStack();
+  sounds.playRuralSheriffBootSpur();
+  sounds.playNegotiatorSecretBriefcase();
+  sounds.playCoalMayorPickaxeStrike();
+  sounds.playBigPharmaVialClick();
+  sounds.playSovereignWealthVaultDoor();
+  sounds.playViralPodcasterLivestreamBeep();
+  sounds.playSpecialOpsRifleBolt();
+  sounds.playDeficitHawkRedPenStamp();
+  sounds.playEnergyDynastHarpsichordChime();
+  sounds.playEthicalHackerKeyboardClack();
+  sounds.playAirlineChiefCabinChime();
+  sounds.playEpidemiologistRespiratorBreath();
+  sounds.playConstitutionalGavelResonance();
+  sounds.playPopulistHeiressFlashbulb();
+  sounds.playSpaceAdmiralThrusterPulse();
+
+  // Test playCandidateSignature across all 31 candidates
+  for (const c of CANDIDATES) {
+    sounds.playCandidateSignature(c.id, 'speech');
+  }
+
+  console.log('5. Studio-Grade SoundManager (All 12 Core + 20 Character Synthesizers & Dispatcher) PASSED!');
 
   // Test 7: Cinematic Ballot Reveal 5-speed presets duration calculation
   const baseMs = 1400;
