@@ -14,7 +14,11 @@ import {
   Banknote,
   AlertTriangle,
   ArrowRight,
-  Radio
+  Radio,
+  Sparkles,
+  Layers,
+  CheckCircle2,
+  Flame
 } from 'lucide-react';
 
 interface VoteRevealBoardProps {
@@ -275,10 +279,10 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
   useEffect(() => {
     let delayMs = getStepDuration(1400);
     if (phase === 'CLEAN_INTRO') delayMs = getStepDuration(1800);
-    else if (phase === 'BALLOTS') delayMs = getStepDuration(1300);
-    else if (phase === 'VOTES_TALLIED') delayMs = getStepDuration(2000);
-    else if (phase === 'BAILOUTS') delayMs = getStepDuration(1900);
-    else if (phase === 'ELIMINATION_LOCKED') delayMs = getStepDuration(2400);
+    else if (phase === 'BALLOTS') delayMs = getStepDuration(1400);
+    else if (phase === 'VOTES_TALLIED') delayMs = getStepDuration(2100);
+    else if (phase === 'BAILOUTS') delayMs = getStepDuration(2000);
+    else if (phase === 'ELIMINATION_LOCKED') delayMs = getStepDuration(2500);
     else if (phase === 'COMPLETE') return;
 
     timerRef.current = setTimeout(() => { stepForward(); }, delayMs);
@@ -304,7 +308,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
   return (
     <div 
       ref={stageContainerRef}
-      className={`fixed inset-0 z-50 overflow-hidden bg-[#020509]/98 backdrop-blur-3xl flex flex-col justify-between p-3 sm:p-5 md:p-8 select-none transition-colors duration-700 ${
+      className={`fixed inset-0 z-50 overflow-hidden bg-[#020509]/98 backdrop-blur-3xl flex flex-col justify-between p-3 sm:p-4 md:p-6 select-none transition-colors duration-700 ${
         isBetrayalEvent ? 'ring-8 ring-red-600/40' : ''
       }`}
     >
@@ -317,66 +321,115 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* 1. TOP BROADCAST HEADER HUD */}
+      {/* 1. TOP BROADCAST HEADER & PHASE STEPPER HUD */}
       {/* ========================================================================= */}
-      <div className="relative z-20 flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-800/80">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-red-950/90 border border-red-600 text-red-300 font-mono text-xs font-black shadow-lg shadow-red-950/50 animate-pulse">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-            <span>REC &bull; LIVE BALLOT UNSEALING</span>
+      <div className="relative z-20 flex flex-col gap-2 pb-2.5 border-b border-slate-800/80">
+        <div className="flex items-center justify-between flex-wrap gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-red-950/90 border border-red-600 text-red-300 font-mono text-xs font-black shadow-lg shadow-red-950/50 animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-red-500" />
+              <span>REC &bull; LIVE BALLOT UNSEALING</span>
+            </div>
+
+            <div>
+              <h1 className="text-sm sm:text-lg md:text-xl font-display font-black text-white uppercase tracking-wider flex items-center gap-2">
+                {isFinalVote ? (
+                  <>
+                    <Crown className="w-5 h-5 text-amber-400" />
+                    <span>Grand Jury Presidential Mandate Totals</span>
+                  </>
+                ) : (
+                  <>
+                    <Vote className="w-5 h-5 text-cyan-400" />
+                    <span>Round {tally.round} Elimination Vote Results</span>
+                  </>
+                )}
+              </h1>
+            </div>
           </div>
 
-          <div>
-            <h1 className="text-base sm:text-xl md:text-2xl font-display font-black text-white uppercase tracking-wider flex items-center gap-2">
-              {isFinalVote ? (
-                <>
-                  <Crown className="w-6 h-6 text-amber-400" />
-                  <span>Grand Jury Presidential Mandate Totals</span>
-                </>
-              ) : (
-                <>
-                  <Vote className="w-6 h-6 text-cyan-400" />
-                  <span>Round {tally.round} Confidential Elimination Ballot</span>
-                </>
-              )}
-            </h1>
-            <p className="text-[11px] sm:text-xs text-slate-400 font-sans mt-0.5">
-              {isFinalVote 
-                ? 'Secret presidential mandates unsealed before the Supreme National Assembly of Valoria.' 
-                : 'Highest vote recipient is eliminated — unless bailed out by $40 Capitol buyouts.'}
-            </p>
+          {/* Timecode and Feed Status */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900/90 border border-slate-750 font-mono text-xs font-bold text-cyan-300 shadow-inner">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              <span>{phase === 'BALLOTS' ? `Ballot ${currentBallotIndex + 1}/${totalBallots}` : phase.replace('_', ' ')}</span>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/60 border border-slate-800 font-mono text-xs text-emerald-400 font-bold">
+              <Radio className="w-3.5 h-3.5 animate-pulse" />
+              <span>{timecode}</span>
+            </div>
           </div>
         </div>
 
-        {/* Live Broadcast Feed Status Pill */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/90 border border-slate-750 shadow-inner">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-            <span className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wide">
-              {phase === 'CLEAN_INTRO' && 'Unsealing Ballot Vault...'}
-              {phase === 'BALLOTS' && `Unsealing Ballot ${currentBallotIndex + 1} of ${totalBallots}`}
-              {phase === 'VOTES_TALLIED' && 'Initial Ballots Counted'}
-              {phase === 'BAILOUTS' && `Capitol Bailout Auction (${currentBailoutIndex + 1}/${totalBailouts})`}
-              {phase === 'ELIMINATION_LOCKED' && 'Results Ratified & Locked'}
-              {phase === 'COMPLETE' && 'Complete'}
-            </span>
-          </div>
-
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/60 border border-slate-800 font-mono text-xs text-emerald-400 font-bold">
-            <Radio className="w-3.5 h-3.5 animate-pulse" />
-            <span>{timecode}</span>
-          </div>
+        {/* 4-Step Broadcast Phase Stepper Ribbon */}
+        <div className="grid grid-cols-4 gap-1.5 pt-1">
+          {[
+            {
+              id: 'BALLOTS',
+              step: '1',
+              label: 'UNSEAL BALLOTS',
+              active: phase === 'CLEAN_INTRO' || phase === 'BALLOTS',
+              done: phase === 'VOTES_TALLIED' || phase === 'BAILOUTS' || phase === 'ELIMINATION_LOCKED' || phase === 'COMPLETE',
+              detail: phase === 'BALLOTS' ? `${currentBallotIndex + 1}/${totalBallots}` : `${totalBallots} Votes`,
+            },
+            {
+              id: 'VOTES_TALLIED',
+              step: '2',
+              label: 'INITIAL TALLY',
+              active: phase === 'VOTES_TALLIED',
+              done: phase === 'BAILOUTS' || phase === 'ELIMINATION_LOCKED' || phase === 'COMPLETE',
+              detail: 'Standings Locked',
+            },
+            {
+              id: 'BAILOUTS',
+              step: '3',
+              label: 'BAILOUT AUCTIONS',
+              active: phase === 'BAILOUTS',
+              done: phase === 'ELIMINATION_LOCKED' || phase === 'COMPLETE',
+              detail: `${totalBailouts} Buyouts ($40/ea)`,
+            },
+            {
+              id: 'ELIMINATION_LOCKED',
+              step: '4',
+              label: isFinalVote ? 'PRESIDENTIAL WINNER' : 'ELIMINATION LOCK',
+              active: phase === 'ELIMINATION_LOCKED' || phase === 'COMPLETE',
+              done: phase === 'COMPLETE',
+              detail: isFinalVote ? 'President Elected' : 'Concession Next',
+            },
+          ].map(st => (
+            <div
+              key={st.step}
+              className={`flex items-center justify-between px-2.5 py-1 rounded-xl border text-[10px] sm:text-xs font-mono transition-all duration-300 ${
+                st.active
+                  ? 'bg-cyan-950/80 border-cyan-400 text-cyan-200 shadow-md shadow-cyan-500/20 ring-1 ring-cyan-400/50 font-black'
+                  : st.done
+                  ? 'bg-slate-900/60 border-emerald-700/60 text-emerald-300 font-bold'
+                  : 'bg-slate-950/40 border-slate-800 text-slate-500 opacity-60'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 truncate">
+                <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${
+                  st.active ? 'bg-cyan-400 text-black' : st.done ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'
+                }`}>
+                  {st.done ? '✓' : st.step}
+                </span>
+                <span className="truncate">{st.label}</span>
+              </div>
+              <span className="hidden md:inline text-[9px] font-bold opacity-80">{st.detail}</span>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* ========================================================================= */}
       {/* 2. MAIN SPLIT STAGE: LEFT (LEADERBOARD) & RIGHT (ACTIVE SPOTLIGHT) */}
       {/* ========================================================================= */}
-      <div className="relative z-20 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 my-3 min-h-0 overflow-hidden">
+      <div className="relative z-20 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 my-2 min-h-0 overflow-hidden">
         
-        {/* LEFT COLUMN: LIVE STANDINGS LEADERBOARD (5 COLS) */}
-        <div className="lg:col-span-5 h-full flex flex-col gap-2.5 overflow-y-auto pr-1 custom-scrollbar">
-          <div className="flex items-center justify-between px-2 text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">
+        {/* LEFT COLUMN: LIVE STANDINGS LEADERBOARD & VOTER ATTRIBUTION (5 COLS) */}
+        <div className="lg:col-span-5 h-full flex flex-col gap-2 overflow-y-auto pr-1 custom-scrollbar">
+          <div className="flex items-center justify-between px-2 text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider">
             <span>Contender Standings</span>
             <span>Elimination Votes</span>
           </div>
@@ -395,25 +448,46 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
               const totalVotesRemoved = st.bailoutTransactions.reduce((sum, tx) => sum + tx.votesRemoved, 0);
               const totalSpent = st.bailoutTransactions.reduce((sum, tx) => sum + tx.cost, 0);
 
+              // Find all votes currently revealed that target this candidate
+              const votesForCandidate = tally.votes
+                .slice(0, currentBallotIndex + 1)
+                .filter(v => v.targetId === st.candidateId);
+
+              // Survival calculations for war chest treasury
+              const canAffordBailouts = Math.floor(st.budget / 40);
+
               return (
                 <div
                   key={st.candidateId}
-                  className={`relative flex flex-col gap-1.5 p-3 rounded-2xl border transition-all duration-500 ${
+                  className={`relative flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-2xl border transition-all duration-500 ${
                     isWinner
-                      ? 'bg-gradient-to-r from-amber-950/90 via-[#0e1424] to-slate-950 border-amber-400 shadow-xl shadow-amber-500/25 scale-[1.02]'
+                      ? 'bg-gradient-to-r from-amber-950/90 via-[#0e1424] to-slate-950 border-amber-400 shadow-xl shadow-amber-500/25 scale-[1.01]'
                       : isEliminated
                       ? 'bg-red-950/80 border-2 border-red-500 shadow-2xl shadow-red-950/80 animate-pulse'
                       : isCurrentTarget
                       ? 'bg-slate-900 border-cyan-400 shadow-lg shadow-cyan-500/20 scale-[1.01]'
                       : isTopChoppingBlock
-                      ? 'bg-red-950/30 border-red-600/70 shadow-md shadow-red-950/30'
+                      ? 'bg-red-950/40 border-red-500 shadow-lg shadow-red-950/40 ring-1 ring-red-500/60'
                       : 'bg-slate-950/80 border-slate-800/80'
                   }`}
                 >
+                  {/* Danger Zone Banner on Chopping Block Leader */}
+                  {isTopChoppingBlock && !isEliminated && !isWinner && (
+                    <div className="flex items-center justify-between px-2 py-0.5 rounded-lg bg-red-950 border border-red-700/80 text-red-300 font-mono text-[9px] font-black uppercase tracking-wider mb-0.5">
+                      <span className="flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-red-400 animate-pulse" />
+                        ON THE CHOPPING BLOCK (ELIMINATION RISK)
+                      </span>
+                      <span>
+                        {canAffordBailouts > 0 ? `💰 ${canAffordBailouts} Bailout Available` : `💀 UNPROTECTED ($${st.budget})`}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Top Row: Rank, Avatar, Name, War Chest Treasury, Live Votes */}
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <span className={`text-xs font-mono font-black w-6 text-center rounded-md py-0.5 ${
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[11px] font-mono font-black w-5 text-center rounded-md py-0.5 ${
                         rank === 0 ? 'bg-red-950 text-red-400 border border-red-700' : 'bg-slate-900 text-slate-400'
                       }`}>
                         #{rank + 1}
@@ -426,7 +500,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                         showBadge={false}
                       />
                       <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <span className="text-xs sm:text-sm font-display font-black text-white">
                             {cand.name}
                           </span>
@@ -436,16 +510,16 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                             ${st.budget}
                           </span>
                         </div>
-                        <span className="text-[10px] text-slate-400 truncate max-w-[140px] sm:max-w-[180px]">
+                        <span className="text-[10px] text-slate-400 truncate max-w-[130px] sm:max-w-[170px]">
                           {cand.titleRole}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       {/* Floating -$40 Bailout Tag */}
                       {st.hasBailedOutThisTick && (
-                        <span className="flex items-center gap-1 text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 shadow-md animate-bounce">
+                        <span className="flex items-center gap-1 text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 shadow-md animate-bounce">
                           <Banknote className="w-3 h-3" /> -$40 [SAVED!]
                         </span>
                       )}
@@ -469,8 +543,8 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                       )}
 
                       {/* Monospace Vote Counter */}
-                      <span className={`text-sm sm:text-base font-black font-mono px-2.5 py-0.5 rounded-lg border transition-transform ${
-                        isCurrentTarget ? 'bg-cyan-950 border-cyan-400 text-cyan-300 scale-110' : 'bg-slate-900 border-slate-750 text-white'
+                      <span className={`text-xs sm:text-sm font-black font-mono px-2 py-0.5 rounded-lg border transition-transform ${
+                        isCurrentTarget ? 'bg-cyan-950 border-cyan-400 text-cyan-300 scale-105' : 'bg-slate-900 border-slate-750 text-white'
                       }`}>
                         {st.votes} {st.votes === 1 ? 'Vote' : 'Votes'}
                       </span>
@@ -492,6 +566,56 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                       style={{ width: `${Math.max(percentage, st.votes > 0 ? 8 : 0)}%` }}
                     />
                   </div>
+
+                  {/* ========================================================================= */}
+                  {/* ⭐ USER REQUIREMENT: VOTER NAME AND PICTURE UNDER PROGRESS BAR */}
+                  {/* ========================================================================= */}
+                  {votesForCandidate.length > 0 && (
+                    <div className="flex items-center flex-wrap gap-1.5 pt-1 mt-0.5 border-t border-slate-800/60 animate-fade-in">
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1">
+                        <Vote className="w-2.5 h-2.5 text-cyan-400" />
+                        Voted By:
+                      </span>
+                      <div className="flex items-center flex-wrap gap-1">
+                        {votesForCandidate.map((v, vIdx) => {
+                          const voter = CANDIDATE_MAP.get(v.voterId);
+                          if (!voter) return null;
+                          return (
+                            <div
+                              key={vIdx}
+                              className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] font-mono font-bold shadow-xs transition-all duration-300 animate-step-transition ${
+                                v.isBetrayal
+                                  ? 'bg-red-950/90 border-red-500 text-red-200 animate-pulse ring-1 ring-red-500'
+                                  : v.isHonoredPact
+                                  ? 'bg-emerald-950/90 border-emerald-500 text-emerald-200'
+                                  : 'bg-slate-900/90 border-slate-700 text-slate-200'
+                              }`}
+                              title={
+                                v.isBetrayal
+                                  ? `${voter.name} (BETRAYED corridor pact!)`
+                                  : v.isHonoredPact
+                                  ? `${voter.name} (Kept $30 alliance pact)`
+                                  : `${voter.name} cast elimination ballot`
+                              }
+                            >
+                              <CandidateAvatar candidate={voter} size="xs" showBadge={false} />
+                              <span className="text-white font-sans text-[10px]">{voter.name.split(' ')[0]}</span>
+                              {v.isBetrayal && (
+                                <span className="text-[8px] font-black uppercase text-red-300 bg-red-900/80 px-1 py-0.2 rounded flex items-center gap-0.5">
+                                  <Swords className="w-2.5 h-2.5 text-red-300" /> Betrayal
+                                </span>
+                              )}
+                              {v.isHonoredPact && (
+                                <span className="text-[8px] font-black uppercase text-emerald-300 bg-emerald-900/80 px-1 py-0.2 rounded flex items-center gap-0.5">
+                                  <ShieldCheck className="w-2.5 h-2.5 text-emerald-300" /> Pact
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -520,7 +644,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
           {phase === 'BALLOTS' && activeVote && activeVoter && activeTarget && (
             <div 
               ref={ballotEnvelopeRef}
-              className="w-full max-w-lg flex flex-col gap-4 p-5 sm:p-7 rounded-3xl bg-gradient-to-b from-[#0f172a] via-[#090d16] to-[#04060a] border-2 border-cyan-500/50 shadow-[0_0_50px_rgba(6,182,212,0.25)] relative overflow-hidden"
+              className="w-full max-w-lg flex flex-col gap-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-b from-[#0f172a] via-[#090d16] to-[#04060a] border-2 border-cyan-500/50 shadow-[0_0_50px_rgba(6,182,212,0.25)] relative overflow-hidden"
             >
               {/* Top Envelope Header */}
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -631,7 +755,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
           {phase === 'BAILOUTS' && activeBailoutTx && activeBailoutCandidate && (
             <div 
               ref={bailoutCashRef}
-              className="w-full max-w-lg flex flex-col gap-4 p-5 sm:p-7 rounded-3xl bg-gradient-to-b from-[#064e3b] via-[#022c22] to-[#01140e] border-2 border-emerald-400 shadow-[0_0_50px_rgba(16,185,129,0.3)] relative overflow-hidden animate-fade-in"
+              className="w-full max-w-lg flex flex-col gap-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-b from-[#064e3b] via-[#022c22] to-[#01140e] border-2 border-emerald-400 shadow-[0_0_50px_rgba(16,185,129,0.3)] relative overflow-hidden animate-fade-in"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-emerald-700/80 pb-3">

@@ -687,6 +687,14 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   }
   console.log('6. Cinematic Ballot Reveal 5-Speed Preset Calculations (0.5x, 0.75x, 1.0x, 1.5x, 2.0x) PASSED!');
 
+  // Test 8: Voter Attribution & Status Filter under Progress Bar
+  const candidateTargetId = 'marcus-vance';
+  const votersForMarcus = sampleVotes.filter(v => v.targetId === candidateTargetId);
+  if (votersForMarcus.length !== 2 || votersForMarcus[0].voterId !== 'jax-alvarez' || votersForMarcus[1].voterId !== 'elena-rostova') {
+    throw new Error('Voter attribution filtering for candidate progress bar failed');
+  }
+  console.log('7. Voter Name & Avatar Attribution Under Candidate Progress Bar PASSED!');
+
   console.log('\nAll unit tests for AI JSON Integrity, Candidate Reordering & Full-Screen YouTube Ballot Reveal PASSED successfully!');
 }
 
