@@ -21,6 +21,7 @@ interface WinnerPodiumProps {
   kineticFontSize?: 'standard' | 'large' | 'cinematic';
   forcedRevealedCount?: number;
   forcedActiveIndex?: number;
+  lineupCandidateIds?: string[];
 }
 
 export const WinnerPodium: React.FC<WinnerPodiumProps> = ({
@@ -37,6 +38,7 @@ export const WinnerPodium: React.FC<WinnerPodiumProps> = ({
   kineticFontSize = 'large',
   forcedRevealedCount,
   forcedActiveIndex,
+  lineupCandidateIds,
 }) => {
   useEffect(() => {
     // Launch celebratory fireworks/confetti
@@ -122,6 +124,7 @@ export const WinnerPodium: React.FC<WinnerPodiumProps> = ({
             showQuotes={true}
             forcedRevealedCount={forcedRevealedCount}
             forcedActiveIndex={forcedActiveIndex}
+            lineupCandidateIds={lineupCandidateIds}
           />
         </div>
       </div>

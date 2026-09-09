@@ -10,6 +10,9 @@
  * - Calibrated speaking rate and pause duration weights
  */
 
+import { Candidate } from '../types/candidate';
+import { CANDIDATES, CANDIDATE_MAP } from '../data/candidates';
+
 export type CriticalWordCategory = 
   | 'money'        // Radiant Gold: $40M, $20, BRIBE, TREASURY, BAILOUT, SLUSH, WARCHEST, etc.
   | 'espionage'    // Matrix Emerald: CCTV, WIRETAP, DOSSIER, SURVEILLANCE, TAPES, CLASSIFIED, LEAK, etc.
@@ -20,6 +23,18 @@ export type CriticalWordCategory =
   | 'power'        // Royal Amethyst / Purple: CHECKMATE, MASTERMIND, COMMAND, DICTATOR, RUTHLESS, VICTORY, etc.
   | 'none';
 
+export interface CharacterTheme {
+  candidateId: string;
+  candidateName: string;
+  matchedName: string;   // e.g. "ARTHUR" or "STERLING"
+  colorHex: string;      // candidate.color.primary (e.g. "#ef4444")
+  badgeBg: string;       // rgba(...)
+  badgeBorder: string;   // rgba(...)
+  textColor: string;     // color string
+  ambientShadow: string; // rgba box-shadow
+  glowShadow: string;    // rgba box-shadow
+}
+
 export interface KineticWordToken {
   index: number;
   original: string;       // Exact string with punctuation (e.g. "BRIBE,")
@@ -27,11 +42,115 @@ export interface KineticWordToken {
   leadingSpace: boolean;
   category: CriticalWordCategory;
   isCritical: boolean;
+  characterTheme?: CharacterTheme; // Set when token matches an in-the-lineup character's first or last name
   weight: number;         // Speaking duration weight
   startRatio: number;     // 0.0 to 1.0 start progress
   endRatio: number;       // 0.0 to 1.0 end progress
   startTime?: number;     // Expected start timestamp in seconds (when duration is available)
   endTime?: number;       // Expected end timestamp in seconds (when duration is available)
+}
+
+/**
+ * Converts a hex color code to rgba() string with custom opacity
+ */
+export function hexToRgba(hex: string, alpha: number): string {
+  if (!hex) return `rgba(255, 255, 255, ${alpha})`;
+  let clean = hex.replace('#', '').trim();
+  if (clean.length === 3) {
+    clean = clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2];
+  }
+  if (clean.length === 6) {
+    const r = parseInt(clean.substring(0, 2), 16);
+    const g = parseInt(clean.substring(2, 4), 16);
+    const b = parseInt(clean.substring(4, 6), 16);
+    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+  }
+  return `rgba(255, 255, 255, ${alpha})`;
+}
+
+/**
+ * Creates a CharacterTheme object from candidate profile and matched name token
+ */
+export function createCharacterTheme(candidate: Candidate, matchedName: string): CharacterTheme {
+  const hex = candidate.color?.primary || '#38bdf8';
+  return {
+    candidateId: candidate.id,
+    candidateName: candidate.name,
+    matchedName,
+    colorHex: hex,
+    badgeBg: hexToRgba(hex, 0.22),
+    badgeBorder: hexToRgba(hex, 0.65),
+    textColor: hex,
+    ambientShadow: `0 0 10px ${hexToRgba(hex, 0.35)}`,
+    glowShadow: `0 0 22px ${hexToRgba(hex, 0.85)}`,
+  };
+}
+
+/**
+ * Strips outer punctuation and apostrophe possessives ('s, ’s, ') to extract pure candidate name key
+ */
+export function extractNameKey(clean: string): string {
+  return clean
+    .replace(/^[^a-zA-Z0-9]+/, '')
+    .replace(/[^a-zA-Z0-9]+$/, '')
+    .replace(/['’]S$/i, '')
+    .replace(/['’]$/, '')
+    .replace(/[^a-zA-Z0-9]+$/, '')
+    .toUpperCase();
+}
+
+export type LineupInput = Candidate[] | Map<string, Candidate> | string[] | null | undefined;
+
+/**
+ * Builds an uppercase name lookup map for in-the-lineup candidates (first names, last names, known aliases)
+ */
+export function buildCharacterNameMap(lineup?: LineupInput): Map<string, Candidate> {
+  const nameMap = new Map<string, Candidate>();
+
+  let candidateList: Candidate[] = [];
+  if (Array.isArray(lineup)) {
+    if (lineup.length > 0) {
+      if (typeof lineup[0] === 'string') {
+        candidateList = (lineup as string[])
+          .map(id => CANDIDATE_MAP.get(id))
+          .filter((c): c is Candidate => Boolean(c));
+      } else {
+        candidateList = lineup as Candidate[];
+      }
+    }
+  } else if (lineup instanceof Map) {
+    candidateList = Array.from(lineup.values());
+  }
+
+  // If no lineup provided, default to all candidates (e.g. for preview or tests)
+  if (candidateList.length === 0 && (lineup === undefined || lineup === null)) {
+    candidateList = CANDIDATES;
+  }
+
+  for (const c of candidateList) {
+    if (!c || !c.name) continue;
+    const parts = c.name.trim().split(/\s+/);
+    if (parts.length > 0) {
+      const first = parts[0].toUpperCase();
+      nameMap.set(first, c);
+      const last = parts[parts.length - 1].toUpperCase();
+      if (!nameMap.has(last) || c.id === 'art-sterling') {
+        nameMap.set(last, c);
+      }
+    }
+
+    // Known aliases
+    if (c.id === 'jax-alvarez') {
+      nameMap.set('JAX', c);
+    }
+    if (c.id === 'art-sterling') {
+      nameMap.set('ART', c);
+    }
+  }
+
+  return nameMap;
 }
 
 // 1. Money & Bribes ($40M, $20, Bribe, Treasury, Slush Fund, Bailout)
@@ -289,8 +408,13 @@ export const CATEGORY_STYLES: Record<CriticalWordCategory, {
 
 /**
  * Tokenize speech text into KineticWordTokens with normalized duration weights
+ * and in-the-lineup character name thematic glow detection
  */
-export function tokenizeSpeech(text: string, knownDuration?: number): KineticWordToken[] {
+export function tokenizeSpeech(
+  text: string, 
+  knownDuration?: number,
+  lineup?: Map<string, Candidate> | LineupInput
+): KineticWordToken[] {
   if (!text || !text.trim()) return [];
 
   // Clean outside decorative outer quotation marks if wrapped completely
@@ -303,11 +427,32 @@ export function tokenizeSpeech(text: string, knownDuration?: number): KineticWor
   const rawSegments = cleanInput.split(/\s+/).filter(Boolean);
   if (rawSegments.length === 0) return [];
 
+  const charMap = lineup instanceof Map 
+    ? lineup 
+    : buildCharacterNameMap(lineup);
+
   // 1. Calculate weights per word
   const unweightedTokens = rawSegments.map((original, index) => {
     const cleanWord = cleanWordToken(original);
-    const category = classifyWord(cleanWord);
-    const isCritical = category !== 'none';
+    const nameKey = extractNameKey(cleanWord);
+
+    // Check if word matches an in-the-lineup character's first or last name
+    let characterTheme: CharacterTheme | undefined;
+    if (charMap.has(nameKey)) {
+      let matchedCandidate = charMap.get(nameKey)!;
+      // Disambiguate shared surname "STERLING" if preceded by "VICTORIA"
+      if (nameKey === 'STERLING' && index > 0) {
+        const prevClean = cleanWordToken(rawSegments[index - 1]);
+        if (extractNameKey(prevClean) === 'VICTORIA') {
+          const victoria = Array.from(charMap.values()).find(c => c.name.toUpperCase().includes('VICTORIA'));
+          if (victoria) matchedCandidate = victoria;
+        }
+      }
+      characterTheme = createCharacterTheme(matchedCandidate, nameKey);
+    }
+
+    const category = characterTheme ? 'none' : classifyWord(cleanWord);
+    const isCritical = Boolean(characterTheme) || category !== 'none';
 
     // Base weight by character length
     let weight = Math.max(1, cleanWord.length);
@@ -319,7 +464,7 @@ export function tokenizeSpeech(text: string, knownDuration?: number): KineticWor
       weight += 2.5; // Clause pause
     }
 
-    // Critical words are spoken with slightly more vocal emphasis
+    // Critical words & character names are spoken with slightly more vocal emphasis
     if (isCritical) {
       weight += 1.5;
     }
@@ -331,6 +476,7 @@ export function tokenizeSpeech(text: string, knownDuration?: number): KineticWor
       leadingSpace: index > 0,
       category,
       isCritical,
+      characterTheme,
       weight,
     };
   });

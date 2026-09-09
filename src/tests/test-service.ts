@@ -18,7 +18,9 @@ import {
   getAcousticRevealedWordCount,
   getActiveWordIndex, 
   estimateSpokenDurationSeconds, 
-  cleanWordToken 
+  cleanWordToken,
+  buildCharacterNameMap,
+  extractNameKey
 } from '../utils/kineticSubtitles';
 import { audioSync } from '../utils/audioSync';
 
@@ -1331,6 +1333,48 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
     throw new Error(`classifyWord('THE') expected 'none', got ${classifyWord('THE')}`);
   }
   console.log('1. 7-Theme Semantic Critical Word Classification & Stem Matching PASSED!');
+
+  // 1b. In-The-Lineup Character Name Glow & Possessive Key Extraction
+  if (extractNameKey("Arthur's") !== 'ARTHUR') {
+    throw new Error(`extractNameKey("Arthur's") expected 'ARTHUR', got ${extractNameKey("Arthur's")}`);
+  }
+  if (extractNameKey("Alvarez's") !== 'ALVAREZ') {
+    throw new Error(`extractNameKey("Alvarez's") expected 'ALVAREZ', got ${extractNameKey("Alvarez's")}`);
+  }
+  if (extractNameKey('"Elena\'s,"') !== 'ELENA') {
+    throw new Error(`extractNameKey('"Elena\'s,"') expected 'ELENA', got ${extractNameKey('"Elena\'s,"')}`);
+  }
+
+  // Test lineup filtering: only candidates in the active lineup should have characterTheme
+  const testLineupIds = ['jax-alvarez', 'art-sterling'];
+  const speechWithNames = "Arthur and Alvarez will stop Marcus from destroying Valoria!";
+  const nameTokens = tokenizeSpeech(speechWithNames, undefined, testLineupIds);
+
+  const arthurToken = nameTokens.find(t => t.cleanWord === 'ARTHUR');
+  const alvarezToken = nameTokens.find(t => t.cleanWord === 'ALVAREZ');
+  const marcusToken = nameTokens.find(t => t.cleanWord === 'MARCUS');
+
+  if (!arthurToken || !arthurToken.characterTheme) {
+    throw new Error('Expected Arthur token to have characterTheme when art-sterling is in lineup');
+  }
+  const artCand = CANDIDATE_MAP.get('art-sterling')!;
+  if (arthurToken.characterTheme.colorHex !== artCand.color.primary) {
+    throw new Error(`Arthur characterTheme color mismatch: expected ${artCand.color.primary}, got ${arthurToken.characterTheme.colorHex}`);
+  }
+
+  if (!alvarezToken || !alvarezToken.characterTheme) {
+    throw new Error('Expected Alvarez token to have characterTheme when jax-alvarez is in lineup');
+  }
+  const jaxCand = CANDIDATE_MAP.get('jax-alvarez')!;
+  if (alvarezToken.characterTheme.colorHex !== jaxCand.color.primary) {
+    throw new Error(`Alvarez characterTheme color mismatch: expected ${jaxCand.color.primary}, got ${alvarezToken.characterTheme.colorHex}`);
+  }
+
+  // Marcus is NOT in testLineupIds, so Marcus should NOT have characterTheme!
+  if (marcusToken?.characterTheme) {
+    throw new Error('Marcus should NOT have characterTheme because marcus-vance is not in the lineup!');
+  }
+  console.log('1b. In-The-Lineup Character First & Last Name Thematic Glow & Lineup Filtering PASSED!');
 
   // 2. Tokenize speech with weighted ratios
   const sampleSpeech = 'I offered a $40M BRIBE to expose their CORRUPT LIES and defend the CONSTITUTION!';

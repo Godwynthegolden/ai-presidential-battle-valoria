@@ -573,6 +573,7 @@ export default function AIPlaygroundPage() {
             kineticHighlightCriticalWords={nineRouterConfig.kineticHighlightCriticalWords}
             kineticDynamicBoxResize={nineRouterConfig.kineticDynamicBoxResize}
             kineticFontSize={nineRouterConfig.kineticFontSize}
+            lineupCandidateIds={state.participatingCandidateIds || state.activeCandidateIds}
           />
         );
       })()}

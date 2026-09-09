@@ -105,6 +105,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
           kineticFontSize={kineticFontSize}
           forcedRevealedCount={forcedRevealedCount}
           forcedActiveIndex={forcedActiveIndex}
+          lineupCandidateIds={gameState.participatingCandidateIds || gameState.activeCandidateIds}
         />
       </div>
     );
@@ -161,6 +162,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             kineticFontSize={kineticFontSize}
             forcedRevealedCount={forcedRevealedCount}
             forcedActiveIndex={forcedActiveIndex}
+            lineupCandidateIds={gameState.participatingCandidateIds || gameState.activeCandidateIds}
           />
         </div>
       </div>
@@ -426,6 +428,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
                         showQuotes={true}
                         forcedRevealedCount={forcedRevealedCount}
                         forcedActiveIndex={forcedActiveIndex}
+                        lineupCandidateIds={gameState.participatingCandidateIds || gameState.activeCandidateIds}
                       />
                     </div>
                   )}
@@ -533,6 +536,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
                     showQuotes={true}
                     forcedRevealedCount={forcedRevealedCount}
                     forcedActiveIndex={forcedActiveIndex}
+                    lineupCandidateIds={gameState.participatingCandidateIds || gameState.activeCandidateIds}
                   />
                 </div>
               )}

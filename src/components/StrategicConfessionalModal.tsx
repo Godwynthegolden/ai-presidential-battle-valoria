@@ -38,6 +38,7 @@ interface StrategicConfessionalModalProps {
   kineticHighlightCriticalWords?: boolean;
   kineticDynamicBoxResize?: boolean;
   kineticFontSize?: 'standard' | 'large' | 'cinematic';
+  lineupCandidateIds?: string[];
 }
 
 export const StrategicConfessionalModal: React.FC<StrategicConfessionalModalProps> = ({
@@ -60,6 +61,7 @@ export const StrategicConfessionalModal: React.FC<StrategicConfessionalModalProp
   kineticHighlightCriticalWords = true,
   kineticDynamicBoxResize = true,
   kineticFontSize = 'large',
+  lineupCandidateIds,
 }) => {
   const voterBailouts = Math.floor(voterBudget / 40);
   const targetBailouts = Math.floor(targetBudget / 40);
@@ -202,6 +204,7 @@ export const StrategicConfessionalModal: React.FC<StrategicConfessionalModalProp
               dynamicResize={kineticDynamicBoxResize}
               fontSize={kineticFontSize}
               showQuotes={true}
+              lineupCandidateIds={lineupCandidateIds}
             />
           </div>
         </div>

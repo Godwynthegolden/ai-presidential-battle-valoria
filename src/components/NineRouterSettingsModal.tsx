@@ -1003,7 +1003,7 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
                     <Banknote className="w-3.5 h-3.5 text-amber-400" /> Critical Words Thematic Glow
                   </span>
                   <span className="text-[11px] text-slate-400 font-mono">
-                    Highlight political keywords across 7 themes with ambient glow and voice-reactive luminescence.
+                    Highlight in-lineup character names in their theme colors & political keywords across 7 themes with ambient glow and voice-reactive luminescence.
                   </span>
                 </div>
                 <button
@@ -1129,7 +1129,7 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
               <div className="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800">
                 <KineticDialogueBox
                   key={`preview-${previewSpeaking ? 'speaking' : 'idle'}-${kineticFontSize}-${kineticHighlightCriticalWords}`}
-                  text="Citizens of VALORIA! I uncovered CCTV TAPES exposing their $40M BRIBE, their SHAM LIES, and the CORRUPT CABAL plotting to ELIMINATE our CONSTITUTION — this is CHECKMATE!"
+                  text="Citizens of VALORIA! Arthur Sterling and Marcus Vance offered a $40M BRIBE, but I uncovered CCTV TAPES exposing their SHAM LIES and corrupt plot to ELIMINATE our CONSTITUTION — this is CHECKMATE!"
                   isSpeaking={previewSpeaking}
                   enabled={kineticSubtitlesEnabled}
                   highlightCritical={kineticHighlightCriticalWords}

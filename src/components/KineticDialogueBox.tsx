@@ -6,8 +6,10 @@ import {
   getAcousticRevealedWordCount,
   estimateSpokenDurationSeconds, 
   CATEGORY_STYLES,
-  KineticWordToken
+  KineticWordToken,
+  buildCharacterNameMap
 } from '@/utils/kineticSubtitles';
+import { Candidate } from '@/types/candidate';
 import { audioSync, AudioSyncState } from '@/utils/audioSync';
 import { Volume2 } from 'lucide-react';
 
@@ -29,6 +31,8 @@ export interface KineticDialogueBoxProps {
   waitingLabel?: string;
   forcedRevealedCount?: number;
   forcedActiveIndex?: number;
+  lineupCandidateIds?: string[];
+  lineupCandidates?: Candidate[];
 }
 
 export const KineticDialogueBox: React.FC<KineticDialogueBoxProps> = ({
@@ -49,9 +53,22 @@ export const KineticDialogueBox: React.FC<KineticDialogueBoxProps> = ({
   waitingLabel,
   forcedRevealedCount,
   forcedActiveIndex,
+  lineupCandidateIds,
+  lineupCandidates,
 }) => {
+  // Memoize lineup candidate name map (resolves in-the-lineup character first/last names)
+  const candidateNameMap = useMemo(() => {
+    if (lineupCandidates && lineupCandidates.length > 0) {
+      return buildCharacterNameMap(lineupCandidates);
+    }
+    if (lineupCandidateIds && lineupCandidateIds.length > 0) {
+      return buildCharacterNameMap(lineupCandidateIds);
+    }
+    return buildCharacterNameMap();
+  }, [lineupCandidateIds, lineupCandidates]);
+
   // Tokenize speech into weighted kinetic tokens
-  const tokens = useMemo(() => tokenizeSpeech(text), [text]);
+  const tokens = useMemo(() => tokenizeSpeech(text, undefined, candidateNameMap), [text, candidateNameMap]);
 
   // Revealed word count (accumulates word-by-word; words never disappear)
   const [revealedCount, setRevealedCount] = useState<number>(() => {
@@ -354,8 +371,12 @@ export const KineticDialogueBox: React.FC<KineticDialogueBoxProps> = ({
         {tokens.slice(0, displayCount).map((token: KineticWordToken) => {
           const currentActiveIndex = forcedActiveIndex !== undefined ? forcedActiveIndex : activeIndex;
           const isActive = token.index === currentActiveIndex && isSpeaking;
-          const styles = CATEGORY_STYLES[highlightCritical ? token.category : 'none'];
+          const charTheme = highlightCritical ? token.characterTheme : undefined;
+          const catStyles = CATEGORY_STYLES[highlightCritical ? token.category : 'none'];
           const energyScale = 1.10 + Math.min(0.18, vocalEnergy * 0.22);
+
+          const isGlowing = highlightCritical && (token.isCritical || !!charTheme);
+          const accentHex = charTheme ? charTheme.colorHex : catStyles.accentHex;
 
           return (
             <span
@@ -365,28 +386,34 @@ export const KineticDialogueBox: React.FC<KineticDialogueBoxProps> = ({
                   ? 'z-20 font-black' 
                   : 'scale-100 z-10'
               } ${
-                token.isCritical && highlightCritical
-                  ? `px-1.5 py-0.5 rounded-lg border ${styles.badgeBg} ${styles.badgeBorder} ${styles.textColor} ${
+                isGlowing
+                  ? `px-1.5 py-0.5 rounded-lg border ${charTheme ? '' : catStyles.badgeBg} ${charTheme ? '' : catStyles.badgeBorder} ${charTheme ? 'font-black' : catStyles.textColor} ${
                       isActive 
-                        ? `${styles.glowShadow} ${styles.activeColor} ring-2 ring-white/70` 
-                        : styles.ambientShadow
+                        ? `${charTheme ? '' : catStyles.glowShadow} ${charTheme ? 'text-white' : catStyles.activeColor} ring-2 ring-white/70` 
+                        : charTheme ? '' : catStyles.ambientShadow
                     } uppercase tracking-tight`
                   : isActive
-                  ? `text-white font-extrabold ${styles.glowShadow} underline decoration-cyan-400 decoration-2 underline-offset-4`
+                  ? `text-white font-extrabold ${catStyles.glowShadow} underline decoration-cyan-400 decoration-2 underline-offset-4`
                   : 'text-slate-100 font-medium'
               }`}
               style={{
+                backgroundColor: isGlowing && charTheme ? charTheme.badgeBg : undefined,
+                borderColor: isGlowing && charTheme ? charTheme.badgeBorder : undefined,
+                color: isGlowing && charTheme && !isActive ? charTheme.textColor : undefined,
+                boxShadow: isGlowing && charTheme
+                  ? (isActive ? charTheme.glowShadow : charTheme.ambientShadow)
+                  : undefined,
                 // Voice-reactive kinetic scale: active word pops and pulses with actual candidate audio amplitude!
                 transform: isActive ? `scale(${energyScale.toFixed(2)})` : undefined,
                 animation: isActive 
                   ? 'kineticWordPop 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards' 
                   : undefined,
                 textShadow: isActive
-                  ? token.isCritical && highlightCritical
-                    ? `0 0 ${(14 + vocalEnergy * 12).toFixed(0)}px ${styles.accentHex}, 0 0 28px ${styles.accentHex}99, 0 2px 4px rgba(0,0,0,0.9)`
+                  ? isGlowing
+                    ? `0 0 ${(14 + vocalEnergy * 12).toFixed(0)}px ${accentHex}, 0 0 28px ${accentHex}99, 0 2px 4px rgba(0,0,0,0.9)`
                     : `0 0 ${(8 + vocalEnergy * 8).toFixed(0)}px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.8)`
-                  : token.isCritical && highlightCritical
-                  ? `0 0 8px ${styles.accentHex}55, 0 1px 2px rgba(0,0,0,0.7)`
+                  : isGlowing
+                  ? `0 0 8px ${accentHex}55, 0 1px 2px rgba(0,0,0,0.7)`
                   : undefined,
               }}
             >

@@ -40,6 +40,7 @@ interface CCTVBackroomViewProps {
   kineticFontSize?: 'standard' | 'large' | 'cinematic';
   forcedRevealedCount?: number;
   forcedActiveIndex?: number;
+  lineupCandidateIds?: string[];
 }
 
 export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
@@ -59,6 +60,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
   kineticFontSize = 'large',
   forcedRevealedCount,
   forcedActiveIndex,
+  lineupCandidateIds,
 }) => {
   const [timecode, setTimecode] = useState('00:00:00.00');
   const [showSecretStrategy, setShowSecretStrategy] = useState(false);
@@ -450,6 +452,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                 showQuotes={true}
                 forcedRevealedCount={forcedRevealedCount}
                 forcedActiveIndex={forcedActiveIndex}
+                lineupCandidateIds={lineupCandidateIds}
               />
             </div>
 
@@ -493,6 +496,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                   highlightCritical={kineticHighlightCriticalWords}
                   dynamicResize={kineticDynamicBoxResize}
                   showQuotes={true}
+                  lineupCandidateIds={lineupCandidateIds}
                 />
               </div>
             )}
