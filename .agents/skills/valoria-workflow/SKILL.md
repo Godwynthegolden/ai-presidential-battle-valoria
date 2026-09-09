@@ -31,7 +31,7 @@ The entire debate lifecycle is coordinated by the `useGameEngine` hook (`src/hoo
 
 ```mermaid
 flowchart TD
-    IDLE([IDLE: Lineup & Roster Selection]) --> CAMPAIGN[1. CAMPAIGN: Opening Speeches]
+    IDLE([IDLE: Lineup & Roster Selection]) --> CAMPAIGN[1. CAMPAIGN: Opening Self-Introductions (25 Words)]
     CAMPAIGN --> ATTACK[2. ATTACK: Public Clash & Counter-Attacks]
     ATTACK --> CCTV[3. CCTV_BACKROOM: Leaked Pacts & $20 Bribes]
     CCTV --> VOTE_SECRET[4. VOTE_SECRET: Secret Ballots Cast]

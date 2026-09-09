@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { Candidate } from '@/types/candidate';
 import { CandidateAvatar } from './CandidateAvatar';
+import { KineticDialogueBox } from './KineticDialogueBox';
 import { Crown, Sparkles, Award, RotateCcw, ShieldCheck, Quote } from 'lucide-react';
 
 interface WinnerPodiumProps {
@@ -12,6 +13,14 @@ interface WinnerPodiumProps {
   eliminatedCount: number;
   totalRounds: number;
   onRestart: () => void;
+  isSpeakingAudio?: boolean;
+  kineticSubtitlesEnabled?: boolean;
+  kineticSubtitleStyle?: 'mrbeast' | 'cinematic' | 'neon';
+  kineticHighlightCriticalWords?: boolean;
+  kineticDynamicBoxResize?: boolean;
+  kineticFontSize?: 'standard' | 'large' | 'cinematic';
+  forcedRevealedCount?: number;
+  forcedActiveIndex?: number;
 }
 
 export const WinnerPodium: React.FC<WinnerPodiumProps> = ({
@@ -20,6 +29,14 @@ export const WinnerPodium: React.FC<WinnerPodiumProps> = ({
   eliminatedCount,
   totalRounds,
   onRestart,
+  isSpeakingAudio = false,
+  kineticSubtitlesEnabled = true,
+  kineticSubtitleStyle = 'mrbeast',
+  kineticHighlightCriticalWords = true,
+  kineticDynamicBoxResize = true,
+  kineticFontSize = 'large',
+  forcedRevealedCount,
+  forcedActiveIndex,
 }) => {
   useEffect(() => {
     // Launch celebratory fireworks/confetti
@@ -92,9 +109,20 @@ export const WinnerPodium: React.FC<WinnerPodiumProps> = ({
         </div>
         <div className="relative">
           <Quote className="absolute -top-3 -left-3 w-10 h-10 text-amber-500/10 -z-0 pointer-events-none" />
-          <p className="text-lg sm:text-xl md:text-2xl font-sans font-semibold text-white leading-relaxed relative z-10 italic">
-            &ldquo;{victorySpeech}&rdquo;
-          </p>
+          <KineticDialogueBox
+            key={`winner-speech-${winner.id}`}
+            text={victorySpeech}
+            isSpeaking={isSpeakingAudio}
+            speakerColor="#f59e0b"
+            enabled={kineticSubtitlesEnabled}
+            style={kineticSubtitleStyle}
+            highlightCritical={kineticHighlightCriticalWords}
+            dynamicResize={kineticDynamicBoxResize}
+            fontSize={kineticFontSize}
+            showQuotes={true}
+            forcedRevealedCount={forcedRevealedCount}
+            forcedActiveIndex={forcedActiveIndex}
+          />
         </div>
       </div>
 

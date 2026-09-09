@@ -188,8 +188,8 @@ export const ElectionIntelModal: React.FC<ElectionIntelModalProps> = ({
             <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
               <span className="w-2 h-2 rounded-full bg-cyan-400 mt-1.5 shrink-0 shadow-xs shadow-cyan-400" />
               <div>
-                <strong className="text-white font-bold block">1. Campaign Speeches</strong>
-                <span className="text-slate-400">Candidates deliver high-energy broadcast speeches (40 words max).</span>
+                <strong className="text-white font-bold block">1. Campaign Introductions</strong>
+                <span className="text-slate-400">Candidates deliver high-energy self-introductions (25 words max).</span>
               </div>
             </div>
             <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80">

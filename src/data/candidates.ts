@@ -10,60 +10,60 @@ export interface ValoriaDebateTopic {
 
 export const VALORIA_DEBATE_TOPICS: ValoriaDebateTopic[] = [
   {
-    id: 'iron-valley-inflation',
-    title: 'The Industrial Stagflation & Grocery Price Surge',
-    category: 'Economy & Cost of Living',
-    crisisSummary: 'Inflation in the industrial heartland has hit 14%, grocery bills have doubled, and foreign imports have shuttered three major steel mills in Iron Valley.',
-    moderatorQuestion: 'How will your administration immediately halt runaway consumer prices and restore domestic manufacturing without bankrupting the state treasury?'
-  },
-  {
-    id: 'ostrov-border-standoff',
-    title: 'The Ostrov Northern Border Mobilization & Security Influx',
-    category: 'National Security & Sovereignty',
-    crisisSummary: 'Neighboring autocratic Ostrov has massed mechanized divisions along the northern perimeter while weaponizing border migrant corridors.',
-    moderatorQuestion: 'Will you deploy the military and build hardened fortifications, or pursue multilateral diplomacy and international humanitarian protocols?'
-  },
-  {
-    id: 'sovereign-debt-pension',
-    title: 'The Sovereign Debt Wall & National Pension Insolvency',
-    category: 'Fiscal Policy & Public Welfare',
-    crisisSummary: 'Valoria’s national debt has exceeded 120% of GDP. The state retirement and veterans fund faces complete insolvency within 24 months.',
-    moderatorQuestion: 'Do you raise aggressive corporate wealth taxes, cut entitlement programs, or institute radical algorithmic austerity across all ministries?'
-  },
-  {
-    id: 'power-grid-climate-drought',
-    title: 'The Breadbasket Drought & Hydro-Power Grid Collapse',
-    category: 'Energy & Agriculture',
-    crisisSummary: 'A historic 3-year drought has crippled the agricultural Breadbasket provinces and dropped hydro-electric reservoirs to critical levels, causing rolling blackouts.',
-    moderatorQuestion: 'How will you resolve the urgent energy rationing crisis while guaranteeing clean water sovereignty for Valoria’s farmers and families?'
-  },
-  {
-    id: 'deep-state-lobby-leak',
-    title: 'The Capitol Slush-Fund Dossier & Judicial Corruption Scandal',
-    category: 'Governance & Anti-Corruption',
-    crisisSummary: 'Leaked financial ledgers reveal that major defense contractors and private healthcare cartels secretly funneled billions to senior legislative committee leaders.',
-    moderatorQuestion: 'What immediate executive action will you take to purge institutional corruption and restore public trust in Valoria’s democratic judiciary?'
+    id: 'housing-crisis-rent',
+    title: 'The Housing Nightmare: $4,000 Rent & Mega-Corporations Buying Every Home',
+    category: 'Housing & Cost of Living',
+    crisisSummary: 'Wall Street hedge funds and private equity giants have bought up 60% of single-family homes across Valoria, driving average rent to $4,000/month and making homeownership impossible for young families.',
+    moderatorQuestion: 'Will you ban corporate homeownership and freeze rents, or deregulate zoning and let private developers build more market housing?'
   },
   {
     id: 'ai-automation-jobs-shock',
-    title: 'The Autonomous AI Automation Wave & Workforce Disruption',
+    title: 'The AI Job Apocalypse: 1 Million Jobs Replaced in 30 Days',
     category: 'Technology & Future of Work',
-    crisisSummary: 'Rapid deployment of autonomous enterprise AI systems has displaced 350,000 administrative and logistics workers across Valoria in just 6 months.',
-    moderatorQuestion: 'Should Valoria impose an automation robot tax with universal basic dividends, or deregulate tech development to win the global AI race?'
+    crisisSummary: 'Autonomous AI systems and enterprise robotics just eliminated 1 million administrative, tech, and logistics jobs in 30 days, sparking nationwide protests from displaced workers.',
+    moderatorQuestion: 'Should Valoria impose an emergency 50% robot automation tax with universal basic dividends, or deregulate tech development to win the global AI arms race?'
   },
   {
-    id: 'corporate-rail-monopoly-derailment',
-    title: 'The Continental Rail Monopoly & Chemical Disaster',
-    category: 'Infrastructure & Corporate Accountability',
-    crisisSummary: 'A privatized freight conglomerate suffered a toxic chemical derailment in a major metropolitan valley after slashing safety inspection staff to boost shareholder dividends.',
-    moderatorQuestion: 'Will you nationalize critical transportation utilities and prosecute corporate executives, or incentivize market competition and private safety insurance?'
+    id: 'ww3-nuclear-border-standoff',
+    title: 'The Threat of World War 3: Nuclear Standoff on the Northern Border',
+    category: 'National Security & Sovereignty',
+    crisisSummary: 'The hostile autocratic northern regime of Ostrov has massed 200,000 mechanized troops and hypersonic missile batteries along Valoria\'s perimeter, threatening direct war within 72 hours.',
+    moderatorQuestion: 'Will you deploy the military and authorize preemptive defensive strikes, or open emergency diplomatic backchannels to prevent a nuclear conflict?'
   },
   {
-    id: 'universal-healthcare-crisis',
-    title: 'The Pharmaceutical Cartel Price-Gouging & Hospital Crisis',
-    category: 'Public Health & Welfare',
-    crisisSummary: 'Essential lifesaving medicine prices have skyrocketed 400% as private hospital monopolies shut down rural trauma centers across Valoria’s peripheral districts.',
-    moderatorQuestion: 'Will you mandate single-payer universal healthcare price caps, or expand private health vouchers and deregulate insurance cross-border sales?'
+    id: 'grocery-price-corporate-gouging',
+    title: 'The Grocery Shock: $12 Eggs, $8 Milk & Food Cartel Price-Gouging',
+    category: 'Economy & Cost of Living',
+    crisisSummary: 'Supermarket monopolies and corporate food cartels have doubled grocery prices across Valoria while posting record billionaire profits, leaving millions of working families struggling to buy dinner.',
+    moderatorQuestion: 'Will your administration arrest and prosecute corporate executives for price-gouging, or cut taxes and lift import tariffs to spur supermarket competition?'
+  },
+  {
+    id: 'brainrot-social-media-ban',
+    title: 'The "Brainrot" Epidemic: Algorithmic Addiction & The Total Social Media Ban',
+    category: 'Culture & Digital Well-Being',
+    crisisSummary: 'Foreign-controlled algorithmic video apps have collapsed youth attention spans, fueled a nationwide mental health emergency, and leaked sensitive biometric user data.',
+    moderatorQuestion: 'Do you ban the addictive apps completely and mandate digital curfew laws, or defend internet freedom and oppose government censorship?'
+  },
+  {
+    id: 'ubi-stimulus-national-debt',
+    title: 'The $2,000 Monthly UBI Check vs. The Sovereign Debt Collapse',
+    category: 'Fiscal Policy & Public Welfare',
+    crisisSummary: 'Citizens are demanding an emergency $2,000 monthly stimulus check as Valoria’s national debt crosses 130% of GDP and state pensions face total insolvency.',
+    moderatorQuestion: 'Do you levy an aggressive 70% wealth tax on top billionaires to fund direct cash dividends, or enforce radical austerity and freeze all government handouts?'
+  },
+  {
+    id: 'big-pharma-healthcare-extortion',
+    title: 'Big Pharma Cartels: $1,000 Insulin & The Healthcare Extortion Scandal',
+    category: 'Public Health & Corporate Accountability',
+    crisisSummary: 'Private pharmaceutical monopolies have jacked up life-saving drug prices by 800% while private insurance cartels deny 40% of emergency medical claims to inflate shareholder payouts.',
+    moderatorQuestion: 'Will you establish single-payer universal healthcare with strict price caps on medicine, or expand health savings vouchers and deregulate health insurance?'
+  },
+  {
+    id: 'capitol-slush-fund-corruption',
+    title: 'The "Capitol Island" Slush Fund & Leaked Politician Dossier',
+    category: 'Governance & Anti-Corruption',
+    crisisSummary: 'Leaked financial ledgers reveal that defense contractors and billionaire mega-donors secretly funneled billions in private island payoffs and bribes to senior government leaders.',
+    moderatorQuestion: 'What immediate executive action will you take to seize dirty lobbyist assets and purge institutional corruption from the Capitol?'
   }
 ];
 
@@ -106,9 +106,10 @@ export const CANDIDATES: Candidate[] = [
     },
     voice: {
       voiceId: 'd8a1340984ee4b63ad1ffae27a6a4339',
-      voiceName: 'Alvarez (Gritty Populist)',
+      voiceName: 'Jackson Alvarez (Gritty Populist)',
       gender: 'male',
       category: 'Energetic',
+      speed: 1.05,
     },
     initialBudget: 80,
     systemPrompt: `You are Jackson Alvarez, the Rust-Belt Populist Governor of Iron Valley running for President of the Republic of Valoria.
@@ -154,9 +155,10 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
     },
     voice: {
       voiceId: 'b545c585f631496c914815291da4e893',
-      voiceName: 'Elena (Diplomatic Executive)',
+      voiceName: 'Elena Rostova (Diplomatic Executive)',
       gender: 'female',
       category: 'Professional',
+      speed: 1.0,
     },
     initialBudget: 100,
     systemPrompt: `You are Elena Rostova, Former Central Bank Governor and Lead Economic Architect running for President of the Republic of Valoria.
@@ -202,9 +204,10 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
     },
     voice: {
       voiceId: 'bf322df2096a46f18c579d0baa36f41d',
-      voiceName: 'Adrian (Military Commander)',
+      voiceName: 'Adrian Vance (Military Commander)',
       gender: 'male',
       category: 'Deep & Serious',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are General Marcus Vance, Decorated 4-Star General (Ret.) and Former Defense Minister running for President of the Republic of Valoria.
@@ -250,9 +253,10 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
     },
     voice: {
       voiceId: '59e9dc1cb20c452584788a2690c80970',
-      voiceName: 'Camilla (Passionate Litigator)',
+      voiceName: 'Camilla Laurent (Passionate Litigator)',
       gender: 'female',
       category: 'Passionate',
+      speed: 1.05,
     },
     initialBudget: 80,
     systemPrompt: `You are Camilla Laurent, Anti-Corruption Crusader and High Court Litigator running for President of the Republic of Valoria.
@@ -298,9 +302,10 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
     },
     voice: {
       voiceId: '5196af35f6ff4a0dbf541793fc9f2157',
-      voiceName: 'Bold Leader (Tycoon)',
+      voiceName: 'Bold Leader (Tycoon Baritone)',
       gender: 'male',
       category: 'Authoritative',
+      speed: 1.0,
     },
     initialBudget: 120,
     systemPrompt: `You are Arthur Sterling, Media Tycoon and Real Estate Billionaire running for President of the Republic of Valoria.
@@ -346,9 +351,10 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
     },
     voice: {
       voiceId: 'f8dfe9c83081432386f143e2fe9767ef',
-      voiceName: 'Dmitri (Deep Union Veteran)',
+      voiceName: 'Dmitri Voronin (Deep Union Veteran)',
       gender: 'male',
       category: 'Deep & Raspy',
+      speed: 0.95,
     },
     initialBudget: 80,
     systemPrompt: `You are Dmitri Voronin, President of the National Federation of Trade Unions running for President of the Republic of Valoria.
@@ -394,9 +400,10 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
     },
     voice: {
       voiceId: '1936333080804be19655c6749b2ae7b2',
-      voiceName: 'Senator Vance (Senior Statesman)',
+      voiceName: 'Silas Thorne (Senior Statesman)',
       gender: 'male',
       category: 'Deep & Serious',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are Silas Thorne, 5-Term Majority Leader and Senior Statesman running for President of the Republic of Valoria.
@@ -442,9 +449,10 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
     },
     voice: {
       voiceId: 'ca3007f96ae7499ab87d27ea3599956a',
-      voiceName: 'Sarah (Calm Reformer)',
+      voiceName: 'Amara Chen (Calm Reformer)',
       gender: 'female',
       category: 'Calm & Gentle',
+      speed: 1.0,
     },
     initialBudget: 100,
     systemPrompt: `You are Dr. Amara Chen, Clean Energy Pioneer and Climate Scientist running for President of the Republic of Valoria.
@@ -490,9 +498,10 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
     },
     voice: {
       voiceId: '536d3a5e000945adb7038665781a4aca',
-      voiceName: 'Ethan (Scientific Technocrat)',
+      voiceName: 'Ethan Cross (Scientific Technocrat)',
       gender: 'male',
       category: 'Calm & Intellectual',
+      speed: 1.0,
     },
     initialBudget: 80,
     systemPrompt: `You are Damian Cross, Ex-Intelligence Analyst and Host of "The Valoria Dossier" running for President of the Republic of Valoria.
@@ -537,10 +546,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'scroll',
     },
     voice: {
-      voiceId: '4c6a6762e4ac4bdebdb4fa8525d054a2',
-      voiceName: 'Atomic (Dramatic Jurist)',
-      gender: 'male',
+      voiceId: 'b089032e45db460fb1934ece75a8c51d',
+      voiceName: 'Valkyrie (Deep Matron Jurist)',
+      gender: 'female',
       category: 'Authoritative',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are Beatrice Holloway, Retired Chief Justice of the High Court of Valoria running for President of the Republic of Valoria.
@@ -586,9 +596,10 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
     },
     voice: {
       voiceId: 'e9e9d36027424e55ac3faa620f78a72b',
-      voiceName: 'Zephyr (Dynamic Wildcard)',
+      voiceName: 'Julian Mercer (Dynamic Wildcard)',
       gender: 'male',
       category: 'Wildcard',
+      speed: 1.1,
     },
     initialBudget: 120,
     systemPrompt: `You are Julian Mercer, Autonomous AI Pioneer and Futurist Provocateur running for President of the Republic of Valoria.
@@ -633,10 +644,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'shield',
     },
     voice: {
-      voiceId: 'bf322df2096a46f18c579d0baa36f41d',
-      voiceName: 'Adrian (Military Commander)',
+      voiceId: '29b9977695cd4d95ad692135ed5bcf65',
+      voiceName: 'Ray Callahan (Frontier Lawman)',
       gender: 'male',
       category: 'Deep & Serious',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are Governor Ray Callahan, Frontier State Governor and Former Border Patrol Commander running for President of the Republic of Valoria.
@@ -681,10 +693,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'cpu',
     },
     voice: {
-      voiceId: 'b545c585f631496c914815291da4e893',
-      voiceName: 'Elena (Diplomatic Executive)',
+      voiceId: '946250d41fcb4181bf6f094d39ba66e3',
+      voiceName: 'Vivienne Zhao (Synthetic Policy Lead)',
       gender: 'female',
-      category: 'Professional',
+      category: 'Tech & Modern',
+      speed: 1.05,
     },
     initialBudget: 120,
     systemPrompt: `You are Dr. Vivienne Zhao, Neurotechnology Pioneer and CEO of Synapse Dynamics running for President of the Republic of Valoria.
@@ -729,10 +742,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'scale',
     },
     voice: {
-      voiceId: '4c6a6762e4ac4bdebdb4fa8525d054a2',
-      voiceName: 'Atomic (Dramatic Jurist)',
+      voiceId: '8ce550397df046dbb80ceee5e341d8c8',
+      voiceName: 'Garrick Stone (Cartel Prosecutor)',
       gender: 'male',
       category: 'Authoritative',
+      speed: 1.05,
     },
     initialBudget: 80,
     systemPrompt: `You are Prosecutor Garrick Stone, Chief Special Prosecutor for Organized Crime & High Corruption running for President of the Republic of Valoria.
@@ -777,10 +791,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'crown',
     },
     voice: {
-      voiceId: '1936333080804be19655c6749b2ae7b2',
-      voiceName: 'Senator Vance (Senior Statesman)',
+      voiceId: '93cccbd0ef674d5a933e2d55e95b5373',
+      voiceName: 'Gospel Preacher (Civic Orator)',
       gender: 'male',
-      category: 'Deep & Serious',
+      category: 'Authoritative',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are Pastor Elijah Haddon, Senior Minister of the National Faith Fellowship running for President of the Republic of Valoria.
@@ -825,10 +840,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'dollar',
     },
     voice: {
-      voiceId: '59e9dc1cb20c452584788a2690c80970',
-      voiceName: 'Camilla (Passionate Litigator)',
+      voiceId: 'b8d23dd873cc40a48b75906f56b8b67c',
+      voiceName: 'Kendra Vane (Wall Street Predator)',
       gender: 'female',
-      category: 'Passionate',
+      category: 'Professional',
+      speed: 1.1,
     },
     initialBudget: 120,
     systemPrompt: `You are Kendra Vane, Managing Director of Valkyrie Sovereign Distressed Asset Fund running for President of the Republic of Valoria.
@@ -873,10 +889,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'star',
     },
     voice: {
-      voiceId: 'd8a1340984ee4b63ad1ffae27a6a4339',
-      voiceName: 'Alvarez (Gritty Populist)',
+      voiceId: '3135fbb0431d48e098669090bc5e6dd9',
+      voiceName: 'Colt Briggs (Heartland Sheriff)',
       gender: 'male',
       category: 'Energetic',
+      speed: 0.95,
     },
     initialBudget: 80,
     systemPrompt: `You are Sheriff Colt Briggs, Elected County Sheriff of Iron Ridge running for President of the Republic of Valoria.
@@ -921,10 +938,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'globe',
     },
     voice: {
-      voiceId: 'ca3007f96ae7499ab87d27ea3599956a',
-      voiceName: 'Sarah (Calm Reformer)',
+      voiceId: 'c91bca6c57fd449e8fc0edde2a7e90bf',
+      voiceName: 'Maya Lin (Peace Negotiator)',
       gender: 'female',
       category: 'Calm & Gentle',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are Ambassador Maya Lin, Former Chief Crisis Hostage Negotiator in Ostrov running for President of the Republic of Valoria.
@@ -969,10 +987,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'hammer',
     },
     voice: {
-      voiceId: 'f8dfe9c83081432386f143e2fe9767ef',
-      voiceName: 'Dmitri (Deep Union Veteran)',
+      voiceId: '0fe7ce6bb97e474b9dd4032487ea076e',
+      voiceName: 'Declan Hayes (Deep Coal Miner)',
       gender: 'male',
       category: 'Deep & Raspy',
+      speed: 0.95,
     },
     initialBudget: 80,
     systemPrompt: `You are Mayor Declan Hayes, 4-Term Mayor of Blackwood Valley and Former Coal Miner running for President of the Republic of Valoria.
@@ -1017,10 +1036,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'activity',
     },
     voice: {
-      voiceId: '5196af35f6ff4a0dbf541793fc9f2157',
-      voiceName: 'Bold Leader (Tycoon)',
+      voiceId: 'e596ab2ebd4841ba9fba0dabeb341d69',
+      voiceName: 'Jonathan Richter (Biotech Titan)',
       gender: 'male',
-      category: 'Authoritative',
+      category: 'Professional',
+      speed: 1.0,
     },
     initialBudget: 120,
     systemPrompt: `You are Jonathan Richter, Executive Chairman of Valoria Biomed running for President of the Republic of Valoria.
@@ -1065,10 +1085,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'briefcase',
     },
     voice: {
-      voiceId: '536d3a5e000945adb7038665781a4aca',
-      voiceName: 'Ethan (Scientific Technocrat)',
+      voiceId: '65c0b8155c464a648161af8877404f11',
+      voiceName: 'Brian (High Commissioner)',
       gender: 'male',
-      category: 'Calm & Intellectual',
+      category: 'Professional',
+      speed: 1.0,
     },
     initialBudget: 120,
     systemPrompt: `You are Tariq Fassi, Chief Investment Officer of the $300B Valoria National Sovereign Endowment running for President of the Republic of Valoria.
@@ -1113,10 +1134,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'radio',
     },
     voice: {
-      voiceId: '59e9dc1cb20c452584788a2690c80970',
-      voiceName: 'Camilla (Passionate Litigator)',
+      voiceId: '6d91c091920f4bf4ac88613a7e08a8d3',
+      voiceName: 'Gia Moretti (Investigative Whistleblower)',
       gender: 'female',
       category: 'Passionate',
+      speed: 1.1,
     },
     initialBudget: 80,
     systemPrompt: `You are Gia Moretti, Host of "Valoria Raw" (12 Million Subscribers) running for President of the Republic of Valoria.
@@ -1161,10 +1183,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'swords',
     },
     voice: {
-      voiceId: 'bf322df2096a46f18c579d0baa36f41d',
-      voiceName: 'Adrian (Military Commander)',
+      voiceId: 'ddc981f5c23046f8a7144393ad261029',
+      voiceName: 'Roland Price (Special Ops Commander)',
       gender: 'male',
       category: 'Deep & Serious',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are Colonel Roland Price, Former Commander of the Black Dagger Counter-Terrorism Task Force running for President of the Republic of Valoria.
@@ -1209,10 +1232,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'landmark',
     },
     voice: {
-      voiceId: 'b545c585f631496c914815291da4e893',
-      voiceName: 'Elena (Diplomatic Executive)',
+      voiceId: 'd9da4a948da0468b8b7730de9be4f748',
+      voiceName: 'Diana Albright (Budget Auditor)',
       gender: 'female',
       category: 'Professional',
+      speed: 1.05,
     },
     initialBudget: 100,
     systemPrompt: `You are Senator Diana Albright, Ranking Member of the Senate Finance & Budget Committee running for President of the Republic of Valoria.
@@ -1257,10 +1281,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'award',
     },
     voice: {
-      voiceId: '1936333080804be19655c6749b2ae7b2',
-      voiceName: 'Senator Vance (Senior Statesman)',
+      voiceId: '565502b9434d467993ba89e4eb5fa7a4',
+      voiceName: 'Henrik Falken (Energy Dynast)',
       gender: 'male',
       category: 'Deep & Serious',
+      speed: 0.9,
     },
     initialBudget: 120,
     systemPrompt: `You are Henrik Falken, President of the Northern Conservation & Hydro Trust running for President of the Republic of Valoria.
@@ -1305,10 +1330,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'zap',
     },
     voice: {
-      voiceId: 'e9e9d36027424e55ac3faa620f78a72b',
-      voiceName: 'Zephyr (Dynamic Wildcard)',
+      voiceId: 'e1ea4679a5fe47a68adb3bfff3859395',
+      voiceName: 'Sora Kim (Neural Architect)',
       gender: 'male',
-      category: 'Wildcard',
+      category: 'Tech & Modern',
+      speed: 1.1,
     },
     initialBudget: 80,
     systemPrompt: `You are Sora Kim, 28-Year-Old White-Hat Hacker and Digital Sovereignty Activist running for President of the Republic of Valoria.
@@ -1353,10 +1379,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'users',
     },
     voice: {
-      voiceId: 'f8dfe9c83081432386f143e2fe9767ef',
-      voiceName: 'Dmitri (Deep Union Veteran)',
+      voiceId: 'cf3bd50df5234f8bbcfaaf83e92361c8',
+      voiceName: 'Douglas Wade (Midnight Broadcaster)',
       gender: 'male',
       category: 'Deep & Raspy',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are Captain Douglas Wade, Commercial Airline Pilot and President of the Aerospace Workers Union running for President of the Republic of Valoria.
@@ -1401,10 +1428,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'heart',
     },
     voice: {
-      voiceId: 'ca3007f96ae7499ab87d27ea3599956a',
-      voiceName: 'Sarah (Calm Reformer)',
+      voiceId: '31a18e2d02c340bf896c39ed27f7e8c5',
+      voiceName: 'Leila Kassam (Public Health Director)',
       gender: 'female',
       category: 'Calm & Gentle',
+      speed: 1.0,
     },
     initialBudget: 100,
     systemPrompt: `You are Dr. Leila Kassam, Director of the National Biodefense Center running for President of the Republic of Valoria.
@@ -1449,10 +1477,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'scroll',
     },
     voice: {
-      voiceId: '4c6a6762e4ac4bdebdb4fa8525d054a2',
-      voiceName: 'Atomic (Dramatic Jurist)',
+      voiceId: '179b5cc736974d96913c7849d0bb68c5',
+      voiceName: 'Malcolm Winters (Epic Chronicler)',
       gender: 'male',
-      category: 'Authoritative',
+      category: 'Deep & Serious',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are Judge Malcolm Winters, 30-Year Federal Circuit Judge and Constitutional Scholar running for President of the Republic of Valoria.
@@ -1497,10 +1526,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'star',
     },
     voice: {
-      voiceId: '59e9dc1cb20c452584788a2690c80970',
-      voiceName: 'Camilla (Passionate Litigator)',
+      voiceId: '0edf03c4ff7f43df8ae59d9ec0f5d4eb',
+      voiceName: 'Victoria Sterling (Youth Tribune)',
       gender: 'female',
       category: 'Passionate',
+      speed: 1.1,
     },
     initialBudget: 120,
     systemPrompt: `You are Victoria Sterling, Venture Philanthropist and Rebellious Heiress running for President of the Republic of Valoria.
@@ -1545,10 +1575,11 @@ DIRECT OUTPUT & FORMAT RULES: Output ONLY your spoken speech directly without in
       svgType: 'globe',
     },
     voice: {
-      voiceId: 'bf322df2096a46f18c579d0baa36f41d',
-      voiceName: 'Adrian (Military Commander)',
+      voiceId: 'ef5698d8d21243928659639c8fd30515',
+      voiceName: 'Cassian Drake (Aerospace General)',
       gender: 'male',
       category: 'Deep & Serious',
+      speed: 0.95,
     },
     initialBudget: 100,
     systemPrompt: `You are Commander Cassian Drake, Supreme Commander of the Valoria Orbital Defense Command running for President of the Republic of Valoria.

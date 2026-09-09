@@ -13,6 +13,9 @@ import { ElectionIntelModal } from '@/components/ElectionIntelModal';
 import { BroadcastTimeline } from '@/components/BroadcastTimeline';
 import { CharactersManagerView } from '@/components/CharactersManagerView';
 import { CharacterEditorModal } from '@/components/CharacterEditorModal';
+import { StrategicConfessionalModal } from '@/components/StrategicConfessionalModal';
+import { FullRoundBufferingModal } from '@/components/FullRoundBufferingModal';
+import { RenderMasterVideoModal } from '@/components/RenderMasterVideoModal';
 import { Candidate } from '@/types/candidate';
 import { CANDIDATE_MAP } from '@/data/candidates';
 import { 
@@ -26,19 +29,25 @@ import {
   Users,
   Tv,
   Eye,
-  EyeOff
+  EyeOff,
+  Film
 } from 'lucide-react';
 
 const STORAGE_KEY = 'ai_politics_9router_config';
+
+const DEFAULT_FISH_KEYS = 'sk-fish-5Zz7hVlOft5sr46Nz1jPf4LhAPdSBJ0Ar08dxdBdCq0, sk-fish-FhpR3igZk-M0oslJOI6KBwe6ipOePusmFB4A1sAUMIs';
 
 export default function AIPlaygroundPage() {
   const [nineRouterConfig, setNineRouterConfig] = useState<NineRouterConfigState>({
     baseUrl: 'http://localhost:20128/v1',
     apiKey: '',
     model: 'gpt-4o-mini',
-    fishAudioApiKey: 'sk-fish-5Zz7hVlOft5sr46Nz1jPf4LhAPdSBJ0Ar08dxdBdCq0',
+    fishAudioApiKey: DEFAULT_FISH_KEYS,
     fishAudioModel: 's2.1-pro-free',
     fishAudioEnabled: true,
+    dialogueOnlyAudio: false,
+    autoNextMode: false,
+    autoNextDelay: 0.75,
   });
 
   const [activeView, setActiveView] = useState<'arena' | 'characters'>('arena');
@@ -49,6 +58,8 @@ export default function AIPlaygroundPage() {
   const [candidateToEdit, setCandidateToEdit] = useState<Candidate | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
+  const [isRenderModalOpen, setIsRenderModalOpen] = useState(false);
+  const [sessionSaveName, setSessionSaveName] = useState('');
   const [hasMounted, setHasMounted] = useState(false);
 
   // Set mounted flag to safely hydrate client-side custom candidate counts
@@ -66,9 +77,12 @@ export default function AIPlaygroundPage() {
           setNineRouterConfig(prev => ({
             ...prev,
             ...parsed,
-            fishAudioApiKey: parsed.fishAudioApiKey || prev.fishAudioApiKey || 'sk-fish-5Zz7hVlOft5sr46Nz1jPf4LhAPdSBJ0Ar08dxdBdCq0',
+            fishAudioApiKey: parsed.fishAudioApiKey || prev.fishAudioApiKey || DEFAULT_FISH_KEYS,
             fishAudioModel: parsed.fishAudioModel || prev.fishAudioModel || 's2.1-pro-free',
             fishAudioEnabled: parsed.fishAudioEnabled !== false,
+            dialogueOnlyAudio: parsed.dialogueOnlyAudio ?? false,
+            autoNextMode: parsed.autoNextMode ?? false,
+            autoNextDelay: typeof parsed.autoNextDelay === 'number' ? parsed.autoNextDelay : 0.75,
           }));
           return;
         }
@@ -99,12 +113,19 @@ export default function AIPlaygroundPage() {
   const {
     state,
     candidates,
+    activeSessionSaveName,
     isSpeakingAudio,
     playSpeechAudio,
+    playCCTVPactAudio,
     stopSpeechAudio,
     isBufferingLookahead,
     bufferingStatus,
     lookaheadBufferCount,
+    isFullRoundPrebuffering,
+    isWaitingForRecordTrigger,
+    startRecordingBroadcast,
+    prebufferProgress,
+    completedPrebufferCandidates,
     startGame,
     nextStep,
     toggleAutoPlay,
@@ -134,15 +155,40 @@ export default function AIPlaygroundPage() {
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
         return;
       }
+      if (isFullRoundPrebuffering) {
+        return;
+      }
+      if (isWaitingForRecordTrigger) {
+        if (e.key === 'ArrowRight' || e.key === 'Enter') {
+          e.preventDefault();
+          startRecordingBroadcast();
+        }
+        return;
+      }
       if (e.key === 'h' || e.key === 'H') {
         setIsCleanView(prev => !prev);
         return;
       }
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+        return;
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        if (state.stage.content && state.stage.speakerId) {
+          const speaker = CANDIDATE_MAP.get(state.stage.speakerId) || candidates.find(c => c.id === state.stage.speakerId);
+          playSpeechAudio(state.stage.content, speaker?.voice?.voiceId, speaker?.id);
+        }
+        return;
+      }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         if (state.phase === 'IDLE') {
-          startGame();
-        } else if (!state.stage.isLoading && !state.playback.autoPlay && state.phase !== 'WINNER') {
+          startGame(sessionSaveName);
+        } else if (!state.stage.isLoading && state.phase !== 'WINNER') {
           nextStep();
         }
       }
@@ -150,9 +196,32 @@ export default function AIPlaygroundPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.phase, state.stage.isLoading, state.playback.autoPlay, startGame, nextStep]);
+  }, [
+    state.phase, 
+    state.stage.isLoading, 
+    state.stage.content, 
+    state.stage.speakerId, 
+    state.playback.autoPlay, 
+    isFullRoundPrebuffering,
+    isWaitingForRecordTrigger,
+    startRecordingBroadcast,
+    candidates, 
+    playSpeechAudio, 
+    startGame, 
+    nextStep, 
+    sessionSaveName
+  ]);
 
-  const isConfigured = Boolean(nineRouterConfig.baseUrl && nineRouterConfig.apiKey);
+  // Pure Black Recording Standby Screen: Hold total black silence with 0 UI, 0 subtitles, 0 audio until user triggers recording
+  if (isWaitingForRecordTrigger) {
+    return (
+      <main 
+        className="fixed inset-0 w-screen h-screen bg-black z-[9999] flex items-center justify-center cursor-pointer select-none overflow-hidden"
+        onClick={() => startRecordingBroadcast()}
+        tabIndex={0}
+      />
+    );
+  }
 
   return (
     <main className="h-screen max-h-screen flex flex-col bg-[#07090e] cyber-grid relative overflow-hidden" suppressHydrationWarning>
@@ -239,6 +308,16 @@ export default function AIPlaygroundPage() {
               <span className="hidden md:inline">Election Intel</span>
             </button>
 
+            {/* Master Video Render Button */}
+            <button
+              onClick={() => setIsRenderModalOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-950/80 to-blue-950/80 hover:from-cyan-900/90 hover:to-blue-900/90 border border-cyan-700/60 hover:border-cyan-400 text-xs font-mono font-bold text-cyan-300 transition cursor-pointer shadow-sm shadow-cyan-500/10"
+              title="Render Master Video for Premiere Pro & YouTube (Zero Artifacts)"
+            >
+              <Film className="w-4 h-4 text-cyan-400" />
+              <span className="hidden md:inline">Master Video</span>
+            </button>
+
             {/* Clean View Toggle Button */}
             <button
               onClick={() => setIsCleanView(prev => !prev)}
@@ -288,7 +367,7 @@ export default function AIPlaygroundPage() {
         </div>
       ) : (
         /* Main Broadcast Workspace */
-        <div className={`flex-1 flex flex-col ${isCleanView ? 'p-2 md:p-3 gap-2' : 'p-3 md:p-4 gap-3'} max-w-[1750px] w-full mx-auto h-full min-h-0 overflow-hidden`}>
+        <div className={`flex-1 flex flex-col ${state.phase === 'CCTV_BACKROOM' && isCleanView ? 'p-1 sm:p-2' : isCleanView ? 'p-2 md:p-3 gap-2' : 'p-3 md:p-4 gap-3.5'} ${state.phase === 'CCTV_BACKROOM' ? 'max-w-none w-full' : 'max-w-[1840px] w-full mx-auto'} h-full min-h-0 overflow-hidden`}>
           {/* Top Controls Bar (Hidden in Clean View) */}
           {!isCleanView && (
             <div className="shrink-0">
@@ -297,8 +376,11 @@ export default function AIPlaygroundPage() {
                 nineRouterConfig={nineRouterConfig}
                 lookaheadBufferCount={lookaheadBufferCount}
                 isBufferingLookahead={isBufferingLookahead}
+                isFullRoundPrebuffering={isFullRoundPrebuffering}
+                sessionSaveName={sessionSaveName}
+                onSessionSaveNameChange={setSessionSaveName}
                 onOpenSettings={() => setIsSettingsOpen(true)}
-                onStartGame={startGame}
+                onStartGame={() => startGame(sessionSaveName)}
                 onNextStep={nextStep}
                 onToggleAutoPlay={toggleAutoPlay}
                 onSetSpeed={setSpeed}
@@ -309,22 +391,9 @@ export default function AIPlaygroundPage() {
             </div>
           )}
 
-          {/* 3-Column Layout: Left (Candidates) - Center (Debate Arena) - Right (Live Battle Timeline) */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3.5 h-full min-h-0 overflow-hidden">
-            {/* Left Column: Candidate Roster (3 Cols) */}
-            <div className="lg:col-span-3 h-full min-h-0 flex flex-col overflow-hidden">
-              <CandidateRoster
-                gameState={state}
-                candidates={candidates}
-                onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
-                onOpenCharactersManager={() => setActiveView('characters')}
-                onMoveCandidate={moveActiveCandidate}
-                onSetPresetRoster={setPresetRoster}
-              />
-            </div>
-
-            {/* Center Column: Live Debate Arena (6 Cols) */}
-            <div className="lg:col-span-6 h-full min-h-0 flex flex-col overflow-hidden">
+          {/* CCTV Surveillance Fullscreen Mode OR 3-Column Layout */}
+          {state.phase === 'CCTV_BACKROOM' ? (
+            <div className="flex-1 w-full h-full min-h-0 flex flex-col overflow-hidden animate-fade-in">
               <DebateArena
                 gameState={state}
                 onRetry={retryCurrentStep}
@@ -332,23 +401,68 @@ export default function AIPlaygroundPage() {
                 onNextStep={nextStep}
                 onSelectCCTVFeed={selectCCTVFeed}
                 onPlaySpeechAudio={playSpeechAudio}
+                onPlayCCTVPactAudio={playCCTVPactAudio}
                 isSpeakingAudio={isSpeakingAudio}
                 isBufferingLookahead={isBufferingLookahead}
                 bufferingStatus={bufferingStatus}
                 lookaheadBufferCount={lookaheadBufferCount}
                 ballotSpeed={nineRouterConfig.ballotSpeed}
                 ballotAutoPlay={nineRouterConfig.ballotAutoPlay}
+                kineticSubtitlesEnabled={nineRouterConfig.kineticSubtitlesEnabled}
+                kineticSubtitleStyle={nineRouterConfig.kineticSubtitleStyle}
+                kineticHighlightCriticalWords={nineRouterConfig.kineticHighlightCriticalWords}
+                kineticDynamicBoxResize={nineRouterConfig.kineticDynamicBoxResize}
+                kineticFontSize={nineRouterConfig.kineticFontSize}
               />
             </div>
+          ) : (
+            /* 3-Column Layout: Left (Candidates) - Center (Debate Arena) - Right (Live Battle Timeline) */
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 xl:gap-6 2xl:gap-7 h-full min-h-0 overflow-hidden">
+              {/* Left Column: Candidate Roster (3 Cols) */}
+              <div className="lg:col-span-3 h-full min-h-0 flex flex-col overflow-hidden">
+                <CandidateRoster
+                  gameState={state}
+                  candidates={candidates}
+                  onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
+                  onOpenCharactersManager={() => setActiveView('characters')}
+                  onMoveCandidate={moveActiveCandidate}
+                  onSetPresetRoster={setPresetRoster}
+                />
+              </div>
 
-            {/* Right Column: Live Battle Timeline (3 Cols) */}
-            <div className="lg:col-span-3 h-full min-h-0 flex flex-col overflow-hidden">
-              <BroadcastTimeline
-                gameState={state}
-                onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
-              />
+              {/* Center Column: Live Debate Arena (6 Cols) */}
+              <div className="lg:col-span-6 h-full min-h-0 flex flex-col overflow-hidden">
+                <DebateArena
+                  gameState={state}
+                  onRetry={retryCurrentStep}
+                  onRestart={restartGame}
+                  onNextStep={nextStep}
+                  onSelectCCTVFeed={selectCCTVFeed}
+                  onPlaySpeechAudio={playSpeechAudio}
+                  onPlayCCTVPactAudio={playCCTVPactAudio}
+                  isSpeakingAudio={isSpeakingAudio}
+                  isBufferingLookahead={isBufferingLookahead}
+                  bufferingStatus={bufferingStatus}
+                  lookaheadBufferCount={lookaheadBufferCount}
+                  ballotSpeed={nineRouterConfig.ballotSpeed}
+                  ballotAutoPlay={nineRouterConfig.ballotAutoPlay}
+                  kineticSubtitlesEnabled={nineRouterConfig.kineticSubtitlesEnabled}
+                  kineticSubtitleStyle={nineRouterConfig.kineticSubtitleStyle}
+                  kineticHighlightCriticalWords={nineRouterConfig.kineticHighlightCriticalWords}
+                  kineticDynamicBoxResize={nineRouterConfig.kineticDynamicBoxResize}
+                  kineticFontSize={nineRouterConfig.kineticFontSize}
+                />
+              </div>
+
+              {/* Right Column: Live Battle Timeline (3 Cols) */}
+              <div className="lg:col-span-3 h-full min-h-0 flex flex-col overflow-hidden">
+                <BroadcastTimeline
+                  gameState={state}
+                  onSelectCandidate={(candidate) => setSelectedCandidate(candidate)}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Bottom Live Wire News Flash Ticker (Hidden in Clean View) */}
           {!isCleanView && (
@@ -422,6 +536,61 @@ export default function AIPlaygroundPage() {
         isOpen={isTranscriptOpen}
         gameState={state}
         onClose={() => setIsTranscriptOpen(false)}
+      />
+
+      {/* Strategic Confessional Full-Screen Modal (Button-Free) */}
+      {state.phase === 'VOTE_CONFESSIONAL' && (() => {
+        const isFinal = state.round === 99 || Boolean(state.finalVoteTally);
+        const tally = isFinal ? state.finalVoteTally : state.votesByRound[state.round];
+        const votesList = tally?.votes || [];
+        const activeVote = votesList[state.currentSpeakerIndex];
+        if (!activeVote) return null;
+
+        const voter = CANDIDATE_MAP.get(activeVote.voterId) || candidates.find(c => c.id === activeVote.voterId);
+        const target = CANDIDATE_MAP.get(activeVote.targetId) || candidates.find(c => c.id === activeVote.targetId);
+        if (!voter) return null;
+
+        const allyCand = activeVote.betrayedAllyId ? CANDIDATE_MAP.get(activeVote.betrayedAllyId) : undefined;
+
+        return (
+          <StrategicConfessionalModal
+            voter={voter}
+            target={target}
+            strategyMonologue={activeVote.strategyMonologue || state.stage.content}
+            privateReason={activeVote.reason}
+            voterIndex={state.currentSpeakerIndex}
+            totalVoters={votesList.length}
+            round={state.round}
+            isSpeakingAudio={isSpeakingAudio}
+            voterBudget={state.candidateBudgets[activeVote.voterId] ?? 100}
+            targetBudget={state.candidateBudgets[activeVote.targetId] ?? 100}
+            isBetrayal={activeVote.isBetrayal}
+            isHonoredPact={activeVote.isHonoredPact}
+            pactAllyName={allyCand?.name}
+            isFinalVote={isFinal}
+            kineticSubtitlesEnabled={nineRouterConfig.kineticSubtitlesEnabled}
+            kineticSubtitleStyle={nineRouterConfig.kineticSubtitleStyle}
+            kineticHighlightCriticalWords={nineRouterConfig.kineticHighlightCriticalWords}
+            kineticDynamicBoxResize={nineRouterConfig.kineticDynamicBoxResize}
+            kineticFontSize={nineRouterConfig.kineticFontSize}
+          />
+        );
+      })()}
+
+      {/* Full-Round 1 Pre-Buffering Modal (Hard Lock Until 100% Ready) */}
+      <FullRoundBufferingModal
+        isOpen={isFullRoundPrebuffering}
+        progress={prebufferProgress}
+        activeCandidates={candidates.filter(c => state.activeCandidateIds.includes(c.id))}
+        completedCandidateIds={completedPrebufferCandidates}
+        nineRouterConfig={nineRouterConfig}
+      />
+
+      {/* Valoria Master Video Render Modal (Zero Artifacts for Premiere Pro) */}
+      <RenderMasterVideoModal
+        isOpen={isRenderModalOpen}
+        onClose={() => setIsRenderModalOpen(false)}
+        currentSessionName={sessionSaveName || 'voiceT1'}
       />
     </main>
   );

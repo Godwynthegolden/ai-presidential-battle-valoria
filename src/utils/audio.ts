@@ -8,6 +8,15 @@
 class SoundManager {
   private ctx: AudioContext | null = null;
   public enabled: boolean = true;
+  public sfxMuted: boolean = false;
+
+  /**
+   * Evaluates if procedural sound effects are allowed to play.
+   * False if sound is globally disabled or if SFX are muted (dialogue-only mode).
+   */
+  public canPlaySfx(): boolean {
+    return this.enabled && !this.sfxMuted;
+  }
   private noiseBuffer: AudioBuffer | null = null;
   private masterGain: GainNode | null = null;
   private masterWarmthFilter: BiquadFilterNode | null = null;
@@ -76,6 +85,13 @@ class SoundManager {
   }
 
   /**
+   * Exposes initialized Web Audio Context and studio master bus for acoustic analysis
+   */
+  public getContext(): { ctx: AudioContext; masterOut: GainNode } | null {
+    return this.initContext();
+  }
+
+  /**
    * Cached smooth low-passed noise buffer for organic tactile textures.
    */
   private getNoiseBuffer(ctx: AudioContext): AudioBuffer {
@@ -97,7 +113,7 @@ class SoundManager {
    * Warm, deep, rounded wooden knock with rich 42Hz floor sub-thump. Zero harsh crackle.
    */
   public playGavel() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -149,7 +165,7 @@ class SoundManager {
    * Dark, velvety, warm trailer braam & 808 sub drop. Zero piercing lasers.
    */
   public playAttackSting() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -204,7 +220,7 @@ class SoundManager {
    * Soft, dreamy, round crystal chime (Apple UI / luxury motion graphic style). Zero piercing highs.
    */
   public playVoteRevealDing() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -255,7 +271,7 @@ class SoundManager {
    * Deep 38Hz reality-show sub boom + smooth tape-stop pitch dive. Zero harsh glitch.
    */
   public playEliminationBuzzer() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -307,7 +323,7 @@ class SoundManager {
    * Tactile, quiet, authentic cassette tape click & soft optical blip (ASMR documentary style).
    */
   public playCCTVBeep() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -354,7 +370,7 @@ class SoundManager {
    * Deep D Minor chord swell (D2, A2, F3) through 380Hz lowpass + deep 50Hz sub tremor. No high screech.
    */
   public playBetrayalStab() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -408,7 +424,7 @@ class SoundManager {
    * Smooth, rhythmic 520Hz sine ping with synchronized 45Hz gentle heartbeat thud.
    */
   public playBetrayalAlarm() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -455,7 +471,7 @@ class SoundManager {
    * Tactile ASMR-style thick paper card placement / soft leather stamp plop.
    */
   public playBallotDrop() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -498,91 +514,121 @@ class SoundManager {
   }
 
   /**
-   * 9. Delicate Luxury Gold Chime (Cash Chime)
-   * Soft staggered sine taps (1.8k, 2.4k, 3.2k) with golden ratio shimmer & 2.8kHz lowpass warmth.
+   * 9. Premium Solid Gold Bullion Clink & Velvet Treasury Drop (Cash Chime / Dollar Decrease)
+   * Deep, warm, rich resonant metallic sound for treasury deduction and bailout auctions.
+   * Completely eliminates harsh/thin high frequencies and noisy sweeps.
+   * Features:
+   *  - Rich C-Major luxury harmonic chord (C4, E4, G4, C5) with warm lowpass filtering
+   *  - Tactile metallic gold bullion strike (740Hz -> 420Hz)
+   *  - Deep 54Hz velvet felt-vault mechanical chest thump
    */
   public playCashChime() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Staggered Warm Coin Taps (Filtered at 2.8kHz)
-    const coinTimes = [0.00, 0.035, 0.075];
-    const coinFreqs = [1800, 2400, 3100];
+    // Layer 1: Warm Solid Gold Chime (C4, E4, G4, C5)
+    const freqs = [261.63, 329.63, 392.00, 523.25];
+    const delays = [0.00, 0.025, 0.05, 0.075];
 
-    coinTimes.forEach((t, idx) => {
+    freqs.forEach((freq, idx) => {
       const osc = ctx.createOscillator();
       const filter = ctx.createBiquadFilter();
       const gain = ctx.createGain();
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(coinFreqs[idx], now + t);
-      osc.frequency.exponentialRampToValueAtTime(coinFreqs[idx] * 0.96, now + t + 0.15);
+      osc.type = 'triangle'; // Richer, warmer than harsh sine
+      osc.frequency.setValueAtTime(freq, now + delays[idx]);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.99, now + delays[idx] + 0.35);
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(2800, now);
+      filter.frequency.setValueAtTime(1400, now);
+      filter.Q.setValueAtTime(1.2, now);
 
-      gain.gain.setValueAtTime(0.001, now + t);
-      gain.gain.linearRampToValueAtTime(0.16, now + t + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + t + 0.18);
+      gain.gain.setValueAtTime(0.001, now + delays[idx]);
+      gain.gain.linearRampToValueAtTime(0.22, now + delays[idx] + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delays[idx] + 0.45);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(masterOut);
-      osc.start(now + t);
-      osc.stop(now + t + 0.2);
+      osc.start(now + delays[idx]);
+      osc.stop(now + delays[idx] + 0.5);
     });
 
-    // Warm Velvet Bell Bloom (1.5kHz with long soft decay)
-    const bellOsc = ctx.createOscillator();
-    const bellFilter = ctx.createBiquadFilter();
-    const bellGain = ctx.createGain();
+    // Layer 2: Tactile Bullion Clink (740Hz -> 420Hz warm metallic impact)
+    const clinkOsc = ctx.createOscillator();
+    const clinkFilter = ctx.createBiquadFilter();
+    const clinkGain = ctx.createGain();
 
-    bellOsc.type = 'sine';
-    bellOsc.frequency.setValueAtTime(1567.98, now + 0.07); // G6
+    clinkOsc.type = 'sine';
+    clinkOsc.frequency.setValueAtTime(740, now);
+    clinkOsc.frequency.exponentialRampToValueAtTime(420, now + 0.08);
 
-    bellFilter.type = 'lowpass';
-    bellFilter.frequency.setValueAtTime(2400, now);
+    clinkFilter.type = 'bandpass';
+    clinkFilter.frequency.setValueAtTime(700, now);
+    clinkFilter.Q.setValueAtTime(1.8, now);
 
-    bellGain.gain.setValueAtTime(0.001, now + 0.07);
-    bellGain.gain.linearRampToValueAtTime(0.18, now + 0.07 + 0.02);
-    bellGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07 + 0.85);
+    clinkGain.gain.setValueAtTime(0.001, now);
+    clinkGain.gain.linearRampToValueAtTime(0.18, now + 0.006);
+    clinkGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
 
-    bellOsc.connect(bellFilter);
-    bellFilter.connect(bellGain);
-    bellGain.connect(masterOut);
-    bellOsc.start(now + 0.07);
-    bellOsc.stop(now + 0.95);
+    clinkOsc.connect(clinkFilter);
+    clinkFilter.connect(clinkGain);
+    clinkGain.connect(masterOut);
+    clinkOsc.start(now);
+    clinkOsc.stop(now + 0.14);
+
+    // Layer 3: Velvet Treasury Sub-Drop (54Hz warm low-end felt thump)
+    const subOsc = ctx.createOscillator();
+    const subFilter = ctx.createBiquadFilter();
+    const subGain = ctx.createGain();
+
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(54, now);
+    subOsc.frequency.exponentialRampToValueAtTime(38, now + 0.18);
+
+    subFilter.type = 'lowpass';
+    subFilter.frequency.setValueAtTime(180, now);
+
+    subGain.gain.setValueAtTime(0.001, now);
+    subGain.gain.linearRampToValueAtTime(0.38, now + 0.008);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+    subOsc.connect(subFilter);
+    subFilter.connect(subGain);
+    subGain.connect(masterOut);
+    subOsc.start(now);
+    subOsc.stop(now + 0.25);
   }
 
   /**
    * 10. Velvety Smooth Bass Whoosh (Swap Whoosh)
-   * Low-frequency air displacement swept 120Hz -> 950Hz -> 160Hz + 65Hz sub whoosh with stereo pan.
+   * Low-frequency air displacement swept 90Hz -> 380Hz -> 120Hz + 60Hz sub whoosh with stereo pan.
    */
   public playSwapWhoosh() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
     const now = ctx.currentTime;
 
-    // Layer 1: Smooth Aerodynamic Noise Sweep (120Hz -> 950Hz -> 160Hz)
+    // Layer 1: Smooth Aerodynamic Noise Sweep (Warm & non-hissing)
     const noiseSource = ctx.createBufferSource();
     noiseSource.buffer = this.getNoiseBuffer(ctx);
 
     const noiseFilter = ctx.createBiquadFilter();
     noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(120, now);
-    noiseFilter.frequency.exponentialRampToValueAtTime(950, now + 0.12);
-    noiseFilter.frequency.exponentialRampToValueAtTime(160, now + 0.28);
-    noiseFilter.Q.setValueAtTime(2.0, now);
+    noiseFilter.frequency.setValueAtTime(90, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(380, now + 0.1);
+    noiseFilter.frequency.exponentialRampToValueAtTime(120, now + 0.24);
+    noiseFilter.Q.setValueAtTime(1.2, now);
 
     const noiseGain = ctx.createGain();
     noiseGain.gain.setValueAtTime(0.001, now);
-    noiseGain.gain.linearRampToValueAtTime(0.35, now + 0.12);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    noiseGain.gain.linearRampToValueAtTime(0.18, now + 0.09);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
 
     // Smooth Stereo Panning Sweep
     let panner: StereoPannerNode | null = null;
@@ -602,7 +648,7 @@ class SoundManager {
     }
 
     noiseSource.start(now);
-    noiseSource.stop(now + 0.32);
+    noiseSource.stop(now + 0.28);
 
     // Layer 2: 65Hz Sub-Bass Whoosh Body
     const subOsc = ctx.createOscillator();
@@ -627,7 +673,7 @@ class SoundManager {
    * Understated, soft organic 540Hz warm wooden UI bubble at low gain (0.05).
    */
   public playSpeechBeep() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -660,7 +706,7 @@ class SoundManager {
    * Warm Hans Zimmer style French horn chords filtered at 750Hz + 42Hz timpani drum booms.
    */
   public playFanfare() {
-    if (!this.enabled) return;
+    if (!this.canPlaySfx()) return;
     const sys = this.initContext();
     if (!sys) return;
     const { ctx, masterOut } = sys;
@@ -725,1039 +771,234 @@ class SoundManager {
   }
 
   // =========================================================================
-  // 20 NEW UNIQUE PRESIDENTIAL CHARACTER SOUND EFFECTS
+  // UNIFIED PRESIDENTIAL SOUND DISPATCHER (100% Consistent & YouTube Friendly)
+  // All characters share the exact same luxury, studio-mastered sound design.
   // =========================================================================
 
   /**
-   * 1. Gov. Ray Callahan (THE BORDER GOVERNOR)
-   * Heavy steel perimeter gate latch drop + desert wind sub boom (48Hz).
+   * Plays the presidential sound motif for candidates.
+   * Unified across all candidates to guarantee consistent, studio-quality audio levels for YouTube.
+   * - 'speech': Subtle, warm organic studio floor cue (playSpeechBeep)
+   * - 'action': Dramatic trailer braam & 808 sub drop (playAttackSting)
    */
-  public playBorderGovernorHammerGate() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Steel Gate Latch Drop (180Hz -> 65Hz)
-    const latchOsc = ctx.createOscillator();
-    const latchFilter = ctx.createBiquadFilter();
-    const latchGain = ctx.createGain();
-
-    latchOsc.type = 'triangle';
-    latchOsc.frequency.setValueAtTime(180, now);
-    latchOsc.frequency.exponentialRampToValueAtTime(65, now + 0.08);
-
-    latchFilter.type = 'lowpass';
-    latchFilter.frequency.setValueAtTime(800, now);
-
-    latchGain.gain.setValueAtTime(0.001, now);
-    latchGain.gain.linearRampToValueAtTime(0.65, now + 0.006);
-    latchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-    latchOsc.connect(latchFilter);
-    latchFilter.connect(latchGain);
-    latchGain.connect(masterOut);
-    latchOsc.start(now);
-    latchOsc.stop(now + 0.14);
-
-    // Deep Desert Perimeter Sub Thud (48Hz)
-    const subOsc = ctx.createOscillator();
-    const subGain = ctx.createGain();
-    subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(58, now);
-    subOsc.frequency.exponentialRampToValueAtTime(32, now + 0.35);
-
-    subGain.gain.setValueAtTime(0.7, now);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-
-    subOsc.connect(subGain);
-    subGain.connect(masterOut);
-    subOsc.start(now);
-    subOsc.stop(now + 0.5);
-  }
-
-  /**
-   * 2. Dr. Vivienne Chen (THE NEUROTECH VISIONARY)
-   * Soft crystalline neural synapse ping with rotary delay (1.8kHz lowpass).
-   */
-  public playNeurotechSynapseChime() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    const synapseFreqs = [1760, 2217.46, 2637];
-    synapseFreqs.forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now + idx * 0.03);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1800, now);
-
-      gain.gain.setValueAtTime(0.001, now + idx * 0.03);
-      gain.gain.linearRampToValueAtTime(0.18, now + idx * 0.03 + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.03 + 0.6);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now + idx * 0.03);
-      osc.stop(now + idx * 0.03 + 0.65);
-    });
-  }
-
-  /**
-   * 3. Prosecutor Sterling Archer (THE CARTEL CRUSADER)
-   * Tactile steel handcuffs ratchet snap + courtroom oak bench knock (75Hz).
-   */
-  public playCartelProsecutorHandcuffSnap() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Handcuff Ratchet Clicks
-    [0.0, 0.025, 0.05].forEach((offset) => {
-      const clickOsc = ctx.createOscillator();
-      const clickFilter = ctx.createBiquadFilter();
-      const clickGain = ctx.createGain();
-
-      clickOsc.type = 'triangle';
-      clickOsc.frequency.setValueAtTime(950, now + offset);
-      clickOsc.frequency.exponentialRampToValueAtTime(240, now + offset + 0.02);
-
-      clickFilter.type = 'lowpass';
-      clickFilter.frequency.setValueAtTime(1600, now + offset);
-
-      clickGain.gain.setValueAtTime(0.35, now + offset);
-      clickGain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.025);
-
-      clickOsc.connect(clickFilter);
-      clickFilter.connect(clickGain);
-      clickGain.connect(masterOut);
-      clickOsc.start(now + offset);
-      clickOsc.stop(now + offset + 0.03);
-    });
-
-    // Oak Bench Knock (75Hz)
-    const benchOsc = ctx.createOscillator();
-    const benchGain = ctx.createGain();
-    benchOsc.type = 'sine';
-    benchOsc.frequency.setValueAtTime(85, now + 0.06);
-    benchOsc.frequency.exponentialRampToValueAtTime(45, now + 0.28);
-
-    benchGain.gain.setValueAtTime(0.65, now + 0.06);
-    benchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
-    benchOsc.connect(benchGain);
-    benchGain.connect(masterOut);
-    benchOsc.start(now + 0.06);
-    benchOsc.stop(now + 0.4);
-  }
-
-  /**
-   * 4. Pastor Elijah Vance (THE TELEVANGELIST)
-   * Warm Hammond gospel drawbar organ swell with deep bass pedal (55Hz).
-   */
-  public playTelevangelistPipeOrganSwell() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Gospel Drawbar Chord (F Major: F3 [174Hz], A3 [220Hz], C4 [261Hz], F4 [349Hz])
-    [174.6, 220.0, 261.6, 349.2].forEach((freq) => {
-      const osc = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1100, now);
-
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.18, now + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.95);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now);
-      osc.stop(now + 1.0);
-    });
-
-    // Deep Cathedral Bass Pedal (55Hz)
-    const pedalOsc = ctx.createOscillator();
-    const pedalGain = ctx.createGain();
-    pedalOsc.type = 'sine';
-    pedalOsc.frequency.setValueAtTime(55, now);
-    pedalGain.gain.setValueAtTime(0.55, now);
-    pedalGain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
-
-    pedalOsc.connect(pedalGain);
-    pedalGain.connect(masterOut);
-    pedalOsc.start(now);
-    pedalOsc.stop(now + 0.9);
-  }
-
-  /**
-   * 5. Kendra "The Shark" Sterling (THE DISTRESSED-DEBT QUEEN)
-   * Heavy casino chip cascade + solid platinum bullion bar drop on felt.
-   */
-  public playDistressedDebtCashStack() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Ceramic Chip Taps (Filtered at 2.4kHz)
-    [0.0, 0.03, 0.065, 0.1].forEach((offset, idx) => {
-      const chipOsc = ctx.createOscillator();
-      const chipFilter = ctx.createBiquadFilter();
-      const chipGain = ctx.createGain();
-
-      chipOsc.type = 'sine';
-      chipOsc.frequency.setValueAtTime(1900 + idx * 250, now + offset);
-
-      chipFilter.type = 'lowpass';
-      chipFilter.frequency.setValueAtTime(2400, now + offset);
-
-      chipGain.gain.setValueAtTime(0.18, now + offset);
-      chipGain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.08);
-
-      chipOsc.connect(chipFilter);
-      chipFilter.connect(chipGain);
-      chipGain.connect(masterOut);
-      chipOsc.start(now + offset);
-      chipOsc.stop(now + offset + 0.09);
-    });
-
-    // Heavy Platinum Bar Felt Thud (140Hz -> 50Hz)
-    const barOsc = ctx.createOscillator();
-    const barGain = ctx.createGain();
-    barOsc.type = 'triangle';
-    barOsc.frequency.setValueAtTime(140, now + 0.08);
-    barOsc.frequency.exponentialRampToValueAtTime(45, now + 0.28);
-
-    barGain.gain.setValueAtTime(0.65, now + 0.08);
-    barGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
-    barOsc.connect(barGain);
-    barGain.connect(masterOut);
-    barOsc.start(now + 0.08);
-    barOsc.stop(now + 0.4);
-  }
-
-  /**
-   * 6. Sheriff Colton "Colt" Briggs (THE RURAL SHERIFF)
-   * Tactile brass boot spur jingle + deep shotgun rack slide and wooden porch thud (60Hz).
-   */
-  public playRuralSheriffBootSpur() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Brass Spur Jingle (1.6kHz triangle clinks)
-    [0.0, 0.02, 0.04].forEach((offset, idx) => {
-      const spurOsc = ctx.createOscillator();
-      const spurFilter = ctx.createBiquadFilter();
-      const spurGain = ctx.createGain();
-
-      spurOsc.type = 'triangle';
-      spurOsc.frequency.setValueAtTime(1450 + idx * 180, now + offset);
-
-      spurFilter.type = 'lowpass';
-      spurFilter.frequency.setValueAtTime(2000, now + offset);
-
-      spurGain.gain.setValueAtTime(0.16, now + offset);
-      spurGain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.06);
-
-      spurOsc.connect(spurFilter);
-      spurFilter.connect(spurGain);
-      spurGain.connect(masterOut);
-      spurOsc.start(now + offset);
-      spurOsc.stop(now + offset + 0.07);
-    });
-
-    // Wooden Porch Thud (60Hz)
-    const porchOsc = ctx.createOscillator();
-    const porchGain = ctx.createGain();
-    porchOsc.type = 'sine';
-    porchOsc.frequency.setValueAtTime(75, now + 0.05);
-    porchOsc.frequency.exponentialRampToValueAtTime(40, now + 0.28);
-
-    porchGain.gain.setValueAtTime(0.65, now + 0.05);
-    porchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
-    porchOsc.connect(porchGain);
-    porchGain.connect(masterOut);
-    porchOsc.start(now + 0.05);
-    porchOsc.stop(now + 0.4);
-  }
-
-  /**
-   * 7. Ambassador Maya Lin (THE HOSTAGE NEGOTIATOR)
-   * Titanium attache case latch snap + soft diplomat whisper tone.
-   */
-  public playNegotiatorSecretBriefcase() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Precision Titanium Snap
-    const snapOsc = ctx.createOscillator();
-    const snapFilter = ctx.createBiquadFilter();
-    const snapGain = ctx.createGain();
-
-    snapOsc.type = 'triangle';
-    snapOsc.frequency.setValueAtTime(820, now);
-    snapOsc.frequency.exponentialRampToValueAtTime(190, now + 0.03);
-
-    snapFilter.type = 'lowpass';
-    snapFilter.frequency.setValueAtTime(1400, now);
-
-    snapGain.gain.setValueAtTime(0.35, now);
-    snapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-
-    snapOsc.connect(snapFilter);
-    snapFilter.connect(snapGain);
-    snapGain.connect(masterOut);
-    snapOsc.start(now);
-    snapOsc.stop(now + 0.05);
-
-    // Diplomatic Room Harmony (Eb Major chord)
-    [311.1, 392.0, 466.2].forEach((freq) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now + 0.02);
-
-      gain.gain.setValueAtTime(0.001, now + 0.02);
-      gain.gain.linearRampToValueAtTime(0.12, now + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
-
-      osc.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now + 0.02);
-      osc.stop(now + 0.7);
-    });
-  }
-
-  /**
-   * 8. Declan "Iron" Hayes (THE COAL RIDGE MAYOR)
-   * Deep underground mine pickaxe strike on iron ore (130Hz -> 45Hz) with reverb.
-   */
-  public playCoalMayorPickaxeStrike() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Cast-Iron Strike Crack (240Hz -> 85Hz)
-    const pickOsc = ctx.createOscillator();
-    const pickFilter = ctx.createBiquadFilter();
-    const pickGain = ctx.createGain();
-
-    pickOsc.type = 'triangle';
-    pickOsc.frequency.setValueAtTime(240, now);
-    pickOsc.frequency.exponentialRampToValueAtTime(85, now + 0.09);
-
-    pickFilter.type = 'lowpass';
-    pickFilter.frequency.setValueAtTime(650, now);
-
-    pickGain.gain.setValueAtTime(0.7, now);
-    pickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-    pickOsc.connect(pickFilter);
-    pickFilter.connect(pickGain);
-    pickGain.connect(masterOut);
-    pickOsc.start(now);
-    pickOsc.stop(now + 0.14);
-
-    // Deep Mine Cave Sub Boom (45Hz)
-    const caveOsc = ctx.createOscillator();
-    const caveGain = ctx.createGain();
-    caveOsc.type = 'sine';
-    caveOsc.frequency.setValueAtTime(65, now + 0.02);
-    caveOsc.frequency.exponentialRampToValueAtTime(36, now + 0.45);
-
-    caveGain.gain.setValueAtTime(0.8, now + 0.02);
-    caveGain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-
-    caveOsc.connect(caveGain);
-    caveGain.connect(masterOut);
-    caveOsc.start(now + 0.02);
-    caveOsc.stop(now + 0.6);
-  }
-
-  /**
-   * 9. Dr. Jonathan Sterling (THE BIG PHARMA CEO)
-   * Medical glass vial clink + cleanroom airlock seal hum (1.4kHz).
-   */
-  public playBigPharmaVialClick() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Medical Glass Clink (1600Hz & 2200Hz sine tap)
-    [1600, 2200].forEach((freq) => {
-      const osc = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(2400, now);
-
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now);
-      osc.stop(now + 0.2);
-    });
-
-    // Airlock Pressurized Cleanroom Hum
-    const airOsc = ctx.createOscillator();
-    const airGain = ctx.createGain();
-    airOsc.type = 'triangle';
-    airOsc.frequency.setValueAtTime(110, now + 0.04);
-    airOsc.frequency.exponentialRampToValueAtTime(70, now + 0.3);
-
-    airGain.gain.setValueAtTime(0.35, now + 0.04);
-    airGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
-    airOsc.connect(airGain);
-    airGain.connect(masterOut);
-    airOsc.start(now + 0.04);
-    airOsc.stop(now + 0.4);
-  }
-
-  /**
-   * 10. Tariq Al-Fassi (THE SOVEREIGN WEALTH ARBITRATOR)
-   * Heavy Swiss bank vault door pneumatic decompression & slow turn (35Hz).
-   */
-  public playSovereignWealthVaultDoor() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Vault Decompression Pressure Hiss
-    const noiseSource = ctx.createBufferSource();
-    noiseSource.buffer = this.getNoiseBuffer(ctx);
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.setValueAtTime(450, now);
-
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.001, now);
-    noiseGain.gain.linearRampToValueAtTime(0.35, now + 0.06);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(masterOut);
-    noiseSource.start(now);
-    noiseSource.stop(now + 0.32);
-
-    // Deep Subterranean Vault Turn (35Hz)
-    const subOsc = ctx.createOscillator();
-    const subGain = ctx.createGain();
-    subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(60, now + 0.04);
-    subOsc.frequency.exponentialRampToValueAtTime(30, now + 0.55);
-
-    subGain.gain.setValueAtTime(0.85, now + 0.04);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
-
-    subOsc.connect(subGain);
-    subGain.connect(masterOut);
-    subOsc.start(now + 0.04);
-    subOsc.stop(now + 0.7);
-  }
-
-  /**
-   * 11. Gia Moretti (THE VIRAL PODCASTER)
-   * Studio mic mute toggle + digital audience notification pop (580Hz).
-   */
-  public playViralPodcasterLivestreamBeep() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Digital Notification Pop (580Hz -> 720Hz)
-    const popOsc = ctx.createOscillator();
-    const popGain = ctx.createGain();
-
-    popOsc.type = 'sine';
-    popOsc.frequency.setValueAtTime(580, now);
-    popOsc.frequency.exponentialRampToValueAtTime(720, now + 0.04);
-
-    popGain.gain.setValueAtTime(0.001, now);
-    popGain.gain.linearRampToValueAtTime(0.25, now + 0.008);
-    popGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-    popOsc.connect(popGain);
-    popGain.connect(masterOut);
-    popOsc.start(now);
-    popOsc.stop(now + 0.09);
-  }
-
-  /**
-   * 12. Colonel Arthur "Warhawk" Price (THE SPECIAL OPS COMMANDER)
-   * Suppressed rifle bolt chambering click + tactical sub-bass impact (50Hz).
-   */
-  public playSpecialOpsRifleBolt() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Suppressed Bolt Double Click
-    [0.0, 0.035].forEach((offset) => {
-      const clickOsc = ctx.createOscillator();
-      const clickGain = ctx.createGain();
-      clickOsc.type = 'triangle';
-      clickOsc.frequency.setValueAtTime(620, now + offset);
-      clickOsc.frequency.exponentialRampToValueAtTime(140, now + offset + 0.025);
-
-      clickGain.gain.setValueAtTime(0.4, now + offset);
-      clickGain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.03);
-
-      clickOsc.connect(clickGain);
-      clickGain.connect(masterOut);
-      clickOsc.start(now + offset);
-      clickOsc.stop(now + offset + 0.035);
-    });
-
-    // Tactical Low Sub Punch (50Hz)
-    const punchOsc = ctx.createOscillator();
-    const punchGain = ctx.createGain();
-    punchOsc.type = 'sine';
-    punchOsc.frequency.setValueAtTime(75, now + 0.04);
-    punchOsc.frequency.exponentialRampToValueAtTime(32, now + 0.3);
-
-    punchGain.gain.setValueAtTime(0.75, now + 0.04);
-    punchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
-    punchOsc.connect(punchGain);
-    punchGain.connect(masterOut);
-    punchOsc.start(now + 0.04);
-    punchOsc.stop(now + 0.4);
-  }
-
-  /**
-   * 13. Senator Diana Ross (THE DEFICIT HAWK)
-   * Rubber audit rejection stamp slam + mechanical adding machine lever pull.
-   */
-  public playDeficitHawkRedPenStamp() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Audit Rejection Stamp Thud (160Hz -> 60Hz)
-    const stampOsc = ctx.createOscillator();
-    const stampFilter = ctx.createBiquadFilter();
-    const stampGain = ctx.createGain();
-
-    stampOsc.type = 'triangle';
-    stampOsc.frequency.setValueAtTime(160, now);
-    stampOsc.frequency.exponentialRampToValueAtTime(60, now + 0.08);
-
-    stampFilter.type = 'lowpass';
-    stampFilter.frequency.setValueAtTime(500, now);
-
-    stampGain.gain.setValueAtTime(0.65, now);
-    stampGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-    stampOsc.connect(stampFilter);
-    stampFilter.connect(stampGain);
-    stampGain.connect(masterOut);
-    stampOsc.start(now);
-    stampOsc.stop(now + 0.14);
-  }
-
-  /**
-   * 14. Baron Henrik Von Falken (THE ENERGY DYNAST)
-   * Velvet chamber string plucking (C Minor) + grandfather clock chime.
-   */
-  public playEnergyDynastHarpsichordChime() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Chamber String Pluck (C Minor: C3 [130.8Hz], Eb3 [155.5Hz], G3 [196Hz])
-    [130.8, 155.5, 196.0].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, now + idx * 0.025);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(950, now + idx * 0.025);
-
-      gain.gain.setValueAtTime(0.001, now + idx * 0.025);
-      gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.025 + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.025 + 0.7);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now + idx * 0.025);
-      osc.stop(now + idx * 0.025 + 0.75);
-    });
-  }
-
-  /**
-   * 15. Sora "Glitch" Kim (THE AI ETHICAL HACKER)
-   * Mechanical keyboard key clack + clean sub-bass system reboot glide.
-   */
-  public playEthicalHackerKeyboardClack() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Mechanical Key Switches (Filtered at 1.4kHz)
-    [0.0, 0.035, 0.07].forEach((offset) => {
-      const keyOsc = ctx.createOscillator();
-      const keyGain = ctx.createGain();
-      keyOsc.type = 'triangle';
-      keyOsc.frequency.setValueAtTime(900, now + offset);
-      keyOsc.frequency.exponentialRampToValueAtTime(280, now + offset + 0.02);
-
-      keyGain.gain.setValueAtTime(0.25, now + offset);
-      keyGain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.025);
-
-      keyOsc.connect(keyGain);
-      keyGain.connect(masterOut);
-      keyOsc.start(now + offset);
-      keyOsc.stop(now + offset + 0.03);
-    });
-
-    // Sub-Bass Reboot Sweep (45Hz -> 90Hz -> 35Hz)
-    const rebootOsc = ctx.createOscillator();
-    const rebootGain = ctx.createGain();
-    rebootOsc.type = 'sine';
-    rebootOsc.frequency.setValueAtTime(45, now + 0.07);
-    rebootOsc.frequency.exponentialRampToValueAtTime(90, now + 0.15);
-    rebootOsc.frequency.exponentialRampToValueAtTime(35, now + 0.4);
-
-    rebootGain.gain.setValueAtTime(0.001, now + 0.07);
-    rebootGain.gain.linearRampToValueAtTime(0.55, now + 0.15);
-    rebootGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-
-    rebootOsc.connect(rebootGain);
-    rebootGain.connect(masterOut);
-    rebootOsc.start(now + 0.07);
-    rebootOsc.stop(now + 0.5);
-  }
-
-  /**
-   * 16. Captain Douglas Mercer (THE AIRLINE UNION CHIEF)
-   * Aircraft cabin chime (Ding-Dong: F#5 -> D5) + low jet engine rumble.
-   */
-  public playAirlineChiefCabinChime() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Classic Cabin Chime (High F#5 [740Hz] -> Low D5 [587Hz])
-    const chimeNotes = [
-      { f: 739.99, t: 0.00, d: 0.4 },
-      { f: 587.33, t: 0.22, d: 0.6 }
-    ];
-
-    chimeNotes.forEach((n) => {
-      const osc = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(n.f, now + n.t);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1400, now + n.t);
-
-      gain.gain.setValueAtTime(0.001, now + n.t);
-      gain.gain.linearRampToValueAtTime(0.24, now + n.t + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterOut);
-      osc.start(now + n.t);
-      osc.stop(now + n.t + n.d + 0.05);
-    });
-
-    // Jet Engine Low Rumble (50Hz)
-    const jetOsc = ctx.createOscillator();
-    const jetGain = ctx.createGain();
-    jetOsc.type = 'sine';
-    jetOsc.frequency.setValueAtTime(50, now);
-    jetGain.gain.setValueAtTime(0.35, now);
-    jetGain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
-
-    jetOsc.connect(jetGain);
-    jetGain.connect(masterOut);
-    jetOsc.start(now);
-    jetOsc.stop(now + 0.75);
-  }
-
-  /**
-   * 17. Dr. Leila Kassam (THE CRISIS EPIDEMIOLOGIST)
-   * Bio-containment respirator air release + warm cardiac monitor ping.
-   */
-  public playEpidemiologistRespiratorBreath() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Cleanroom Respirator Air Release
-    const noiseSource = ctx.createBufferSource();
-    noiseSource.buffer = this.getNoiseBuffer(ctx);
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(450, now);
-    noiseFilter.Q.setValueAtTime(2.0, now);
-
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.001, now);
-    noiseGain.gain.linearRampToValueAtTime(0.25, now + 0.04);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(masterOut);
-    noiseSource.start(now);
-    noiseSource.stop(now + 0.25);
-
-    // Warm Cardiac Monitor Ping (620Hz)
-    const pingOsc = ctx.createOscillator();
-    const pingGain = ctx.createGain();
-    pingOsc.type = 'sine';
-    pingOsc.frequency.setValueAtTime(620, now + 0.08);
-
-    pingGain.gain.setValueAtTime(0.001, now + 0.08);
-    pingGain.gain.linearRampToValueAtTime(0.2, now + 0.09);
-    pingGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
-    pingOsc.connect(pingGain);
-    pingGain.connect(masterOut);
-    pingOsc.start(now + 0.08);
-    pingOsc.stop(now + 0.4);
-  }
-
-  /**
-   * 18. Judge Malcolm Winters (THE CONSTITUTIONAL PURIST)
-   * African teakwood gavel strike with deep courtroom reverberation (72Hz).
-   */
-  public playConstitutionalGavelResonance() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Hardwood Gavel Knock (140Hz -> 65Hz)
-    const gavelOsc = ctx.createOscillator();
-    const gavelFilter = ctx.createBiquadFilter();
-    const gavelGain = ctx.createGain();
-
-    gavelOsc.type = 'triangle';
-    gavelOsc.frequency.setValueAtTime(140, now);
-    gavelOsc.frequency.exponentialRampToValueAtTime(65, now + 0.12);
-
-    gavelFilter.type = 'lowpass';
-    gavelFilter.frequency.setValueAtTime(450, now);
-
-    gavelGain.gain.setValueAtTime(0.001, now);
-    gavelGain.gain.linearRampToValueAtTime(0.7, now + 0.006);
-    gavelGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-
-    gavelOsc.connect(gavelFilter);
-    gavelFilter.connect(gavelGain);
-    gavelGain.connect(masterOut);
-    gavelOsc.start(now);
-    gavelOsc.stop(now + 0.28);
-
-    // Deep Courtroom Bench Sub-Drop (72Hz -> 35Hz)
-    const subOsc = ctx.createOscillator();
-    const subGain = ctx.createGain();
-    subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(72, now);
-    subOsc.frequency.exponentialRampToValueAtTime(35, now + 0.45);
-
-    subGain.gain.setValueAtTime(0.75, now);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-
-    subOsc.connect(subGain);
-    subGain.connect(masterOut);
-    subOsc.start(now);
-    subOsc.stop(now + 0.6);
-  }
-
-  /**
-   * 19. Victoria "Vicky" Sterling (THE POPULIST HEIRESS)
-   * Camera strobe flashbulb recharge whine + soft luxury glass chime.
-   */
-  public playPopulistHeiressFlashbulb() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Flashbulb Inverter Charge Whine (400Hz -> 1800Hz)
-    const flashOsc = ctx.createOscillator();
-    const flashGain = ctx.createGain();
-
-    flashOsc.type = 'sine';
-    flashOsc.frequency.setValueAtTime(400, now);
-    flashOsc.frequency.exponentialRampToValueAtTime(1800, now + 0.12);
-
-    flashGain.gain.setValueAtTime(0.001, now);
-    flashGain.gain.linearRampToValueAtTime(0.16, now + 0.06);
-    flashGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-
-    flashOsc.connect(flashGain);
-    flashGain.connect(masterOut);
-    flashOsc.start(now);
-    flashOsc.stop(now + 0.16);
-
-    // Champagne Glass Chime (2093Hz C7)
-    const glassOsc = ctx.createOscillator();
-    const glassGain = ctx.createGain();
-    glassOsc.type = 'sine';
-    glassOsc.frequency.setValueAtTime(2093, now + 0.08);
-
-    glassGain.gain.setValueAtTime(0.001, now + 0.08);
-    glassGain.gain.linearRampToValueAtTime(0.18, now + 0.09);
-    glassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-
-    glassOsc.connect(glassGain);
-    glassGain.connect(masterOut);
-    glassOsc.start(now + 0.08);
-    glassOsc.stop(now + 0.6);
-  }
-
-  /**
-   * 20. Commander Victor Thorne (THE SPACE FLEET ADMIRAL)
-   * Orbital ion thruster pulse + high-vacuum sub bass rumble (32Hz).
-   */
-  public playSpaceAdmiralThrusterPulse() {
-    if (!this.enabled) return;
-    const sys = this.initContext();
-    if (!sys) return;
-    const { ctx, masterOut } = sys;
-    const now = ctx.currentTime;
-
-    // Ion Thruster Plasma Swell (140Hz -> 320Hz)
-    const plasmaOsc = ctx.createOscillator();
-    const plasmaFilter = ctx.createBiquadFilter();
-    const plasmaGain = ctx.createGain();
-
-    plasmaOsc.type = 'triangle';
-    plasmaOsc.frequency.setValueAtTime(140, now);
-    plasmaOsc.frequency.exponentialRampToValueAtTime(320, now + 0.15);
-    plasmaOsc.frequency.exponentialRampToValueAtTime(90, now + 0.45);
-
-    plasmaFilter.type = 'lowpass';
-    plasmaFilter.frequency.setValueAtTime(600, now);
-
-    plasmaGain.gain.setValueAtTime(0.001, now);
-    plasmaGain.gain.linearRampToValueAtTime(0.45, now + 0.08);
-    plasmaGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-
-    plasmaOsc.connect(plasmaFilter);
-    plasmaFilter.connect(plasmaGain);
-    plasmaGain.connect(masterOut);
-    plasmaOsc.start(now);
-    plasmaOsc.stop(now + 0.55);
-
-    // Deep Cosmic Sub-Bass Rumble (32Hz)
-    const spaceSub = ctx.createOscillator();
-    const spaceSubGain = ctx.createGain();
-    spaceSub.type = 'sine';
-    spaceSub.frequency.setValueAtTime(50, now);
-    spaceSub.frequency.exponentialRampToValueAtTime(26, now + 0.7);
-
-    spaceSubGain.gain.setValueAtTime(0.8, now);
-    spaceSubGain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
-
-    spaceSub.connect(spaceSubGain);
-    spaceSubGain.connect(masterOut);
-    spaceSub.start(now);
-    spaceSub.stop(now + 0.9);
-  }
-
-  // =========================================================================
-  // PRESIDENTIAL CANDIDATE SIGNATURE SOUND DISPATCHER
-  // =========================================================================
-
-  /**
-   * Plays the custom presidential sound motif for any of the 31 candidates.
-   */
-  public playCandidateSignature(candidateId: string, type: 'speech' | 'action' = 'speech'): void {
-    if (!this.enabled) return;
-
-    switch (candidateId) {
-      // Original 11 Candidates
-      case 'jax-alvarez':
-        this.playGavel();
-        break;
-      case 'elena-rostova':
-        this.playVoteRevealDing();
-        break;
-      case 'marcus-vance':
-        this.playAttackSting();
-        break;
-      case 'camilla-laurent':
-        this.playBallotDrop();
-        break;
-      case 'art-sterling':
-        this.playCashChime();
-        break;
-      case 'dmitri-voronin':
-        this.playEliminationBuzzer();
-        break;
-      case 'silas-thorne':
-        this.playCCTVBeep();
-        break;
-      case 'amara-chen':
-        this.playSpeechBeep();
-        break;
-      case 'damian-cross':
-        this.playBetrayalAlarm();
-        break;
-      case 'beatrice-holloway':
-        this.playFanfare();
-        break;
-      case 'julian-mercer':
-        this.playSwapWhoosh();
-        break;
-
-      // 20 New Presidential Candidates (and legacy ID support)
-      case 'ray-callahan':
-      case 'raymond-callahan':
-        this.playBorderGovernorHammerGate();
-        break;
-      case 'vivienne-zhao':
-      case 'vivienne-chen':
-        this.playNeurotechSynapseChime();
-        break;
-      case 'garrick-stone':
-      case 'sterling-archer':
-        this.playCartelProsecutorHandcuffSnap();
-        break;
-      case 'elijah-haddon':
-      case 'elijah-vance':
-        this.playTelevangelistPipeOrganSwell();
-        break;
-      case 'kendra-vane':
-      case 'kendra-sterling':
-        this.playDistressedDebtCashStack();
-        break;
-      case 'colt-briggs':
-      case 'colton-briggs':
-        this.playRuralSheriffBootSpur();
-        break;
-      case 'maya-lin':
-        this.playNegotiatorSecretBriefcase();
-        break;
-      case 'declan-hayes':
-        this.playCoalMayorPickaxeStrike();
-        break;
-      case 'jonathan-richter':
-      case 'jonathan-sterling':
-        this.playBigPharmaVialClick();
-        break;
-      case 'tariq-fassi':
-      case 'tariq-al-fassi':
-        this.playSovereignWealthVaultDoor();
-        break;
-      case 'gia-moretti':
-        this.playViralPodcasterLivestreamBeep();
-        break;
-      case 'roland-price':
-      case 'arthur-price':
-        this.playSpecialOpsRifleBolt();
-        break;
-      case 'diana-albright':
-      case 'diana-ross':
-        this.playDeficitHawkRedPenStamp();
-        break;
-      case 'henrik-falken':
-      case 'henrik-von-falken':
-        this.playEnergyDynastHarpsichordChime();
-        break;
-      case 'sora-kim':
-        this.playEthicalHackerKeyboardClack();
-        break;
-      case 'douglas-wade':
-      case 'douglas-mercer':
-        this.playAirlineChiefCabinChime();
-        break;
-      case 'leila-kassam':
-        this.playEpidemiologistRespiratorBreath();
-        break;
-      case 'malcolm-winters':
-        this.playConstitutionalGavelResonance();
-        break;
-      case 'victoria-sterling':
-        this.playPopulistHeiressFlashbulb();
-        break;
-      case 'cassian-drake':
-      case 'victor-thorne':
-        this.playSpaceAdmiralThrusterPulse();
-        break;
-
-      // Default fallback
-      default:
-        this.playSpeechBeep();
-        break;
+  public playCandidateSignature(_candidateId?: string, type: 'speech' | 'action' = 'speech'): void {
+    if (!this.canPlaySfx()) return;
+
+    if (type === 'action') {
+      this.playAttackSting();
+    } else {
+      this.playSpeechBeep();
     }
   }
+
+  /**
+   * Plays an HTMLAudioElement through an authentic Web Audio surveillance wiretap / walkie-talkie filter chain.
+   * Features:
+   * - Bandpass telephony filter (Highpass 450Hz, Lowpass 3200Hz, Peak 2100Hz)
+   * - Analog preamp waveshaper saturation
+   * - Filtered RF radio static floor (gated to speech duration)
+   * - Dynamic dry/wet blending based on strengthPct (0% to 100%)
+   * 
+   * Returns a cleanup function that stops static and disconnects nodes.
+   */
+  public playSpeechWithWiretap(
+    audio: HTMLAudioElement,
+    strengthPct: number = 80,
+    onEnded?: () => void
+  ): () => void {
+    if (!this.enabled || typeof window === 'undefined') {
+      audio.play().catch(() => {});
+      return () => { audio.pause(); };
+    }
+
+    // When SFX are muted (dialogue-only mode), play candidate speech cleanly without synthetic static or procedural RF noise
+    if (this.sfxMuted) {
+      const handleEnded = () => { if (onEnded) onEnded(); };
+      audio.addEventListener('ended', handleEnded, { once: true });
+      audio.play().catch(() => {});
+      return () => {
+        audio.removeEventListener('ended', handleEnded);
+        audio.pause();
+      };
+    }
+
+    const contextInit = this.initContext();
+    if (!contextInit) {
+      audio.play().catch(() => {});
+      return () => { audio.pause(); };
+    }
+
+    const { ctx, masterOut } = contextInit;
+    const strength = Math.max(0, Math.min(100, strengthPct)) / 100;
+
+    // If strength is 0%, bypass effect completely
+    if (strength <= 0) {
+      const handleEnded = () => { if (onEnded) onEnded(); };
+      audio.addEventListener('ended', handleEnded, { once: true });
+      audio.play().catch(() => {});
+      return () => {
+        audio.removeEventListener('ended', handleEnded);
+        audio.pause();
+      };
+    }
+
+    try {
+      // Avoid creating multiple media element sources for the same HTMLAudioElement
+      let sourceNode: MediaElementAudioSourceNode;
+      if ((audio as any).__wiretapSourceNode) {
+        sourceNode = (audio as any).__wiretapSourceNode;
+      } else {
+        sourceNode = ctx.createMediaElementSource(audio);
+        (audio as any).__wiretapSourceNode = sourceNode;
+      }
+
+      const now = ctx.currentTime;
+
+      // 1. Dry path (unprocessed)
+      const dryGain = ctx.createGain();
+      dryGain.gain.setValueAtTime(1 - strength, now);
+      sourceNode.connect(dryGain);
+      dryGain.connect(masterOut);
+
+      // 2. Wet path: Bandpass Telephone / Walkie-Talkie Filter Chain
+      const highpass = ctx.createBiquadFilter();
+      highpass.type = 'highpass';
+      highpass.frequency.setValueAtTime(450, now);
+      highpass.Q.setValueAtTime(1.0, now);
+
+      const lowpass = ctx.createBiquadFilter();
+      lowpass.type = 'lowpass';
+      lowpass.frequency.setValueAtTime(3200, now);
+      lowpass.Q.setValueAtTime(1.2, now);
+
+      // Midrange presence / mic horn resonance peak
+      const midPeak = ctx.createBiquadFilter();
+      midPeak.type = 'peaking';
+      midPeak.frequency.setValueAtTime(2100, now);
+      midPeak.gain.setValueAtTime(4.5, now);
+      midPeak.Q.setValueAtTime(1.5, now);
+
+      // Mild analog waveshaper saturation
+      const waveshaper = ctx.createWaveShaper();
+      const nSamples = 512;
+      const wsCurve = new Float32Array(nSamples);
+      const drive = 2.5;
+      for (let i = 0; i < nSamples; i++) {
+        const x = (i * 2) / nSamples - 1;
+        wsCurve[i] = ((1 + drive) * x) / (1 + drive * Math.abs(x));
+      }
+      waveshaper.curve = wsCurve;
+      waveshaper.oversample = '2x';
+
+      const wetGain = ctx.createGain();
+      // Boost to compensate for narrow bandpass energy loss
+      wetGain.gain.setValueAtTime(strength * 1.35, now);
+
+      // Connect Wet Speech Chain
+      sourceNode.connect(highpass);
+      highpass.connect(lowpass);
+      lowpass.connect(midPeak);
+      midPeak.connect(waveshaper);
+      waveshaper.connect(wetGain);
+      wetGain.connect(masterOut);
+
+      // 3. Authenticated Surveillance Radio Static / RF Hiss Floor (Gated)
+      const noiseBuffer = this.getNoiseBuffer(ctx);
+      const noiseSource = ctx.createBufferSource();
+      noiseSource.buffer = noiseBuffer;
+      noiseSource.loop = true;
+
+      // Filter the noise through telephone bandpass so it sounds like analog line hiss
+      const noiseFilter = ctx.createBiquadFilter();
+      noiseFilter.type = 'bandpass';
+      noiseFilter.frequency.setValueAtTime(1800, now);
+      noiseFilter.Q.setValueAtTime(1.0, now);
+
+      const noiseGain = ctx.createGain();
+      // Scaled static volume (subtle, intelligible background hiss)
+      const targetNoiseVol = 0.022 * strength;
+      noiseGain.gain.setValueAtTime(0.0001, now);
+      noiseGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, targetNoiseVol), now + 0.08);
+
+      noiseSource.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(masterOut);
+
+      noiseSource.start(now);
+
+      let isCleanedUp = false;
+      const cleanup = () => {
+        if (isCleanedUp) return;
+        isCleanedUp = true;
+        try {
+          const fadeOutTime = ctx.currentTime + 0.05;
+          noiseGain.gain.setValueAtTime(noiseGain.gain.value, ctx.currentTime);
+          noiseGain.gain.linearRampToValueAtTime(0.0001, fadeOutTime);
+          setTimeout(() => {
+            try { noiseSource.stop(); } catch {}
+            try { noiseSource.disconnect(); } catch {}
+            try { dryGain.disconnect(); } catch {}
+            try { wetGain.disconnect(); } catch {}
+            try { highpass.disconnect(); } catch {}
+            try { lowpass.disconnect(); } catch {}
+            try { midPeak.disconnect(); } catch {}
+            try { waveshaper.disconnect(); } catch {}
+            try { noiseFilter.disconnect(); } catch {}
+            try { noiseGain.disconnect(); } catch {}
+          }, 100);
+        } catch {}
+      };
+
+      const handleEnded = () => {
+        cleanup();
+        if (onEnded) onEnded();
+      };
+
+      const handlePause = () => {
+        cleanup();
+      };
+
+      audio.addEventListener('ended', handleEnded, { once: true });
+      audio.addEventListener('pause', handlePause, { once: true });
+
+      audio.play().catch(() => {
+        cleanup();
+      });
+
+      return () => {
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('pause', handlePause);
+        audio.pause();
+        cleanup();
+      };
+    } catch (e) {
+      console.warn('[SoundManager wiretap error, falling back to clean audio]:', e);
+      audio.play().catch(() => {});
+      return () => { audio.pause(); };
+    }
+  }
+
+  // Backward-compatible method aliases (all routed to core premium YouTube sound effects)
+  public playBorderGovernorHammerGate() { this.playGavel(); }
+  public playNeurotechSynapseChime() { this.playSpeechBeep(); }
+  public playCartelProsecutorHandcuffSnap() { this.playAttackSting(); }
+  public playTelevangelistPipeOrganSwell() { this.playFanfare(); }
+  public playDistressedDebtCashStack() { this.playCashChime(); }
+  public playRuralSheriffBootSpur() { this.playSpeechBeep(); }
+  public playNegotiatorSecretBriefcase() { this.playCCTVBeep(); }
+  public playCoalMayorPickaxeStrike() { this.playGavel(); }
+  public playBigPharmaVialClick() { this.playSpeechBeep(); }
+  public playSovereignWealthVaultDoor() { this.playGavel(); }
+  public playViralPodcasterLivestreamBeep() { this.playSpeechBeep(); }
+  public playSpecialOpsRifleBolt() { this.playAttackSting(); }
+  public playDeficitHawkRedPenStamp() { this.playBallotDrop(); }
+  public playEnergyDynastHarpsichordChime() { this.playVoteRevealDing(); }
+  public playEthicalHackerKeyboardClack() { this.playSpeechBeep(); }
+  public playAirlineChiefCabinChime() { this.playVoteRevealDing(); }
+  public playEpidemiologistRespiratorBreath() { this.playSpeechBeep(); }
+  public playConstitutionalGavelResonance() { this.playGavel(); }
+  public playPopulistHeiressFlashbulb() { this.playVoteRevealDing(); }
+  public playSpaceAdmiralThrusterPulse() { this.playSwapWhoosh(); }
 }
 
 export const sounds = new SoundManager();
-
-

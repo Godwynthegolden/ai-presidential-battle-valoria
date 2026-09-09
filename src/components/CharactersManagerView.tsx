@@ -342,7 +342,7 @@ export const CharactersManagerView: React.FC<CharactersManagerViewProps> = ({
                   onDragOver={(e) => handleDragOver(e, cand.id)}
                   onDrop={(e) => handleDrop(e, cand.id)}
                   onDragEnd={handleDragEnd}
-                  className={`group relative flex items-center gap-2.5 p-2 rounded-2xl border transition-all select-none cursor-grab active:cursor-grabbing ${
+                  className={`group relative flex items-center gap-2.5 pl-3.5 pr-2.5 py-2 rounded-2xl border transition-all select-none cursor-grab active:cursor-grabbing overflow-hidden ${
                     isDragged
                       ? 'opacity-40 scale-95 border-dashed border-cyan-400 bg-cyan-950/20'
                       : isDragOver
@@ -350,10 +350,20 @@ export const CharactersManagerView: React.FC<CharactersManagerViewProps> = ({
                       : 'bg-slate-900/90 hover:bg-slate-850 border-slate-750 hover:border-cyan-500/60 shadow-md'
                   }`}
                   style={{
-                    borderLeftColor: cand.color.primary,
-                    borderLeftWidth: '4px',
+                    borderColor: `${cand.color.primary}33`,
                   }}
                 >
+                  {/* Symmetrical Left Accent Edge Bar */}
+                  <div 
+                    className="absolute left-0 top-0 bottom-0 w-1 transition-all duration-300 pointer-events-none"
+                    style={{ backgroundColor: cand.color.primary }}
+                  />
+
+                  {/* Symmetrical Right Accent Edge Bar */}
+                  <div 
+                    className="absolute right-0 top-0 bottom-0 w-1 transition-all duration-300 pointer-events-none"
+                    style={{ backgroundColor: cand.color.primary }}
+                  />
                   {/* Drag Grip Handle */}
                   <div className="text-slate-600 group-hover:text-slate-400 cursor-grab active:cursor-grabbing pl-0.5">
                     <GripVertical className="w-3.5 h-3.5" />

@@ -387,7 +387,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
               label: 'BAILOUT AUCTIONS',
               active: phase === 'BAILOUTS',
               done: phase === 'ELIMINATION_LOCKED' || phase === 'COMPLETE',
-              detail: `${totalBailouts} Buyouts ($40/ea)`,
+              detail: `${totalBailouts} Buyouts ($40M/ea)`,
             },
             {
               id: 'ELIMINATION_LOCKED',
@@ -507,7 +507,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                           {/* War Chest Treasury Badge */}
                           <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-700 flex items-center gap-0.5">
                             <DollarSign className="w-2.5 h-2.5 text-emerald-400" />
-                            ${st.budget}
+                            ${st.budget}M
                           </span>
                         </div>
                         <span className="text-[10px] text-slate-400 truncate max-w-[130px] sm:max-w-[170px]">
@@ -517,16 +517,16 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      {/* Floating -$40 Bailout Tag */}
+                      {/* Floating -$40M Bailout Tag */}
                       {st.hasBailedOutThisTick && (
                         <span className="flex items-center gap-1 text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 shadow-md animate-bounce">
-                          <Banknote className="w-3 h-3" /> -$40 [SAVED!]
+                          <Banknote className="w-3 h-3" /> -$40M [SAVED!]
                         </span>
                       )}
 
                       {totalVotesRemoved > 0 && !st.hasBailedOutThisTick && (
                         <span className="flex items-center gap-1 text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-600">
-                          -${totalSpent} ({totalVotesRemoved} bailed)
+                          -${totalSpent}M ({totalVotesRemoved} bailed)
                         </span>
                       )}
 
@@ -635,7 +635,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                 Unsealing Capitol Ballots...
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 font-mono max-w-md">
-                All contenders have registered their confidential votes. Surveillance verification and $40 bailout auctions will commence automatically.
+                All contenders have registered their confidential votes. Surveillance verification and $40M bailout auctions will commence automatically.
               </p>
             </div>
           )}
@@ -700,7 +700,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                     <Swords className="w-4 h-4 text-red-400" /> PACT BETRAYAL DETECTED!
                   </div>
                   <p className="text-[11px] text-red-300/90">
-                    {activeVoter.name} broke secret corridor alliance with <strong>{activeBetrayedAlly?.name || 'Ally'}</strong>! ($15 escrow refunded).
+                    {activeVoter.name} broke secret corridor alliance with <strong>{activeBetrayedAlly?.name || 'Ally'}</strong>! ($15M escrow refunded).
                   </p>
                 </div>
               )}
@@ -709,7 +709,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                 <div className="flex items-center gap-2 p-3 rounded-2xl bg-emerald-950/80 border border-emerald-500 text-emerald-200 text-xs font-mono shadow-md">
                   <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>
-                    <strong>Pact Honored:</strong> {activeVoter.name} delivered promised vote against {activeTarget.name}! ($15 escrow released).
+                    <strong>Pact Honored:</strong> {activeVoter.name} delivered promised vote against {activeTarget.name}! ($15M escrow released).
                   </span>
                 </div>
               )}
@@ -745,7 +745,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
               </div>
               <p className="text-xs text-slate-400 font-mono">
                 {totalBailouts > 0 
-                  ? 'Emergency $40 Capitol Vote Bailouts will now process sequentially...' 
+                  ? 'Emergency $40M Capitol Vote Bailouts will now process sequentially...' 
                   : 'No bailouts available. Preparing final elimination lock...'}
               </p>
             </div>
@@ -763,7 +763,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                   <Banknote className="w-4 h-4" /> CAPITOL BAILOUT AUCTION (#{currentBailoutIndex + 1}/{totalBailouts})
                 </span>
                 <span className="text-xs font-mono font-black px-2 py-0.5 rounded-md bg-emerald-400 text-black">
-                  -$40 VOTE REMOVAL
+                  -$40M VOTE REMOVAL
                 </span>
               </div>
 
@@ -776,7 +776,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                       {activeBailoutCandidate.name}
                     </span>
                     <span className="text-xs font-mono text-emerald-300 font-bold">
-                      Treasury Balance: ${activeBailoutTx.remainingBudget} remaining
+                      Treasury Balance: ${activeBailoutTx.remainingBudget}M remaining
                     </span>
                   </div>
                 </div>
@@ -795,7 +795,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
               <div className="p-3.5 rounded-2xl bg-black/60 border border-emerald-500/60 text-xs font-mono text-emerald-200 flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-emerald-400 shrink-0" />
                 <span>
-                  <strong>{activeBailoutCandidate.name}</strong> paid $40 to successfully eliminate 1 vote against them, altering the chopping block!
+                  <strong>{activeBailoutCandidate.name}</strong> paid $40M to successfully eliminate 1 vote against them, altering the chopping block!
                 </span>
               </div>
             </div>

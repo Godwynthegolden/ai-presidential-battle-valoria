@@ -91,10 +91,10 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
     roundPacts.forEach(p => {
       const bribeInfo = p.bribeOffered
         ? (p.receiverDecision === 'accept'
-            ? ' [💸 $20 Bribe Accepted]'
+            ? ' [💸 $30M Bribe Accepted]'
             : p.receiverDecision === 'accept_and_betray'
-            ? ' [🗡️ $20 Bribe Pocketed (Betrayal)]'
-            : ' [🚫 $20 Bribe Declined]')
+            ? ' [🗡️ $15M Upfront Pocketed (Betrayal)]'
+            : ' [🚫 $30M Bribe Declined]')
         : '';
 
       allEvents.push({
@@ -116,7 +116,7 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
           type: 'vote',
           title: `Round ${r} Capitol Vote Bailout Auction`,
           speakerId: tx.candidateId,
-          text: `💰 ${cand?.name} paid $40 to cancel 1 elimination vote (${tx.initialVotes} → ${tx.remainingVotes} votes, $${tx.remainingBudget} remaining balance).`,
+          text: `💰 ${cand?.name} paid $40M to cancel 1 elimination vote (${tx.initialVotes} → ${tx.remainingVotes} votes, $${tx.remainingBudget}M remaining balance).`,
           round: r,
         });
       });

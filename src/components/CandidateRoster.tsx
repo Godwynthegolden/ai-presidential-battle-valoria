@@ -6,19 +6,13 @@ import { GameState } from '@/types/game';
 import { CandidateAvatar } from './CandidateAvatar';
 import { CANDIDATE_MAP } from '@/data/candidates';
 import { 
-  Shield, 
-  Sparkles, 
   Skull, 
   Info, 
   Crosshair, 
   Crown, 
-  Users,
-  Settings2,
   Mic2,
   ChevronUp,
-  ChevronDown,
-  Flame,
-  ArrowUpDown
+  ChevronDown
 } from 'lucide-react';
 
 interface CandidateRosterProps {
@@ -51,49 +45,9 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
     .filter((c): c is Candidate => Boolean(c));
 
   return (
-    <div className="flex flex-col gap-3 h-full min-h-0">
-      {/* Roster Header */}
-      <div className="flex flex-col gap-2.5 p-3.5 bg-[#0b0f19] border border-slate-700/80 rounded-2xl shadow-lg shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs font-display font-black tracking-wider text-slate-100 uppercase">
-              {isPreGame ? 'Debate Speaking Order' : 'Debate Lineup Order'}
-            </span>
-          </div>
-
-          <div className="text-[11px] font-mono text-cyan-300 font-bold px-2.5 py-0.5 rounded-md bg-slate-950 border border-cyan-500/40 shadow-xs">
-            {activeCandidateIds.length} {isPreGame ? 'Lineup' : 'Alive'}
-          </div>
-        </div>
-
-        {/* In Pre-game, offer Quick YouTube Preset & Manager Button */}
-        {isPreGame && (
-          <div className="flex flex-col gap-1.5 pt-1 border-t border-slate-800">
-            {onSetPresetRoster && (
-              <button
-                onClick={() => onSetPresetRoster('youtube11')}
-                className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white text-[11px] font-mono font-black uppercase transition active:scale-98 shadow-md shadow-rose-500/20 cursor-pointer"
-                title="Apply the 11-candidate lineup engineered for YouTube retention"
-              >
-                <Flame className="w-3.5 h-3.5 text-yellow-200" /> 🎬 YouTube 11 Viral Order
-              </button>
-            )}
-
-            {onOpenCharactersManager && (
-              <button
-                onClick={onOpenCharactersManager}
-                className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-xl bg-slate-950 hover:bg-slate-900 text-slate-300 hover:text-cyan-300 border border-slate-700/80 text-xs font-mono font-bold uppercase transition active:scale-98 shadow-sm cursor-pointer"
-              >
-                <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" /> Reorder &amp; Manage Lineup
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-
+    <div className="flex flex-col h-full min-h-0 py-2 sm:py-2.5">
       {/* Candidate List Grid */}
-      <div className="flex-1 min-h-0 flex flex-col gap-2.5 overflow-y-auto pr-1 custom-scrollbar">
+      <div className={`flex-1 min-h-0 flex flex-col ${participatingCandidates.length >= 8 ? 'justify-between' : 'justify-center'} gap-1.5 sm:gap-2 overflow-y-auto scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}>
         {participatingCandidates.map((candidate, idx) => {
           const isAlive = activeCandidateIds.includes(candidate.id);
           const isSpeaking = stage.speakerId === candidate.id;
@@ -108,13 +62,13 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
             <div
               key={candidate.id}
               onClick={() => onSelectCandidate(candidate)}
-              className={`group relative flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 cursor-pointer select-none ${
+              className={`group relative flex-1 min-h-[52px] ${participatingCandidates.length < 8 ? 'max-h-24' : ''} flex items-center gap-2.5 pl-3.5 pr-3 py-1 sm:py-1.5 rounded-2xl border transition-all duration-300 cursor-pointer select-none overflow-hidden ${
                 isSpeaking || isTarget || isPresident ? 'z-20' : 'z-0'
               } ${
                 isPresident
-                  ? 'bg-gradient-to-r from-amber-950/90 to-[#0e1424] border-amber-400 shadow-xl shadow-amber-500/30'
+                  ? 'bg-gradient-to-r from-amber-950/90 via-[#0e1424] to-amber-950/90 border-amber-400 shadow-xl shadow-amber-500/30'
                   : isSpeaking
-                  ? 'bg-[#0f182c] border-2 shadow-xl scale-[1.02] translate-x-1'
+                  ? 'bg-[#0f182c] border-2 shadow-xl scale-[1.01]'
                   : isTarget
                   ? 'bg-red-950/60 border-2 border-red-500 shadow-xl shadow-red-950/40'
                   : isAlive
@@ -122,20 +76,59 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                   : 'bg-slate-950/40 border-slate-900 opacity-40 grayscale hover:opacity-70'
               }`}
               style={{
-                borderColor: isSpeaking
+                borderColor: isPresident
+                  ? '#f59e0b'
+                  : isSpeaking
                   ? (candidate.color.primary || '#06b6d4')
+                  : isTarget
+                  ? '#ef4444'
+                  : isAlive
+                  ? `${candidate.color.primary || '#38bdf8'}33`
                   : undefined,
                 boxShadow: isSpeaking
                   ? `0 0 25px ${candidate.color.primary}33`
+                  : isPresident
+                  ? '0 0 25px rgba(245, 158, 11, 0.25)'
+                  : isTarget
+                  ? '0 0 25px rgba(239, 68, 68, 0.25)'
                   : undefined,
               }}
             >
-              {/* Left Accent Bar */}
+              {/* Symmetrical Left Accent Edge Bar */}
               <div 
-                className="w-1.5 self-stretch rounded-full transition-all duration-300 shrink-0"
-                style={{
-                  backgroundColor: isAlive ? candidate.color.primary : '#475569',
-                  boxShadow: isSpeaking ? `0 0 12px ${candidate.color.primary}` : undefined,
+                className="absolute left-0 top-0 bottom-0 w-1 transition-all duration-300 pointer-events-none"
+                style={{ 
+                  backgroundColor: isPresident
+                    ? '#f59e0b'
+                    : isSpeaking
+                    ? (candidate.color.primary || '#06b6d4')
+                    : isTarget
+                    ? '#ef4444'
+                    : isAlive
+                    ? (candidate.color.primary || '#38bdf8')
+                    : '#475569',
+                  boxShadow: (isSpeaking || isPresident || isTarget)
+                    ? `0 0 10px ${isPresident ? '#f59e0b' : isTarget ? '#ef4444' : candidate.color.primary}`
+                    : undefined
+                }}
+              />
+
+              {/* Symmetrical Right Accent Edge Bar */}
+              <div 
+                className="absolute right-0 top-0 bottom-0 w-1 transition-all duration-300 pointer-events-none"
+                style={{ 
+                  backgroundColor: isPresident
+                    ? '#f59e0b'
+                    : isSpeaking
+                    ? (candidate.color.primary || '#06b6d4')
+                    : isTarget
+                    ? '#ef4444'
+                    : isAlive
+                    ? (candidate.color.primary || '#38bdf8')
+                    : '#475569',
+                  boxShadow: (isSpeaking || isPresident || isTarget)
+                    ? `0 0 10px ${isPresident ? '#f59e0b' : isTarget ? '#ef4444' : candidate.color.primary}`
+                    : undefined
                 }}
               />
 
@@ -231,14 +224,9 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1 shrink-0">
-                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
-                        ${gameState.candidateBudgets?.[candidate.id] ?? candidate.initialBudget ?? 100}
-                      </span>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-900/90 text-cyan-300 border border-cyan-500/30">
-                        In Race
-                      </span>
-                    </div>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-900/90 text-cyan-300 border border-cyan-500/30 shrink-0">
+                      In Race
+                    </span>
                   )}
                 </div>
 

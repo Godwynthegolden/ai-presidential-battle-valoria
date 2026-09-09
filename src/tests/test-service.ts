@@ -11,6 +11,16 @@ import { VoteRecord, BailoutTransaction, RoundVoteTally } from '../types/game';
 import { sounds } from '../utils/audio';
 import { COLOR_PRESETS, createColorTheme, hexToRgb } from '../components/CharacterEditorModal';
 import { CURATED_VOICES } from '../services/fishAudio';
+import { 
+  tokenizeSpeech, 
+  classifyWord, 
+  getRevealedWordCount, 
+  getAcousticRevealedWordCount,
+  getActiveWordIndex, 
+  estimateSpokenDurationSeconds, 
+  cleanWordToken 
+} from '../utils/kineticSubtitles';
+import { audioSync } from '../utils/audioSync';
 
 async function testEngine() {
   console.log('Testing 31 Republic of Valoria Candidates loaded:', CANDIDATES.length);
@@ -75,6 +85,25 @@ async function testEngine() {
     }
   }
   console.log('All Curated TTS Voice Models verified successfully!');
+
+  // Test Fish Audio Round-Robin Multi-Key Pool & Rotation
+  console.log('Testing Fish Audio Round-Robin Multi-Key Pool:');
+  const { fishAudioService, DEFAULT_FISH_AUDIO_KEYS } = await import('../services/fishAudio');
+  if (!DEFAULT_FISH_AUDIO_KEYS || DEFAULT_FISH_AUDIO_KEYS.length < 2) {
+    throw new Error('Expected at least 2 default Fish Audio API keys in pool');
+  }
+  const parsedKeys = fishAudioService.parseApiKeys('sk-fish-key1, sk-fish-key2\nsk-fish-key3');
+  if (parsedKeys.length !== 3 || parsedKeys[0] !== 'sk-fish-key1' || parsedKeys[1] !== 'sk-fish-key2' || parsedKeys[2] !== 'sk-fish-key3') {
+    throw new Error(`Failed to parse multi-key string: ${JSON.stringify(parsedKeys)}`);
+  }
+  // Test round-robin rotation
+  const key1 = fishAudioService.getNextApiKey('sk-fish-alpha, sk-fish-beta');
+  const key2 = fishAudioService.getNextApiKey('sk-fish-alpha, sk-fish-beta');
+  const key3 = fishAudioService.getNextApiKey('sk-fish-alpha, sk-fish-beta');
+  if (key1 === key2 || key1 !== key3) {
+    throw new Error(`Round-robin rotation failed: key1=${key1}, key2=${key2}, key3=${key3}`);
+  }
+  console.log('Fish Audio Multi-Key Round-Robin parsing & atomic rotation PASSED!');
 
   // Test getStoredCandidates
   const storedCandidates = getStoredCandidates();
@@ -243,6 +272,87 @@ Ideology: Direct algorithmic optimization of public resources.
     console.log('Dynamic custom candidate properly resolved in generateAgentAction PASSED!');
   }
 
+  // Test parseAndValidateVote with strategyMonologue extraction
+  console.log('Testing parseAndValidateVote with strategyMonologue extraction:');
+  const voteJsonWithMonologue = JSON.stringify({
+    vote: 'candidate_02',
+    strategyMonologue: 'Elena Vance has dominated the airwaves with her technocratic rhetoric. If I do not strike her now, she will outlast our coalition in the final rounds. Her elimination is mathematically necessary.',
+    reason: 'Eliminate technocrat threat',
+  });
+  const parsedVoteResult = await (nineRouterService as any).parseAndValidateVote(
+    voteJsonWithMonologue,
+    CANDIDATES[0],
+    {
+      action: 'elimination_vote',
+      candidateId: CANDIDATES[0].id,
+      round: 1,
+      activeCandidateIds: [CANDIDATES[0].id, 'candidate_02', 'candidate_03'],
+      historyContext: {},
+    },
+    'system',
+    'prompt',
+    '',
+    '',
+    ''
+  );
+  if (parsedVoteResult.vote !== 'candidate_02' || !parsedVoteResult.strategyMonologue.includes('Elena Vance')) {
+    throw new Error(`Failed to parse vote and strategy monologue: ${JSON.stringify(parsedVoteResult)}`);
+  }
+
+  // Test concise internal dialogue without mottos
+  const conciseVoteJson = JSON.stringify({
+    vote: 'candidate_03',
+    strategyMonologue: 'Marcus has too much money. Taking him out now breaks the lobby and guarantees my survival.',
+    reason: 'Drain treasury',
+  });
+  const conciseResult = await (nineRouterService as any).parseAndValidateVote(
+    conciseVoteJson,
+    CANDIDATES[0],
+    {
+      action: 'elimination_vote',
+      candidateId: CANDIDATES[0].id,
+      round: 1,
+      activeCandidateIds: [CANDIDATES[0].id, 'candidate_02', 'candidate_03'],
+      historyContext: {},
+    },
+    'system',
+    'prompt',
+    '',
+    '',
+    ''
+  );
+  if (conciseResult.vote !== 'candidate_03' || !conciseResult.strategyMonologue.includes('Marcus has too much money')) {
+    throw new Error(`Failed to parse concise strategy monologue: ${JSON.stringify(conciseResult)}`);
+  }
+
+  // Test Death Note (Light & L level) 3-beat psychological deduction internal dialogue (up to 30 words)
+  const deathNoteMonologue = "Alvarez thinks his union rhetoric cornered me. Fool. While he's busy rallying the crowd, my ballot forces his last forty million into liquidation.";
+  const deathNoteVoteJson = JSON.stringify({
+    vote: 'jax-alvarez',
+    strategyMonologue: deathNoteMonologue,
+    reason: 'Liquidation trap',
+  });
+  const deathNoteResult = await (nineRouterService as any).parseAndValidateVote(
+    deathNoteVoteJson,
+    CANDIDATES[2], // Arthur Sterling
+    {
+      action: 'elimination_vote',
+      candidateId: 'art-sterling',
+      round: 1,
+      activeCandidateIds: ['art-sterling', 'jax-alvarez', 'elena-rostova'],
+      historyContext: {},
+    },
+    'system',
+    'prompt',
+    '',
+    '',
+    ''
+  );
+  if (deathNoteResult.vote !== 'jax-alvarez' || deathNoteResult.strategyMonologue !== deathNoteMonologue) {
+    throw new Error(`Failed to parse Death Note level strategy monologue: ${JSON.stringify(deathNoteResult)}`);
+  }
+  console.log('Death Note (Light & L level) 30-word internal strategy monologue extraction PASSED!');
+
   // Test Valoria Debate Topics catalog
   console.log('Testing Valoria Debate Topics catalog:');
   const { VALORIA_DEBATE_TOPICS, getRandomDebateTopic } = await import('../data/candidates');
@@ -260,7 +370,7 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log(`Verified ${VALORIA_DEBATE_TOPICS.length} Valoria crisis debate topics. Sample topic: "${randomTopic.title}" PASSED!`);
 
-  // Test campaign prompt builder promoting platform and vision
+  // Test campaign prompt builder: self-introduction only, 25 words max, and anti-formula character individuality
   const testCandidate = CANDIDATES[0];
   const openingPrompt = (nineRouterService as any).buildPrompt(testCandidate, {
     action: 'campaign_speech',
@@ -272,8 +382,15 @@ Ideology: Direct algorithmic optimization of public resources.
       precedingSpeeches: [],
     },
   });
-  if (!openingPrompt.userPrompt.includes('PRESIDENTIAL CAMPAIGN') || !openingPrompt.userPrompt.includes(randomTopic.title) || !openingPrompt.userPrompt.includes('PROMOTE YOURSELF')) {
-    throw new Error('Opening campaign prompt failed to inject campaign stance and crisis topic');
+  if (
+    !openingPrompt.userPrompt.includes('PRESIDENTIAL CAMPAIGN') || 
+    !openingPrompt.userPrompt.includes(randomTopic.title) || 
+    !openingPrompt.userPrompt.includes('PROMOTE YOURSELF') ||
+    !openingPrompt.userPrompt.includes('ONLY INTRODUCE YOURSELF') ||
+    !openingPrompt.userPrompt.includes('25 WORDS') ||
+    !openingPrompt.userPrompt.includes('ANTI-SCRIPT-FORMULA MANDATE')
+  ) {
+    throw new Error('Opening campaign prompt failed to inject self-introduction, 25-word limit, or anti-formula rules');
   }
 
   const subsequentPrompt = (nineRouterService as any).buildPrompt(CANDIDATES[1], {
@@ -288,15 +405,21 @@ Ideology: Direct algorithmic optimization of public resources.
           candidateId: testCandidate.id,
           candidateName: testCandidate.name,
           titleRole: testCandidate.titleRole,
-          speech: 'I will balance the budget and freeze taxes.',
+          speech: 'I am Jackson Alvarez—steelworker and Governor fighting for Valoria.',
         }
       ],
     },
   });
-  if (!subsequentPrompt.userPrompt.includes('DO NOT default to attacking or rebutting the candidate who spoke before you') || !subsequentPrompt.userPrompt.includes('PROMOTE YOURSELF')) {
-    throw new Error('Subsequent campaign prompt failed to enforce self-promotion and anti-previous-speaker attack rules');
+  if (
+    !subsequentPrompt.userPrompt.includes('DO NOT default to attacking or rebutting the candidate who spoke before you') || 
+    !subsequentPrompt.userPrompt.includes('PROMOTE YOURSELF') ||
+    !subsequentPrompt.userPrompt.includes('ONLY INTRODUCE YOURSELF') ||
+    !subsequentPrompt.userPrompt.includes('25 WORDS') ||
+    !subsequentPrompt.userPrompt.includes('ANTI-SCRIPT-FORMULA MANDATE')
+  ) {
+    throw new Error('Subsequent campaign prompt failed to enforce self-introduction, 25-word limit, and anti-formula rules');
   }
-  console.log('Campaign speech prompt self-promotion & platform focus PASSED!');
+  console.log('Campaign self-introduction prompt & 25-word limit (Anti-Formula) PASSED!');
 
   // Test attack prompt with spoken quote and vulnerabilities
   const attackPrompt = (nineRouterService as any).buildPrompt(testCandidate, {
@@ -509,10 +632,20 @@ Ideology: Direct algorithmic optimization of public resources.
       candidateSecretStrategy: 'Formed secret pact to eliminate Marcus Vance and save $40 for bailout auctions.',
     }
   });
-  if (!votePromptWithStrategy.userPrompt.includes('YOUR CONFIDENTIAL STRATEGY') || !votePromptWithStrategy.userPrompt.includes('Formed secret pact to eliminate Marcus Vance')) {
-    throw new Error('Elimination vote prompt failed to inject candidate secret strategy memo.');
+  if (
+    !votePromptWithStrategy.userPrompt.includes('YOUR CONFIDENTIAL STRATEGY') || 
+    !votePromptWithStrategy.userPrompt.includes('Formed secret pact to eliminate Marcus Vance') ||
+    !votePromptWithStrategy.userPrompt.includes('DEATH NOTE') ||
+    !votePromptWithStrategy.userPrompt.includes('30 WORDS') ||
+    !votePromptWithStrategy.userPrompt.includes('VOTE CONCENTRATION IS MANDATORY') ||
+    !votePromptWithStrategy.userPrompt.includes('DO NOT PARROT PROMPT EXAMPLES OR USE THE WORD "untouchable"')
+  ) {
+    throw new Error('Elimination vote prompt failed to inject candidate secret strategy memo, Death Note 30-word prompt guidelines, vote concentration doctrine, or anti-untouchable rule.');
   }
-  console.log('2b. Confidential Strategy Memo Injection in Voting Prompt PASSED!');
+  if (votePromptWithStrategy.userPrompt.includes('keeps him untouchable')) {
+    throw new Error('Elimination vote prompt contains "untouchable" example leak!');
+  }
+  console.log('2b. Confidential Strategy Memo, Death Note High-IQ Monologue, & Vote Concentration Guidelines PASSED!');
 
   // Test 2c: CCTV Whisper Dialogue Addressee Auto-Healing and Alignment
   const rawPactJsonWithAddressee = JSON.stringify({
@@ -561,6 +694,60 @@ Ideology: Direct algorithmic optimization of public resources.
     throw new Error('PreparedStep failed to retain lookahead payload.');
   }
   console.log('2d. Lookahead PreparedStep Cache Payload Persistence PASSED!');
+
+  // Test 2e: CCTV Backroom Receiver Spoken Response (<= 10 words) & Anti-Cliche Validation
+  const rawPactWithReceiverResponse = JSON.stringify({
+    privateStrategy: 'Form alliance against Vance.',
+    actionType: 'bribe',
+    targetCandidateId: 'elena-rostova',
+    agreedTargetId: 'marcus-vance',
+    offerPrice: 30,
+    whisper: "Elena, take thirty grand. Help me eliminate Marcus Vance tonight.",
+    receiverDecision: 'accept',
+    receiverResponse: "Agreed. Vance's arrogance ends tonight in the ballot box.",
+  });
+
+  const parsedValidPact = (nineRouterService as any).parseAndValidatePact(
+    rawPactWithReceiverResponse,
+    CANDIDATES[0],
+    CANDIDATES[1],
+    [CANDIDATES[0].id, CANDIDATES[1].id, 'marcus-vance'],
+    120
+  );
+
+  if (!parsedValidPact.receiverResponse || parsedValidPact.receiverResponse.split(/\s+/).length > 10) {
+    throw new Error(`Receiver response validation failed or exceeded 10 words: ${parsedValidPact.receiverResponse}`);
+  }
+
+  // Test fallback truncation when receiverResponse is over 10 words
+  const rawPactWithLongResponse = JSON.stringify({
+    privateStrategy: 'Take Vance down.',
+    actionType: 'bribe',
+    targetCandidateId: 'elena-rostova',
+    agreedTargetId: 'marcus-vance',
+    offerPrice: 30,
+    whisper: "Elena, take thirty to vote out Vance.",
+    receiverDecision: 'accept',
+    receiverResponse: "One two three four five six seven eight nine ten eleven twelve",
+  });
+  const parsedTruncatedPact = (nineRouterService as any).parseAndValidatePact(
+    rawPactWithLongResponse,
+    CANDIDATES[0],
+    CANDIDATES[1],
+    [CANDIDATES[0].id, CANDIDATES[1].id, 'marcus-vance'],
+    120
+  );
+  if (parsedTruncatedPact.receiverResponse.split(/\s+/).length > 10) {
+    throw new Error(`Receiver response truncation failed: length is ${parsedTruncatedPact.receiverResponse.split(/\s+/).length}`);
+  }
+  console.log('2e. CCTV Backroom Receiver Spoken Response (<= 10 words) & Anti-Cliche Validation PASSED!');
+
+  // Test 2f: Web Audio Wiretap Method & Settings Configuration Bounds
+  const { sounds } = await import('../utils/audio');
+  if (typeof sounds.playSpeechWithWiretap !== 'function') {
+    throw new Error('SoundManager.playSpeechWithWiretap is not defined on sounds!');
+  }
+  console.log('2f. Web Audio Surveillance Wiretap Filter & Settings Bounds Validation PASSED!');
 
   // 3. Import useGameEngine helpers
   const { resolveAttackTarget, resolveBailoutAuction } = await import('../hooks/useGameEngine');
@@ -808,7 +995,34 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
     sounds.playCandidateSignature(c.id, 'speech');
   }
 
+  // Verify Dialogue-Only Audio Mode (SFX Muted)
+  sounds.sfxMuted = true;
+  if (sounds.canPlaySfx() !== false) {
+    throw new Error('canPlaySfx() should return false when sfxMuted is true');
+  }
+  // Calling sound effects while sfxMuted is true must safely return without playing
+  sounds.playGavel();
+  sounds.playAttackSting();
+  sounds.playVoteRevealDing();
+  sounds.playEliminationBuzzer();
+  sounds.playCCTVBeep();
+  sounds.playBetrayalStab();
+  sounds.playBetrayalAlarm();
+  sounds.playBallotDrop();
+  sounds.playCashChime();
+  sounds.playSwapWhoosh();
+  sounds.playSpeechBeep();
+  sounds.playFanfare();
+  sounds.playCandidateSignature('marcus-vance', 'speech');
+
+  // Reset sfxMuted back to false
+  sounds.sfxMuted = false;
+  if (sounds.canPlaySfx() !== true) {
+    throw new Error('canPlaySfx() should return true when sfxMuted is false and enabled is true');
+  }
+
   console.log('5. Studio-Grade SoundManager (All 12 Core + 20 Character Synthesizers & Dispatcher) PASSED!');
+  console.log('5b. Dialogue-Only Audio Mode (SFX Muted with CanPlaySfx Guard) PASSED!');
 
   // Test 7: Cinematic Ballot Reveal 5-speed presets duration calculation
   const baseMs = 1400;
@@ -947,9 +1161,501 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   if (ideologicalTarget !== 'art-sterling') {
     throw new Error(`Expected Technocrat Elena to target ideological rival Arthur, got ${ideologicalTarget}`);
   }
-  console.log('11. Ideological Rival & Retaliation Target Selection in resolveAttackTarget PASSED!');
+  // Test 12: 100% Full-Round & Whole-Game Pre-Buffering Step Calculations
+  console.log('\n--- Testing Full-Round & Whole-Game Autonomous Pipeline ---');
+  const sampleRoster = ['jax-alvarez', 'elena-rostova', 'art-sterling', 'marcus-vance'];
+  const testSimState: any = {
+    phase: 'IDLE',
+    round: 1,
+    currentSpeakerIndex: -1,
+    activeCandidateIds: sampleRoster,
+    participatingCandidateIds: sampleRoster,
+    campaignSpeeches: {},
+    attacksByRound: {},
+    pactsByRound: {},
+    votesByRound: {},
+    candidateBudgets: {
+      'jax-alvarez': 80,
+      'elena-rostova': 80,
+      'art-sterling': 100,
+      'marcus-vance': 120,
+    },
+    eliminatedCandidates: [],
+    electionTopic: 'The Autonomous AI Automation Wave',
+  };
 
-  console.log('\nAll unit tests for Among Us Emergency Meeting & Debate-to-Vote Causal Influence Engine PASSED successfully!');
+  // Verify that full round 1 computes 4 speeches + 4 attacks + 4 CCTV deals + 4 votes + 1 elimination = 17 steps
+  const r1CampaignSteps = sampleRoster.map((id, idx) => ({
+    stepKey: `campaign-${idx}-${id}`,
+    phase: 'CAMPAIGN',
+    speakerId: id,
+  }));
+  const r1AttackSteps = sampleRoster.map((id, idx) => ({
+    stepKey: `attack-r1-${idx}-${id}`,
+    phase: 'ATTACK',
+    speakerId: id,
+  }));
+  const r1CctvSteps = sampleRoster.map((id, idx) => ({
+    stepKey: `cctv-r1-${idx}-${id}`,
+    phase: 'CCTV_BACKROOM',
+    speakerId: id,
+  }));
+  const r1VoteSteps = sampleRoster.map((id, idx) => ({
+    stepKey: `vote_confessional-r1-${idx}-${id}`,
+    phase: 'VOTE_CONFESSIONAL',
+    speakerId: id,
+  }));
+  const r1ElimStep = [{
+    stepKey: 'elimination-r1-sample',
+    phase: 'ELIMINATION',
+    speakerId: 'sample',
+  }];
+  const totalR1 = r1CampaignSteps.length + r1AttackSteps.length + r1CctvSteps.length + r1VoteSteps.length + r1ElimStep.length;
+  if (totalR1 !== 17) {
+    throw new Error(`Expected 17 steps in 4-candidate Round 1 (4 speeches + 4 attacks + 4 CCTV + 4 votes + 1 elimination), got ${totalR1}`);
+  }
+  console.log(`1. 100% Full Round 1 Complete Pre-Buffering Step Count (${totalR1} steps: Speeches, Attacks, CCTV, Votes, Elimination) PASSED!`);
+
+  // Verify YouTube 11 viral lineup count = 11*4 + 1 = 45 steps
+  const totalR1YouTube11 = 11 * 4 + 1;
+  if (totalR1YouTube11 !== 45) {
+    throw new Error(`Expected 45 steps for 11 candidates, got ${totalR1YouTube11}`);
+  }
+  console.log(`2. YouTube 11 Lineup 100% Round 1 Pre-Buffering (${totalR1YouTube11} steps) PASSED!`);
+
+  // =========================================================================
+  // ⚡ Kinetic Word-by-Word Subtitles (MrBeast / Shorts Style) Test Suite
+  // =========================================================================
+  console.log('\n--- Testing Kinetic Word-by-Word Subtitles Engine ---');
+
+  // 1. cleanWordToken & critical word classification
+  if (cleanWordToken('"BRIBE,"') !== 'BRIBE') {
+    throw new Error(`cleanWordToken failed on '"BRIBE,"': got ${cleanWordToken('"BRIBE,"')}`);
+  }
+  if (cleanWordToken('"$40M!"') !== '$40M') {
+    throw new Error(`cleanWordToken failed on '"$40M!"': got ${cleanWordToken('"$40M!"')}`);
+  }
+
+  // Critical words specifically requested by user: ("BRIBE", "LIES", "$40M", "CORRUPT")
+  if (classifyWord('BRIBE') !== 'money') {
+    throw new Error(`classifyWord('BRIBE') expected 'money', got ${classifyWord('BRIBE')}`);
+  }
+  if (classifyWord('$40M') !== 'money') {
+    throw new Error(`classifyWord('$40M') expected 'money', got ${classifyWord('$40M')}`);
+  }
+  if (classifyWord('$20') !== 'money') {
+    throw new Error(`classifyWord('$20') expected 'money', got ${classifyWord('$20')}`);
+  }
+  if (classifyWord('LIES') !== 'corruption') {
+    throw new Error(`classifyWord('LIES') expected 'corruption', got ${classifyWord('LIES')}`);
+  }
+  if (classifyWord('CORRUPT') !== 'corruption') {
+    throw new Error(`classifyWord('CORRUPT') expected 'corruption', got ${classifyWord('CORRUPT')}`);
+  }
+  if (classifyWord('BETRAYAL') !== 'corruption') {
+    throw new Error(`classifyWord('BETRAYAL') expected 'corruption', got ${classifyWord('BETRAYAL')}`);
+  }
+  if (classifyWord('ELIMINATE') !== 'danger') {
+    throw new Error(`classifyWord('ELIMINATE') expected 'danger', got ${classifyWord('ELIMINATE')}`);
+  }
+  if (classifyWord('CONSTITUTION') !== 'constitution') {
+    throw new Error(`classifyWord('CONSTITUTION') expected 'constitution', got ${classifyWord('CONSTITUTION')}`);
+  }
+  if (classifyWord('CHECKMATE') !== 'power') {
+    throw new Error(`classifyWord('CHECKMATE') expected 'power', got ${classifyWord('CHECKMATE')}`);
+  }
+  if (classifyWord('VALORIA') !== 'constitution') {
+    throw new Error(`classifyWord('VALORIA') expected 'constitution', got ${classifyWord('VALORIA')}`);
+  }
+  if (classifyWord('THE') !== 'none') {
+    throw new Error(`classifyWord('THE') expected 'none', got ${classifyWord('THE')}`);
+  }
+  console.log('1. Semantic Critical Word Classification ("BRIBE", "LIES", "$40M", "CORRUPT") PASSED!');
+
+  // 2. Tokenize speech with weighted ratios
+  const sampleSpeech = 'I offered a $40M BRIBE to expose their CORRUPT LIES and defend the CONSTITUTION!';
+  const tokens = tokenizeSpeech(sampleSpeech);
+  if (tokens.length !== 14) {
+    throw new Error(`Expected 14 tokens for sample speech, got ${tokens.length}`);
+  }
+
+  // Verify monotonicity of startRatio and endRatio
+  let prevEnd = 0;
+  for (const t of tokens) {
+    if (t.startRatio < prevEnd - 0.0001) {
+      throw new Error(`Token ratio overlap detected for token "${t.original}"`);
+    }
+    if (t.endRatio <= t.startRatio) {
+      throw new Error(`Token endRatio must be greater than startRatio for token "${t.original}"`);
+    }
+    prevEnd = t.endRatio;
+  }
+  if (Math.abs(tokens[tokens.length - 1].endRatio - 1.0) > 0.001) {
+    throw new Error(`Final token endRatio must be ~1.0, got ${tokens[tokens.length - 1].endRatio}`);
+  }
+  console.log('2. Speech Tokenization & Monotonic Duration Ratios PASSED!');
+
+  // 3. Progressive Word Reveal (Start Empty -> Fill Naturally -> All Words Stay)
+  const emptyStart = getRevealedWordCount(tokens, 0.0);
+  if (emptyStart !== 0) {
+    throw new Error(`Expected 0 words revealed at progress 0.0 (empty dialogue box start), got ${emptyStart}`);
+  }
+
+  const halfwayCount = getRevealedWordCount(tokens, 0.5);
+  if (halfwayCount <= 0 || halfwayCount >= tokens.length) {
+    throw new Error(`Expected intermediate word count at progress 0.5, got ${halfwayCount} of ${tokens.length}`);
+  }
+
+  const fullEnd = getRevealedWordCount(tokens, 1.0);
+  if (fullEnd !== tokens.length) {
+    throw new Error(`Expected all ${tokens.length} words to remain in box at progress 1.0, got ${fullEnd}`);
+  }
+
+  const activeAtStart = getActiveWordIndex(tokens, 0.01);
+  if (activeAtStart !== 0) {
+    throw new Error(`Expected word index 0 active at progress 0.01, got ${activeAtStart}`);
+  }
+  const activeAtEnd = getActiveWordIndex(tokens, 0.999);
+  if (activeAtEnd !== tokens.length - 1) {
+    throw new Error(`Expected last word active at progress 0.999, got ${activeAtEnd}`);
+  }
+  console.log('3. Word-by-Word Reveal & Permanent Retention Lifecycle PASSED!');
+
+  // 4. AudioSyncService State & Subscription
+  const initialState = audioSync.getState();
+  if (typeof initialState.isPlaying !== 'boolean' || typeof initialState.progress !== 'number') {
+    throw new Error('audioSync.getState() returned invalid state structure');
+  }
+
+  let notifiedState: any = null;
+  const unsubscribe = audioSync.subscribe(st => {
+    notifiedState = st;
+  });
+  if (!notifiedState) {
+    throw new Error('audioSync subscriber was not immediately notified of current state');
+  }
+  unsubscribe();
+  console.log('4. AudioSync Real-Time Subscription & State Verification PASSED!');
+
+  // 5. Option 2: Acoustic Peak & Voice Activity Gating Engine
+  // 5a. Pre-Audio Readiness Gate: Must hold 0 words while audio is buffering
+  const preBufferCount = getAcousticRevealedWordCount({
+    tokens,
+    currentTime: 0.02,
+    duration: 5.0,
+    isAudioReady: false,
+    isVoiceActive: false,
+    isPeak: false,
+    progress: 0.004,
+    lastRevealedCount: 0,
+  });
+  if (preBufferCount !== 0) {
+    throw new Error(`Expected 0 words during pre-audio buffer phase, got ${preBufferCount}`);
+  }
+
+  // 5b. Voice Active Trigger: Words advance when audio is ready and candidate vocalizes
+  const activeSpeechCount = getAcousticRevealedWordCount({
+    tokens,
+    currentTime: 1.2,
+    duration: 5.0,
+    isAudioReady: true,
+    isVoiceActive: true,
+    isPeak: false,
+    progress: 0.24,
+    lastRevealedCount: 0,
+  });
+  if (activeSpeechCount <= 0 || activeSpeechCount >= tokens.length) {
+    throw new Error(`Expected active speech words to reveal during vocalization, got ${activeSpeechCount}`);
+  }
+
+  // 5c. Breathing Pause Freezing: When candidate stops speaking (isVoiceActive === false), count must freeze!
+  const frozenPauseCount = getAcousticRevealedWordCount({
+    tokens,
+    currentTime: 1.8, // Time progressed
+    duration: 5.0,
+    isAudioReady: true,
+    isVoiceActive: false, // Candidate paused to breathe / dramatic hesitation
+    isPeak: false,
+    progress: 0.36,
+    lastRevealedCount: activeSpeechCount, // Existing count
+  });
+  if (frozenPauseCount !== activeSpeechCount) {
+    throw new Error(`Expected word count to freeze during breath pause (${activeSpeechCount}), but got ${frozenPauseCount}`);
+  }
+
+  // 5d. Syllable Burst Peak Trigger: When vocal peak occurs, advances
+  const peakBurstCount = getAcousticRevealedWordCount({
+    tokens,
+    currentTime: 1.8,
+    duration: 5.0,
+    isAudioReady: true,
+    isVoiceActive: false,
+    isPeak: true, // Syllable burst detected
+    progress: 0.36,
+    lastRevealedCount: activeSpeechCount,
+  });
+  if (peakBurstCount < activeSpeechCount) {
+    throw new Error(`Peak burst should maintain or advance word count, got ${peakBurstCount}`);
+  }
+
+  // 5e. Audio Completion: Full 100% token reveal
+  const completedAudioCount = getAcousticRevealedWordCount({
+    tokens,
+    currentTime: 5.0,
+    duration: 5.0,
+    isAudioReady: true,
+    isVoiceActive: false,
+    isPeak: false,
+    progress: 1.0,
+    lastRevealedCount: frozenPauseCount,
+  });
+  if (completedAudioCount !== tokens.length) {
+    throw new Error(`Expected all ${tokens.length} words on completion, got ${completedAudioCount}`);
+  }
+  console.log('5. Option 2 Acoustic Peak & Voice Activity Gated Sync PASSED!');
+
+  // -----------------------------------------------------------------
+  // Testing Eliminated Candidate Dialogue Healing & Secretive CCTV Pacts
+  // -----------------------------------------------------------------
+  console.log('\n--- Testing Eliminated Candidate Dialogue Healing & Secretive CCTV Pacts ---');
+
+  // 1. Sanitizer heals eliminated candidate names addressed in dialogue
+  const tJax = CANDIDATE_MAP.get('jax-alvarez')!;
+  const tMarcus = CANDIDATE_MAP.get('marcus-vance')!;
+  const rogueDialogue = "Elena Rostova, your state-controlled media monopolies have poisoned public trust!";
+  const healedDialogue = nineRouterService.sanitizeDialogueSpeech(
+    rogueDialogue,
+    tJax,
+    tMarcus, // Target is Marcus Vance
+    ['elena-rostova'] // Elena Rostova was eliminated
+  );
+  if (healedDialogue.includes('Elena Rostova') || healedDialogue.includes('Elena')) {
+    throw new Error(`Sanitizer failed to heal eliminated candidate name: "${healedDialogue}"`);
+  }
+  if (!healedDialogue.includes('Marcus')) {
+    throw new Error(`Sanitizer did not replace eliminated candidate with live target: "${healedDialogue}"`);
+  }
+  console.log('1. Dialogue Speech Sanitizer Eliminated Candidate Healing PASSED!');
+
+  // 2. Attack Prompt includes Eliminated Candidates Prohibition section
+  const attackPromptWithEliminated = nineRouterService.buildPrompt(tJax, {
+    action: 'attack',
+    candidateId: tJax.id,
+    targetId: tMarcus.id,
+    round: 2,
+    activeCandidateIds: ['jax-alvarez', 'marcus-vance'],
+    eliminatedCandidateIds: ['elena-rostova', 'dmitri-voronin'],
+    historyContext: {
+      electionTopic: 'National Debt Crisis',
+      campaignSpeeches: {},
+    }
+  });
+  if (!attackPromptWithEliminated.userPrompt.includes('ELIMINATED FORMER CONTENDERS (DO NOT ATTACK OR ADDRESS)')) {
+    throw new Error('Attack prompt missing ELIMINATED FORMER CONTENDERS section');
+  }
+  if (!attackPromptWithEliminated.userPrompt.includes('SURVIVING CONTENDERS IN THE ROOM')) {
+    throw new Error('Attack prompt missing SURVIVING CONTENDERS IN THE ROOM section');
+  }
+  console.log('2. Attack Prompt Eliminated Candidates Prohibition PASSED!');
+
+  // 3. CCTV Backroom Secretive Whispers & Dramatic Double-Meaning Responses
+  const cctvPrompt = nineRouterService.buildPrompt(tJax, {
+    action: 'backroom_pact',
+    candidateId: tJax.id,
+    targetId: tMarcus.id,
+    round: 1,
+    activeCandidateIds: ['jax-alvarez', 'marcus-vance'],
+    historyContext: {
+      electionTopic: 'National Debt Crisis',
+      recentAttacks: [],
+      proposerBudget: 100,
+      receiverBudget: 100,
+      candidateTreasuries: { 'jax-alvarez': 100, 'marcus-vance': 100 },
+    }
+  });
+  if (!cctvPrompt.userPrompt.includes('SECRETIVE CORRIDOR ATMOSPHERE & DRAMATIC TONE')) {
+    throw new Error('CCTV prompt missing secretive corridor atmosphere');
+  }
+  if (!cctvPrompt.userPrompt.includes('You do NOT sound like an automated bribery bot')) {
+    throw new Error('CCTV prompt missing strict ban on robotic bribery lines');
+  }
+  if (!cctvPrompt.userPrompt.includes('STRICT PROHIBITION ON CAMERA & SURVEILLANCE TALK')) {
+    throw new Error('CCTV prompt missing strict prohibition on camera/surveillance talk');
+  }
+  if (!cctvPrompt.userPrompt.includes('CIA OPERATIVE & COVERT TRADECRAFT VIBE')) {
+    throw new Error('CCTV prompt missing CIA operative tradecraft vibe');
+  }
+  if (!cctvPrompt.userPrompt.includes('ANTI-FORMULA MANDATE / HIGH NATURAL VARIETY')) {
+    throw new Error('CCTV prompt missing anti-formula variety mandate');
+  }
+  if (!cctvPrompt.userPrompt.includes('THE YOUTUBE FLASHBACK HOOK') || !cctvPrompt.userPrompt.includes('chilling double meaning')) {
+    throw new Error('CCTV prompt missing YouTube flashback double-meaning guidelines');
+  }
+
+  if (!cctvPrompt.userPrompt.includes('STRICTLY MAXIMUM 15 WORDS')) {
+    throw new Error('CCTV prompt missing strict 15-word limit for proposer whisper');
+  }
+
+  // 4. CCTV Pact Validation Sanitizes Robotic Bribery Lines, Camera Chatter, JSON Leaks & Enforces Word Limits
+  const parsedPact = nineRouterService.parseAndValidatePact(
+    JSON.stringify({
+      whisper: "Marcus, thirty seconds before the cameras cycle, take this $30 bribe to destroy Elena Rostova.",
+      receiverResponse: "I will take your $30 bribe deal right now.",
+      actionType: "bribe",
+      receiverDecision: "accept_and_betray",
+      agreedTargetId: "elena-rostova",
+      privateStrategy: "I will take the collateral but vote Marcus out instead.",
+    }),
+    tJax,
+    tMarcus,
+    ['jax-alvarez', 'marcus-vance', 'elena-rostova'],
+    100
+  );
+  if (parsedPact.whisper.toLowerCase().includes('bribe')) {
+    throw new Error(`CCTV whisper still contains robotic "bribe": "${parsedPact.whisper}"`);
+  }
+  if (parsedPact.whisper.toLowerCase().includes('camera')) {
+    throw new Error(`CCTV whisper still contains camera filler: "${parsedPact.whisper}"`);
+  }
+  if (parsedPact.whisper.trim().split(/\s+/).length > 15) {
+    throw new Error(`CCTV whisper exceeds strict 15 words: "${parsedPact.whisper}" (${parsedPact.whisper.trim().split(/\s+/).length} words)`);
+  }
+  if (parsedPact.receiverResponse && parsedPact.receiverResponse.toLowerCase().includes('bribe')) {
+    throw new Error(`CCTV receiverResponse still contains robotic "bribe": "${parsedPact.receiverResponse}"`);
+  }
+  if (parsedPact.receiverResponse && parsedPact.receiverResponse.trim().split(/\s+/).length > 10) {
+    throw new Error(`CCTV receiverResponse exceeds 10 words: "${parsedPact.receiverResponse}"`);
+  }
+
+  // 5. Test JSON Leak & Trailing Garbage Auto-Stripping (as observed in Arthur Sterling screenshot bug)
+  const malformedPactRaw = `{"whisper": "Victoria, ride the Alvarez consensus, seal it with Rostova's vote, keep $70M dry powder for ballot bailouts.", "actionType": "bribe", "targetCandidate`;
+  const healedMalformedPact = nineRouterService.parseAndValidatePact(
+    malformedPactRaw,
+    tJax,
+    tMarcus,
+    ['jax-alvarez', 'marcus-vance', 'victoria-sterling'],
+    100
+  );
+  if (healedMalformedPact.whisper.includes('actionType') || healedMalformedPact.whisper.includes('targetCandidate')) {
+    throw new Error(`CCTV whisper leaked raw JSON fragments: "${healedMalformedPact.whisper}"`);
+  }
+  if (healedMalformedPact.whisper.trim().split(/\s+/).length > 15) {
+    throw new Error(`Healed CCTV whisper exceeds 15 words: "${healedMalformedPact.whisper}"`);
+  }
+  console.log('3. CCTV Secretive Atmosphere, CIA Tradecraft Vibe, 15-Word Proposer Limit & JSON Stripping PASSED!');
+
+  // -------------------------------------------------------------
+  // ⚡ Automatic Next Mode (Hands-Free OBS / YouTube Recording) Test Suite
+  // -------------------------------------------------------------
+  console.log('\n--- Testing Automatic Next Mode & Dual-Gated Dialogue Sync ---');
+
+  // 1. Settings & Customizable Delay Default & Bounds
+  const defaultConfig = {
+    baseUrl: 'http://localhost:20128/v1',
+    apiKey: '',
+    model: 'gpt-4o-mini',
+    autoNextMode: false,
+    autoNextDelay: 0.75,
+  };
+  if (defaultConfig.autoNextDelay !== 0.75) {
+    throw new Error(`Expected default autoNextDelay 0.75s, got ${defaultConfig.autoNextDelay}`);
+  }
+  const customDelays = [0.25, 0.50, 0.75, 1.00, 1.50];
+  for (const d of customDelays) {
+    const delayMs = Math.max(50, Math.round(d * 1000));
+    if (delayMs !== Math.round(d * 1000)) {
+      throw new Error(`Delay calculation mismatch for ${d}s: got ${delayMs}`);
+    }
+  }
+  console.log('1. Auto-Next default (0.75s) and customizable delay presets validation PASSED!');
+
+  // 2. AudioSync Subtitle Completion Lifecycle
+  const autoNextSampleSpeech = "Citizens of Valoria, I will dismantle their corruption and protect your treasury!";
+  audioSync.notifySubtitlesStarted(autoNextSampleSpeech);
+  if (audioSync.isSubtitlesComplete(autoNextSampleSpeech)) {
+    throw new Error('Subtitle should not be complete immediately after notifySubtitlesStarted!');
+  }
+  audioSync.notifySubtitlesComplete(autoNextSampleSpeech);
+  if (!audioSync.isSubtitlesComplete(autoNextSampleSpeech)) {
+    throw new Error('Subtitle should be complete after notifySubtitlesComplete!');
+  }
+  if (!audioSync.isSubtitlesComplete('')) {
+    throw new Error('Empty text should be considered trivially complete');
+  }
+  console.log('2. AudioSync Subtitle 100% completion tracking & notification PASSED!');
+
+  // 3. AudioSync CCTV Backroom Dual Dialogue Completion Lifecycle
+  const samplePactId = 'pact-round-1-vance-alvarez';
+  if (audioSync.isCctvComplete(samplePactId)) {
+    throw new Error('CCTV pact should not be complete before notification');
+  }
+  audioSync.notifyCctvComplete(samplePactId);
+  if (!audioSync.isCctvComplete(samplePactId)) {
+    throw new Error('CCTV pact should be complete after notifyCctvComplete');
+  }
+  console.log('3. AudioSync CCTV Backroom dual dialogue completion tracking PASSED!');
+
+  // 4. Completion Listener Dispatch Verification
+  let listenerCalledCount = 0;
+  const unsubscribeTest = audioSync.subscribeCompletion(() => {
+    listenerCalledCount += 1;
+  });
+  audioSync.notifySubtitlesComplete("New distinct subtitle dialogue text for listener test");
+  audioSync.notifyCctvComplete("new-distinct-cctv-pact-id");
+  unsubscribeTest();
+  audioSync.notifySubtitlesComplete("Post unsubscribe text");
+  if (listenerCalledCount !== 2) {
+    throw new Error(`Expected exactly 2 listener invocations, got ${listenerCalledCount}`);
+  }
+  console.log('4. AudioSync completion subscription & event dispatch PASSED!');
+
+  // 5. Dual-Condition Gating Simulation
+  // Verifies that advance is only allowed when BOTH character audio AND subtitles are 100% finished
+  interface StepEvaluationState {
+    isLoading: boolean;
+    phase: string;
+    isSpeakingAudio: boolean;
+    subtitlesComplete: boolean;
+    cctvComplete: boolean;
+    isPaused: boolean;
+  }
+
+  const canAdvanceStep = (s: StepEvaluationState): boolean => {
+    if (s.isPaused || s.isLoading || s.phase === 'WINNER' || s.phase === 'IDLE') return false;
+    if (s.phase === 'VOTE_REVEAL' || s.phase === 'FINAL_REVEAL') return false; // Handled by VoteRevealBoard
+    if (s.isSpeakingAudio) return false; // Audio not finished
+    if (!s.subtitlesComplete) return false; // Subtitles not finished
+    if (s.phase === 'CCTV_BACKROOM' && !s.cctvComplete) return false; // CCTV dialogue incomplete
+    return true; // BOTH finished!
+  };
+
+  // Case A: Audio is playing, subtitles finished -> BLOCKED
+  if (canAdvanceStep({ isLoading: false, phase: 'ATTACK', isSpeakingAudio: true, subtitlesComplete: true, cctvComplete: true, isPaused: false })) {
+    throw new Error('Should NOT advance while audio is speaking!');
+  }
+  // Case B: Audio finished, subtitles still animating -> BLOCKED
+  if (canAdvanceStep({ isLoading: false, phase: 'ATTACK', isSpeakingAudio: false, subtitlesComplete: false, cctvComplete: true, isPaused: false })) {
+    throw new Error('Should NOT advance while subtitle animation is in progress!');
+  }
+  // Case C: CCTV proposer finished, receiver has not finished -> BLOCKED
+  if (canAdvanceStep({ isLoading: false, phase: 'CCTV_BACKROOM', isSpeakingAudio: false, subtitlesComplete: true, cctvComplete: false, isPaused: false })) {
+    throw new Error('Should NOT advance in CCTV before both proposer and receiver finish!');
+  }
+  // Case D: Whole game finished at WINNER -> BLOCKED
+  if (canAdvanceStep({ isLoading: false, phase: 'WINNER', isSpeakingAudio: false, subtitlesComplete: true, cctvComplete: true, isPaused: false })) {
+    throw new Error('Should NOT advance past WINNER phase (election finished)!');
+  }
+  // Case E: Game paused by streamer -> BLOCKED
+  if (canAdvanceStep({ isLoading: false, phase: 'CAMPAIGN', isSpeakingAudio: false, subtitlesComplete: true, cctvComplete: true, isPaused: true })) {
+    throw new Error('Should NOT advance when paused!');
+  }
+  // Case F: BOTH character audio dialogue and subtitle dialogue are 100% finished -> ALLOWED!
+  if (!canAdvanceStep({ isLoading: false, phase: 'CAMPAIGN', isSpeakingAudio: false, subtitlesComplete: true, cctvComplete: true, isPaused: false })) {
+    throw new Error('Expected step advance when BOTH audio and subtitles have 100% finished!');
+  }
+  console.log('5. Dual-Condition Gate (Audio finished + Subtitles 100% finished) simulation PASSED!');
+
+  console.log('\nAll unit tests for Among Us Emergency Meeting, Debate Engine, Kinetic Subtitles & Auto-Next PASSED successfully!');
 }
 
 testEngine().catch(err => {

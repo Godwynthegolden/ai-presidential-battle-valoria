@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
-import { GameState } from '@/types/game';
+import { GameState, BackroomPact } from '@/types/game';
 import { CandidateAvatar } from './CandidateAvatar';
 import { VoteRevealBoard } from './VoteRevealBoard';
 import { WinnerPodium } from './WinnerPodium';
 import { CCTVBackroomView } from './CCTVBackroomView';
 import { CANDIDATE_MAP } from '@/data/candidates';
+import { KineticDialogueBox } from './KineticDialogueBox';
 import { 
   Radio, 
   Flame, 
@@ -17,7 +18,6 @@ import {
   Loader2, 
   AlertCircle,
   RefreshCw,
-  Sparkles,
   Quote,
   Mic2,
   ShieldCheck,
@@ -37,12 +37,20 @@ interface DebateArenaProps {
   onNextStep?: () => void;
   onSelectCCTVFeed?: (feedIndex: number) => void;
   onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string) => void;
+  onPlayCCTVPactAudio?: (pact: BackroomPact) => void;
   isSpeakingAudio?: boolean;
   isBufferingLookahead?: boolean;
   bufferingStatus?: string;
   lookaheadBufferCount?: number;
   ballotSpeed?: number;
   ballotAutoPlay?: boolean;
+  kineticSubtitlesEnabled?: boolean;
+  kineticSubtitleStyle?: 'mrbeast' | 'cinematic' | 'neon';
+  kineticHighlightCriticalWords?: boolean;
+  kineticDynamicBoxResize?: boolean;
+  kineticFontSize?: 'standard' | 'large' | 'cinematic';
+  forcedRevealedCount?: number;
+  forcedActiveIndex?: number;
 }
 
 export const DebateArena: React.FC<DebateArenaProps> = ({
@@ -52,12 +60,20 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
   onNextStep,
   onSelectCCTVFeed,
   onPlaySpeechAudio,
+  onPlayCCTVPactAudio,
   isSpeakingAudio = false,
   isBufferingLookahead = false,
   bufferingStatus = '',
   lookaheadBufferCount = 0,
   ballotSpeed = 1.0,
   ballotAutoPlay = true,
+  kineticSubtitlesEnabled = true,
+  kineticSubtitleStyle = 'mrbeast',
+  kineticHighlightCriticalWords = true,
+  kineticDynamicBoxResize = true,
+  kineticFontSize = 'large',
+  forcedRevealedCount,
+  forcedActiveIndex,
 }) => {
   const { stage, phase, round, votesByRound, pactsByRound, finalVoteTally, winnerId, eliminatedCandidates } = gameState;
 
@@ -71,19 +87,25 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
     const activePact = pactsThisRound[activeFeedIndex] || pactsThisRound[0] || null;
 
     return (
-      <div className="flex-1 flex flex-col items-center justify-start p-2 md:p-4 h-full min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="w-full max-w-4xl my-auto">
-          <CCTVBackroomView
-            pact={activePact}
-            allPactsThisRound={pactsThisRound}
-            activeFeedIndex={activeFeedIndex}
-            onSelectFeed={onSelectCCTVFeed}
-            onPlaySpeechAudio={onPlaySpeechAudio}
-            isSpeakingAudio={isSpeakingAudio}
-            round={round}
-            isLoading={stage.isLoading}
-          />
-        </div>
+      <div className="flex-1 flex flex-col items-center justify-center p-0 sm:p-1 md:p-2 h-full min-h-0 w-full overflow-hidden">
+        <CCTVBackroomView
+          pact={activePact}
+          allPactsThisRound={pactsThisRound}
+          activeFeedIndex={activeFeedIndex}
+          onSelectFeed={onSelectCCTVFeed}
+          onPlaySpeechAudio={onPlaySpeechAudio}
+          onPlayCCTVPactAudio={onPlayCCTVPactAudio}
+          isSpeakingAudio={isSpeakingAudio}
+          round={round}
+          isLoading={stage.isLoading}
+          kineticSubtitlesEnabled={kineticSubtitlesEnabled}
+          kineticSubtitleStyle={kineticSubtitleStyle}
+          kineticHighlightCriticalWords={kineticHighlightCriticalWords}
+          kineticDynamicBoxResize={kineticDynamicBoxResize}
+          kineticFontSize={kineticFontSize}
+          forcedRevealedCount={forcedRevealedCount}
+          forcedActiveIndex={forcedActiveIndex}
+        />
       </div>
     );
   }
@@ -131,6 +153,14 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             eliminatedCount={eliminatedCandidates.length}
             totalRounds={round}
             onRestart={onRestart}
+            isSpeakingAudio={isSpeakingAudio}
+            kineticSubtitlesEnabled={kineticSubtitlesEnabled}
+            kineticSubtitleStyle={kineticSubtitleStyle}
+            kineticHighlightCriticalWords={kineticHighlightCriticalWords}
+            kineticDynamicBoxResize={kineticDynamicBoxResize}
+            kineticFontSize={kineticFontSize}
+            forcedRevealedCount={forcedRevealedCount}
+            forcedActiveIndex={forcedActiveIndex}
           />
         </div>
       </div>
@@ -213,7 +243,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
           </div>
         )}
 
-        <div className="w-full flex flex-col items-center max-w-3xl my-auto lg:-translate-x-6 transition-transform duration-300">
+        <div className="w-full flex flex-col items-center max-w-3xl my-auto transition-transform duration-300">
         {/* If Error Occurred */}
         {stage.error ? (
           <div className="flex flex-col items-center justify-center text-center max-w-md p-8 rounded-3xl bg-red-950/50 border-2 border-red-600/80 shadow-2xl shadow-red-950/80 backdrop-blur-xl">
@@ -234,7 +264,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             </button>
           </div>
         ) : stage.actionType === 'attack' && speaker && target ? (
-          /* Attack Showdown View: Attacker vs Target (Among Us Emergency Meeting HUD) */
+          /* Attack Showdown View: Hero Speaker (Top & Center) + Subordinate Target Lock HUD */
           (() => {
             const currentAttacks = gameState.attacksByRound[gameState.round] || [];
             const currentAttack = currentAttacks.find(a => a.attackerId === speaker.id);
@@ -246,108 +276,157 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
             return (
               <div 
                 key={`attack-${speaker.id}-${target.id}-${gameState.currentSpeakerIndex}-${gameState.round}`}
-                className="w-full flex flex-col items-center gap-6 max-w-3xl animate-step-transition"
+                className="w-full flex flex-col items-center gap-5 max-w-3xl animate-step-transition"
               >
-                <div className="flex items-center justify-between w-full max-w-xl px-4 pt-3">
-                  {/* Attacker Podium */}
-                  <div className="flex flex-col items-center gap-2.5">
+                {/* 1. Hero Speaker Podium (Top & Center — Big Icon & Visual Dominance) */}
+                <div className="flex flex-col items-center text-center gap-2.5 pt-1">
+                  <div className="relative flex items-center justify-center">
+                    {/* Glowing Thematic Aura behind Hero Speaker */}
+                    <div 
+                      className="absolute -inset-4 rounded-full blur-2xl opacity-35 animate-pulse pointer-events-none"
+                      style={{ backgroundColor: speaker.color.primary || '#06b6d4' }}
+                    />
                     <CandidateAvatar
                       candidate={speaker}
                       size="xl"
                       isSpeaking={true}
                       isAttacking={true}
                     />
-                    <div className="text-center flex flex-col items-center">
-                      <span className="text-base font-display font-black text-white tracking-wide block">
-                        {speaker.name}
-                      </span>
-                      {isRebuttal ? (
-                        <span className="text-[11px] font-mono font-bold text-emerald-400 uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/60 inline-flex items-center gap-1 mt-1 shadow-md shadow-emerald-950/50">
-                          <Shield className="w-3 h-3 text-emerald-400" /> Rebuttal Defense
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-mono font-bold text-red-400 uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-950/80 border border-red-800/60 inline-block mt-1">
-                          Accuser ({speaker.codename})
-                        </span>
-                      )}
-                    </div>
                   </div>
 
-                  {/* Clash Energy Beam Icon */}
-                  <div className="flex flex-col items-center justify-center gap-1.5 px-4 text-red-500">
-                    <div className="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/40 flex items-center justify-center shadow-lg shadow-red-500/20 animate-pulse">
-                      <Swords className="w-6 h-6 text-red-400" />
-                    </div>
-                    <span className="text-[11px] font-display font-black uppercase tracking-widest bg-red-950 px-2.5 py-0.5 rounded-md border border-red-700 text-red-200">
-                      VS
-                    </span>
-                  </div>
-
-                  {/* Target Podium */}
-                  <div className="flex flex-col items-center gap-2.5">
-                    <CandidateAvatar
-                      candidate={target}
-                      size="xl"
-                      isTarget={true}
-                    />
-                    <div className="text-center flex flex-col items-center">
-                      <span className="text-base font-display font-black text-white tracking-wide block">
-                        {target.name}
+                  <div className="flex flex-col items-center">
+                    <h2 className="text-2xl sm:text-3xl font-display font-black text-white tracking-tight">
+                      {speaker.name}
+                    </h2>
+                    <div className="flex items-center justify-center flex-wrap gap-2 mt-1">
+                      <span 
+                        className="text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-xs"
+                        style={{ 
+                          backgroundColor: `${speaker.color.primary}18`, 
+                          color: speaker.color.primary,
+                          borderColor: `${speaker.color.primary}44` 
+                        }}
+                      >
+                        {speaker.archetypeTitle}
                       </span>
-                      {/* Suspicion & Heat Meter Badge */}
-                      {targetHeat >= 3 ? (
-                        <span className="text-[11px] font-mono font-black text-red-300 uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-950 border border-red-500 animate-pulse inline-flex items-center gap-1 mt-1 shadow-lg shadow-red-500/30">
-                          <Crosshair className="w-3 h-3 text-red-400" /> Prime Target ({targetHeat} Clashes)
-                        </span>
-                      ) : targetHeat === 2 ? (
-                        <span className="text-[11px] font-mono font-bold text-orange-300 uppercase tracking-wider px-2 py-0.5 rounded-full bg-orange-950/80 border border-orange-500/60 inline-flex items-center gap-1 mt-1">
-                          <Flame className="w-3 h-3 text-orange-400" /> Suspect ({targetHeat} Accusations)
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-mono font-bold text-amber-400 uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-950/80 border border-amber-800/60 inline-block mt-1">
-                          Targeted ($ {targetBudget})
-                        </span>
-                      )}
-                      <span className="text-[10px] font-mono text-slate-400 mt-0.5">
-                        💰 War Chest: ${targetBudget} {targetBailouts > 0 ? `(${targetBailouts} Bailouts)` : '(Vulnerable)'}
+                      <span className="text-xs font-sans text-slate-300 font-medium">
+                        &ldquo;{speaker.slogan}&rdquo;
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Attack Speech Box */}
-                <div className="w-full relative rounded-3xl bg-slate-950/95 border-2 border-red-500/80 p-6 md:p-8 shadow-2xl shadow-red-950/70 backdrop-blur-xl">
-                  <div className="flex items-center justify-between absolute -top-3.5 left-6 right-6">
-                    <div className={`px-3.5 py-1 rounded-md text-white text-xs font-display font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5 ${isRebuttal ? 'bg-emerald-600 border border-emerald-400/50' : 'bg-red-600 border border-red-400/50'}`}>
-                      {isRebuttal ? <Shield className="w-3.5 h-3.5" /> : <Flame className="w-3.5 h-3.5" />}
-                      {isRebuttal ? 'Rebuttal & Vote Call' : 'Emergency Accusation'}
+                {/* 2. Subordinate Target Lock HUD (Smaller & Less Dominant, but Noticeable) */}
+                <div className="w-full max-w-xl flex items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-red-950/40 via-[#0d1220]/90 to-red-950/40 border border-red-500/40 shadow-lg shadow-red-950/30 backdrop-blur-md">
+                  {/* Left: Target Avatar & Name */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative shrink-0">
+                      <CandidateAvatar
+                        candidate={target}
+                        size="md"
+                        isTarget={true}
+                        showBadge={false}
+                      />
+                      <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-red-600 border border-black shadow-xs">
+                        <Crosshair className="w-2.5 h-2.5 text-white" />
+                      </div>
                     </div>
 
-                    {!stage.isLoading && onPlaySpeechAudio && (
-                      <button
-                        type="button"
-                        onClick={() => onPlaySpeechAudio(stage.content, speaker?.voice?.voiceId, speaker?.id)}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900/90 hover:bg-slate-800 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-mono font-bold shadow-md transition active:scale-95 cursor-pointer"
-                        title="Replay candidate's attack voice"
-                      >
-                        <Volume2 className="w-3.5 h-3.5 text-purple-400" />
-                        <span>{isSpeakingAudio ? 'Speaking...' : 'Replay Voice'}</span>
-                      </button>
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-mono font-black text-red-400 uppercase tracking-widest flex items-center gap-1">
+                          <Target className="w-3 h-3 text-red-400" /> Target of Accusation
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-600">•</span>
+                        <span className="text-[10px] font-mono font-bold text-slate-400 uppercase truncate">
+                          {target.archetypeTitle}
+                        </span>
+                      </div>
+                      <span className="text-sm sm:text-base font-display font-black text-white tracking-wide truncate">
+                        {target.name}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: Clash Heat Meter & War Chest Resilience */}
+                  <div className="flex flex-col items-end shrink-0 gap-0.5">
+                    {targetHeat >= 3 ? (
+                      <span className="text-[10px] font-mono font-black text-red-300 uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-950 border border-red-500 animate-pulse flex items-center gap-1 shadow-xs">
+                        <Crosshair className="w-2.5 h-2.5 text-red-400" /> Prime Target ({targetHeat} Clashes)
+                      </span>
+                    ) : targetHeat === 2 ? (
+                      <span className="text-[10px] font-mono font-bold text-orange-300 uppercase tracking-wider px-2 py-0.5 rounded-md bg-orange-950/80 border border-orange-500/60 flex items-center gap-1">
+                        <Flame className="w-2.5 h-2.5 text-orange-400" /> {targetHeat} Accusations
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono font-bold text-amber-300 uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-950/80 border border-amber-700/60">
+                        Targeted
+                      </span>
+                    )}
+                    <span className="text-[10px] font-mono text-slate-400">
+                      War Chest: <strong className="text-emerald-400">${targetBudget}M</strong> {targetBailouts > 0 ? `(${targetBailouts} Bailouts)` : <span className="text-red-400 font-bold">(Vulnerable)</span>}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. Attack Speech Teleprompter Box */}
+                <div className={`w-full relative rounded-3xl p-6 sm:p-8 md:p-9 shadow-2xl backdrop-blur-2xl transition-all duration-300 border-2 ${
+                  isRebuttal 
+                    ? 'bg-[#0a1618]/95 border-emerald-500/80 shadow-emerald-950/50' 
+                    : 'bg-[#150a0d]/95 border-red-500/80 shadow-red-950/60'
+                }`}>
+                  {/* Header Badge & Audio Equalizer Indicator */}
+                  <div className="flex items-center justify-between pb-3.5 mb-3 border-b border-slate-800/80 flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`px-3 py-1 rounded-md text-white text-xs font-display font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5 ${
+                        isRebuttal 
+                          ? 'bg-emerald-600 border border-emerald-400/50' 
+                          : 'bg-red-600 border border-red-400/50'
+                      }`}>
+                        {isRebuttal ? <Shield className="w-3.5 h-3.5" /> : <Flame className="w-3.5 h-3.5" />}
+                        {isRebuttal ? 'Rebuttal Defense & Vote Call' : 'Public Emergency Accusation'}
+                      </div>
+                    </div>
+
+                    {/* Equalizer Audio Indicator (Shows when audio is playing, Replay via 'R' shortcut) */}
+                    {!stage.isLoading && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
+                          {isSpeakingAudio ? 'Speaking Voice' : 'Press [R] to Replay'}
+                        </span>
+                        <div className="flex items-end gap-1 h-4">
+                          <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-1' : 'bg-slate-600 h-1'}`} />
+                          <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-2' : 'bg-slate-600 h-2'}`} />
+                          <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-3' : 'bg-slate-600 h-1.5'}`} />
+                          <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-4' : 'bg-slate-600 h-2.5'}`} />
+                        </div>
+                      </div>
                     )}
                   </div>
 
                   {stage.isLoading ? (
                     <div className="flex items-center justify-center py-8 gap-3 text-red-400">
                       <Loader2 className="w-6 h-6 animate-spin" />
-                      <span className="text-sm font-mono tracking-wider">
+                      <span className="text-sm font-mono tracking-wider font-semibold">
                         Formulating strategic debate argument via 9router AI...
                       </span>
                     </div>
                   ) : (
                     <div className="relative">
-                      <p className="text-lg sm:text-xl md:text-2xl font-sans font-semibold text-white leading-relaxed italic">
-                        &ldquo;{stage.content}&rdquo;
-                      </p>
+                      <KineticDialogueBox
+                        key={`attack-speech-${speaker.id}-${target.id}-${gameState.round}-${gameState.currentSpeakerIndex}`}
+                        text={stage.content}
+                        isSpeaking={isSpeakingAudio}
+                        speakerColor={speaker.color.primary}
+                        enabled={kineticSubtitlesEnabled}
+                        style={kineticSubtitleStyle}
+                        highlightCritical={kineticHighlightCriticalWords}
+                        dynamicResize={kineticDynamicBoxResize}
+                        fontSize={kineticFontSize === 'cinematic' ? 'cinematic' : 'large'}
+                        showQuotes={true}
+                        forcedRevealedCount={forcedRevealedCount}
+                        forcedActiveIndex={forcedActiveIndex}
+                      />
                     </div>
                   )}
                 </div>
@@ -390,7 +469,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
               </div>
             </div>
 
-            {/* Speech Teleprompter Bubble (Major Overhaul) */}
+            {/* Speech Teleprompter Bubble */}
             <div 
               className={`w-full relative rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl backdrop-blur-2xl transition-all duration-300 teleprompter-glow ${
                 stage.actionType === 'eliminated'
@@ -415,21 +494,12 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
                   </span>
                 </div>
 
-                {/* Animated Audio Equalizer Visualizer & Replay Audio Button */}
+                {/* Animated Audio Equalizer Visualizer */}
                 {!stage.isLoading && (
-                  <div className="flex items-center gap-3">
-                    {onPlaySpeechAudio && (
-                      <button
-                        type="button"
-                        onClick={() => onPlaySpeechAudio(stage.content, speaker.voice?.voiceId, speaker.id)}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-mono font-bold shadow-sm transition active:scale-95 cursor-pointer"
-                        title="Replay candidate's speech with Fish Audio TTS"
-                      >
-                        <Volume2 className={`w-3.5 h-3.5 text-purple-400 ${isSpeakingAudio ? 'animate-pulse' : ''}`} />
-                        <span>{isSpeakingAudio ? 'Speaking...' : 'Replay Voice'}</span>
-                      </button>
-                    )}
-
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
+                      {isSpeakingAudio ? 'Speaking Voice' : 'Press [R] to Replay'}
+                    </span>
                     <div className="flex items-end gap-1 h-4">
                       <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-1' : 'bg-slate-600 h-1'}`} />
                       <span className={`w-1 rounded-full ${isSpeakingAudio ? 'bg-purple-400 animate-equalizer eq-bar-2' : 'bg-slate-600 h-2'}`} />
@@ -450,20 +520,20 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
               ) : (
                 <div className="relative">
                   <Quote className="absolute -top-3 -left-3 w-10 h-10 text-white/5 -z-0 pointer-events-none" />
-                  <p className="text-xl sm:text-2xl md:text-3xl font-sans font-semibold text-white leading-relaxed md:leading-snug tracking-normal relative z-10">
-                    &ldquo;{stage.content}&rdquo;
-                  </p>
-
-                  {/* Context Shelf Footer */}
-                  <div className="flex items-center justify-between flex-wrap gap-2 mt-6 pt-4 border-t border-slate-800/80 text-xs text-slate-300 font-sans">
-                    <span className="flex items-center gap-2 text-slate-200">
-                      <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-                      <strong className="font-semibold text-white">Platform:</strong> {speaker.ideology}
-                    </span>
-                    <span className="font-mono font-bold text-slate-400 uppercase text-[11px] px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800">
-                      Speaker {gameState.currentSpeakerIndex + 1} of {gameState.activeCandidateIds.length}
-                    </span>
-                  </div>
+                  <KineticDialogueBox
+                    key={`speaker-speech-${speaker.id}-${gameState.phase}-${gameState.round}-${gameState.currentSpeakerIndex}`}
+                    text={stage.content}
+                    isSpeaking={isSpeakingAudio}
+                    speakerColor={speaker.color.primary}
+                    enabled={kineticSubtitlesEnabled}
+                    style={kineticSubtitleStyle}
+                    highlightCritical={kineticHighlightCriticalWords}
+                    dynamicResize={kineticDynamicBoxResize}
+                    fontSize={kineticFontSize}
+                    showQuotes={true}
+                    forcedRevealedCount={forcedRevealedCount}
+                    forcedActiveIndex={forcedActiveIndex}
+                  />
                 </div>
               )}
             </div>

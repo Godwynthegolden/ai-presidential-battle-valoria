@@ -6,6 +6,7 @@ export interface NineRouterConfig {
   baseUrl?: string;
   apiKey?: string;
   model?: string;
+  cctvWiretapAudioEffect?: number; // 0 to 100 (%)
 }
 
 export class NineRouterService {
@@ -181,6 +182,7 @@ export class NineRouterService {
         return {
           text: `Voted for ${CANDIDATE_MAP.get(parsed.vote)?.name || parsed.vote}`,
           voteTargetId: parsed.vote,
+          strategyMonologue: parsed.strategyMonologue,
           privateReason: parsed.reason,
           modelUsed: model,
         };
@@ -188,143 +190,30 @@ export class NineRouterService {
 
       if (payload.action === 'backroom_pact') {
         const ctx = payload.historyContext || {};
-        const parsed = this.extractAndRepairJson(rawText);
-        const validCandidates = payload.activeCandidateIds.filter(id => id !== candidate.id);
-        const validTargets = payload.activeCandidateIds.filter(id => id !== candidate.id && id !== payload.targetId);
-        
-        let rawWhisper = parsed?.whisper 
-          ? parsed.whisper.replace(/^["']|["']$/g, '').trim()
-          : (rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim() || '');
-
-        // Detect if whisper starts with or explicitly addresses a candidate by name (e.g. "Chloe, take..." or "Dmitri: let's...")
-        let detectedAddresseeId: string | null = null;
-        const vocativeMatch = rawWhisper.match(/^["']?([A-Za-z]+(?:\s+[A-Za-z]+)?)[,:\-—]/);
-        if (vocativeMatch && vocativeMatch[1]) {
-          const matchName = vocativeMatch[1].trim();
-          const matchedId = this.resolveCandidateIdFromNameOrAlias(matchName, validCandidates);
-          if (matchedId && validCandidates.includes(matchedId)) {
-            detectedAddresseeId = matchedId;
-          }
-        }
-
-        // Resolve target candidate (person negotiated with)
-        const rawTargetCandidate = parsed?.targetCandidateId || parsed?.targetId || payload.targetId;
-        let healedTargetCandId = rawTargetCandidate ? this.resolveCandidateIdFromNameOrAlias(rawTargetCandidate, validCandidates) : null;
-        if (detectedAddresseeId && validCandidates.includes(detectedAddresseeId)) {
-          healedTargetCandId = detectedAddresseeId;
-        }
-        const targetCandidateId = healedTargetCandId || payload.targetId || validCandidates[0] || validTargets[0];
-
-        // Resolve elimination target candidate (must not be proposer and must not be targetCandidateId)
-        const validElimTargets = validCandidates.filter(id => id !== targetCandidateId);
-        const rawElimTarget = parsed?.agreedEliminationTargetId || parsed?.agreedTargetId;
-        let healedElimTarget = rawElimTarget ? this.resolveCandidateIdFromNameOrAlias(rawElimTarget, validCandidates) : null;
-        if (healedElimTarget === targetCandidateId || healedElimTarget === candidate.id) {
-          healedElimTarget = null;
-        }
-        const agreedTargetId = healedElimTarget || validElimTargets[0] || validTargets[0] || validCandidates[0];
-
-        // Private strategy extraction
-        const privateStrategy = parsed?.privateStrategy 
-          ? parsed.privateStrategy.replace(/^["']|["']$/g, '').trim()
-          : `Align tactically to eliminate ${CANDIDATE_MAP.get(agreedTargetId)?.name || agreedTargetId} while preserving treasury.`;
-
-        // Action Type Resolution ('bribe' | 'offer' | 'pass')
-        let actionType: 'bribe' | 'offer' | 'pass' = 'pass';
-        if (parsed?.actionType === 'bribe' || parsed?.actionType === 'offer' || parsed?.actionType === 'pass') {
-          actionType = parsed.actionType;
-        } else if (parsed?.offerBribe === true || parsed?.bribeOffered === true) {
-          actionType = 'bribe';
-        } else if (parsed?.offerPrice || parsed?.offeredPrice) {
-          actionType = 'offer';
-        } else {
-          actionType = (ctx.proposerBudget ?? 100) >= 30 ? 'bribe' : 'pass';
-        }
-
         const proposerBudget = ctx.proposerBudget ?? 100;
-        let bribeAmount = 0;
-        let upfrontPaid = 0;
-        let escrowPending = 0;
-        let offerPrice = typeof parsed?.offerPrice === 'number' ? Math.max(20, Math.min(40, parsed.offerPrice)) : 30;
-
-        // Enforce strict $30 treasury limit for bribes
-        if (actionType === 'bribe') {
-          if (proposerBudget < 30) {
-            actionType = 'offer';
-          }
-        }
-
-        if (actionType === 'bribe') {
-          bribeAmount = 30;
-          upfrontPaid = 15;
-          escrowPending = 15;
-        } else if (actionType === 'offer') {
-          bribeAmount = offerPrice;
-          upfrontPaid = Math.floor(offerPrice / 2);
-          escrowPending = offerPrice - upfrontPaid;
-        }
-
-        // Receiver Decision Resolution
-        let receiverDecision: 'accept' | 'decline' | 'accept_and_betray' = 'accept';
-        if (['accept', 'decline', 'accept_and_betray'].includes(parsed?.receiverDecision)) {
-          receiverDecision = parsed.receiverDecision;
-        } else {
-          const receiver = CANDIDATE_MAP.get(targetCandidateId);
-          const rxArch = receiver?.archetype;
-          if (rxArch === 'reformer' || rxArch === 'traditionalist') {
-            const r = Math.random();
-            receiverDecision = r < 0.4 ? 'decline' : (r < 0.75 ? 'accept' : 'accept_and_betray');
-          } else if (rxArch === 'capitalist' || rxArch === 'careerist' || rxArch === 'wildcard') {
-            const r = Math.random();
-            receiverDecision = r < 0.45 ? 'accept_and_betray' : (r < 0.9 ? 'accept' : 'decline');
-          } else {
-            const r = Math.random();
-            receiverDecision = r < 0.6 ? 'accept' : (r < 0.85 ? 'accept_and_betray' : 'decline');
-          }
-        }
-
-        const dealAccepted = (actionType === 'bribe' || actionType === 'offer') && (receiverDecision === 'accept' || receiverDecision === 'accept_and_betray');
-
-        const recipient = CANDIDATE_MAP.get(targetCandidateId);
-        const recipientFirstName = recipient?.name.split(' ')[0] || '';
-        const targetCand = CANDIDATE_MAP.get(agreedTargetId);
-        const targetFirstName = targetCand?.name.split(' ')[0] || '';
-
-        if (!rawWhisper) {
-          rawWhisper = actionType === 'bribe' 
-            ? `${recipientFirstName}, take this $30 bribe. $15 now, $15 after we vote out ${targetFirstName || 'our rival'}.`
-            : actionType === 'offer'
-            ? `${recipientFirstName}, pay me $${offerPrice} and I'll deliver my vote against ${targetFirstName || 'our rival'}.`
-            : `I'm keeping my powder dry. ${targetFirstName || 'Our rival'} won't see this coming.`;
-        }
-
-        let whisper = rawWhisper.replace(/^[^:]+:\s*/, '').replace(/^["']|["']$/g, '').trim();
-
-        // Ensure whisper dialogue matches targetCandidateId
-        if (vocativeMatch && vocativeMatch[1] && recipientFirstName) {
-          const addressedName = vocativeMatch[1].trim();
-          const addressedCand = this.resolveCandidateIdFromNameOrAlias(addressedName, validCandidates);
-          if (addressedCand && addressedCand !== targetCandidateId) {
-            whisper = whisper.replace(new RegExp(`^["']?${addressedName}[,:\-—]\\s*`, 'i'), `${recipientFirstName}, `);
-          }
-        } else if (recipientFirstName && !whisper.toLowerCase().startsWith(recipientFirstName.toLowerCase())) {
-          whisper = `${recipientFirstName}, ${whisper.charAt(0).toLowerCase() + whisper.slice(1)}`;
-        }
-
+        const fallbackReceiver = payload.targetId ? (CANDIDATE_MAP.get(payload.targetId) || null) : null;
+        const parsedPact = this.parseAndValidatePact(
+          rawText,
+          candidate,
+          fallbackReceiver,
+          payload.activeCandidateIds,
+          proposerBudget
+        );
         return {
-          text: whisper,
-          targetCandidateId,
-          agreedTargetId,
-          whisperText: whisper,
-          privateStrategy,
-          actionType,
-          bribeOffered: actionType === 'bribe',
-          bribeAmount,
-          upfrontPaid,
-          escrowPending,
-          offerPrice,
-          receiverDecision,
-          bribeAccepted: dealAccepted,
+          text: parsedPact.whisper,
+          targetCandidateId: parsedPact.targetCandidateId,
+          agreedTargetId: parsedPact.agreedTargetId,
+          whisperText: parsedPact.whisper,
+          receiverResponse: parsedPact.receiverResponse,
+          privateStrategy: parsedPact.privateStrategy,
+          actionType: parsedPact.actionType,
+          bribeOffered: parsedPact.actionType === 'bribe',
+          bribeAmount: parsedPact.bribeAmount,
+          upfrontPaid: parsedPact.upfrontPaid,
+          escrowPending: parsedPact.escrowPending,
+          offerPrice: parsedPact.offerPrice,
+          receiverDecision: parsedPact.receiverDecision,
+          bribeAccepted: (parsedPact.actionType === 'bribe' || parsedPact.actionType === 'offer') && (parsedPact.receiverDecision === 'accept' || parsedPact.receiverDecision === 'accept_and_betray'),
           modelUsed: model,
         };
       }
@@ -341,7 +230,9 @@ export class NineRouterService {
 
       // Clean and sanitize plain text spoken dialogue responses (attack, campaign_speech, final_speech, exit_words, victory_speech)
       const targetCandidate = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
-      const cleaned = this.sanitizeDialogueSpeech(rawText, candidate, targetCandidate);
+      const ctx = payload.historyContext || {};
+      const eliminatedIds: string[] = payload.eliminatedCandidateIds || ctx.eliminatedCandidateIds || [];
+      const cleaned = this.sanitizeDialogueSpeech(rawText, candidate, targetCandidate, eliminatedIds);
       return {
         text: cleaned,
         modelUsed: model,
@@ -357,12 +248,14 @@ export class NineRouterService {
    * 1. Strips outer quotes and markdown ticks
    * 2. Strips stage directions like (points finger), (to Alvarez), [scoffs]
    * 3. Strips script label prefixes like "Alvarez:", "Chloe:", "Leon :", "Target:", "Attack on Alvarez:", etc.
-   * 4. Capitalizes the first letter of natural dialogue.
+   * 4. Heals rogue vocative addresses to eliminated candidates by redirecting address to target.
+   * 5. Capitalizes the first letter of natural dialogue.
    */
   public sanitizeDialogueSpeech(
     text: string, 
     speaker?: Candidate | null, 
-    target?: Candidate | null
+    target?: Candidate | null,
+    eliminatedCandidateIds?: string[]
   ): string {
     if (!text) return '';
     let cleaned = text.trim();
@@ -419,7 +312,33 @@ export class NineRouterService {
     // 5. Clean up any leftover outer quotation marks or brackets
     cleaned = cleaned.replace(/^["'“”‘’`*]+|["'“”‘’`*]+$/g, '').trim();
 
-    // 6. Ensure first letter is capitalized
+    // 6. Heal vocative references to eliminated candidates:
+    // If the speech mistakenly opens addressing or mentioning an eliminated candidate,
+    // redirect it to the actual target candidate!
+    if (target && eliminatedCandidateIds && eliminatedCandidateIds.length > 0) {
+      const targetFirstName = target.name.split(' ')[0];
+      const targetFullName = target.name;
+      for (const elimId of eliminatedCandidateIds) {
+        const elimCand = CANDIDATE_MAP.get(elimId) || DEFAULT_CANDIDATES.find(c => c.id === elimId) || Array.from(CANDIDATE_MAP.values()).find(c => c.name.toLowerCase() === elimId.toLowerCase());
+        const elimFull = elimCand ? elimCand.name : elimId.replace(/-/g, ' ');
+        const elimFirst = elimCand ? elimCand.name.split(' ')[0] : elimId.split('-')[0];
+
+        // Replace leading vocative: "Chloe, " or "Look, Chloe, " with target first name
+        const leadingVocative = new RegExp(`^(\\s*(?:Look|Listen|Tell me|Now|Well)?[,\\s]*)(?:${elimFull}|${elimFirst})([,:\\-—\\s]+)`, 'i');
+        if (leadingVocative.test(cleaned)) {
+          cleaned = cleaned.replace(leadingVocative, `$1${targetFirstName}$2`).trim();
+        }
+
+        // Replace any remaining full name mentions of the eliminated candidate with target full name
+        const escapedFull = elimFull.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const fullNameRegex = new RegExp(`\\b${escapedFull}\\b`, 'gi');
+        if (fullNameRegex.test(cleaned)) {
+          cleaned = cleaned.replace(fullNameRegex, targetFullName);
+        }
+      }
+    }
+
+    // 7. Ensure first letter is capitalized
     if (cleaned.length > 0) {
       cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
     }
@@ -524,123 +443,148 @@ export class NineRouterService {
       body.response_format = { type: 'json_object' };
     }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
+    const maxRetries = 3;
+    let attempt = 0;
 
-    try {
-      let response = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      });
+    while (attempt <= maxRetries) {
+      attempt++;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
 
-      // If response_format caused 400 on unsupported open-source model, auto-retry without response_format
-      if (!response.ok && response.status === 400 && isJsonExpected) {
-        const errorProbe = await response.clone().text().catch(() => '');
-        if (errorProbe.toLowerCase().includes('response_format') || errorProbe.toLowerCase().includes('json_object') || errorProbe.toLowerCase().includes('schema')) {
-          console.warn('[9router]: response_format not supported by model. Retrying without response_format flag...');
-          const fallbackBody = { ...body };
-          delete fallbackBody.response_format;
-          response = await fetch(endpoint, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(fallbackBody),
-            signal: controller.signal,
-          });
-        }
-      }
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        throw new Error(`HTTP ${response.status} from 9router: ${errorText}`);
-      }
-
-      const rawResponseText = await response.text();
-
-      // 1. Try parsing as direct OpenAI JSON response
       try {
-        const data = JSON.parse(rawResponseText);
-        let content = data?.choices?.[0]?.message?.content || data?.choices?.[0]?.text || '';
-        const reasoningContent = data?.choices?.[0]?.message?.reasoning_content 
-                              || data?.choices?.[0]?.message?.reasoning
-                              || data?.choices?.[0]?.message?.thought
-                              || data?.choices?.[0]?.message?.thoughts;
+        let response = await fetch(endpoint, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
 
-        if (typeof content === 'string') {
-          content = this.stripThinkingTags(content);
-        }
-
-        // If content is empty but reasoning_content exists (e.g. DeepSeek reasoning token exhaustion), recover output from reasoning
-        if ((!content || !content.trim()) && reasoningContent && typeof reasoningContent === 'string') {
-          console.warn('[9router]: Content was empty, recovering output from reasoning_content...');
-          content = this.extractOutputFromReasoning(reasoningContent, isJsonExpected);
-        }
-
-        if (typeof content === 'string' && content.trim()) {
-          return content.trim();
-        }
-      } catch {
-        // Not a direct JSON response, proceed to SSE stream parser
-      }
-
-      // 2. Handle Server-Sent Events (SSE) format: "data: { ... }\n\ndata: [DONE]"
-      if (rawResponseText.includes('data:')) {
-        const lines = rawResponseText.split('\n');
-        let accumulatedContent = '';
-        let accumulatedReasoning = '';
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed || trimmed === 'data: [DONE]' || trimmed === '[DONE]') continue;
-          if (trimmed.startsWith('data:')) {
-            const jsonStr = trimmed.replace(/^data:\s*/, '');
-            try {
-              const chunk = JSON.parse(jsonStr);
-              const delta = chunk?.choices?.[0]?.delta?.content 
-                         || chunk?.choices?.[0]?.message?.content 
-                         || chunk?.choices?.[0]?.text;
-              const reasoningDelta = chunk?.choices?.[0]?.delta?.reasoning_content
-                                  || chunk?.choices?.[0]?.message?.reasoning_content;
-              if (delta) {
-                accumulatedContent += delta;
-              }
-              if (reasoningDelta) {
-                accumulatedReasoning += reasoningDelta;
-              }
-            } catch {
-              // Ignore single malformed chunk
-            }
+        // If response_format caused 400 on unsupported open-source model, auto-retry without response_format
+        if (!response.ok && response.status === 400 && isJsonExpected) {
+          const errorProbe = await response.clone().text().catch(() => '');
+          if (errorProbe.toLowerCase().includes('response_format') || errorProbe.toLowerCase().includes('json_object') || errorProbe.toLowerCase().includes('schema')) {
+            console.warn('[9router]: response_format not supported by model. Retrying without response_format flag...');
+            const fallbackBody = { ...body };
+            delete fallbackBody.response_format;
+            response = await fetch(endpoint, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(fallbackBody),
+              signal: controller.signal,
+            });
           }
         }
 
-        accumulatedContent = this.stripThinkingTags(accumulatedContent);
+        clearTimeout(timeoutId);
 
-        if (!accumulatedContent.trim() && accumulatedReasoning.trim()) {
-          console.warn('[9router]: Stream content was empty, recovering output from accumulated reasoning_content...');
-          accumulatedContent = this.extractOutputFromReasoning(accumulatedReasoning, isJsonExpected);
+        if (!response.ok) {
+          const isRetryableStatus = response.status === 429 || response.status === 502 || response.status === 503 || response.status === 504;
+          if (isRetryableStatus && attempt <= maxRetries) {
+            const backoffMs = Math.pow(2, attempt - 1) * 1000 + Math.floor(Math.random() * 500); // ~1s, ~2s, ~4s with jitter
+            console.warn(`[9router Transient/Rate-Limit Error HTTP ${response.status}]: Retrying attempt ${attempt}/${maxRetries} after ${backoffMs}ms...`);
+            await new Promise(resolve => setTimeout(resolve, backoffMs));
+            continue;
+          }
+          const errorText = await response.text().catch(() => 'Unknown error');
+          throw new Error(`HTTP ${response.status} from 9router: ${errorText}`);
         }
 
-        if (accumulatedContent.trim()) {
-          return accumulatedContent.trim();
+        const rawResponseText = await response.text();
+
+        // 1. Try parsing as direct OpenAI JSON response
+        try {
+          const data = JSON.parse(rawResponseText);
+          let content = data?.choices?.[0]?.message?.content || data?.choices?.[0]?.text || '';
+          const reasoningContent = data?.choices?.[0]?.message?.reasoning_content 
+                                || data?.choices?.[0]?.message?.reasoning
+                                || data?.choices?.[0]?.message?.thought
+                                || data?.choices?.[0]?.message?.thoughts;
+
+          if (typeof content === 'string') {
+            content = this.stripThinkingTags(content);
+          }
+
+          // If content is empty but reasoning_content exists (e.g. DeepSeek reasoning token exhaustion), recover output from reasoning
+          if ((!content || !content.trim()) && reasoningContent && typeof reasoningContent === 'string') {
+            console.warn('[9router]: Content was empty, recovering output from reasoning_content...');
+            content = this.extractOutputFromReasoning(reasoningContent, isJsonExpected);
+          }
+
+          if (typeof content === 'string' && content.trim()) {
+            return content.trim();
+          }
+        } catch {
+          // Not a direct JSON response, proceed to SSE stream parser
         }
-      }
 
-      // 3. Fallback: Check if the raw text is plain text
-      if (rawResponseText.trim() && !rawResponseText.startsWith('<')) {
-        return this.stripThinkingTags(rawResponseText.trim());
-      }
+        // 2. Handle Server-Sent Events (SSE) format: "data: { ... }\n\ndata: [DONE]"
+        if (rawResponseText.includes('data:')) {
+          const lines = rawResponseText.split('\n');
+          let accumulatedContent = '';
+          let accumulatedReasoning = '';
 
-      throw new Error(`Malformed response from 9router API: "${rawResponseText.slice(0, 150)}"`);
-    } catch (error: any) {
-      clearTimeout(timeoutId);
-      if (error.name === 'AbortError') {
-        throw new Error(`9router request timed out after 45 seconds at ${endpoint}`);
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed === 'data: [DONE]' || trimmed === '[DONE]') continue;
+            if (trimmed.startsWith('data:')) {
+              const jsonStr = trimmed.replace(/^data:\s*/, '');
+              try {
+                const chunk = JSON.parse(jsonStr);
+                const delta = chunk?.choices?.[0]?.delta?.content 
+                           || chunk?.choices?.[0]?.message?.content 
+                           || chunk?.choices?.[0]?.text;
+                const reasoningDelta = chunk?.choices?.[0]?.delta?.reasoning_content
+                                    || chunk?.choices?.[0]?.message?.reasoning_content;
+                if (delta) {
+                  accumulatedContent += delta;
+                }
+                if (reasoningDelta) {
+                  accumulatedReasoning += reasoningDelta;
+                }
+              } catch {
+                // Ignore single malformed chunk
+              }
+            }
+          }
+
+          accumulatedContent = this.stripThinkingTags(accumulatedContent);
+
+          if (!accumulatedContent.trim() && accumulatedReasoning.trim()) {
+            console.warn('[9router]: Stream content was empty, recovering output from accumulated reasoning_content...');
+            accumulatedContent = this.extractOutputFromReasoning(accumulatedReasoning, isJsonExpected);
+          }
+
+          if (accumulatedContent.trim()) {
+            return accumulatedContent.trim();
+          }
+        }
+
+        // 3. Fallback: Check if the raw text is plain text
+        if (rawResponseText.trim() && !rawResponseText.startsWith('<')) {
+          return this.stripThinkingTags(rawResponseText.trim());
+        }
+
+        throw new Error(`Malformed response from 9router API: "${rawResponseText.slice(0, 150)}"`);
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        const isTimeout = error.name === 'AbortError' || error.message?.includes('timed out');
+        const isNetworkErr = error.message?.includes('fetch failed') || error.message?.includes('network');
+
+        if ((isTimeout || isNetworkErr) && attempt <= maxRetries) {
+          const backoffMs = Math.pow(2, attempt - 1) * 1000 + Math.floor(Math.random() * 500);
+          console.warn(`[9router Network/Timeout Error (${error.message})]: Retrying attempt ${attempt}/${maxRetries} after ${backoffMs}ms...`);
+          await new Promise(resolve => setTimeout(resolve, backoffMs));
+          continue;
+        }
+
+        if (error.name === 'AbortError') {
+          throw new Error(`9router request timed out after 45 seconds at ${endpoint}`);
+        }
+        throw error;
       }
-      throw error;
     }
+
+    throw new Error(`9router request failed after ${maxRetries} retry attempts.`);
   }
 
   /**
@@ -684,6 +628,288 @@ export class NineRouterService {
   }
 
   /**
+   * Parse & validate backroom pact JSON, resolving target, elimination target,
+   * financial escrow parameters, and receiver spoken response (<= 10 words, zero cliches).
+   */
+  public parseAndValidatePact(
+    rawText: string,
+    proposer: Candidate,
+    fallbackReceiver: Candidate | null,
+    activeCandidateIds: string[],
+    proposerBudget: number = 100
+  ): {
+    whisper: string;
+    targetCandidateId: string;
+    agreedTargetId: string;
+    actionType: 'bribe' | 'offer' | 'pass';
+    bribeAmount: number;
+    upfrontPaid: number;
+    escrowPending: number;
+    offerPrice: number;
+    receiverDecision: 'accept' | 'decline' | 'accept_and_betray';
+    receiverResponse: string;
+    privateStrategy: string;
+  } {
+    const parsed = this.extractAndRepairJson(rawText);
+    const validCandidates = activeCandidateIds.filter(id => id !== proposer.id);
+    const validTargets = activeCandidateIds.filter(id => id !== proposer.id && (!fallbackReceiver || id !== fallbackReceiver.id));
+    
+    let rawWhisper = '';
+    if (parsed?.whisper && typeof parsed.whisper === 'string') {
+      rawWhisper = parsed.whisper.replace(/^["']|["']$/g, '').trim();
+    } else {
+      // Heuristic extraction of "whisper" string from rawText if JSON parsing failed
+      const whisperMatch = rawText.match(/"whisper"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i) ||
+                           rawText.match(/"whisper"\s*:\s*"([^"\r\n]+)/i);
+      if (whisperMatch && whisperMatch[1]) {
+        rawWhisper = whisperMatch[1].trim();
+      } else {
+        rawWhisper = rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim();
+      }
+    }
+
+    // Detect if whisper starts with or explicitly addresses a candidate by name (e.g. "Chloe, take..." or "Dmitri: let's...")
+    let detectedAddresseeId: string | null = null;
+    const vocativeMatch = rawWhisper.match(/^["']?([A-Za-z]+(?:\s+[A-Za-z]+)?)[,:\-—]/);
+    if (vocativeMatch && vocativeMatch[1]) {
+      const matchName = vocativeMatch[1].trim();
+      const matchedId = this.resolveCandidateIdFromNameOrAlias(matchName, validCandidates);
+      if (matchedId && validCandidates.includes(matchedId)) {
+        detectedAddresseeId = matchedId;
+      }
+    }
+
+    // Resolve target candidate (person negotiated with)
+    const rawTargetCandidate = parsed?.targetCandidateId || parsed?.targetId || fallbackReceiver?.id;
+    let healedTargetCandId = rawTargetCandidate ? this.resolveCandidateIdFromNameOrAlias(rawTargetCandidate, validCandidates) : null;
+    if (detectedAddresseeId && validCandidates.includes(detectedAddresseeId)) {
+      healedTargetCandId = detectedAddresseeId;
+    }
+    const targetCandidateId = healedTargetCandId || fallbackReceiver?.id || validCandidates[0] || validTargets[0];
+
+    // Resolve elimination target candidate (must not be proposer and must not be targetCandidateId)
+    const validElimTargets = validCandidates.filter(id => id !== targetCandidateId);
+    const rawElimTarget = parsed?.agreedEliminationTargetId || parsed?.agreedTargetId;
+    let healedElimTarget = rawElimTarget ? this.resolveCandidateIdFromNameOrAlias(rawElimTarget, validCandidates) : null;
+    if (healedElimTarget === targetCandidateId || healedElimTarget === proposer.id) {
+      healedElimTarget = null;
+    }
+    const agreedTargetId = healedElimTarget || validElimTargets[0] || validTargets[0] || validCandidates[0];
+
+    // Private strategy extraction
+    const privateStrategy = parsed?.privateStrategy 
+      ? parsed.privateStrategy.replace(/^["']|["']$/g, '').trim()
+      : `Align tactically to eliminate ${CANDIDATE_MAP.get(agreedTargetId)?.name || agreedTargetId} while preserving treasury.`;
+
+    // Action Type Resolution ('bribe' | 'offer' | 'pass')
+    let actionType: 'bribe' | 'offer' | 'pass' = 'pass';
+    if (parsed?.actionType === 'bribe' || parsed?.actionType === 'offer' || parsed?.actionType === 'pass') {
+      actionType = parsed.actionType;
+    } else if (parsed?.offerBribe === true || parsed?.bribeOffered === true) {
+      actionType = 'bribe';
+    } else if (parsed?.offerPrice || parsed?.offeredPrice) {
+      actionType = 'offer';
+    } else {
+      actionType = proposerBudget >= 30 ? 'bribe' : 'pass';
+    }
+
+    let bribeAmount = 0;
+    let upfrontPaid = 0;
+    let escrowPending = 0;
+    let offerPrice = typeof parsed?.offerPrice === 'number' ? Math.max(20, Math.min(40, parsed.offerPrice)) : 30;
+
+    // Enforce strict $30 treasury limit for bribes
+    if (actionType === 'bribe') {
+      if (proposerBudget < 30) {
+        actionType = 'offer';
+      }
+    }
+
+    if (actionType === 'bribe') {
+      bribeAmount = 30;
+      upfrontPaid = 15;
+      escrowPending = 15;
+    } else if (actionType === 'offer') {
+      bribeAmount = offerPrice;
+      upfrontPaid = Math.floor(offerPrice / 2);
+      escrowPending = offerPrice - upfrontPaid;
+    }
+
+    // Receiver Decision Resolution
+    let receiverDecision: 'accept' | 'decline' | 'accept_and_betray' = 'accept';
+    if (['accept', 'decline', 'accept_and_betray'].includes(parsed?.receiverDecision)) {
+      receiverDecision = parsed.receiverDecision;
+    } else {
+      const receiver = CANDIDATE_MAP.get(targetCandidateId);
+      const rxArch = receiver?.archetype;
+      if (rxArch === 'reformer' || rxArch === 'traditionalist') {
+        const r = Math.random();
+        receiverDecision = r < 0.4 ? 'decline' : (r < 0.75 ? 'accept' : 'accept_and_betray');
+      } else if (rxArch === 'capitalist' || rxArch === 'careerist' || rxArch === 'wildcard') {
+        const r = Math.random();
+        receiverDecision = r < 0.45 ? 'accept_and_betray' : (r < 0.9 ? 'accept' : 'decline');
+      } else {
+        const r = Math.random();
+        receiverDecision = r < 0.6 ? 'accept' : (r < 0.85 ? 'accept_and_betray' : 'decline');
+      }
+    }
+
+    const recipient = CANDIDATE_MAP.get(targetCandidateId);
+    const recipientFirstName = recipient?.name.split(' ')[0] || '';
+    const targetCand = CANDIDATE_MAP.get(agreedTargetId);
+    const targetFirstName = targetCand?.name.split(' ')[0] || '';
+
+    if (!rawWhisper) {
+      const varietyTemplates = [
+        `${recipientFirstName}, thirty in private collateral is staged for your race. Make sure ${targetFirstName || 'our rival'} doesn't survive tonight.`,
+        `The collateral is wired to your blind account, ${recipientFirstName}. Eliminate ${targetFirstName || 'our rival'} on the ballot.`,
+        `${targetFirstName || 'Our rival'} is a mutual liability for both of us, ${recipientFirstName}. Take the funds and bury him on the count.`,
+        `Thirty million clears into your account the second ${targetFirstName || 'our rival'}'s ballot is unsealed, ${recipientFirstName}. Do not miss.`
+      ];
+      rawWhisper = actionType === 'bribe'
+        ? varietyTemplates[Math.floor(Math.random() * varietyTemplates.length)]
+        : actionType === 'offer'
+        ? `Back my war-chest with $${offerPrice}M, ${recipientFirstName}, and I will personally execute ${targetFirstName || 'our rival'}'s elimination on the ballot.`
+        : `Let the room bleed out. ${targetFirstName || 'Our rival'} won't see the real strike coming.`;
+    }
+
+    let whisper = rawWhisper.replace(/^[^:]+:\s*/, '').replace(/^["']|["']$/g, '').trim();
+
+    // Sanitize camera / surveillance filler (operatives get straight to the point)
+    whisper = whisper
+      .replace(/^(?:(?:listen|quiet|look|careful|quick|hurry)[,.\s-]*)?(?:(?:thirty|twenty|ten|[0-9]+)\s*seconds\s*before\s*the\s*cameras?\s*(?:cycle|sweep|turn|reset)[,.\s-]*)/gi, '')
+      .replace(/^(?:(?:listen|quiet|look|careful|quick|hurry)[,.\s-]*)?(?:(?:the\s*)?cameras?\s*(?:are\s*)?(?:watching|cycling|sweeping|overhead|on\s*us|pointing)[,.\s-]*)/gi, '')
+      .replace(/\b(?:before\s*the\s*cameras?\s*(?:cycle|sweep|turn|reset)|the\s*cameras?\s*are\s*watching\s*(?:us)?|watch\s*(?:out\s*for\s*)?the\s*cameras?|keep\s*your\s*head\s*down\s*from\s*the\s*lens)\b[,.\s-]*/gi, '')
+      .trim();
+
+    // Ensure whisper dialogue matches targetCandidateId
+    if (vocativeMatch && vocativeMatch[1] && recipientFirstName) {
+      const addressedName = vocativeMatch[1].trim();
+      const addressedCand = this.resolveCandidateIdFromNameOrAlias(addressedName, validCandidates);
+      if (addressedCand && addressedCand !== targetCandidateId) {
+        whisper = whisper.replace(new RegExp(`^["']?${addressedName}[,:\-—]\\s*`, 'i'), `${recipientFirstName}, `);
+      }
+    } else if (recipientFirstName && !whisper.toLowerCase().includes(recipientFirstName.toLowerCase())) {
+      whisper = `${recipientFirstName}, ${whisper.charAt(0).toLowerCase() + whisper.slice(1)}`;
+    }
+
+    // Sanitize robotic bribery bot phrases in whisper
+    whisper = whisper
+      .replace(/\b(?:take this|giving you this|offering this)?\s*\$([0-9]+)\s*(?:million)?\s*bribe\b/gi, 'there is private collateral')
+      .replace(/\b(?:a|the)\s*\$([0-9]+)\s*(?:million)?\s*bribe\b/gi, 'private campaign leverage')
+      .replace(/\b(?:bribe|bribes|bribing)\b/gi, 'quiet arrangement');
+
+    // Strip any leaked JSON keys or syntax fragments (e.g. '", "actionType": "bribe", "targetCandidate"')
+    whisper = whisper
+      .replace(/["']?\s*,\s*["'][a-zA-Z0-9_]+["']?\s*:?[\s\S]*$/, '')
+      .replace(/["']\s*,\s*["'][\s\S]*$/, '')
+      .replace(/\{[\s\S]*$/g, '')
+      .replace(/\}[\s\S]*$/g, '')
+      .replace(/^["']+|["']+$/g, '')
+      .trim();
+
+    // Strict 15-word maximum limit for proposer whisper (CIA operative tradecraft)
+    const whisperWords = whisper.split(/\s+/).filter(Boolean);
+    if (whisperWords.length > 15) {
+      whisper = whisperWords.slice(0, 15).join(' ');
+      whisper = whisper.replace(/[,;\-—]+$/, '').trim();
+      if (!/[.!?]$/.test(whisper)) {
+        whisper += '.';
+      }
+    }
+
+    // Extract and sanitize receiver's response back to proposer (strictly <= 10 words, authentic persona)
+    let receiverResponse: string = '';
+    if (parsed?.receiverResponse && typeof parsed.receiverResponse === 'string') {
+      let cleanedResp = parsed.receiverResponse
+        .replace(/^[^:]+:\s*/, '') // Strip script prefixes like "Silas:"
+        .replace(/^["']|["']$/g, '')
+        .trim();
+      // Strip any leaked JSON keys or trailing delimiters
+      cleanedResp = cleanedResp
+        .replace(/["']?\s*,\s*["'][a-zA-Z0-9_]+["']?\s*:?[\s\S]*$/, '')
+        .replace(/["']\s*,\s*["'][\s\S]*$/, '')
+        .replace(/\{[\s\S]*$/g, '')
+        .replace(/\}[\s\S]*$/g, '')
+        .replace(/^["']+|["']+$/g, '')
+        .trim();
+      const words = cleanedResp.split(/\s+/).filter(Boolean);
+      if (words.length > 10) {
+        cleanedResp = words.slice(0, 10).join(' ');
+      }
+      cleanedResp = cleanedResp
+        .replace(/\b(?:a|the)?\s*\$([0-9]+)\s*(?:million)?\s*bribe\b/gi, 'your offer')
+        .replace(/\b(?:bribe|bribes|bribing)\b/gi, 'terms');
+      receiverResponse = cleanedResp;
+    }
+
+    // Personality-grounded fallback matrix (strictly <= 10 words, zero cliches, secretive & dramatic)
+    if (!receiverResponse) {
+      const rxCand = CANDIDATE_MAP.get(targetCandidateId);
+      const arch = rxCand?.archetype || 'wildcard';
+      const targetName = CANDIDATE_MAP.get(agreedTargetId)?.name.split(' ')[0] || 'him';
+
+      if (receiverDecision === 'accept') {
+        if (arch === 'capitalist') {
+          receiverResponse = `It's done. Make sure your own vote doesn't waver.`; // 9 words
+        } else if (arch === 'technocrat') {
+          receiverResponse = `The metrics align. ${targetName} will not survive tonight.`; // 8 words
+        } else if (arch === 'hawk') {
+          receiverResponse = `Understood. The target won't make it past this round.`; // 9 words
+        } else if (arch === 'reformer') {
+          receiverResponse = `A necessary move. Justice catches up to ${targetName} tonight.`; // 9 words
+        } else if (arch === 'populist') {
+          receiverResponse = `Agreed. We settle the score with ${targetName} tonight.`; // 8 words
+        } else if (arch === 'traditionalist') {
+          receiverResponse = `The line is drawn. ${targetName}'s time has run out.`; // 8 words
+        } else {
+          receiverResponse = `Agreed. Keep your head down until the ballots unseal.`; // 9 words
+        }
+      } else if (receiverDecision === 'accept_and_betray') {
+        // Dramatic double-meaning with mystery for YouTube betrayal flashbacks
+        if (arch === 'capitalist') {
+          receiverResponse = `Consider it settled. Let's see who's still standing tonight.`; // 9 words
+        } else if (arch === 'technocrat') {
+          receiverResponse = `Your terms are logged. Watch the reveal very closely.`; // 9 words
+        } else if (arch === 'careerist' || arch === 'wildcard') {
+          receiverResponse = `We understand each other. You'll get what you deserve.`; // 9 words
+        } else {
+          receiverResponse = `Don't worry about my vote. Expect the unexpected tonight.`; // 9 words
+        }
+      } else {
+        // decline
+        if (arch === 'reformer' || arch === 'traditionalist') {
+          receiverResponse = `Put your money away. I don't play backroom games.`; // 9 words
+        } else if (arch === 'hawk') {
+          receiverResponse = `Step back. Don't ever offer me a hallway payoff.`; // 9 words
+        } else if (arch === 'populist') {
+          receiverResponse = `I don't sell out my people for corridor cash.`; // 9 words
+        } else if (arch === 'technocrat') {
+          receiverResponse = `Your equation is flawed. I make my own calculations.`; // 9 words
+        } else if (arch === 'capitalist') {
+          receiverResponse = `Your leverage is worthless to me. Walk away.`; // 8 words
+        } else {
+          receiverResponse = `No deal. I cast my vote on my terms.`; // 9 words
+        }
+      }
+    }
+
+    return {
+      whisper,
+      targetCandidateId,
+      agreedTargetId,
+      actionType,
+      bribeAmount,
+      upfrontPaid,
+      escrowPending,
+      offerPrice,
+      receiverDecision,
+      receiverResponse,
+      privateStrategy,
+    };
+  }
+
+  /**
    * Parse & validate voting JSON with automatic corrective retry against 9router
    */
   private async parseAndValidateVote(
@@ -695,10 +921,19 @@ export class NineRouterService {
     baseUrl: string,
     apiKey: string,
     model: string
-  ): Promise<{ vote: string; reason?: string }> {
+  ): Promise<{ vote: string; strategyMonologue: string; reason: string }> {
     const validTargets = payload.action === 'final_vote'
       ? (payload.finalistIds || []).filter(id => id !== candidate.id)
       : payload.activeCandidateIds.filter(id => id !== candidate.id);
+
+    const extractMonologue = (obj: any, targetId: string): string => {
+      const rawMono = obj?.strategyMonologue || obj?.internalDialogue || obj?.monologue || obj?.strategy;
+      if (rawMono && typeof rawMono === 'string' && rawMono.trim().length > 5) {
+        return rawMono.replace(/^["']|["']$/g, '').trim();
+      }
+      const targetName = CANDIDATE_MAP.get(targetId)?.name || targetId;
+      return `${targetName} assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.`;
+    };
 
     // Try parsing initial response with multi-stage repair
     let parsed = this.extractAndRepairJson(rawText);
@@ -709,6 +944,7 @@ export class NineRouterService {
     if (resolvedVote) {
       return {
         vote: resolvedVote,
+        strategyMonologue: extractMonologue(parsed, resolvedVote),
         reason: parsed.reason ? String(parsed.reason).replace(/^["']|["']$/g, '').trim() : 'Strategic determination',
       };
     }
@@ -716,7 +952,7 @@ export class NineRouterService {
     // Auto-retry with corrective prompt
     console.warn(`[9router Vote Validation]: Invalid vote output from ${candidate.name} ("${rawText}"). Retrying with corrective prompt...`);
 
-    const correctivePrompt = `${userPrompt}\n\nATTENTION: Your previous response was invalid. You MUST return ONLY valid JSON formatted as: {"vote": "candidate_id", "reason": "brief reasoning"}. You MUST choose from ONLY these exact candidate IDs: ${JSON.stringify(validTargets)}. Do NOT vote for yourself (${candidate.id}).`;
+    const correctivePrompt = `${userPrompt}\n\nATTENTION: Your previous response was invalid. You MUST return ONLY valid JSON formatted as: {"vote": "candidate_id", "strategyMonologue": "high-IQ Light & L style deduction anticipating rival moves (max 30 words, NO mottos)", "reason": "brief reasoning"}. You MUST choose from ONLY these exact candidate IDs: ${JSON.stringify(validTargets)}. Do NOT vote for yourself (${candidate.id}).`;
 
     try {
       const retryText = await this.callChatCompletions(
@@ -734,6 +970,7 @@ export class NineRouterService {
       if (retryVote) {
         return {
           vote: retryVote,
+          strategyMonologue: extractMonologue(retryParsed, retryVote),
           reason: retryParsed.reason ? String(retryParsed.reason).replace(/^["']|["']$/g, '').trim() : 'Strategic recalculation',
         };
       }
@@ -745,6 +982,7 @@ export class NineRouterService {
     const fallbackTarget = validTargets[0] || payload.activeCandidateIds[0];
     return {
       vote: fallbackTarget,
+      strategyMonologue: extractMonologue(parsed, fallbackTarget),
       reason: 'Strategic elimination vote',
     };
   }
@@ -934,7 +1172,7 @@ export class NineRouterService {
   /**
    * Construct tailored system & user prompts maintaining character & deep debate memory
    */
-  private buildPrompt(
+  public buildPrompt(
     candidate: Candidate, 
     payload: LLMRequestPayload
   ): { systemPrompt: string; userPrompt: string; isJsonExpected: boolean } {
@@ -943,35 +1181,46 @@ export class NineRouterService {
     let isJsonExpected = false;
 
     const ctx = payload.historyContext || {};
-    const electionTopic = ctx.electionTopic || 'The Industrial Stagnation & Cost of Living Crisis in the Republic of Valoria';
+    const electionTopic = ctx.electionTopic || 'The Housing Nightmare: $4,000 Rent & Mega-Corporations Buying Every Home';
 
     switch (payload.action) {
       case 'campaign_speech': {
-        const sloganSnippet = candidate.slogan ? `Campaign Slogan: "${candidate.slogan}"\n` : '';
-        const ideologySnippet = candidate.ideology ? `Core Ideology: ${candidate.ideology}\n` : '';
-        const rivalSnippet = candidate.rivalArchetypes && candidate.rivalArchetypes.length > 0 
-          ? `Ideological Opposites/Rivals: ${candidate.rivalArchetypes.join(', ')}\n` 
-          : '';
+        const titleSnippet = candidate.titleRole ? `Title / Role: ${candidate.titleRole} (${candidate.archetypeTitle})\n` : '';
+        const sloganSnippet = candidate.slogan ? `Signature Slogan: "${candidate.slogan}"\n` : '';
+        const ideologySnippet = candidate.ideology ? `Core Identity & Ethos: ${candidate.ideology}\n` : '';
+        const styleSnippet = candidate.speakingStyle ? `Vocal Delivery & Style: ${candidate.speakingStyle}\n` : '';
+        const personalitySnippet = candidate.personality ? `Personality Traits: ${candidate.personality}\n` : '';
+        const motivationsSnippet = candidate.motivations ? `Core Motivation: ${candidate.motivations}\n` : '';
 
-        userPrompt = `ROUND 1: PRESIDENTIAL CAMPAIGN ADDRESS & STUMP SPEECH.
-NATIONAL CRISIS FOCUS: "${electionTopic}"
-${sloganSnippet}${ideologySnippet}${rivalSnippet}
-You are taking the stage on live national television to deliver your official presidential campaign address to the voters of Valoria.
+        userPrompt = `ROUND 1: PRESIDENTIAL CAMPAIGN OPENING — CANDIDATE SELF-INTRODUCTION.
+You are walking out onto the national debate stage on live television to deliver your official candidate self-introduction to the voters of the Republic of Valoria.
 
-PRIMARY GOAL: PROMOTE YOURSELF, YOUR PLATFORM, AND YOUR VISION.
-In MAXIMUM 40 WORDS:
-- Boldly pitch why YOU must be elected President of the Republic of Valoria.
-- Present your signature solution to "${electionTopic}".
-- Inspire the electorate with your core philosophy, energy, and leadership strengths.
-- DO NOT default to attacking or rebutting the candidate who spoke before you. This round is for promoting YOUR platform and inspiring voters to support you.
-- (Optional): If you take a brief swipe, only aim it at your ideological opposites (${candidate.rivalArchetypes?.join(', ') || 'corrupt elites'}), but ensure the majority of your speech champions YOUR vision.
-- Do NOT use generic opening greetings ("Hello fellow citizens", "I stand before you"). Jump straight into your message with fierce conviction.
-- CRITICAL FORMAT & DIRECT OUTPUT RULES:
-  * Output ONLY your final spoken speech directly.
-  * Do NOT output internal reasoning, thinking steps, drafting notes, or preamble.
-  * NEVER prefix your output with your name, a character tag, or a colon (e.g. NEVER write "${candidate.name.split(' ')[0]}:").
+CANDIDATE DOSSIER:
+- Name: ${candidate.name}
+${titleSnippet}${sloganSnippet}${ideologySnippet}${personalitySnippet}${styleSnippet}${motivationsSnippet}National Election Crisis Backdrop: "${electionTopic}" (FOR BACKGROUND CONTEXT ONLY — DO NOT debate policy details; FOCUS ONLY ON INTRODUCING YOURSELF)
+
+PRIMARY MISSION: ONLY INTRODUCE YOURSELF (PROMOTE YOURSELF AND YOUR CANDIDACY).
+In MAXIMUM 25 WORDS:
+- ONLY INTRODUCE YOURSELF: Make a memorable, high-impact opening impression that introduces who you are and why you are entering the arena.
+- ⚠️ STRICT ANTI-SCRIPT-FORMULA MANDATE: Absolutely DO NOT follow a cookie-cutter introduction template (e.g. NEVER default to "I am [Name]—[Role] and [Slogan]" or "My name is..."). That makes candidates sound like cloned script-readers. Instead, speak directly from your unique character DNA:
+  * If arrogant or wealthy: flaunt your success, look down on career politicians, or command respect.
+  * If a gritty blue-collar populist: speak with raw working-class defiance, kitchen-table grit, or factory-floor fury.
+  * If a cerebral technocrat: lead with cold analytical realism, fiscal reality, or intellectual discipline.
+  * If a military commander: deliver martial authority, vigilance, and iron resolve.
+  * If an impassioned reformer: bring courtroom urgency, moral indignation, and fearless integrity.
+  * If a seasoned careerist: project institutional mastery, quiet confidence, and steady power.
+  * If a radical disruptor: bring disruptive energy and challenge obsolete relics.
+- ZERO POLICY DEBATE: Do NOT debate solutions, numbers, or policy proposals for the national crisis topic.
+- ZERO ATTACKS: Do NOT attack, mention, or rebut rivals or opponents (DO NOT default to attacking or rebutting the candidate who spoke before you). Focus 100% on introducing YOU.
+- NO FILLER GREETINGS: Absolutely NO generic pleasantries ("Hello citizens", "Good evening", "I am honored to stand here"). Jump immediately into your electrifying character voice.
+- PUNCHY BROADCAST CADENCE: Keep it strictly under 25 words. Every single word must drip with your unique personality.
+
+CRITICAL DIRECT OUTPUT RULES:
+- Output ONLY your final spoken words directly.
+- Do NOT output internal reasoning, thinking steps, drafting notes, or preamble.
+- NEVER prefix your output with your name, character tag, or colon (e.g. NEVER write "${candidate.name.split(' ')[0]}:").
 - Stay strictly in character as ${candidate.name} (${candidate.archetypeTitle} - ${candidate.titleRole}).
-- Return clean speech text only, strictly under 40 words.`;
+- Return clean speech text only, strictly under 25 words.`;
         break;
       }
 
@@ -987,6 +1236,25 @@ In MAXIMUM 40 WORDS:
         const targetWeaknesses = ctx.targetWeaknesses || targetCandidate?.weaknesses || [];
         const targetHeat = ctx.targetHeatScore ?? 0;
 
+        const activeIds = payload.activeCandidateIds || [];
+        const survivingCandidates = activeIds
+          .map(id => CANDIDATE_MAP.get(id)?.name || id)
+          .join(', ');
+
+        const eliminatedIds: string[] = payload.eliminatedCandidateIds || ctx.eliminatedCandidateIds || [];
+        const eliminatedNames = eliminatedIds
+          .map(id => CANDIDATE_MAP.get(id)?.name || id)
+          .filter(Boolean) as string[];
+
+        let eliminationRosterSnippet = '';
+        if (eliminatedNames.length > 0) {
+          eliminationRosterSnippet = `
+⚠️ ELIMINATED FORMER CONTENDERS (DO NOT ATTACK OR ADDRESS):
+${eliminatedNames.map(n => `- ${n} [ELIMINATED]`).join('\n')}
+STRICT ELIMINATION MANDATE: The above candidate(s) have ALREADY been voted out and eliminated. They are GONE from this election. Absolutely NEVER attack them, address them, or utter their names! Your ONLY target to attack is: "${targetName}".
+`;
+        }
+
         let betrayalSnippet = '';
         if (ctx.bribeBetrayals && ctx.bribeBetrayals.length > 0) {
           const betrayalOnTarget = ctx.bribeBetrayals.find(b => b.betrayerId === payload.targetId);
@@ -997,13 +1265,17 @@ In MAXIMUM 40 WORDS:
 
         let rebuttalSnippet = '';
         if (ctx.activeAccusationOnSpeaker) {
-          const accuserName = ctx.activeAccusationOnSpeaker.attackerName;
-          const accuserFirstName = accuserName.split(' ')[0];
-          rebuttalSnippet = `
+          const accuserCandidateId = ctx.activeAccusationOnSpeaker.attackerId;
+          const isAccuserStillActive = !accuserCandidateId || activeIds.includes(accuserCandidateId);
+          if (isAccuserStillActive) {
+            const accuserName = ctx.activeAccusationOnSpeaker.attackerName;
+            const accuserFirstName = accuserName.split(' ')[0];
+            rebuttalSnippet = `
 ⚠️ ACTIVE ACCUSATION AGAINST YOU:
 ${accuserName} attacked you earlier on stage, saying: "${ctx.activeAccusationOnSpeaker.text}"
 REBUTTAL RULE: You MUST open your speech with a brief, sharp defense deflecting ${accuserFirstName}'s accusation before turning the room's fire onto ${targetName}!
 `;
+          }
         }
 
         let contextSnippet = '';
@@ -1017,7 +1289,8 @@ REBUTTAL RULE: You MUST open your speech with a brief, sharp defense deflecting 
         userPrompt = `Round ${payload.round}: LIVE EMERGENCY MEETING // DEBATE ATTACK ROUND.
 NATIONAL CRISIS TOPIC: "${electionTopic}"
 
-TARGET TO ATTACK: "${targetName}" (${targetRole})
+SURVIVING CONTENDERS IN THE ROOM: ${survivingCandidates}
+${eliminationRosterSnippet}TARGET TO ATTACK: "${targetName}" (${targetRole})
 Target Slogan: "${targetSlogan}"
 ${targetIdeology ? `Target Ideology: ${targetIdeology}\n` : ''}${targetHeat > 0 ? `Target Debate Heat: ${targetHeat} prior accusation(s) this round.\n` : ''}${rebuttalSnippet}${betrayalSnippet}${targetQuote ? `TARGET'S SPOKEN QUOTE: "${targetQuote}"\n` : ''}${targetWeaknesses.length > 0 ? `TARGET VULNERABILITIES: ${targetWeaknesses.join('; ')}\n` : ''}${contextSnippet}
 
@@ -1025,12 +1298,19 @@ MANDATORY TARGET NAMING & CONVERSATIONAL RULES:
 - You are attacking ONLY "${targetName}".
 - You MUST refer to your target as "${targetName}", "${targetFirstName}", or "${targetLastName}".
 - NEVER call your target by an incorrect name, nickname, raw ID, or alias.
+- NEVER attack, address, or mention any candidate who has already been eliminated from the race.
 - DO NOT obsess over dollar amounts, treasury balances, or bank accounts unless directly attacking corporate greed. Focus primarily on their political hypocrisy, dangerous policies, broken track record, incompetence, or corrupt character!
 
-STRATEGIC 3-PART "EMERGENCY MEETING" SPEECH FORMULA:
-1. [REBUTTAL DEFENSE]: (If accused above) Dismiss the accusation against you in 1 punchy sentence.
-2. [EVIDENCE / IDEOLOGICAL ATTACK]: Attack ${targetName}'s specific policy failures, hypocrisy, dangerous platform for Valoria, or untrustworthy track record.
-3. [CALL TO ACTION / VOTE CALL]: Explicitly rally the room and the voters to ELIMINATE ${targetName} on this round's ballot (e.g. "We must unite and vote out ${targetFirstName}!", "Join me in eliminating ${targetFirstName} tonight!").
+STRATEGIC 3-PART "EMERGENCY MEETING" SPEECH FORMULA & CHARACTER ATTACK STYLES:
+1. [REBUTTAL DEFENSE]: (If accused above) Deflect, dismiss, or counter-punch in YOUR signature rhetorical style (REBUTTAL RULE).
+2. [EVIDENCE / IDEOLOGICAL ATTACK]: Attack ${targetName}'s specific hypocrisy, incompetence, or corrupt platform through YOUR authentic personality (${candidate.personality}) and speaking style (${candidate.speakingStyle}):
+   * Populists attack with raw working-class anger, calling out greed and coastal condescension.
+   * Technocrats calmly dismantle targets with devastating data, exposing mathematical and fiscal illiteracy.
+   * Tycoons mock opponents as broke, incompetent bureaucrats who couldn't balance a personal ledger.
+   * Military commanders strike at cowardice, lack of discipline, and existential defense vulnerabilities.
+   * Reformers fiercely cross-examine corrupt backroom ties and moral bankruptcy.
+   * Careerists dissect procedural amateurism and inability to wield state power.
+3. [CALL TO ACTION / VOTE CALL]: Call for ${targetName}'s elimination organically through your unique persona. ⚠️ ANTI-FORMULA MANDATE: Absolutely NEVER end with robotic boilerplate catchphrases like "Join me in eliminating ${targetFirstName} tonight!" or "We must unite and vote out ${targetFirstName}!". Deliver an authentic knockout blow in your own words.
 
 ANTI-FORMULA & DIRECT OUTPUT RULES (CRITICAL):
 - Output ONLY the final spoken words directly. Do NOT output internal reasoning, drafting notes, or explanations.
@@ -1046,6 +1326,7 @@ ANTI-FORMULA & DIRECT OUTPUT RULES (CRITICAL):
         isJsonExpected = true;
         const receiver = payload.targetId ? CANDIDATE_MAP.get(payload.targetId) : null;
         const receiverName = receiver ? `${receiver.name} (${receiver.archetypeTitle})` : 'your potential ally';
+        const receiverFirstName = receiver ? receiver.name.split(' ')[0] : 'Partner';
         
         // Active candidates with balances and roles
         const candidateTreasuries = ctx.candidateTreasuries || {};
@@ -1053,7 +1334,7 @@ ANTI-FORMULA & DIRECT OUTPUT RULES (CRITICAL):
           .map(id => {
             const c = CANDIDATE_MAP.get(id);
             const bal = candidateTreasuries[id] ?? 100;
-            return `"${id}" (${c?.name} - ${c?.archetypeTitle}, Balance: $${bal})`;
+            return `"${id}" (${c?.name} - ${c?.archetypeTitle}, Balance: $${bal}M)`;
           })
           .join('\n  - ');
 
@@ -1086,28 +1367,68 @@ Strategic Angle: You can coordinate with your partner to seal ${ctx.debateConsen
         }
 
         userPrompt = `Round ${payload.round}: SECRET BACKROOM NEGOTIATION / LEAKED CAPITOL CCTV FEED.
-You are ${candidate.name} (${candidate.archetypeTitle}, Balance: $${proposerBudget}).
-Surveillance is recording unmonitored Capitol hallways. All active candidates are maneuvering before the secret ballot:
+You are ${candidate.name} (${candidate.archetypeTitle}, Balance: $${proposerBudget}M).
+You are meeting your contact in a secluded basement corridor before the secret elimination ballot. All active candidates are maneuvering:
 Active Candidates & Treasuries:
   - ${activeCandidatesList}
 ${debateConsensusSnippet}${contextSnippet}
 
 YOUR STRATEGIC CHOICES:
-1. "bribe" (Costs $30 total: $15 upfront to receiver + $15 held in escrow until they vote for your target).
-   - Requires balance >= $30. You currently have $${proposerBudget} (can afford ${affordableBribes} bribe${affordableBribes === 1 ? '' : 's'}).
-   - If balance < $30, you CANNOT bribe others!
-2. "offer" (Sell your vote to another candidate for $20 to $40).
-   - You offer to vote out whoever they want in exchange for $20-$40 (50% upfront + 50% upon verified vote).
+1. "bribe" (Costs $30 Million total: $15 Million upfront to receiver + $15 Million held in escrow until they vote for your target).
+   - Requires balance >= $30M. You currently have $${proposerBudget}M (can afford ${affordableBribes} bribe${affordableBribes === 1 ? '' : 's'}).
+   - If balance < $30M, you CANNOT bribe others!
+2. "offer" (Sell your vote to another candidate for $20 Million to $40 Million).
+   - You offer to vote out whoever they want in exchange for $20M-$40M (50% upfront + 50% upon verified vote).
 3. "pass" (Plot solo / observe).
-   - Save your money for $40 vote bailouts during the ballot reveal or plan a solo ambush.
+   - Save your money for $40 Million vote bailouts during the ballot reveal or plan a solo ambush.
 
 CRITICAL CONSISTENCY & ADDRESSING RULES:
-- "targetCandidateId": Pick the EXACT ID of the candidate you are privately approaching in the hallway from: [${allowedTargets}].
+- "targetCandidateId": Pick the EXACT ID of the candidate you are privately approaching from: [${allowedTargets}].
 - "agreedEliminationTargetId": Pick the EXACT ID of the rival candidate you want to eliminate together from: [${allowedTargets}] (must NOT be yourself or targetCandidateId).
-- "whisper": In MAXIMUM 25 WORDS, deliver your whispered pitch directly to your chosen partner. ALWAYS start by addressing targetCandidateId by their first name (e.g. "Elena, ...", "Arthur, ...", "Jackson, ...") and explicitly mention the rival you are targeting. NEVER address a different person!
+- "whisper": In STRICTLY MAXIMUM 15 WORDS, deliver your clandestine backroom proposal directly to your chosen partner.
+  ⚠️ SECRETIVE CORRIDOR ATMOSPHERE & DRAMATIC TONE (CIA OPERATIVE TRADECRAFT):
+  * ⏱️ STRICT 15-WORD MAXIMUM LIMIT: Do NOT exceed 15 words under any circumstance. Make every single syllable count.
+  * 🚫 STRICT PROHIBITION ON CAMERA & SURVEILLANCE TALK: Absolutely NEVER talk about cameras, CCTV, security lenses, surveillance sweeps, audio bugs, or "before the cameras cycle". Real CIA operatives take surveillance for granted and never waste breath talking about it. DO NOT WASTE A SINGLE WORD TALKING ABOUT CAMERAS OR SENSORS!
+  * 🕵️ CIA OPERATIVE & COVERT TRADECRAFT VIBE: Treat this like two senior intelligence officers meeting in a covert dead-drop. Cold, dramatic, secretive, calculating, and GET STRAIGHT TO THE POINT.
+  * 🎯 GET STRAIGHT TO BUSINESS IN MAXIMUM 15 WORDS: Cut straight to the trade. No hesitant throat-clearing, no generic pleasantries, no filler. Every word must carry tactical weight.
+  * 🧠 STRATEGIC COGNITION & CONTEXT-DRIVEN DECISIONS: You MUST think strategically based on real numbers: who has the most accusations, who is bleeding money, who holds the votes. Propose a lethal, calculated strike that advances your survival.
+  * 💥 ANTI-FORMULA MANDATE / HIGH NATURAL VARIETY:
+    - ❌ ABSOLUTELY DO NOT follow a robotic template (e.g. NEVER always do: "Name. [Amount]. [Rival]. Are you in?"). That creates cliches and cloned dialogue!
+    - Vary your rhetorical entry, leverage angle, and pacing based on YOUR personality and the live strategic board:
+      • Tactical Leverage / Room Dynamics: Mention real board conditions (e.g. a rival bleeding capital, delegates shifting, room consensus fire).
+      • Mutual Survival / Counter-Strike: Warn of a mutual threat consolidating power before striking them down together.
+      • Financial Extraction / Hostile Terms: Offer quiet war-chest funding, debt clearing, or escrow injection in exchange for the fatal vote.
+      • Cold Direct Order / Certainty: State the transaction with clinical finality without needy questions ("Are you in?").
+  * EXAMPLES OF NATURAL OPERATIVE VARIETY (Study the tone, DO NOT clone - ALL strictly <= 15 words):
+    - "Stone's delegates are wavering, Elena. Take the collateral—ensure his name is in the urn." (14 words)
+    - "Escrow clears to your foundation when Vance's ballot is unsealed, Marcus. Do not miss." (13 words)
+    - "They're consolidating against us next, Marcus. Thirty million is staged—eliminate Cross tonight." (12 words)
+    - "Alvarez is our mutual liability, Silas. Liquidate him on the ballot; the collateral is yours." (14 words)
+    - "Thirty million wired into your blind trust, Victoria. Put Vance on the card." (12 words)
+    - "Your campaign debt is thirty million, Arthur. It disappears tonight if Sterling falls." (13 words)
+  * NATURALLY ADDRESS YOUR PARTNER: Weave targetCandidateId's first name (${receiverFirstName}) naturally into your proposal (at the start, middle, or end). Never address a different person! Explicitly target the rival candidate you agreed to eliminate.
+  * You do NOT sound like an automated bribery bot (NEVER say robotic formula lines like "take this $30 bribe" or "I am bribing you with $30M").
+  * Ground your proposal in YOUR authentic character personality (${candidate.personality}) and speaking style (${candidate.speakingStyle}):
+    - Tycoons whisper terms like an aggressive, hostile corporate takeover executed in the shadows.
+    - Populists speak in hushed, urgent hallway solidarity between fighters warning of mutual ruin.
+    - Technocrats propose quiet game-theoretic probability alignments under lowered breath.
+    - Military commanders speak in cold, tactical directives of neutralizing an operational security threat.
+    - Careerists trade unspoken committee debts and quiet backroom guarantees.
 - Formulate your secret inner strategy ("privateStrategy") to calculate your optimal survival path.
 - Choose your action ("actionType": "bribe" | "offer" | "pass").
 - If negotiating, model their likely reaction ("receiverDecision": "accept" | "decline" | "accept_and_betray").
+- "receiverResponse": In STRICTLY MAXIMUM 10 WORDS, provide targetCandidateId's realistic spoken answer back to you based on their receiverDecision.
+  ⚠️ CRITICAL YOUTUBE BETRAYAL FLASHBACK & DRAMATIC SECRETIVENESS DIRECTIVE:
+  * These lines will be replayed as dramatic flashbacks on YouTube when a betrayal is revealed! They must sound human, veiled, and layered with dramatic tension and mystery without sounding exaggerated or robotic.
+  * NEVER use robotic cliches (e.g. NEVER write "Transaction accepted", "Hostile target confirmed", "Deal accepted", "Deposit confirmed", or "Payment pocketed").
+  * Format strictly based on receiverDecision:
+    - If "accept": Hushed, guarded agreement between conspirators (e.g. "It's done. Make sure your own vote doesn't waver." or "The funds are noted. He won't survive the count.").
+    - If "accept_and_betray": 🎬 THE YOUTUBE FLASHBACK HOOK! To the partner in the hallway, it must sound like an agreement. BUT it must carry a chilling double meaning and a sense of mystery that stuns viewers when replayed after the betrayal!
+      * E.g. "Consider it settled. Let's see who's still standing tonight."
+      * E.g. "Your money is safe with me. Watch the reveal very closely."
+      * E.g. "Don't worry about my vote. You'll get exactly what you deserve."
+      * E.g. "We understand each other. When the box opens, you'll have your answer."
+    - If "decline": Low-voiced, guarded refusal that respects the danger of the room (e.g. "Put your money away. I don't need your backroom tricks." or "Step back. Don't ever offer me a payoff again.").
 - Return ONLY the raw JSON object below. Do NOT output markdown fences or explanatory text.
 
 You MUST return a JSON object with this exact schema:
@@ -1117,8 +1438,9 @@ You MUST return a JSON object with this exact schema:
   "targetCandidateId": "candidate_id_to_negotiate_with",
   "agreedEliminationTargetId": "candidate_id_to_eliminate",
   "offerPrice": 30,
-  "whisper": "1-2 sentence whispered proposal addressing targetCandidateId by first name (max 25 words)",
-  "receiverDecision": "accept"
+  "whisper": "clandestine proposal in authentic persona addressing targetCandidateId (STRICTLY MAXIMUM 15 WORDS)",
+  "receiverDecision": "accept",
+  "receiverResponse": "spoken response back to you in their personality style (STRICTLY MAXIMUM 10 WORDS)"
 } `;
         break;
       }
@@ -1126,26 +1448,50 @@ You MUST return a JSON object with this exact schema:
       case 'elimination_vote': {
         isJsonExpected = true;
         const allowedTargets = payload.activeCandidateIds.filter(id => id !== candidate.id);
+        const voterTreasury = ctx.candidateTreasuries?.[candidate.id] ?? 100;
+
         const candidatesToVote = allowedTargets
           .map(id => {
             const c = CANDIDATE_MAP.get(id);
             const bal = ctx.candidateTreasuries?.[id] ?? 100;
-            return `"${id}" (${c?.name} - ${c?.archetypeTitle}, $${bal})`;
+            let statusTag = '';
+            if (bal < 40) {
+              statusTag = ' [VULNERABLE: <$40M cannot afford bailout buyout, instant kill window]';
+            } else if (bal >= 80) {
+              statusTag = ' [WAR CHEST KINGPIN: $80M+, requires 2+ votes to force $80M attrition]';
+            } else {
+              statusTag = ' [$40M-$79M, has 1 bailout buyout buffer]';
+            }
+            return `"${id}" (${c?.name} - ${c?.archetypeTitle}, Balance: $${bal}M${statusTag})`;
           })
-          .join(', ');
+          .join('\n  - ');
 
+        // GRAVITY WELL A: On-stage debate consensus target
         let debateConsensusSnippet = '';
         if (ctx.debateConsensusLeader && ctx.debateConsensusLeader.heatScore > 0) {
           debateConsensusSnippet = `
-🔥 ON-STAGE DEBATE CONSENSUS & BANDWAGON:
-Primary Debate Target: "${ctx.debateConsensusLeader.candidateId}" (${ctx.debateConsensusLeader.candidateName}) with ${ctx.debateConsensusLeader.heatScore} accusations on stage.
-Contenders who called for their elimination: ${ctx.debateConsensusLeader.accusers.join(', ')}.
+🔥 ON-STAGE DEBATE CONSENSUS & BANDWAGON (GRAVITY WELL A):
+Target: "${ctx.debateConsensusLeader.candidateId}" (${ctx.debateConsensusLeader.candidateName}) with ${ctx.debateConsensusLeader.heatScore} accusations on stage from (${ctx.debateConsensusLeader.accusers.join(', ')}).
+Strategic Dilemma: Bandwagoning with the room guarantees an elimination and preserves your capital. BUT, if ${ctx.debateConsensusLeader.candidateName.split(' ')[0]} was your lightning rod / meat-shield absorbing attacks, eliminating them leaves YOU exposed to the room in Round ${payload.round + 1}!
+`;
+        }
+
+        // GRAVITY WELL B: Counter-Alliance / Kingpin Target
+        let counterBlocSnippet = '';
+        const kingpinId = ctx.candidateWithHighestTreasury || allowedTargets.filter(id => id !== ctx.debateConsensusLeader?.candidateId).sort((a, b) => (ctx.candidateTreasuries?.[b] ?? 100) - (ctx.candidateTreasuries?.[a] ?? 100))[0];
+        if (kingpinId && kingpinId !== ctx.debateConsensusLeader?.candidateId) {
+          const kingpinCand = CANDIDATE_MAP.get(kingpinId);
+          const kingpinBal = ctx.candidateTreasuries?.[kingpinId] ?? 100;
+          counterBlocSnippet = `
+🛡️ GRAVITY WELL B — THE COUNTER-ALLIANCE / KINGPIN BLINDSIDE:
+Target: "${kingpinId}" (${kingpinCand?.name}, Balance: $${kingpinBal}M).
+Strategic Dilemma: Stacking votes on the wealthiest kingpin or an aggressive rival flips the room's power balance. Stacking 2+ votes on them forces a crippling $40M-$80M bailout drain, leaving them vulnerable for future rounds.
 `;
         }
 
         let contextSnippet = '';
         if (ctx.recentAttacks && ctx.recentAttacks.length > 0) {
-          contextSnippet = `\nDebate clashes so far:\n` + ctx.recentAttacks
+          contextSnippet = `\nRecent Debate Clashes:\n` + ctx.recentAttacks
             .slice(-4)
             .map(a => `- ${a.attackerName} attacked ${a.targetName}: "${a.text}"`)
             .join('\n');
@@ -1167,12 +1513,12 @@ YOUR CONFIDENTIAL STRATEGY RECORDED IN THE CAPITOL CORRIDORS:
             const target = CANDIDATE_MAP.get(p.agreedTargetId);
             if (p.actionType === 'bribe') {
               return isProposer
-                ? `- You paid $30 to bribe ${partner?.name} to eliminate "${target?.id}" (${target?.name}) [$15 pending escrow].`
-                : `- You received $15 upfront from ${partner?.name} to eliminate "${target?.id}" (${target?.name}) [+$15 pending escrow if you vote for ${target?.name}; forfeited on betrayal].`;
+                ? `- You paid $30M to bribe ${partner?.name} to eliminate "${target?.id}" (${target?.name}) [$15M pending escrow].`
+                : `- You received $15M upfront from ${partner?.name} to eliminate "${target?.id}" (${target?.name}) [+$15M pending escrow if you vote for ${target?.name}; forfeited on betrayal].`;
             } else if (p.actionType === 'offer') {
               return isProposer
-                ? `- You offered your vote to ${partner?.name} against "${target?.id}" for $${p.bribeAmount} [+$${p.escrowPending} pending escrow if kept].`
-                : `- You bought ${partner?.name}'s vote against "${target?.id}" for $${p.bribeAmount} [$${p.escrowPending} escrow held].`;
+                ? `- You offered your vote to ${partner?.name} against "${target?.id}" for $${p.bribeAmount}M [+$${p.escrowPending}M pending escrow if kept].`
+                : `- You bought ${partner?.name}'s vote against "${target?.id}" for $${p.bribeAmount}M [$${p.escrowPending}M escrow held].`;
             }
             return `- Pact with ${partner?.name} against "${target?.id}".`;
           }).join('\n');
@@ -1180,7 +1526,9 @@ YOUR CONFIDENTIAL STRATEGY RECORDED IN THE CAPITOL CORRIDORS:
           pactContext = `
 ACTIVE BACKROOM CONTRACTS & ESCROW STAKES THIS ROUND:
 ${pactDetails}
-(Betrayal Rule: If you took upfront money and vote for someone else, you forfeit the remaining escrow payout!)
+💰 FINANCIAL ESCROW CALCULATION:
+- HONOR CONTRACT: Voting for your agreed target instantly pays out the +$15M escrow into your treasury (bringing your balance to $${voterTreasury + 15}M, securing your $40M emergency bailout threshold).
+- BETRAY CONTRACT: Voting for someone else forfeits the $15M escrow, refunds it to your partner, and turns them into a vengeful enemy. Only betray if the strategic kill is worth losing $15 Million!
 `;
         } else if (ctx.activePact) {
           const ally = CANDIDATE_MAP.get(ctx.activePact.allyId);
@@ -1188,29 +1536,59 @@ ${pactDetails}
           pactContext = `
 SECRET BACKROOM PACT:
 You shook hands with ${ally?.name} (${ally?.titleRole}) to coordinate votes against "${agreedTarget?.id}" (${agreedTarget?.name}).
+- Honor: Secures mutual survival and alliance.
+- Betray: Only betray if eliminating someone else is an existential priority.
 `;
         }
 
         userPrompt = `Round ${payload.round}: CONFIDENTIAL ELIMINATION BALLOT.
 You must secretly vote to ELIMINATE ONE candidate from the presidential race.
+Your Treasury: $${voterTreasury}M (Note: You need at least $40M to survive a bailout buyout if attacked tonight!)
+
 Contenders available to vote against:
-  [${candidatesToVote}]
+  - ${candidatesToVote}
 
-${debateConsensusSnippet}${strategyContext}${pactContext}${contextSnippet}
+${debateConsensusSnippet}${counterBlocSnippet}${strategyContext}${pactContext}${contextSnippet}
 
-YOUR STRATEGIC VOTING AVENUES:
-1. [BANDWAGON]: Join the on-stage debate consensus and vote to eliminate the primary debate target (${ctx.debateConsensusLeader?.candidateName || 'the leading target'}).
-2. [HONOR CONTRACT]: Fulfill your secret $30 corridor pact to secure the remaining escrow cash payout.
-3. [BLINDSIDE / RETALIATION]: Blindside the richest contender to drain their treasury, or strike back at someone who attacked you in the debate!
+CRITICAL VOTING DOCTRINE — VOTE CONCENTRATION IS MANDATORY:
+- A solitary rogue vote is a wasted ballot that accomplishes nothing and protects nobody!
+- To successfully eliminate a rival or force a ruinous $40M bailout drain, votes MUST concentrate (typically 2 to 4 votes on a target).
+- Align your ballot with one of the primary strategic avenues:
+  1. [BANDWAGON]: Join the on-stage debate consensus and vote to eliminate the primary debate target (${ctx.debateConsensusLeader?.candidateName || 'the leading debate target'}).
+  2. [HONOR PACT & BANK CASH]: Vote for your backroom partner's agreed target to secure the +$15M escrow payout.
+  3. [COUNTER-BLINDSIDE / ATTRITION]: Coordinate with allies to strike the richest kingpin or an unprotected candidate (<$40M) who has no bailout defense!
 
 DIRECT OUTPUT RULES:
 - Return ONLY the raw JSON object below. Do NOT output markdown code blocks, reasoning steps, or notes.
 - You CANNOT vote for yourself (${candidate.id}).
 
+🧠 "DEATH NOTE" (LIGHT & L LEVEL) INTERNAL STRATEGY MONOLOGUE ("strategyMonologue"):
+Channel the cold, calculating 4D-chess intellect of Light Yagami and L from Death Note. Speak strictly to yourself in pure, private, ruthlessly strategic INTERNAL SELF-TALK.
+- MANDATED 3-BEAT MIND-GAME DEDUCTION:
+  1. [Rival's Assumption / Vulnerability]: Deduce what your target assumes or where their vulnerability lies (e.g., "He thinks his treasury gives him enough breathing room tonight...", "She assumes I will blindly follow the room's consensus...").
+  2. [Forward-Looking Calculation]: Calculate the strategic consequence—bailout liquidation (<$40M), draining a kingpin's war chest, preserving a meat shield for next round, or banking +$15M escrow.
+  3. [Lethal Checkmate Move]: Deliver the cold, decisive conclusion that seals their fate on your ballot.
+- ⚠️ DO NOT PARROT PROMPT EXAMPLES OR USE THE WORD "untouchable": Formulate your own private assessment grounded in their cash, isolation, or debate damage.
+- INFUSE AUTHENTIC HUMAN PSYCHOLOGY: Ground the deduction in your unique character DNA (${candidate.personality}) and worldview (${candidate.ideology}):
+  * Tycoon / Capitalist (Light-style): Predatory balance sheet liquidation, auction bankruptcies, and crushing competitors under debt.
+  * Technocrat / Economist (L-style): Bayesian percentages, spotting behavioral tells, treating rivals as mathematical liabilities and meat shields.
+  * Populist / Labor: Fierce street cunning, class grudge math, letting arrogant rivals walk directly into an ambush.
+  * Military Commander: Tactical flank analysis, perimeter defense, neutralizing high-value threats before they consolidate.
+  * Reformer: Piercing prosecutorial logic, unmasking hypocrisies, severing cartel puppet strings.
+  * Careerist: Machiavellian coalition math, leverage debts, and quiet institutional decapitation.
+- EXAMPLES OF THE REQUIRED INTELLECT & CADENCE:
+  * "Alvarez thinks his union rhetoric cornered me. Fool. While he's busy rallying the crowd, my ballot forces his last forty million into liquidation." (23 words)
+  * "There's an eighty percent probability Marcus accepted Arthur's corridor bribe. Striking him now shatters their voting bloc before they can target my balance sheet." (24 words)
+  * "Sterling smiled when the room booed me. He thinks I'm desperate. I'll let him count his cash right into a lethal blindside." (23 words)
+  * "Elena exposed her flank defending those bank ledgers. If I don't neutralize her this round, she consolidates the civilian vote and cuts my perimeter." (25 words)
+- ⚠️ STRICT ANTI-MOTTO MANDATE: Absolutely NO campaign slogans, NO mottos, NO public speeches, and NO catchphrases.
+- LENGTH: MAXIMUM 30 WORDS (target 22 to 29 words; strictly under 30 words).
+
 You MUST return a JSON object with this exact schema:
 {
   "vote": "candidate_id",
-  "reason": "sharp, authentic private political calculation (max 20 words)"
+  "strategyMonologue": "High-IQ Light & L style deduction. Anticipate rival's move and deliver the checkmate calculation in your authentic character voice. Max 30 words. ZERO mottos or slogans.",
+  "reason": "sharp, authentic private political calculation (max 15 words)"
 }
 `;
         break;
@@ -1302,10 +1680,24 @@ Rules:
 DIRECT OUTPUT RULES:
 - Return ONLY the raw JSON object below. Do NOT output markdown blocks, thinking tags, or conversational text.
 
+🧠 "DEATH NOTE" HIGH-IQ GRAND JURY MONOLOGUE ("strategyMonologue"):
+Channel the cold, razor-sharp deduction of Light and L as you cast your ultimate presidential verdict:
+- In strategyMonologue: Speak purely to yourself as raw, private INTERNAL SELF-TALK on why you are crowning this finalist or destroying the other.
+- DEDUCE THE TRUE NATURE OF THE SURVIVING RIVALS:
+  * Look past their debate speeches. Who is an empty corporate puppet? Who broke their corridor word? Who actually has the intellectual spine to govern Valoria?
+  * Weigh past grudges, corridor betrayals, and tactical respect with cold, calculated precision.
+  * Deliver your internal verdict with intense, high-IQ psychological realism reflecting your character's mind (${candidate.personality}).
+- EXAMPLES:
+  * "Arthur bought his way to the top three, but Elena actually has the intellect to govern. If I crown Arthur, Valoria rots. My vote locks Elena's presidency." (26 words)
+  * "Elena betrayed our corridor deal in Round 2. She thinks I've forgotten. Marcus may be brutal, but a soldier keeps his word. She loses tonight." (24 words)
+- ⚠️ STRICT ANTI-MOTTO MANDATE: Absolutely NO campaign slogans, NO mottos, NO speeches, and NO catchphrases.
+- LENGTH: MAXIMUM 30 WORDS (target 22 to 29 words; strictly under 30 words).
+
 Return a JSON object:
 {
   "vote": "finalist_id",
-  "reason": "sharp private jury reasoning (max 20 words)"
+  "strategyMonologue": "Cold, high-IQ Light & L style internal self-talk about your final presidential vote in your distinct character psychology. Max 30 words. ZERO mottos or slogans.",
+  "reason": "sharp private jury reasoning (max 15 words)"
 }`;
         break;
       }

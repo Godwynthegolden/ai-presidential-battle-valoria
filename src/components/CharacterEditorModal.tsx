@@ -211,12 +211,15 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
   const [customColorHex, setCustomColorHex] = useState('#3b82f6');
 
   // TTS Voice & Audio state
-  const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
+  const [playingVoiceKey, setPlayingVoiceKey] = useState<string | null>(null);
+  const [loadingVoiceKey, setLoadingVoiceKey] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [testAudioError, setTestAudioError] = useState<string | null>(null);
   const [voiceSearch, setVoiceSearch] = useState('');
-  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'male' | 'female'>('all');
+  const [voiceGenderFilter, setVoiceGenderFilter] = useState<'all' | 'male' | 'female'>('all');
+  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<string>('all');
   const activeAudioRef = React.useRef<HTMLAudioElement | null>(null);
+  const activeAudioUrlRef = React.useRef<string | null>(null);
 
   // Candidate Form State
   const [form, setForm] = useState<Candidate>(() => {
@@ -229,6 +232,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
           voiceName: defaultVoice.name,
           gender: defaultVoice.gender,
           category: defaultVoice.category,
+          speed: 1.0,
         }
       };
     }
@@ -258,6 +262,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
         voiceName: defaultVoice.name,
         gender: defaultVoice.gender,
         category: defaultVoice.category,
+        speed: 1.0,
       },
       systemPrompt: 'You are a bold presidential contender in the Republic of Valoria. Speak with authenticity, intelligence, and conviction.',
       isCustom: true,
@@ -275,6 +280,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
           voiceName: defaultVoice.name,
           gender: defaultVoice.gender,
           category: defaultVoice.category,
+          speed: 1.0,
         }
       });
       setCustomColorHex(candidateToEdit.color.primary || '#3b82f6');
@@ -305,6 +311,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
           voiceName: defaultVoice.name,
           gender: defaultVoice.gender,
           category: defaultVoice.category,
+          speed: 1.0,
         },
         systemPrompt: 'You are a bold presidential contender in the Republic of Valoria. Speak with authenticity, intelligence, and conviction.',
         isCustom: true,
@@ -314,34 +321,67 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
     }
   }, [candidateToEdit, isOpen]);
 
-  // Cleanup audio on unmount
+  // Cleanup audio on unmount or close
   useEffect(() => {
     return () => {
       if (activeAudioRef.current) {
-        activeAudioRef.current.pause();
+        try {
+          activeAudioRef.current.pause();
+          activeAudioRef.current.src = '';
+        } catch {}
         activeAudioRef.current = null;
+      }
+      if (activeAudioUrlRef.current) {
+        try { URL.revokeObjectURL(activeAudioUrlRef.current); } catch {}
+        activeAudioUrlRef.current = null;
       }
     };
   }, []);
 
-  const handleTestVoice = async (voiceId: string, customText?: string) => {
+  const handleStopAudio = () => {
+    if (activeAudioRef.current) {
+      try {
+        activeAudioRef.current.pause();
+        activeAudioRef.current.src = '';
+      } catch {}
+      activeAudioRef.current = null;
+    }
+    if (activeAudioUrlRef.current) {
+      try { URL.revokeObjectURL(activeAudioUrlRef.current); } catch {}
+      activeAudioUrlRef.current = null;
+    }
+    setIsPlayingAudio(false);
+    setPlayingVoiceKey(null);
+    setLoadingVoiceKey(null);
+  };
+
+  const handleTestVoice = async (voiceId: string, voiceKey: string, customText?: string) => {
     try {
       setTestAudioError(null);
-      if (activeAudioRef.current) {
-        activeAudioRef.current.pause();
-        activeAudioRef.current = null;
+
+      // Stop if already playing this exact voice
+      if (playingVoiceKey === voiceKey) {
+        handleStopAudio();
+        return;
       }
 
-      setPlayingVoiceId(voiceId);
-      setIsPlayingAudio(true);
+      handleStopAudio();
+      setLoadingVoiceKey(voiceKey);
 
-      const text = customText || form.slogan || `I am ${form.name}, and I fight for the people of Valoria!`;
+      const targetVoiceId = voiceId?.trim() || CURATED_VOICES[0].id;
+      const text = (customText && customText.trim()) || 
+                   (form.slogan && form.slogan.trim()) || 
+                   `I am ${form.name || 'a presidential contender'}, and I fight for the people of the Republic of Valoria!`;
+
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text,
-          voiceId,
+          voiceId: targetVoiceId,
+          apiKey: nineRouterConfig?.fishAudioApiKey,
+          model: nineRouterConfig?.fishAudioModel || 's2.1-pro-free',
+          speed: form.voice?.speed || 1.0,
         }),
       });
 
@@ -352,35 +392,42 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
 
       const blob = await res.blob();
       const audioUrl = URL.createObjectURL(blob);
+      activeAudioUrlRef.current = audioUrl;
       const audio = new Audio(audioUrl);
       activeAudioRef.current = audio;
 
       audio.onended = () => {
         setIsPlayingAudio(false);
-        setPlayingVoiceId(null);
+        setPlayingVoiceKey(null);
+        if (activeAudioUrlRef.current) {
+          try { URL.revokeObjectURL(activeAudioUrlRef.current); } catch {}
+          activeAudioUrlRef.current = null;
+        }
       };
 
       audio.onerror = () => {
         setIsPlayingAudio(false);
-        setPlayingVoiceId(null);
+        setPlayingVoiceKey(null);
+        if (activeAudioUrlRef.current) {
+          try { URL.revokeObjectURL(activeAudioUrlRef.current); } catch {}
+          activeAudioUrlRef.current = null;
+        }
       };
 
-      await audio.play();
+      setLoadingVoiceKey(null);
+      setPlayingVoiceKey(voiceKey);
+      setIsPlayingAudio(true);
+
+      await audio.play().catch(playErr => {
+        if (playErr.name !== 'AbortError') {
+          console.warn('[Audio Play Error]:', playErr);
+        }
+      });
     } catch (err: any) {
       console.error('[TTS Test Error]:', err);
       setTestAudioError(err.message || 'Failed to synthesize voice sample');
-      setIsPlayingAudio(false);
-      setPlayingVoiceId(null);
+      handleStopAudio();
     }
-  };
-
-  const handleStopAudio = () => {
-    if (activeAudioRef.current) {
-      activeAudioRef.current.pause();
-      activeAudioRef.current = null;
-    }
-    setIsPlayingAudio(false);
-    setPlayingVoiceId(null);
   };
 
   const handleCustomColorChange = (hex: string) => {
@@ -486,7 +533,21 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
   };
 
   const handleSave = () => {
-    onSaveCandidate(form);
+    handleStopAudio();
+    const defaultVoice = CURATED_VOICES[0];
+    const sanitizedVoice = {
+      voiceId: form.voice?.voiceId?.trim() || defaultVoice.id,
+      voiceName: form.voice?.voiceName?.trim() || defaultVoice.name,
+      gender: form.voice?.gender || defaultVoice.gender,
+      category: form.voice?.category || defaultVoice.category,
+      speed: typeof form.voice?.speed === 'number' && !isNaN(form.voice.speed) ? form.voice.speed : 1.0,
+      sampleText: form.voice?.sampleText,
+    };
+
+    onSaveCandidate({
+      ...form,
+      voice: sanitizedVoice,
+    });
     onClose();
   };
 
@@ -969,7 +1030,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
               />
             </div>
 
-            {/* Row 3.5: Campaign Treasury & War Chest ($ Dollars) */}
+            {/* Row 3.5: Campaign Treasury & War Chest ($ Millions) */}
             <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-900/50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -978,25 +1039,25 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                   </div>
                   <div>
                     <h4 className="text-xs font-mono font-bold text-emerald-200 uppercase tracking-wider">
-                      Campaign War Chest ($ Dollars)
+                      Campaign War Chest ($ Millions)
                     </h4>
                     <p className="text-[10px] text-slate-400 font-mono">
-                      Used for $20 CCTV backroom bribes and $40 post-vote bailout vote buyouts.
+                      Used for $30M CCTV backroom bribes and $40M post-vote bailout vote buyouts.
                     </p>
                   </div>
                 </div>
 
                 {/* Live Current Value Pill */}
                 <div className="px-3 py-1 rounded-xl bg-emerald-900/40 border border-emerald-500/50 text-xs font-mono font-bold text-emerald-300 shadow-sm shadow-emerald-950/50">
-                  ${form.initialBudget ?? 100}
+                  ${form.initialBudget ?? 100}M
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2 pt-1">
                 {[
-                  { value: 80, label: '$80 (Grassroots)', desc: '2 Bailouts / 4 Bribes' },
-                  { value: 100, label: '$100 (Standard)', desc: '2 Bailouts + 1 Bribe' },
-                  { value: 120, label: '$120 (War Chest)', desc: '3 Bailouts / 6 Bribes' },
+                  { value: 80, label: '$80M (Grassroots)', desc: '2 Bailouts / $80M' },
+                  { value: 100, label: '$100M (Standard)', desc: '2 Bailouts + $20M' },
+                  { value: 120, label: '$120M (War Chest)', desc: '3 Bailouts / $120M' },
                 ].map((tier) => (
                   <button
                     key={tier.value}
@@ -1034,31 +1095,31 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
             </div>
 
             {/* Row 5: Voice & Speech Audio (Fish.Audio TTS) */}
-            <div className="flex flex-col gap-3 p-4 rounded-2xl bg-purple-950/20 border border-purple-900/50">
+            <div className="flex flex-col gap-3.5 p-4 rounded-2xl bg-purple-950/20 border border-purple-900/50 shadow-inner">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-purple-950/80 border border-purple-700/60 text-purple-300">
+                  <div className="p-2 rounded-xl bg-purple-950/90 border border-purple-700/60 text-purple-300 shadow-sm">
                     <Mic className="w-4 h-4" />
                   </div>
                   <div>
                     <h4 className="text-xs font-mono font-bold text-purple-200 uppercase tracking-wider flex items-center gap-1.5">
-                      Character Voice &amp; Speech (Fish.Audio TTS)
+                      Character Voice &amp; Acoustic Model (Fish.Audio TTS)
                     </h4>
                     <p className="text-[11px] text-slate-400 font-mono">
-                      Choose the acoustic model and speech persona for debate dialogues and speeches.
+                      Assign neural speech acoustic persona, cadence, and test sample lines.
                     </p>
                   </div>
                 </div>
 
-                {/* Currently Assigned Voice Indicator */}
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-purple-500/40 text-xs font-mono">
+                {/* Currently Assigned Voice Indicator & Global Stop Button */}
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-purple-500/40 text-xs font-mono shadow-xs">
                   <span className="text-slate-400 text-[11px]">Selected:</span>
-                  <span className="text-purple-300 font-bold">{form.voice?.voiceName || 'Custom Voice'}</span>
+                  <span className="text-purple-300 font-bold max-w-[160px] truncate">{form.voice?.voiceName || 'Custom Voice'}</span>
                   {isPlayingAudio && (
                     <button
                       type="button"
                       onClick={handleStopAudio}
-                      className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-950/80 text-red-300 border border-red-700 text-[10px] hover:bg-red-900 transition cursor-pointer"
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-950/90 text-red-300 border border-red-700 text-[10px] font-bold hover:bg-red-900 transition cursor-pointer shadow-xs"
                       title="Stop Audio Preview"
                     >
                       <Square className="w-2.5 h-2.5 fill-red-400 text-red-400" />
@@ -1069,64 +1130,177 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
               </div>
 
               {testAudioError && (
-                <div className="p-2.5 rounded-xl bg-red-950/60 border border-red-800 text-xs font-mono text-red-300 flex items-center justify-between">
-                  <span>⚠️ {testAudioError}</span>
+                <div className="p-3 rounded-xl bg-red-950/70 border border-red-800 text-xs font-mono text-red-200 flex items-center justify-between gap-2 animate-fade-in shadow-md">
+                  <span className="leading-relaxed">⚠️ {testAudioError}</span>
                   <button
                     type="button"
                     onClick={() => setTestAudioError(null)}
-                    className="text-red-400 hover:text-white text-xs px-1"
+                    className="text-red-400 hover:text-white text-xs px-1.5 py-0.5 rounded-lg hover:bg-red-900/50 transition cursor-pointer shrink-0"
+                    title="Dismiss"
                   >
                     ✕
                   </button>
                 </div>
               )}
 
-              {/* Search & Gender Filters */}
-              <div className="flex items-center gap-2 flex-wrap justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-mono text-slate-400">Filter:</span>
-                  {(['all', 'male', 'female'] as const).map(cat => (
+              {/* Filters, Categories & Search Bar */}
+              <div className="flex flex-col gap-2.5 pt-1">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  {/* Gender Filter Tabs */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-mono text-slate-400">Gender:</span>
+                    {(['all', 'male', 'female'] as const).map(gender => {
+                      const count = gender === 'all' 
+                        ? CURATED_VOICES.length 
+                        : CURATED_VOICES.filter(v => v.gender === gender).length;
+                      return (
+                        <button
+                          key={gender}
+                          type="button"
+                          onClick={() => setVoiceGenderFilter(gender)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-mono transition capitalize flex items-center gap-1 cursor-pointer ${
+                            voiceGenderFilter === gender
+                              ? 'bg-purple-600 text-white font-bold shadow-xs'
+                              : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                          }`}
+                        >
+                          <span>{gender}</span>
+                          <span className={`text-[10px] opacity-75 ${voiceGenderFilter === gender ? 'text-purple-200' : 'text-slate-500'}`}>
+                            ({count})
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Search Input */}
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      placeholder="Search voice, style, tag..."
+                      value={voiceSearch}
+                      onChange={(e) => setVoiceSearch(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 rounded-xl pl-3 pr-7 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono w-52"
+                    />
+                    {voiceSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setVoiceSearch('')}
+                        className="absolute right-2 text-slate-500 hover:text-white text-xs cursor-pointer"
+                        title="Clear search"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Style / Category Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+                  <span className="text-[11px] font-mono text-slate-400 shrink-0">Style:</span>
+                  {[
+                    'all',
+                    'Authoritative',
+                    'Deep & Serious',
+                    'Passionate',
+                    'Energetic',
+                    'Calm & Intellectual',
+                    'Tech & Modern',
+                    'Professional',
+                    'Wildcard',
+                    'Calm & Gentle',
+                    'Deep & Raspy'
+                  ].map(cat => (
                     <button
                       key={cat}
                       type="button"
                       onClick={() => setVoiceCategoryFilter(cat)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-mono transition capitalize ${
+                      className={`px-2 py-0.5 rounded-lg text-[11px] font-mono transition shrink-0 cursor-pointer ${
                         voiceCategoryFilter === cat
-                          ? 'bg-purple-600 text-white font-bold shadow-xs'
-                          : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                          ? 'bg-purple-900/80 text-purple-200 border border-purple-500 font-bold'
+                          : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800'
                       }`}
                     >
-                      {cat}
+                      {cat === 'all' ? 'All Styles' : cat}
                     </button>
                   ))}
                 </div>
 
-                <input
-                  type="text"
-                  placeholder="Search voices by name, role..."
-                  value={voiceSearch}
-                  onChange={(e) => setVoiceSearch(e.target.value)}
-                  className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono w-48"
-                />
+                {/* Speech Cadence / Speed Control Slider */}
+                <div className="flex items-center justify-between gap-3 px-3 py-1.5 rounded-xl bg-slate-900/70 border border-purple-900/30 text-xs font-mono">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-purple-300 font-bold">Voice Speed / Pace:</span>
+                    <span className="text-[11px] font-bold text-white bg-purple-950 px-2 py-0.5 rounded-md border border-purple-800/60">
+                      {(form.voice?.speed || 1.0).toFixed(2)}x
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-500">0.8x</span>
+                    <input
+                      type="range"
+                      min={0.8}
+                      max={1.4}
+                      step={0.05}
+                      value={form.voice?.speed || 1.0}
+                      onChange={(e) => {
+                        const speedVal = parseFloat(e.target.value);
+                        setForm(prev => ({
+                          ...prev,
+                          voice: {
+                            ...(prev.voice || { voiceId: CURATED_VOICES[0].id, voiceName: CURATED_VOICES[0].name }),
+                            speed: speedVal,
+                          }
+                        }));
+                      }}
+                      className="w-32 sm:w-44 accent-purple-500 cursor-pointer"
+                    />
+                    <span className="text-[10px] text-slate-500">1.4x</span>
+                  </div>
+                </div>
               </div>
 
               {/* Curated Voice Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
-                {CURATED_VOICES
-                  .filter(v => voiceCategoryFilter === 'all' || v.gender === voiceCategoryFilter)
-                  .filter(v => !voiceSearch.trim() || 
-                    v.name.toLowerCase().includes(voiceSearch.toLowerCase()) ||
-                    v.category.toLowerCase().includes(voiceSearch.toLowerCase()) ||
-                    v.description.toLowerCase().includes(voiceSearch.toLowerCase()) ||
-                    v.tags.some(t => t.toLowerCase().includes(voiceSearch.toLowerCase()))
-                  )
-                  .map(v => {
-                    const isSelected = form.voice?.voiceId === v.id;
-                    const isVoicePlaying = isPlayingAudio && playingVoiceId === v.id;
+                {(() => {
+                  const filtered = CURATED_VOICES
+                    .filter(v => voiceGenderFilter === 'all' || v.gender === voiceGenderFilter)
+                    .filter(v => voiceCategoryFilter === 'all' || v.category.toLowerCase().includes(voiceCategoryFilter.toLowerCase()))
+                    .filter(v => !voiceSearch.trim() || 
+                      v.name.toLowerCase().includes(voiceSearch.toLowerCase()) ||
+                      v.category.toLowerCase().includes(voiceSearch.toLowerCase()) ||
+                      v.description.toLowerCase().includes(voiceSearch.toLowerCase()) ||
+                      v.tags.some(t => t.toLowerCase().includes(voiceSearch.toLowerCase()))
+                    );
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="col-span-full py-8 text-center flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-purple-900/40 bg-purple-950/10">
+                        <VolumeX className="w-6 h-6 text-purple-400/60" />
+                        <p className="text-xs font-mono text-purple-200">No voice models matching your search criteria</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVoiceSearch('');
+                            setVoiceGenderFilter('all');
+                            setVoiceCategoryFilter('all');
+                          }}
+                          className="px-3 py-1 text-[11px] font-mono rounded-lg bg-purple-900/50 hover:bg-purple-800 text-purple-200 transition cursor-pointer border border-purple-700/50"
+                        >
+                          Clear Filters
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  return filtered.map(v => {
+                    const voiceKey = `${v.id}-${v.name}`;
+                    const isSelected = form.voice?.voiceId === v.id && (form.voice?.voiceName === v.name || !form.voice?.voiceName);
+                    const isVoiceLoading = loadingVoiceKey === voiceKey;
+                    const isVoicePlaying = playingVoiceKey === voiceKey;
 
                     return (
                       <div
-                        key={v.id}
+                        key={voiceKey}
                         onClick={() => {
                           setForm(prev => ({
                             ...prev,
@@ -1135,19 +1309,21 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                               voiceName: v.name,
                               gender: v.gender,
                               category: v.category,
+                              speed: prev.voice?.speed || 1.0,
+                              sampleText: v.sampleText,
                             }
                           }));
                         }}
                         className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-2 text-left ${
                           isSelected
-                            ? 'bg-purple-950/50 border-purple-500 ring-1 ring-purple-500/50 shadow-md shadow-purple-950/40'
+                            ? 'bg-purple-950/60 border-purple-500 ring-1 ring-purple-500/50 shadow-md shadow-purple-950/40'
                             : 'bg-slate-900/80 hover:bg-slate-850 border-slate-800 hover:border-slate-700'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <div>
+                          <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-xs font-bold text-white">{v.name}</span>
+                              <span className="text-xs font-bold text-white truncate">{v.name}</span>
                               <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold uppercase ${
                                 v.gender === 'female' 
                                   ? 'bg-pink-950/70 text-pink-300 border border-pink-700/60' 
@@ -1166,22 +1342,29 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (isVoicePlaying) {
+                              if (isVoicePlaying || isVoiceLoading) {
                                 handleStopAudio();
                               } else {
-                                handleTestVoice(v.id, v.sampleText);
+                                handleTestVoice(v.id, voiceKey, v.sampleText);
                               }
                             }}
                             className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition shrink-0 cursor-pointer ${
-                              isVoicePlaying
-                                ? 'bg-red-900 text-white animate-pulse'
+                              isVoiceLoading
+                                ? 'bg-purple-900 text-purple-200 border border-purple-500'
+                                : isVoicePlaying
+                                ? 'bg-red-900 text-white animate-pulse shadow-md shadow-red-950'
                                 : isSelected
                                 ? 'bg-purple-600 hover:bg-purple-500 text-white'
                                 : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
                             }`}
                             title="Play sample line in this voice"
                           >
-                            {isVoicePlaying ? (
+                            {isVoiceLoading ? (
+                              <>
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                                <span>Generating...</span>
+                              </>
+                            ) : isVoicePlaying ? (
                               <>
                                 <Square className="w-3 h-3 fill-white" />
                                 <span>Stop</span>
@@ -1189,7 +1372,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                             ) : (
                               <>
                                 <Play className="w-3 h-3 fill-current" />
-                                <span>Test</span>
+                                <span>Sample</span>
                               </>
                             )}
                           </button>
@@ -1200,10 +1383,11 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                         </p>
                       </div>
                     );
-                  })}
+                  });
+                })()}
               </div>
 
-              {/* Custom Voice ID Input */}
+              {/* Custom Voice ID Input & Audition Slogan Button */}
               <div className="pt-2 border-t border-purple-900/40 flex flex-col sm:flex-row items-center gap-2">
                 <div className="flex-1 w-full flex flex-col gap-1">
                   <label className="text-[11px] font-mono text-slate-400 flex items-center justify-between">
@@ -1216,14 +1400,15 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                     value={form.voice?.voiceId || ''}
                     onChange={(e) => {
                       const val = e.target.value.trim();
-                      const matched = CURATED_VOICES.find(c => c.id === val);
+                      const matched = CURATED_VOICES.find(c => c.id.toLowerCase() === val.toLowerCase());
                       setForm(prev => ({
                         ...prev,
                         voice: {
                           voiceId: val,
-                          voiceName: matched ? matched.name : (prev.voice?.voiceName || 'Custom Model ID'),
+                          voiceName: matched ? matched.name : (prev.voice?.voiceName && prev.voice?.voiceName !== 'Custom Model ID' ? prev.voice.voiceName : 'Custom Voice'),
                           gender: matched?.gender,
                           category: matched?.category || 'Custom',
+                          speed: prev.voice?.speed || 1.0,
                         }
                       }));
                     }}
@@ -1231,16 +1416,51 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                   />
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleTestVoice(form.voice?.voiceId || CURATED_VOICES[0].id, form.slogan)}
-                  disabled={!form.voice?.voiceId}
-                  className="w-full sm:w-auto mt-auto flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-purple-700 hover:bg-purple-600 text-white text-xs font-mono font-bold transition shadow-md shadow-purple-900/40 disabled:opacity-50 cursor-pointer whitespace-nowrap"
-                  title="Generate audio speech of candidate slogan using selected voice"
-                >
-                  <Volume2 className="w-3.5 h-3.5" />
-                  <span>Audition Slogan</span>
-                </button>
+                {(() => {
+                  const isSloganLoading = loadingVoiceKey === 'slogan_audition';
+                  const isSloganPlaying = playingVoiceKey === 'slogan_audition';
+
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isSloganPlaying || isSloganLoading) {
+                          handleStopAudio();
+                        } else {
+                          handleTestVoice(
+                            form.voice?.voiceId || CURATED_VOICES[0].id, 
+                            'slogan_audition', 
+                            form.slogan
+                          );
+                        }
+                      }}
+                      disabled={!form.voice?.voiceId}
+                      className={`w-full sm:w-auto mt-auto flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-mono font-bold transition shadow-md disabled:opacity-50 cursor-pointer whitespace-nowrap ${
+                        isSloganPlaying
+                          ? 'bg-red-900 hover:bg-red-800 text-white animate-pulse shadow-red-950'
+                          : 'bg-purple-700 hover:bg-purple-600 text-white shadow-purple-900/40'
+                      }`}
+                      title="Generate audio speech of candidate slogan using selected voice"
+                    >
+                      {isSloganLoading ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Synthesizing...</span>
+                        </>
+                      ) : isSloganPlaying ? (
+                        <>
+                          <Square className="w-3.5 h-3.5 fill-white" />
+                          <span>Stop Slogan</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="w-3.5 h-3.5" />
+                          <span>Audition Slogan</span>
+                        </>
+                      )}
+                    </button>
+                  );
+                })()}
               </div>
             </div>
           </div>

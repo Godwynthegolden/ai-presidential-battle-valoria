@@ -6,6 +6,7 @@ export type GamePhase =
   | 'ATTACK'           // Candidate attacks another
   | 'CCTV_BACKROOM'    // Leaked surveillance feed of secret backroom pacts
   | 'VOTE_SECRET'      // Secret voting process
+  | 'VOTE_CONFESSIONAL'// Full-screen strategic internal dialogue before voting reveal
   | 'VOTE_REVEAL'      // Dramatic reveal of votes & betrayal highlights
   | 'ELIMINATION'      // Announcing eliminated candidate + last words
   | 'FINAL_SPEECHES'   // Top 3 candidates final appeal
@@ -53,9 +54,13 @@ export interface BackroomPact {
   actionType?: CCTVPactActionType;
   agreedTargetId: string;
   whisperText: string;
+  receiverResponse?: string; // Receiver's spoken answer (<=10 words)
   privateStrategy?: string; // Secret tactical reasoning (kept confidential)
   location: string;
   audioBlobUrl?: string | null;
+  receiverAudioBlobUrl?: string | null;
+  audioBlob?: Blob | null;
+  receiverAudioBlob?: Blob | null;
   wasBetrayedByProposer?: boolean;
   wasBetrayedByReceiver?: boolean;
   timestamp: number;
@@ -76,6 +81,9 @@ export interface VoteRecord {
   voterId: string;
   targetId: string;
   reason?: string;
+  strategyMonologue?: string;  // 30 to 50 word raw, authentic strategic internal dialogue
+  audioBlobUrl?: string | null;
+  audioBlob?: Blob | null;
   // Alliance & Betrayal tracking
   pactWithId?: string;       // Ally they plotted with, if any
   pactTargetId?: string;     // Target agreed in pact
@@ -205,6 +213,7 @@ export interface LLMRequestPayload {
   targetId?: string;
   round: number;
   activeCandidateIds: string[];
+  eliminatedCandidateIds?: string[];
   finalistIds?: string[];
   customPrompt?: string; // Optional custom character prompt description
   historyContext: {
@@ -217,6 +226,7 @@ export interface LLMRequestPayload {
     targetSlogan?: string;
     recentAttacks?: Array<{ attackerName: string; targetName: string; text: string }>;
     recentEliminations?: Array<{ candidateName: string; round: number }>;
+    eliminatedCandidateIds?: string[];
     eliminatedCandidatesSummary?: Array<{ candidateName: string; candidateId: string; round: number; exitWords?: string }>;
     activePact?: { allyId: string; agreedTargetId: string };
     activePactsForVoter?: BackroomPact[];
@@ -236,6 +246,7 @@ export interface LLMRequestPayload {
       accusers: string[];
       voteCalls: string[];
     };
+    candidateWithHighestTreasury?: string; // Leading rival or wealthiest candidate for Gravity Well B
     allDebateHeat?: Record<string, { heatScore: number; accusers: string[] }>;
     betrayalContext?: { 
       wasBetrayed: boolean; 
@@ -272,9 +283,11 @@ export interface LLMRequestPayload {
 export interface LLMResponsePayload {
   text: string;
   voteTargetId?: string;
+  strategyMonologue?: string; // 30-50 word strategic monologue before vote
   targetCandidateId?: string; // Resolved backroom partner/negotiator candidate ID
   agreedTargetId?: string;
   whisperText?: string;
+  receiverResponse?: string; // Receiver's spoken answer (<=10 words)
   privateReason?: string;
   privateStrategy?: string; // Candidate's secret inner strategy
   candidateProfile?: Partial<Candidate>;

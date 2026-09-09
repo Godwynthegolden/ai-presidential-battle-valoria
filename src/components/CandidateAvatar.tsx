@@ -63,6 +63,54 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
 
   const currentSize = sizeMap[size];
 
+  const borderThickness = {
+    xs: isSpeaking || isTarget || isPresident ? 'border-2' : 'border-[1.5px]',
+    sm: isSpeaking || isTarget || isPresident ? 'border-[2.5px]' : 'border-2',
+    md: isSpeaking || isTarget || isPresident ? 'border-[3px]' : 'border-2',
+    lg: isSpeaking || isTarget || isPresident ? 'border-[3.5px]' : 'border-[2.5px]',
+    xl: isSpeaking || isTarget || isPresident ? 'border-4' : 'border-[3px]',
+  }[size];
+
+  const targetRingInset = {
+    xs: '-inset-1',
+    sm: '-inset-1.5',
+    md: '-inset-2',
+    lg: '-inset-2.5',
+    xl: '-inset-3',
+  }[size];
+
+  const targetRingWidth = {
+    xs: 'border-[1.5px]',
+    sm: 'border-2',
+    md: 'border-2',
+    lg: 'border-[2.5px]',
+    xl: 'border-[3px]',
+  }[size];
+
+  const attackBadgePos = {
+    xs: '-top-1 -right-1',
+    sm: '-top-1 -right-1',
+    md: 'top-0 right-0',
+    lg: 'top-0.5 right-0.5',
+    xl: 'top-1 right-1',
+  }[size];
+
+  const budgetBadgePos = {
+    xs: '-top-1 -left-1',
+    sm: '-top-1.5 -left-0.5',
+    md: '-top-1.5 -left-1',
+    lg: '-top-1 -left-0.5',
+    xl: 'top-0.5 left-0.5',
+  }[size];
+
+  const budgetBadgeSize = {
+    xs: 'px-1 py-[0.5px] text-[7px]',
+    sm: 'px-1 py-[0.5px] text-[7.5px]',
+    md: 'px-1.5 py-[1px] text-[8px] tracking-tight',
+    lg: 'px-2 py-0.5 text-[9px]',
+    xl: 'px-2.5 py-0.5 text-[10px]',
+  }[size];
+
   const renderIcon = () => {
     const iconSize = currentSize.icon;
     const isTailwindClass = candidate.color.text?.startsWith('text-');
@@ -123,55 +171,73 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
   };
 
   return (
-    <div className="relative inline-flex items-center justify-center select-none">
+    <div className="relative inline-flex items-center justify-center select-none rounded-full shrink-0">
       {/* Outer Glow / Speaking Pulse */}
       {isSpeaking && (
         <span 
-          className="absolute inset-0 rounded-2xl animate-ping opacity-30 -z-10"
+          className="absolute inset-0 rounded-full animate-ping opacity-30 -z-10 pointer-events-none"
           style={{ backgroundColor: candidate.color.primary }}
         />
       )}
 
       {/* Target Laser Alert Ring */}
       {isTarget && (
-        <span className="absolute -inset-2 rounded-2xl border-2 border-red-500 animate-pulse-glow z-20 pointer-events-none" />
+        <span className={`absolute ${targetRingInset} rounded-full ${targetRingWidth} border-red-500 animate-pulse-glow z-20 pointer-events-none`} />
       )}
 
-      {/* Main Avatar Body (Clips Image/Icon) */}
+      {/* Main Avatar Body (Clips Image/Icon into Perfect Circle) */}
       <div 
-        className={`relative flex items-center justify-center rounded-2xl border overflow-hidden transition-all duration-300 ${currentSize.box} ${
+        className={`relative flex items-center justify-center rounded-full ${borderThickness} overflow-hidden transition-all duration-300 ${currentSize.box} ${
           isEliminated
             ? 'bg-stone-900/90 border-stone-800 opacity-60 grayscale'
             : isSpeaking
-            ? `bg-slate-900 border-2 ${candidate.color.border?.startsWith('border-') ? candidate.color.border : ''} shadow-lg scale-105`
+            ? 'bg-slate-900 shadow-lg scale-105'
             : isPresident
-            ? 'bg-amber-950/80 border-2 border-amber-400 shadow-xl shadow-amber-500/40'
-            : 'bg-slate-900/80 border-slate-700/60 hover:border-slate-500'
+            ? 'bg-amber-950/80 border-amber-400 shadow-xl shadow-amber-500/40'
+            : isTarget
+            ? 'bg-red-950/70 border-red-500 shadow-lg shadow-red-500/30'
+            : 'bg-slate-900/80 border-slate-700/80 hover:border-slate-500'
         }`}
         style={{
-          boxShadow: isSpeaking ? `0 0 20px ${candidate.color.primary}44` : undefined,
-          borderColor: isSpeaking && !candidate.color.border?.startsWith('border-') ? candidate.color.primary : undefined,
+          boxShadow: isEliminated
+            ? undefined
+            : isSpeaking 
+            ? `0 0 25px ${candidate.color.primary}55` 
+            : isTarget 
+            ? '0 0 20px rgba(239, 68, 68, 0.4)' 
+            : isPresident 
+            ? '0 0 25px rgba(245, 158, 11, 0.5)' 
+            : undefined,
+          borderColor: isEliminated
+            ? undefined
+            : isSpeaking 
+            ? (candidate.color.primary || '#06b6d4')
+            : isTarget 
+            ? '#ef4444' 
+            : isPresident 
+            ? '#f59e0b' 
+            : undefined,
         }}
       >
         {/* Background Cyber Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.06),transparent_70%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.06),transparent_70%)] pointer-events-none rounded-full" />
 
         {/* Custom Image or SVG Icon */}
         {candidate.customAvatarUrl ? (
           <img 
             src={candidate.customAvatarUrl} 
             alt={candidate.name} 
-            className={`w-full h-full object-cover rounded-2xl ${isEliminated ? 'grayscale opacity-50' : ''}`} 
+            className={`w-full h-full object-cover rounded-full ${isEliminated ? 'grayscale opacity-50' : ''}`} 
           />
         ) : (
-          <div className="relative z-10">
+          <div className="relative z-10 flex items-center justify-center">
             {renderIcon()}
           </div>
         )}
 
         {/* Eliminated Overlay */}
         {isEliminated && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-2xl backdrop-blur-xs z-20">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-full backdrop-blur-xs z-20">
             <Skull className="text-red-500/80" size={currentSize.icon * 0.9} />
           </div>
         )}
@@ -186,7 +252,7 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
 
       {/* Attack Marker (Placed OUTSIDE overflow-hidden so it never clips) */}
       {isAttacking && showBadge && (
-        <div className="absolute -top-2.5 -right-2.5 bg-red-600 text-white text-[10px] font-display font-black px-2 py-0.5 rounded-full shadow-lg shadow-red-950/80 animate-pulse z-30 pointer-events-none border border-red-400">
+        <div className={`absolute ${attackBadgePos} bg-red-600 text-white text-[10px] font-display font-black px-2 py-0.5 rounded-full shadow-lg shadow-red-950/80 animate-pulse z-30 pointer-events-none border border-red-400`}>
           ATTACK
         </div>
       )}
@@ -207,11 +273,9 @@ export const CandidateAvatar: React.FC<CandidateAvatarProps> = ({
       {/* Live War Chest Budget Badge */}
       {typeof budget === 'number' && !isEliminated && size !== 'xs' && (
         <div 
-          className={`absolute -top-2 -left-2 bg-emerald-950/95 text-emerald-300 border border-emerald-500/50 font-mono font-bold rounded-full shadow-md z-30 pointer-events-none flex items-center gap-0.5 ${
-            size === 'sm' ? 'px-1.5 py-0.2 text-[8px]' : 'px-2 py-0.5 text-[9px]'
-          }`}
+          className={`absolute ${budgetBadgePos} ${budgetBadgeSize} bg-emerald-950/95 text-emerald-300 border border-emerald-500/50 font-mono font-bold rounded-full shadow-md z-30 pointer-events-none flex items-center gap-0.5`}
         >
-          <span className="text-emerald-400 font-extrabold">$</span>{budget}
+          <span className="text-emerald-400 font-extrabold">$</span>{budget}M
         </div>
       )}
     </div>
