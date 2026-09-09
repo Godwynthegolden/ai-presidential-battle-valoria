@@ -2726,6 +2726,15 @@ export function useGameEngine(
           const p2 = CANDIDATE_MAP.get(nextPact.receiverId);
 
           sounds.playCCTVBeep();
+          if (nextPact.id) {
+            audioSync.notifyCctvStarted(nextPact.id);
+          }
+          if (nextPact.whisperText) {
+            audioSync.notifySubtitlesStarted(nextPact.whisperText);
+          }
+          if (nextPact.receiverResponse) {
+            audioSync.notifySubtitlesStarted(nextPact.receiverResponse);
+          }
           playCCTVPactAudio(nextPact);
 
           setState(prev => ({
@@ -4991,21 +5000,40 @@ export function useGameEngine(
       return;
     }
 
-    // 6. Dual-Condition Gate 2: Check if Subtitle Dialogue (100% of kinetic animation) is finished
-    const currentText = state.stage.content || '';
-    if (currentText && !audioSync.isSubtitlesComplete(currentText)) {
-      if (autoPlayTimer.current) {
-        clearTimeout(autoPlayTimer.current);
-        autoPlayTimer.current = null;
-      }
-      return;
-    }
-
-    // 7. CCTV Backroom Dual Speaker Gate: Check if both proposer and receiver completed
+    // 6. Dual-Condition Gate 2: Check if Subtitle Dialogue (100% of kinetic animation) & Character Audio Dialogue is finished
     if (state.phase === 'CCTV_BACKROOM') {
       const pactsThisRound = state.pactsByRound[state.round] || [];
       const currentPact = pactsThisRound[state.currentSpeakerIndex];
-      if (currentPact && !audioSync.isCctvComplete(currentPact.id)) {
+      if (currentPact) {
+        // Proposer whisper subtitle must be 100% finished
+        if (currentPact.whisperText && !audioSync.isSubtitlesComplete(currentPact.whisperText)) {
+          if (autoPlayTimer.current) {
+            clearTimeout(autoPlayTimer.current);
+            autoPlayTimer.current = null;
+          }
+          return;
+        }
+        // Receiver reply subtitle must be 100% finished (if receiver response exists)
+        if (currentPact.receiverResponse && !audioSync.isSubtitlesComplete(currentPact.receiverResponse)) {
+          if (autoPlayTimer.current) {
+            clearTimeout(autoPlayTimer.current);
+            autoPlayTimer.current = null;
+          }
+          return;
+        }
+        // CCTV complete gate (both proposer and receiver dialogue audio & sequencing complete)
+        if (!audioSync.isCctvComplete(currentPact.id)) {
+          if (autoPlayTimer.current) {
+            clearTimeout(autoPlayTimer.current);
+            autoPlayTimer.current = null;
+          }
+          return;
+        }
+      }
+    } else {
+      // Standard Single-Speaker Dialogue Phase Gate (CAMPAIGN, ATTACK, VOTE_CONFESSIONAL, ELIMINATION, FINAL_SPEECHES)
+      const currentText = state.stage.content || '';
+      if (currentText && !audioSync.isSubtitlesComplete(currentText)) {
         if (autoPlayTimer.current) {
           clearTimeout(autoPlayTimer.current);
           autoPlayTimer.current = null;
@@ -5244,6 +5272,15 @@ export function useGameEngine(
 
     sounds.playCCTVBeep();
     const pact = pactsThisRound[feedIndex];
+    if (pact.id) {
+      audioSync.notifyCctvStarted(pact.id);
+    }
+    if (pact.whisperText) {
+      audioSync.notifySubtitlesStarted(pact.whisperText);
+    }
+    if (pact.receiverResponse) {
+      audioSync.notifySubtitlesStarted(pact.receiverResponse);
+    }
     playCCTVPactAudio(pact);
     setState(prev => ({
       ...prev,

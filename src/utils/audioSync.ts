@@ -43,9 +43,9 @@ class AudioSyncService {
   private peakCount: number = 0;
   private lastPeakTime: number = 0;
 
-  // Subtitle & Dialogue Completion Coordination
-  private completedSubtitleText: string = '';
-  private completedCctvPactId: string = '';
+  // Subtitle & Dialogue Completion Coordination (Set-based to handle concurrent multi-speaker subtitles like CCTV)
+  private completedSubtitleTexts: Set<string> = new Set();
+  private completedCctvPactIds: Set<string> = new Set();
   private completionListeners: Set<() => void> = new Set();
 
   private currentState: AudioSyncState = {
@@ -389,8 +389,10 @@ class AudioSyncService {
    */
   public notifySubtitlesComplete(text: string): void {
     if (!text) return;
-    if (this.completedSubtitleText !== text) {
-      this.completedSubtitleText = text;
+    const key = text.trim();
+    if (!key) return;
+    if (!this.completedSubtitleTexts.has(key)) {
+      this.completedSubtitleTexts.add(key);
       this.notifyCompletionListeners();
     }
   }
@@ -399,8 +401,11 @@ class AudioSyncService {
    * Notifies that a new subtitle animation has started for the given dialogue text.
    */
   public notifySubtitlesStarted(text: string): void {
-    if (this.completedSubtitleText === text) {
-      this.completedSubtitleText = '';
+    if (!text) return;
+    const key = text.trim();
+    if (!key) return;
+    if (this.completedSubtitleTexts.has(key)) {
+      this.completedSubtitleTexts.delete(key);
       this.notifyCompletionListeners();
     }
   }
@@ -409,16 +414,28 @@ class AudioSyncService {
    * Checks whether the subtitle animation for the given text has completed 100%.
    */
   public isSubtitlesComplete(text: string): boolean {
-    if (!text) return true;
-    return this.completedSubtitleText === text;
+    if (!text || !text.trim()) return true;
+    return this.completedSubtitleTexts.has(text.trim());
   }
 
   /**
    * Notifies that a CCTV pact's complete conversation (proposer whisper + receiver response) is finished.
    */
   public notifyCctvComplete(pactId: string): void {
-    if (this.completedCctvPactId !== pactId) {
-      this.completedCctvPactId = pactId;
+    if (!pactId) return;
+    if (!this.completedCctvPactIds.has(pactId)) {
+      this.completedCctvPactIds.add(pactId);
+      this.notifyCompletionListeners();
+    }
+  }
+
+  /**
+   * Notifies that a CCTV pact feed has started or restarted.
+   */
+  public notifyCctvStarted(pactId: string): void {
+    if (!pactId) return;
+    if (this.completedCctvPactIds.has(pactId)) {
+      this.completedCctvPactIds.delete(pactId);
       this.notifyCompletionListeners();
     }
   }
@@ -428,7 +445,15 @@ class AudioSyncService {
    */
   public isCctvComplete(pactId: string): boolean {
     if (!pactId) return true;
-    return this.completedCctvPactId === pactId;
+    return this.completedCctvPactIds.has(pactId);
+  }
+
+  /**
+   * Clears completed subtitle and CCTV tracking state.
+   */
+  public clearCompletionState(): void {
+    this.completedSubtitleTexts.clear();
+    this.completedCctvPactIds.clear();
   }
 
   /**

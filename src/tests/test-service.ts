@@ -1757,7 +1757,182 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   if (!canAdvanceStep({ isLoading: false, phase: 'CAMPAIGN', isSpeakingAudio: false, subtitlesComplete: true, cctvComplete: true, isPaused: false })) {
     throw new Error('Expected step advance when BOTH audio and subtitles have 100% finished!');
   }
-  console.log('5. Dual-Condition Gate (Audio finished + Subtitles 100% finished) simulation PASSED!');
+  // 6. CCTV Multi-Speaker Concurrent Subtitles Verification
+  // In CCTV, proposer whisper and receiver reply are rendered simultaneously.
+  // Neither one must overwrite the other in AudioSync completion tracking!
+  const cctvWhisper = "Arthur, let us combine our delegates to purge Elena from the ballot.";
+  const cctvReply = "I agree. Let us do it.";
+  audioSync.notifySubtitlesStarted(cctvWhisper);
+  audioSync.notifySubtitlesStarted(cctvReply);
+  if (audioSync.isSubtitlesComplete(cctvWhisper) || audioSync.isSubtitlesComplete(cctvReply)) {
+    throw new Error('Neither whisper nor reply should be complete immediately upon starting!');
+  }
+  // Proposer finishes first
+  audioSync.notifySubtitlesComplete(cctvWhisper);
+  if (!audioSync.isSubtitlesComplete(cctvWhisper)) {
+    throw new Error('Proposer whisper should be complete after notifySubtitlesComplete!');
+  }
+  if (audioSync.isSubtitlesComplete(cctvReply)) {
+    throw new Error('Receiver reply should still be incomplete while only proposer has finished!');
+  }
+  // Receiver finishes second
+  audioSync.notifySubtitlesComplete(cctvReply);
+  if (!audioSync.isSubtitlesComplete(cctvReply)) {
+    throw new Error('Receiver reply should be complete after notifySubtitlesComplete!');
+  }
+  // CRITICAL REGRESSION TEST: Proposer whisper must STILL be complete! It must not have been overwritten!
+  if (!audioSync.isSubtitlesComplete(cctvWhisper)) {
+    throw new Error('REGRESSION: Proposer whisper was overwritten by receiver reply in audioSync!');
+  }
+  console.log('6. CCTV Multi-Speaker Concurrent Subtitles & Non-Destructive Retention PASSED!');
+
+  // 7. Multi-Feed CCTV Auto-Next Progression & Reset Simulation
+  const feed1Id = 'cctv-feed-1';
+  const feed2Id = 'cctv-feed-2';
+  audioSync.notifyCctvStarted(feed1Id);
+  audioSync.notifyCctvStarted(feed2Id);
+  if (audioSync.isCctvComplete(feed1Id) || audioSync.isCctvComplete(feed2Id)) {
+    throw new Error('Neither CCTV feed should be marked complete initially');
+  }
+  audioSync.notifyCctvComplete(feed1Id);
+  if (!audioSync.isCctvComplete(feed1Id)) {
+    throw new Error('Feed 1 should be complete after notifyCctvComplete');
+  }
+  if (audioSync.isCctvComplete(feed2Id)) {
+    throw new Error('Feed 2 should still be incomplete');
+  }
+  audioSync.notifyCctvComplete(feed2Id);
+  if (!audioSync.isCctvComplete(feed2Id) || !audioSync.isCctvComplete(feed1Id)) {
+    throw new Error('Both Feed 1 and Feed 2 should be complete');
+  }
+  // Replaying Feed 1 resets Feed 1 while leaving Feed 2 intact
+  audioSync.notifyCctvStarted(feed1Id);
+  if (audioSync.isCctvComplete(feed1Id)) {
+    throw new Error('Replayed Feed 1 should be reset to incomplete');
+  }
+  if (!audioSync.isCctvComplete(feed2Id)) {
+    throw new Error('Feed 2 should remain complete during Feed 1 replay');
+  }
+  console.log('7. Multi-Feed CCTV Auto-Next Progression & Replay Isolation PASSED!');
+
+  // 8. Whole-Game Auto-Next State Machine Pipeline (Start to Finish)
+  // Simulates every single phase from IDLE -> CAMPAIGN -> ATTACK -> CCTV Feeds ->
+  // VOTE_CONFESSIONAL -> VOTE_REVEAL -> ELIMINATION -> FINAL_SPEECHES -> FINAL_REVEAL -> WINNER
+  interface GameStepSim {
+    phase: string;
+    stepLabel: string;
+    whisperText?: string;
+    replyText?: string;
+    text?: string;
+    pactId?: string;
+  }
+
+  const wholeGameWorkflow: GameStepSim[] = [
+    { phase: 'CAMPAIGN', stepLabel: 'Round 1 Campaign: Arthur', text: 'I promise economic growth.' },
+    { phase: 'CAMPAIGN', stepLabel: 'Round 1 Campaign: Alvarez', text: 'Power to the workers!' },
+    { phase: 'CAMPAIGN', stepLabel: 'Round 1 Campaign: Elena', text: 'Data-driven governance.' },
+    { phase: 'CAMPAIGN', stepLabel: 'Round 1 Campaign: Vance', text: 'Security and order.' },
+    { phase: 'ATTACK', stepLabel: 'Round 1 Attack: Arthur vs Alvarez', text: 'Alvarez will bankrupt us.' },
+    { phase: 'ATTACK', stepLabel: 'Round 1 Attack: Alvarez vs Elena', text: 'Elena ignores human heart.' },
+    { phase: 'CCTV_BACKROOM', stepLabel: 'Round 1 CCTV Feed 1', pactId: 'pact-r1-feed1', whisperText: 'Let us coordinate.', replyText: 'Deal accepted.' },
+    { phase: 'CCTV_BACKROOM', stepLabel: 'Round 1 CCTV Feed 2', pactId: 'pact-r1-feed2', whisperText: 'I offer $15M bribe.', replyText: 'Refused.' },
+    { phase: 'VOTE_CONFESSIONAL', stepLabel: 'Round 1 Confessional: Arthur', text: 'I am voting for Alvarez.' },
+    { phase: 'VOTE_CONFESSIONAL', stepLabel: 'Round 1 Confessional: Alvarez', text: 'Arthur will pay.' },
+    { phase: 'VOTE_REVEAL', stepLabel: 'Round 1 Ballot & Bailout Reveal' }, // Handled by VoteRevealBoard
+    { phase: 'ELIMINATION', stepLabel: 'Round 1 Elimination Speech: Elena', text: 'History will judge this nation.' },
+    { phase: 'FINAL_SPEECHES', stepLabel: 'Final 3: Arthur', text: 'Make Valoria proud.' },
+    { phase: 'FINAL_SPEECHES', stepLabel: 'Final 3: Alvarez', text: 'For the ordinary people.' },
+    { phase: 'FINAL_SPEECHES', stepLabel: 'Final 3: Vance', text: 'Strength and vigilance.' },
+    { phase: 'FINAL_REVEAL', stepLabel: 'Grand Jury Final Reveal' }, // Handled by VoteRevealBoard
+    { phase: 'WINNER', stepLabel: 'Winner Podium: Arthur Inaugural', text: 'Thank you citizens of Valoria!' },
+  ];
+
+  let currentStepIdx = 0;
+  while (currentStepIdx < wholeGameWorkflow.length) {
+    const step = wholeGameWorkflow[currentStepIdx];
+    if (step.phase === 'WINNER') {
+      // Auto-Next MUST halt on WINNER podium!
+      const canAdvanceWinner = canAdvanceStep({
+        isLoading: false,
+        phase: 'WINNER',
+        isSpeakingAudio: false,
+        subtitlesComplete: true,
+        cctvComplete: true,
+        isPaused: false,
+      });
+      if (canAdvanceWinner) {
+        throw new Error('Auto-Next must halt on WINNER podium!');
+      }
+      break;
+    }
+
+    if (step.phase === 'VOTE_REVEAL' || step.phase === 'FINAL_REVEAL') {
+      // Self-driving board advances on complete
+      currentStepIdx += 1;
+      continue;
+    }
+
+    if (step.phase === 'CCTV_BACKROOM') {
+      // 1. Initially whisper and reply are started (incomplete)
+      audioSync.notifySubtitlesStarted(step.whisperText!);
+      if (step.replyText) audioSync.notifySubtitlesStarted(step.replyText);
+      audioSync.notifyCctvStarted(step.pactId!);
+
+      // Audio playing -> must not advance
+      const advanceAudioPlaying = canAdvanceStep({
+        isLoading: false,
+        phase: 'CCTV_BACKROOM',
+        isSpeakingAudio: true,
+        subtitlesComplete: false,
+        cctvComplete: false,
+        isPaused: false,
+      });
+      if (advanceAudioPlaying) throw new Error(`Auto-Next incorrectly advanced while CCTV audio playing in ${step.stepLabel}`);
+
+      // Proposer done, receiver not done -> must not advance
+      audioSync.notifySubtitlesComplete(step.whisperText!);
+      const advanceHalfway = canAdvanceStep({
+        isLoading: false,
+        phase: 'CCTV_BACKROOM',
+        isSpeakingAudio: false,
+        subtitlesComplete: audioSync.isSubtitlesComplete(step.whisperText!) && (!step.replyText || audioSync.isSubtitlesComplete(step.replyText)),
+        cctvComplete: audioSync.isCctvComplete(step.pactId!),
+        isPaused: false,
+      });
+      if (advanceHalfway) throw new Error(`Auto-Next incorrectly advanced when only proposer completed in ${step.stepLabel}`);
+
+      // Both done -> must advance
+      if (step.replyText) audioSync.notifySubtitlesComplete(step.replyText);
+      audioSync.notifyCctvComplete(step.pactId!);
+      const advanceBothDone = canAdvanceStep({
+        isLoading: false,
+        phase: 'CCTV_BACKROOM',
+        isSpeakingAudio: false,
+        subtitlesComplete: audioSync.isSubtitlesComplete(step.whisperText!) && (!step.replyText || audioSync.isSubtitlesComplete(step.replyText!)),
+        cctvComplete: audioSync.isCctvComplete(step.pactId!),
+        isPaused: false,
+      });
+      if (!advanceBothDone) throw new Error(`Auto-Next failed to advance when both completed in ${step.stepLabel}`);
+
+      currentStepIdx += 1;
+      continue;
+    }
+
+    // Standard single-speaker step
+    audioSync.notifySubtitlesStarted(step.text!);
+    audioSync.notifySubtitlesComplete(step.text!);
+    const advanceStandard = canAdvanceStep({
+      isLoading: false,
+      phase: step.phase,
+      isSpeakingAudio: false,
+      subtitlesComplete: audioSync.isSubtitlesComplete(step.text!),
+      cctvComplete: true,
+      isPaused: false,
+    });
+    if (!advanceStandard) throw new Error(`Auto-Next failed to advance in ${step.stepLabel}`);
+    currentStepIdx += 1;
+  }
+  console.log('8. Whole-Game Auto-Next State Machine Pipeline (Start to Finish) PASSED!');
 
   console.log('\nAll unit tests for Among Us Emergency Meeting, Debate Engine, Kinetic Subtitles & Auto-Next PASSED successfully!');
 }

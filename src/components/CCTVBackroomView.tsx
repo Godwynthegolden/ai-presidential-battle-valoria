@@ -82,20 +82,38 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
 
   const displayedPact = pact || allPactsThisRound[activeFeedIndex] || allPactsThisRound[0];
 
-  const [activeSpeaker, setActiveSpeaker] = useState<'proposer' | 'receiver' | null>(null);
+  const [activeSpeaker, setActiveSpeaker] = useState<'proposer' | 'receiver' | null>('proposer');
   const [proposerCompleted, setProposerCompleted] = useState<boolean>(false);
   const [receiverCompleted, setReceiverCompleted] = useState<boolean>(false);
   const [receiverProgress, setReceiverProgress] = useState<number>(0);
   const [isReceiverMidway, setIsReceiverMidway] = useState<boolean>(false);
   const [replayCount, setReplayCount] = useState<number>(0);
+  const [completionTick, setCompletionTick] = useState<number>(0);
 
-  // When active feed or pact changes, reset sequencing state
+  // Subscribe to AudioSync completion events so CCTV state recalculates as soon as subtitles finish
   useEffect(() => {
-    setActiveSpeaker(null);
+    const unsub = audioSync.subscribeCompletion(() => {
+      setCompletionTick(c => c + 1);
+    });
+    return () => unsub();
+  }, []);
+
+  // When active feed or pact changes, reset sequencing state and prepare clean sync state
+  useEffect(() => {
+    setActiveSpeaker('proposer');
     setProposerCompleted(false);
     setReceiverCompleted(false);
     setReceiverProgress(0);
     setIsReceiverMidway(false);
+    if (displayedPact?.id) {
+      audioSync.notifyCctvStarted(displayedPact.id);
+      if (displayedPact.whisperText) {
+        audioSync.notifySubtitlesStarted(displayedPact.whisperText);
+      }
+      if (displayedPact.receiverResponse) {
+        audioSync.notifySubtitlesStarted(displayedPact.receiverResponse);
+      }
+    }
   }, [displayedPact?.id, activeFeedIndex]);
 
   // Track active speaker in the CCTV dialogue sequence via audioSync
@@ -167,18 +185,21 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
     }
   }, [displayedPact, isSpeakingAudio, proposerCompleted, receiverCompleted]);
 
-  // Notify audioSync when the entire CCTV pact conversation (proposer + receiver) has 100% finished
+  // Notify audioSync when the entire CCTV pact conversation (proposer whisper + receiver response + subtitles) has 100% finished
   useEffect(() => {
-    if (!displayedPact) return;
+    if (!displayedPact?.id) return;
     const hasReceiver = Boolean(displayedPact.receiverResponse);
+    const proposerSubsDone = audioSync.isSubtitlesComplete(displayedPact.whisperText);
+    const receiverSubsDone = !hasReceiver || audioSync.isSubtitlesComplete(displayedPact.receiverResponse!);
+
     const isFinished = hasReceiver
-      ? (proposerCompleted && receiverCompleted && !isSpeakingAudio)
-      : (proposerCompleted && !isSpeakingAudio);
+      ? (proposerCompleted && receiverCompleted && !isSpeakingAudio && proposerSubsDone && receiverSubsDone)
+      : (proposerCompleted && !isSpeakingAudio && proposerSubsDone);
 
     if (isFinished) {
       audioSync.notifyCctvComplete(displayedPact.id);
     }
-  }, [displayedPact, proposerCompleted, receiverCompleted, isSpeakingAudio]);
+  }, [displayedPact, proposerCompleted, receiverCompleted, isSpeakingAudio, completionTick]);
 
   // Derived speaker states for dialogue boxes
   const isProposerSpeaking = !proposerCompleted && (
@@ -401,6 +422,11 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                     setIsReceiverMidway(false);
                     setActiveSpeaker('proposer');
                     setReplayCount(c => c + 1);
+                    if (displayedPact?.id) {
+                      audioSync.notifyCctvStarted(displayedPact.id);
+                      if (displayedPact.whisperText) audioSync.notifySubtitlesStarted(displayedPact.whisperText);
+                      if (displayedPact.receiverResponse) audioSync.notifySubtitlesStarted(displayedPact.receiverResponse);
+                    }
                     if (onPlayCCTVPactAudio) {
                       onPlayCCTVPactAudio(displayedPact);
                     } else if (onPlaySpeechAudio) {
