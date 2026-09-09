@@ -367,7 +367,9 @@ export const KineticDialogueBox: React.FC<KineticDialogueBoxProps> = ({
               } ${
                 token.isCritical && highlightCritical
                   ? `px-1.5 py-0.5 rounded-lg border ${styles.badgeBg} ${styles.badgeBorder} ${styles.textColor} ${
-                      isActive ? `${styles.glowShadow} ${styles.activeColor} ring-2 ring-white/60` : ''
+                      isActive 
+                        ? `${styles.glowShadow} ${styles.activeColor} ring-2 ring-white/70` 
+                        : styles.ambientShadow
                     } uppercase tracking-tight`
                   : isActive
                   ? `text-white font-extrabold ${styles.glowShadow} underline decoration-cyan-400 decoration-2 underline-offset-4`
@@ -381,8 +383,10 @@ export const KineticDialogueBox: React.FC<KineticDialogueBoxProps> = ({
                   : undefined,
                 textShadow: isActive
                   ? token.isCritical && highlightCritical
-                    ? `0 0 ${(12 + vocalEnergy * 10).toFixed(0)}px currentColor, 0 2px 4px rgba(0,0,0,0.8)`
+                    ? `0 0 ${(14 + vocalEnergy * 12).toFixed(0)}px ${styles.accentHex}, 0 0 28px ${styles.accentHex}99, 0 2px 4px rgba(0,0,0,0.9)`
                     : `0 0 ${(8 + vocalEnergy * 8).toFixed(0)}px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.8)`
+                  : token.isCritical && highlightCritical
+                  ? `0 0 8px ${styles.accentHex}55, 0 1px 2px rgba(0,0,0,0.7)`
                   : undefined,
               }}
             >

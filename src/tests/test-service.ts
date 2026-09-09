@@ -1236,7 +1236,8 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
     throw new Error(`cleanWordToken failed on '"$40M!"': got ${cleanWordToken('"$40M!"')}`);
   }
 
-  // Critical words specifically requested by user: ("BRIBE", "LIES", "$40M", "CORRUPT")
+  // Critical words specifically requested by user across 7 Republic of Valoria themes:
+  // 1. Money & Bribes
   if (classifyWord('BRIBE') !== 'money') {
     throw new Error(`classifyWord('BRIBE') expected 'money', got ${classifyWord('BRIBE')}`);
   }
@@ -1246,31 +1247,90 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   if (classifyWord('$20') !== 'money') {
     throw new Error(`classifyWord('$20') expected 'money', got ${classifyWord('$20')}`);
   }
-  if (classifyWord('LIES') !== 'corruption') {
-    throw new Error(`classifyWord('LIES') expected 'corruption', got ${classifyWord('LIES')}`);
+  if (classifyWord('BAILOUT') !== 'money') {
+    throw new Error(`classifyWord('BAILOUT') expected 'money', got ${classifyWord('BAILOUT')}`);
   }
+  if (classifyWord('SLUSH') !== 'money') {
+    throw new Error(`classifyWord('SLUSH') expected 'money', got ${classifyWord('SLUSH')}`);
+  }
+
+  // 2. Espionage & CCTV
+  if (classifyWord('CCTV') !== 'espionage') {
+    throw new Error(`classifyWord('CCTV') expected 'espionage', got ${classifyWord('CCTV')}`);
+  }
+  if (classifyWord('WIRETAPPED') !== 'espionage') {
+    throw new Error(`classifyWord('WIRETAPPED') expected 'espionage', got ${classifyWord('WIRETAPPED')}`);
+  }
+  if (classifyWord('DOSSIERS') !== 'espionage') {
+    throw new Error(`classifyWord('DOSSIERS') expected 'espionage', got ${classifyWord('DOSSIERS')}`);
+  }
+
+  // 3. Deception & Hypocrisy
+  if (classifyWord('LIES') !== 'deception') {
+    throw new Error(`classifyWord('LIES') expected 'deception', got ${classifyWord('LIES')}`);
+  }
+  if (classifyWord('HYPOCRITE') !== 'deception') {
+    throw new Error(`classifyWord('HYPOCRITE') expected 'deception', got ${classifyWord('HYPOCRITE')}`);
+  }
+  if (classifyWord('PUPPETS') !== 'deception') {
+    throw new Error(`classifyWord('PUPPETS') expected 'deception', got ${classifyWord('PUPPETS')}`);
+  }
+  if (classifyWord('SHAM') !== 'deception') {
+    throw new Error(`classifyWord('SHAM') expected 'deception', got ${classifyWord('SHAM')}`);
+  }
+
+  // 4. Corruption & Treason
   if (classifyWord('CORRUPT') !== 'corruption') {
     throw new Error(`classifyWord('CORRUPT') expected 'corruption', got ${classifyWord('CORRUPT')}`);
   }
   if (classifyWord('BETRAYAL') !== 'corruption') {
     throw new Error(`classifyWord('BETRAYAL') expected 'corruption', got ${classifyWord('BETRAYAL')}`);
   }
+  if (classifyWord('TREASON') !== 'corruption') {
+    throw new Error(`classifyWord('TREASON') expected 'corruption', got ${classifyWord('TREASON')}`);
+  }
+  if (classifyWord('EMBEZZLEMENT') !== 'corruption') {
+    throw new Error(`classifyWord('EMBEZZLEMENT') expected 'corruption', got ${classifyWord('EMBEZZLEMENT')}`);
+  }
+
+  // 5. Danger & Elimination
   if (classifyWord('ELIMINATE') !== 'danger') {
     throw new Error(`classifyWord('ELIMINATE') expected 'danger', got ${classifyWord('ELIMINATE')}`);
   }
+  if (classifyWord('TERMINATED') !== 'danger') {
+    throw new Error(`classifyWord('TERMINATED') expected 'danger', got ${classifyWord('TERMINATED')}`);
+  }
+  if (classifyWord('DOOMED') !== 'danger') {
+    throw new Error(`classifyWord('DOOMED') expected 'danger', got ${classifyWord('DOOMED')}`);
+  }
+
+  // 6. Constitution & Republic
   if (classifyWord('CONSTITUTION') !== 'constitution') {
     throw new Error(`classifyWord('CONSTITUTION') expected 'constitution', got ${classifyWord('CONSTITUTION')}`);
   }
-  if (classifyWord('CHECKMATE') !== 'power') {
-    throw new Error(`classifyWord('CHECKMATE') expected 'power', got ${classifyWord('CHECKMATE')}`);
+  if (classifyWord('UNCONSTITUTIONAL') !== 'constitution') {
+    throw new Error(`classifyWord('UNCONSTITUTIONAL') expected 'constitution', got ${classifyWord('UNCONSTITUTIONAL')}`);
   }
   if (classifyWord('VALORIA') !== 'constitution') {
     throw new Error(`classifyWord('VALORIA') expected 'constitution', got ${classifyWord('VALORIA')}`);
   }
+
+  // 7. Tactical Power & Calculations
+  if (classifyWord('CHECKMATE') !== 'power') {
+    throw new Error(`classifyWord('CHECKMATE') expected 'power', got ${classifyWord('CHECKMATE')}`);
+  }
+  if (classifyWord('MASTERMIND') !== 'power') {
+    throw new Error(`classifyWord('MASTERMIND') expected 'power', got ${classifyWord('MASTERMIND')}`);
+  }
+  if (classifyWord('DICTATOR') !== 'power') {
+    throw new Error(`classifyWord('DICTATOR') expected 'power', got ${classifyWord('DICTATOR')}`);
+  }
+
+  // Neutral / Non-critical
   if (classifyWord('THE') !== 'none') {
     throw new Error(`classifyWord('THE') expected 'none', got ${classifyWord('THE')}`);
   }
-  console.log('1. Semantic Critical Word Classification ("BRIBE", "LIES", "$40M", "CORRUPT") PASSED!');
+  console.log('1. 7-Theme Semantic Critical Word Classification & Stem Matching PASSED!');
 
   // 2. Tokenize speech with weighted ratios
   const sampleSpeech = 'I offered a $40M BRIBE to expose their CORRUPT LIES and defend the CONSTITUTION!';

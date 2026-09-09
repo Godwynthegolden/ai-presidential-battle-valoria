@@ -31,6 +31,7 @@ import {
   FastForward
 } from 'lucide-react';
 import { KineticDialogueBox } from './KineticDialogueBox';
+import { CATEGORY_STYLES, CriticalWordCategory } from '../utils/kineticSubtitles';
 
 export interface NineRouterConfigState {
   baseUrl: string;
@@ -995,26 +996,61 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
             </div>
 
             {/* 2. Critical Words Highlighting Switch */}
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                  <Banknote className="w-3.5 h-3.5 text-amber-400" /> Critical Words Thematic Glow
-                </span>
-                <span className="text-[11px] text-slate-400 font-mono">
-                  Highlight high-impact words (&ldquo;BRIBE&rdquo;, &ldquo;LIES&rdquo;, &ldquo;$40M&rdquo;, &ldquo;CORRUPT&rdquo;) in glowing badges.
-                </span>
+            <div className="flex flex-col p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <Banknote className="w-3.5 h-3.5 text-amber-400" /> Critical Words Thematic Glow
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    Highlight political keywords across 7 themes with ambient glow and voice-reactive luminescence.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setKineticHighlightCriticalWords(!kineticHighlightCriticalWords)}
+                  className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition cursor-pointer ${
+                    kineticHighlightCriticalWords
+                      ? 'bg-amber-600 text-white shadow-md'
+                      : 'bg-slate-900 text-slate-400 border border-slate-800'
+                  }`}
+                >
+                  {kineticHighlightCriticalWords ? 'ON' : 'OFF'}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setKineticHighlightCriticalWords(!kineticHighlightCriticalWords)}
-                className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition cursor-pointer ${
-                  kineticHighlightCriticalWords
-                    ? 'bg-amber-600 text-white shadow-md'
-                    : 'bg-slate-900 text-slate-400 border border-slate-800'
-                }`}
-              >
-                {kineticHighlightCriticalWords ? 'ON' : 'OFF'}
-              </button>
+
+              {/* 7 Thematic Glow Categories Palette */}
+              {kineticHighlightCriticalWords && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-2 border-t border-slate-800/80">
+                  {[
+                    { cat: 'money', icon: '💰', title: 'Finance', examples: '$40M, Bribe, Slush' },
+                    { cat: 'espionage', icon: '🕵️', title: 'CCTV / Leaks', examples: 'Tapes, Wiretaps' },
+                    { cat: 'deception', icon: '🎭', title: 'Deception', examples: 'Lies, Sham, Puppet' },
+                    { cat: 'corruption', icon: '🩸', title: 'Corruption', examples: 'Treason, Cartel' },
+                    { cat: 'danger', icon: '🔥', title: 'Danger', examples: 'Eliminate, Fatal' },
+                    { cat: 'constitution', icon: '⚖️', title: 'Republic', examples: 'Valoria, Ballot' },
+                    { cat: 'power', icon: '👑', title: 'Power', examples: 'Checkmate, Command' },
+                  ].map((theme) => {
+                    const style = CATEGORY_STYLES[theme.cat as CriticalWordCategory];
+                    return (
+                      <div
+                        key={theme.cat}
+                        className={`px-2 py-1.5 rounded-lg border flex flex-col gap-0.5 ${style.badgeBg} ${style.badgeBorder} ${style.ambientShadow}`}
+                      >
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs">{theme.icon}</span>
+                          <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${style.textColor}`}>
+                            {theme.title}
+                          </span>
+                        </div>
+                        <span className="text-[9px] font-mono text-slate-300 truncate">
+                          {theme.examples}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* 3. Dynamic Dialogue Box Resizing */}
@@ -1093,7 +1129,7 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
               <div className="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800">
                 <KineticDialogueBox
                   key={`preview-${previewSpeaking ? 'speaking' : 'idle'}-${kineticFontSize}-${kineticHighlightCriticalWords}`}
-                  text="I offered a $40M BRIBE to expose their CORRUPT LIES and defend the CONSTITUTION!"
+                  text="Citizens of VALORIA! I uncovered CCTV TAPES exposing their $40M BRIBE, their SHAM LIES, and the CORRUPT CABAL plotting to ELIMINATE our CONSTITUTION — this is CHECKMATE!"
                   isSpeaking={previewSpeaking}
                   enabled={kineticSubtitlesEnabled}
                   highlightCritical={kineticHighlightCriticalWords}

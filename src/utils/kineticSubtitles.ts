@@ -11,11 +11,13 @@
  */
 
 export type CriticalWordCategory = 
-  | 'money'        // Gold/Amber: $40M, BRIBE, TREASURY, BAILOUT, etc.
-  | 'corruption'   // Crimson/Red: LIES, CORRUPT, BETRAYAL, FRAUD, etc.
-  | 'danger'       // Flame Orange: ELIMINATE, TERMINATE, DESTROY, etc.
-  | 'constitution' // Electric Cyan: CONSTITUTION, REPUBLIC, VOTE, PACT, etc.
-  | 'power'        // Radiant Violet: POWER, CHECKMATE, CALCULATION, etc.
+  | 'money'        // Radiant Gold: $40M, $20, BRIBE, TREASURY, BAILOUT, SLUSH, WARCHEST, etc.
+  | 'espionage'    // Matrix Emerald: CCTV, WIRETAP, DOSSIER, SURVEILLANCE, TAPES, CLASSIFIED, LEAK, etc.
+  | 'deception'    // Neon Fuchsia / Pink: LIES, LIAR, SHAM, HYPOCRITE, PROPAGANDA, PUPPET, PHONY, etc.
+  | 'corruption'   // Blood Crimson / Red: CORRUPT, TREASON, TRAITOR, CABAL, EXTORTION, CARTEL, FELON, etc.
+  | 'danger'       // Molten Lava / Orange: ELIMINATE, TERMINATE, DESTROY, CHOPPING BLOCK, FATAL, DOOMED, etc.
+  | 'constitution' // Electric Cyan: CONSTITUTION, REPUBLIC, VALORIA, SOVEREIGN, VOTE, BALLOT, JUSTICE, etc.
+  | 'power'        // Royal Amethyst / Purple: CHECKMATE, MASTERMIND, COMMAND, DICTATOR, RUTHLESS, VICTORY, etc.
   | 'none';
 
 export interface KineticWordToken {
@@ -32,58 +34,108 @@ export interface KineticWordToken {
   endTime?: number;       // Expected end timestamp in seconds (when duration is available)
 }
 
-// 1. Money & Bribes ($40M, Bribe, Treasury, Cash)
-const MONEY_PATTERN = /^\$?\d+([.,]\d+)?[kKmMbB]?\$?$|^(\$\d+)/;
+// 1. Money & Bribes ($40M, $20, Bribe, Treasury, Slush Fund, Bailout)
+const MONEY_PATTERN = /^\$?\d+([.,]\d+)?[kKmMbB%]?\$?$|^(\$\d+)/;
+const MONEY_STEM = /^(BRIB|BAILOUT|BUYOUT|WARCHEST|SLUSH|AUCTION|RANSOM)/;
 const MONEY_KEYWORDS = new Set([
   'BRIBE', 'BRIBES', 'BRIBED', 'BRIBING', 'BRIBERY',
   'MONEY', 'DOLLARS', 'DOLLAR', 'CASH', 'TREASURY',
   'BAILOUT', 'BAILOUTS', 'BUYOUT', 'BUYOUTS',
   'MILLION', 'MILLIONS', 'BILLION', 'BILLIONS',
   'ESCROW', 'FUNDING', 'BUDGET', 'FUNDS', 'PRICE',
-  'WARCHEST', 'BANK', 'ACCOUNTS', 'ASSETS', 'OFFSHORE'
+  'WARCHEST', 'BANK', 'BANKS', 'ACCOUNTS', 'ASSETS', 'OFFSHORE',
+  'FINANCE', 'FINANCIAL', 'PAYOFF', 'PAYOFFS', 'COLLATERAL', 'SLUSH',
+  'DEFICIT', 'DIVIDENDS', 'OLIGARCH', 'OLIGARCHS', 'WEALTH', 'CURRENCY',
+  'AUCTION', 'BID', 'BIDS', 'BOUNTY', 'RANSOM'
 ]);
 
-// 2. Corruption & Lies (Lies, Corrupt, Betrayal, Treason)
-const CORRUPTION_KEYWORDS = new Set([
+// 2. Espionage & CCTV Leaks (CCTV, Wiretaps, Audio Tapes, Classified Dossiers)
+const ESPIONAGE_STEM = /^(SURVEILL|WIRETAP|DOSSIER|INTERCEPT|EAVESDROP|BLACKMAIL|BACKROOM|CLOAKROOM)/;
+const ESPIONAGE_KEYWORDS = new Set([
+  'CCTV', 'CAMERA', 'CAMERAS', 'WIRETAP', 'WIRETAPS', 'WIRETAPPED', 'WIRETAPPING',
+  'LEAK', 'LEAKS', 'LEAKED', 'LEAKING', 'DOSSIER', 'DOSSIERS',
+  'SURVEILLANCE', 'SURVEIL', 'SURVEILLED', 'SPY', 'SPIES', 'SPYING',
+  'AUDIO', 'TAPE', 'TAPES', 'RECORDING', 'RECORDINGS', 'RECORDED',
+  'CLASSIFIED', 'BUGGED', 'INTERCEPT', 'INTERCEPTED', 'INTERCEPTING',
+  'CLOAKROOM', 'BACKROOM', 'FOOTAGE', 'COVERT', 'BLACKMAIL', 'BLACKMAILED',
+  'SECRET', 'SECRETS', 'EXPOSED', 'CAUGHT', 'EAVESDROP', 'EAVESDROPPING'
+]);
+
+// 3. Deception & Hypocrisy (Lies, Liar, Sham, Hypocrite, Puppet, Propaganda)
+const DECEPTION_STEM = /^(HYPOCRI|DECEIV|DECEPT|PUPPET|FABRICAT|PROPAGAND)/;
+const DECEPTION_KEYWORDS = new Set([
   'LIE', 'LIES', 'LIAR', 'LIARS', 'LYING',
-  'CORRUPT', 'CORRUPTION', 'DIRTY',
+  'SHAM', 'PHONY', 'PHONIES',
+  'HYPOCRITE', 'HYPOCRITES', 'HYPOCRITICAL', 'HYPOCRISY',
+  'PROPAGANDA', 'BLUFF', 'BLUFFING', 'BLUFFS',
+  'FACADE', 'PUPPET', 'PUPPETS', 'PUPPETEER',
+  'FAKE', 'FRAUD', 'FRAUDS', 'FRAUDULENT',
+  'DECEIT', 'DECEIVE', 'DECEIVED', 'DECEIVING', 'DECEPTION',
+  'SNAKE', 'SNAKES', 'COWARD', 'COWARDS', 'TWO-FACED',
+  'HOAX', 'FABRICATE', 'FABRICATED', 'FABRICATION', 'DISGRACE'
+]);
+
+// 4. Corruption, High Treason & Cabals (Treason, Cartel, Extortion, Crime)
+const CORRUPTION_STEM = /^(CORRUPT|TREASON|TRAITOR|BETRAY|EXTORT|COLLUD|IMPEACH|EMBEZZL|CONSPIR)/;
+const CORRUPTION_KEYWORDS = new Set([
+  'CORRUPT', 'CORRUPTION', 'CORRUPTED', 'CORRUPTING',
+  'TREASON', 'TREASONOUS', 'TRAITOR', 'TRAITORS',
   'BETRAY', 'BETRAYAL', 'BETRAYED', 'BETRAYING', 'BETRAYER', 'BETRAYERS',
-  'SCANDAL', 'FRAUD', 'FRAUDULENT', 'TREASON', 'TRAITOR', 'TRAITORS',
-  'CRIMINAL', 'FELON', 'FELONY', 'EXTORTION', 'STAB', 'BACKSTAB',
-  'SHAM', 'GUILTY', 'THIEF', 'THIEVES', 'GREED', 'SELLOUT', 'FORFEIT',
-  'WIRETAP', 'LEAK', 'LEAKED', 'CONSPIRACY', 'SUBPOENA'
+  'CABAL', 'CARTEL', 'CARTELS', 'SYNDICATE',
+  'CRIME', 'CRIMINAL', 'CRIMINALS', 'FELON', 'FELONS', 'FELONY',
+  'EXTORT', 'EXTORTION', 'EXTORTED', 'EXTORTING',
+  'BACKSTAB', 'BACKSTABBING', 'BACKSTABBER',
+  'THIEF', 'THIEVES', 'STEAL', 'STEALING', 'STOLEN',
+  'COLLUSION', 'COLLUDE', 'COLLUDED', 'COLLUDING',
+  'SUBPOENA', 'SUBPOENAS', 'SUBPOENAED',
+  'IMPEACH', 'IMPEACHED', 'IMPEACHMENT',
+  'EMBEZZLE', 'EMBEZZLED', 'EMBEZZLING', 'EMBEZZLEMENT',
+  'CONSPIRACY', 'CONSPIRATOR', 'CONSPIRATORS', 'CONSPIRE',
+  'DIRTY', 'GUILTY', 'GREED', 'SELLOUT'
 ]);
 
-// 3. Danger, Elimination & Destruction
+// 5. Danger, Elimination & Destruction (Eliminate, Terminate, Chopping Block)
+const DANGER_STEM = /^(ELIMINAT|TERMINAT|DESTRUCT|EXECU|ANNIHILAT|FATAL|DOOMED|COLLAPS)/;
 const DANGER_KEYWORDS = new Set([
-  'ELIMINATE', 'ELIMINATED', 'ELIMINATION', 'ELIMINATING',
-  'TERMINATE', 'TERMINATED', 'TERMINATION',
-  'DESTROY', 'DESTROYED', 'CRUSH', 'CRUSHED',
-  'CHOPPING', 'BLOCK', 'FATAL', 'FATALITY', 'EXECUTE', 'EXECUTED',
-  'DEAD', 'DEATH', 'FALL', 'FALLEN', 'DISASTER', 'THREAT', 'ENEMY',
-  'TARGET', 'TARGETED', 'DOOMED', 'DOWNFALL'
+  'ELIMINATE', 'ELIMINATED', 'ELIMINATES', 'ELIMINATING', 'ELIMINATION', 'ELIMINATIONS',
+  'TERMINATE', 'TERMINATED', 'TERMINATES', 'TERMINATING', 'TERMINATION',
+  'DESTROY', 'DESTROYED', 'DESTROYING', 'DESTRUCTION',
+  'CRUSH', 'CRUSHED', 'CRUSHING',
+  'CHOPPING', 'BLOCK', 'GUILLOTINE',
+  'EXECUTE', 'EXECUTED', 'EXECUTING', 'EXECUTION', 'EXECUTIONER',
+  'DEAD', 'DEATH', 'FATAL', 'FATALITY',
+  'FALL', 'FALLEN', 'DOOMED', 'DOWNFALL', 'DISASTER',
+  'COLLAPSE', 'COLLAPSED', 'COLLAPSING',
+  'THREAT', 'THREATS', 'THREATEN', 'THREATENED',
+  'TARGET', 'TARGETED', 'TARGETS',
+  'ANNIHILATE', 'ANNIHILATED', 'ANNIHILATION',
+  'PERISH', 'CASUALTY', 'CASUALTIES', 'LETHAL', 'GRAVE', 'EMERGENCY'
 ]);
 
-// 4. Constitutional & Pacts (Alliance, Republic, Vote)
+// 6. Constitutional, Republic & Democracy (Valoria, Constitution, Sovereignty, Ballot)
+const CONSTITUTION_STEM = /^(CONSTITUTION|SOVEREIGN|DEMOCRA|PRESIDEN|UNCONSTITUTION)/;
 const CONSTITUTION_KEYWORDS = new Set([
-  'CONSTITUTION', 'CONSTITUTIONAL', 'REPUBLIC', 'VALORIA',
+  'CONSTITUTION', 'CONSTITUTIONAL', 'UNCONSTITUTIONAL', 'REPUBLIC', 'VALORIA', 'VALORIAN',
   'PRESIDENT', 'PRESIDENCY', 'PRESIDENTIAL',
   'SOVEREIGN', 'SOVEREIGNTY',
   'VOTE', 'VOTES', 'VOTED', 'VOTING', 'VOTER', 'VOTERS',
   'BALLOT', 'BALLOTS',
   'ALLIANCE', 'PACT', 'CONTRACT', 'DEAL', 'ACCORD',
   'MANDATE', 'DEMOCRACY', 'DEMOCRATIC', 'JUSTICE', 'VERDICT',
-  'LAW', 'SENATE', 'CHAMBER'
+  'LAW', 'LAWS', 'SENATE', 'SENATOR', 'CHAMBER', 'TREATY',
+  'CITIZEN', 'CITIZENS', 'INTEGRITY', 'LIBERTY', 'FREEDOM', 'OATH'
 ]);
 
-// 5. Tactical Power & Calculations
+// 7. Tactical Power & Calculations (Checkmate, Mastermind, Command, Dictator)
+const POWER_STEM = /^(CHECKMATE|MASTERMIND|DICTAT|DOMINAT|CALCULAT|RUTHLESS|TRIUMPH)/;
 const POWER_KEYWORDS = new Set([
   'POWER', 'POWERFUL', 'CHECKMATE',
-  'CALCULATION', 'CALCULATIONS', 'STRATEGY', 'STRATEGIC',
-  'SURVIVAL', 'SURVIVE', 'SURVIVES',
-  'VICTORY', 'TRIUMPH', 'TRIUMPHANT',
+  'CALCULATION', 'CALCULATIONS', 'CALCULATED', 'STRATEGY', 'STRATEGIC', 'TACTICAL', 'TACTICS',
+  'SURVIVAL', 'SURVIVE', 'SURVIVES', 'SURVIVOR',
+  'VICTORY', 'VICTORIOUS', 'TRIUMPH', 'TRIUMPHANT',
   'RUTHLESS', 'LEADERSHIP', 'MASTERMIND', 'ARCHITECT',
-  'COMMAND', 'SUPREME', 'FORCE', 'STRONG'
+  'COMMAND', 'COMMANDER', 'COMMANDING', 'SUPREME', 'FORCE', 'STRONG',
+  'DICTATOR', 'DICTATORSHIP', 'DOMINANCE', 'DOMINATE', 'DOMINATING', 'REIGN', 'CONQUER', 'OVERTHROW'
 ]);
 
 /**
@@ -92,33 +144,48 @@ const POWER_KEYWORDS = new Set([
 export function cleanWordToken(raw: string): string {
   return raw
     .replace(/^[^a-zA-Z0-9$]+/, '')
-    .replace(/[^a-zA-Z0-9$]+$/, '')
+    .replace(/[^a-zA-Z0-9$%]+$/, '')
     .toUpperCase();
 }
 
 /**
- * Classify a word token into a critical semantic category
+ * Classify a word token into one of the 7 semantic critical categories
  */
 export function classifyWord(clean: string): CriticalWordCategory {
   if (!clean) return 'none';
 
-  if (clean.includes('$') || MONEY_PATTERN.test(clean) || MONEY_KEYWORDS.has(clean)) {
+  // 1. Money & Bribes ($40M, Bribe, Treasury, Bailout, Cash)
+  if (clean.includes('$') || MONEY_PATTERN.test(clean) || MONEY_KEYWORDS.has(clean) || MONEY_STEM.test(clean)) {
     return 'money';
   }
 
-  if (CORRUPTION_KEYWORDS.has(clean)) {
+  // 2. Espionage & CCTV Leaks (CCTV, Wiretaps, Audio Tapes, Dossiers, Backroom)
+  if (ESPIONAGE_KEYWORDS.has(clean) || ESPIONAGE_STEM.test(clean)) {
+    return 'espionage';
+  }
+
+  // 3. Deception & Hypocrisy (Lies, Sham, Hypocrite, Puppet, Phony)
+  if (DECEPTION_KEYWORDS.has(clean) || DECEPTION_STEM.test(clean)) {
+    return 'deception';
+  }
+
+  // 4. Corruption, High Treason & Cabals (Corrupt, Treason, Extortion, Cabal, Betrayal)
+  if (CORRUPTION_KEYWORDS.has(clean) || CORRUPTION_STEM.test(clean)) {
     return 'corruption';
   }
 
-  if (DANGER_KEYWORDS.has(clean)) {
+  // 5. Danger, Elimination & Destruction (Eliminate, Terminate, Chopping Block)
+  if (DANGER_KEYWORDS.has(clean) || DANGER_STEM.test(clean)) {
     return 'danger';
   }
 
-  if (CONSTITUTION_KEYWORDS.has(clean)) {
+  // 6. Constitutional, Republic & Democracy (Valoria, Constitution, Sovereignty, Ballot)
+  if (CONSTITUTION_KEYWORDS.has(clean) || CONSTITUTION_STEM.test(clean)) {
     return 'constitution';
   }
 
-  if (POWER_KEYWORDS.has(clean)) {
+  // 7. Tactical Power & Calculations (Checkmate, Mastermind, Command, Dictator)
+  if (POWER_KEYWORDS.has(clean) || POWER_STEM.test(clean)) {
     return 'power';
   }
 
@@ -126,38 +193,66 @@ export function classifyWord(clean: string): CriticalWordCategory {
 }
 
 /**
- * Styling presets for each critical category (Text Color, Background Pill, Border, Glow)
+ * Styling presets for each critical category (Text Color, Background Pill, Border, Glow, Ambient Shadow)
  */
 export const CATEGORY_STYLES: Record<CriticalWordCategory, {
   textColor: string;
   activeColor: string;
   badgeBg: string;
   badgeBorder: string;
+  ambientShadow: string;
   glowShadow: string;
+  accentHex: string;
   label: string;
 }> = {
   money: {
     textColor: 'text-amber-300 font-black',
-    activeColor: 'text-yellow-200',
+    activeColor: 'text-yellow-100',
     badgeBg: 'bg-amber-500/20',
     badgeBorder: 'border-amber-400/60',
-    glowShadow: 'shadow-[0_0_16px_rgba(251,191,36,0.65)]',
+    ambientShadow: 'shadow-[0_0_10px_rgba(251,191,36,0.35)]',
+    glowShadow: 'shadow-[0_0_22px_rgba(251,191,36,0.85)]',
+    accentHex: '#fbbf24',
     label: 'Finance / Bribe',
+  },
+  espionage: {
+    textColor: 'text-emerald-300 font-black',
+    activeColor: 'text-emerald-100',
+    badgeBg: 'bg-emerald-500/20',
+    badgeBorder: 'border-emerald-400/60',
+    ambientShadow: 'shadow-[0_0_10px_rgba(16,185,129,0.35)]',
+    glowShadow: 'shadow-[0_0_22px_rgba(16,185,129,0.85)]',
+    accentHex: '#10b981',
+    label: 'CCTV / Surveillance',
+  },
+  deception: {
+    textColor: 'text-pink-300 font-black',
+    activeColor: 'text-pink-100',
+    badgeBg: 'bg-pink-500/20',
+    badgeBorder: 'border-pink-400/60',
+    ambientShadow: 'shadow-[0_0_10px_rgba(236,72,153,0.35)]',
+    glowShadow: 'shadow-[0_0_22px_rgba(236,72,153,0.85)]',
+    accentHex: '#ec4899',
+    label: 'Deception / Hypocrisy',
   },
   corruption: {
     textColor: 'text-red-400 font-black',
-    activeColor: 'text-red-200',
+    activeColor: 'text-red-100',
     badgeBg: 'bg-red-600/25',
     badgeBorder: 'border-red-500/70',
-    glowShadow: 'shadow-[0_0_16px_rgba(239,68,68,0.7)]',
-    label: 'Corruption / Lies',
+    ambientShadow: 'shadow-[0_0_10px_rgba(239,68,68,0.35)]',
+    glowShadow: 'shadow-[0_0_22px_rgba(239,68,68,0.85)]',
+    accentHex: '#ef4444',
+    label: 'Corruption / Treason',
   },
   danger: {
-    textColor: 'text-orange-400 font-black',
-    activeColor: 'text-orange-200',
+    textColor: 'text-orange-300 font-black',
+    activeColor: 'text-orange-100',
     badgeBg: 'bg-orange-500/25',
     badgeBorder: 'border-orange-500/60',
-    glowShadow: 'shadow-[0_0_16px_rgba(249,115,22,0.65)]',
+    ambientShadow: 'shadow-[0_0_10px_rgba(249,115,22,0.35)]',
+    glowShadow: 'shadow-[0_0_22px_rgba(249,115,22,0.85)]',
+    accentHex: '#f97316',
     label: 'Elimination / Danger',
   },
   constitution: {
@@ -165,15 +260,19 @@ export const CATEGORY_STYLES: Record<CriticalWordCategory, {
     activeColor: 'text-cyan-100',
     badgeBg: 'bg-cyan-500/20',
     badgeBorder: 'border-cyan-400/60',
-    glowShadow: 'shadow-[0_0_16px_rgba(6,182,212,0.65)]',
-    label: 'Republic / Pact',
+    ambientShadow: 'shadow-[0_0_10px_rgba(6,182,212,0.35)]',
+    glowShadow: 'shadow-[0_0_22px_rgba(6,182,212,0.85)]',
+    accentHex: '#06b6d4',
+    label: 'Republic / Constitution',
   },
   power: {
     textColor: 'text-purple-300 font-black',
     activeColor: 'text-purple-100',
     badgeBg: 'bg-purple-500/25',
     badgeBorder: 'border-purple-400/60',
-    glowShadow: 'shadow-[0_0_16px_rgba(168,85,247,0.65)]',
+    ambientShadow: 'shadow-[0_0_10px_rgba(168,85,247,0.35)]',
+    glowShadow: 'shadow-[0_0_22px_rgba(168,85,247,0.85)]',
+    accentHex: '#a855f7',
     label: 'Tactical Checkmate',
   },
   none: {
@@ -181,7 +280,9 @@ export const CATEGORY_STYLES: Record<CriticalWordCategory, {
     activeColor: 'text-white font-extrabold',
     badgeBg: 'bg-transparent',
     badgeBorder: 'border-transparent',
+    ambientShadow: '',
     glowShadow: 'shadow-[0_0_10px_rgba(255,255,255,0.4)]',
+    accentHex: '#ffffff',
     label: 'Normal',
   },
 };
