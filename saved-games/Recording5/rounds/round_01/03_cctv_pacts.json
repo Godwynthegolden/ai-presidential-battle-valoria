@@ -1,0 +1,156 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria, the family that merges treasuries conquers. Thirty million staged—Alvarez falls tonight.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Victoria, the family that merges treasuries conquers. Thirty million staged—Alvarez falls tonight.",
+      "receiverResponse": "Consider our portfolio aligned. Alvarez's stock crashes tonight.",
+      "privateStrategy": "Alvarez has four accusers; sealing Victoria's vote guarantees majority elimination cheaply, conserving $70M for ballot bailouts and a future strike against Vance.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Garrick, the room feasts on Alvarez. While they gorge, our escrow quietly buries Vance.",
+    "details": {
+      "location": "West Wing Corridor 3",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "Garrick, the room feasts on Alvarez. While they gorge, our escrow quietly buries Vance.",
+      "receiverResponse": "Indictment sealed. Vance's file closes when the ballots open.",
+      "privateStrategy": "Alvarez dies regardless—consensus kills free. Bank the blindside: fund Stone, eliminate Vance while every eye watches the populist burn.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena, the room already hungers for Alvarez. Thirty million escrowed—seal his fate tonight.",
+    "details": {
+      "location": "Capitol Cloakroom Cam 04",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Elena, the room already hungers for Alvarez. Thirty million escrowed—seal his fate tonight.",
+      "receiverResponse": "The numbers agree. Alvarez falls tonight.",
+      "privateStrategy": "Alvarez is consensus-damned; buying Rostova's vote cheaply cements elimination, earns her bloc's goodwill, and preserves $70M for ballot bailouts.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, Alvarez bleeds four knives deep. Thirty million staged — finish him on the ballot.",
+    "details": {
+      "location": "Sub-Basement Boiler Room",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Silas, Alvarez bleeds four knives deep. Thirty million staged — finish him on the ballot.",
+      "receiverResponse": "The committee owes you nothing after tonight. Consider it settled.",
+      "privateStrategy": "Alvarez falls with consensus; my capital stays hidden. Next round, Vance is isolated — Stone and I finish him cheaply.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, consensus demands Alvarez's decommission. My escrow clears when his ballot dies.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Silas, consensus demands Alvarez's decommission. My escrow clears when his ballot dies.",
+      "receiverResponse": "The old furnace goes cold tonight. Count my pen steady,",
+      "privateStrategy": "Alvarez carries four accusations; his elimination is consensus. Buying Silas locks the majority cheaply, preserving $90M for ballot-day bailouts or a Vance ambush.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena, four of us already drew blood. Thirty million seals the ballot tonight.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Elena, four of us already drew blood. Thirty million seals the ballot tonight.",
+      "receiverResponse": "The numbers favor it. Consider my vote aligned.",
+      "privateStrategy": "Alvarez bleeds from four attacks and $85M treasury—cheapest consensus kill. Locking Rostova preserves my war chest for later blindsides.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya, my Exhibit A buried Vance. Join the indictment — thirty million escrowed on his.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "Maya, my Exhibit A buried Vance. Join the indictment — thirty million escrowed on his.",
+      "receiverResponse": "Calibrated leverage, Prosecutor. Vance falls quietly tonight.",
+      "privateStrategy": "Alvarez is doomed without spending a cent; blindside Vance with Maya while the room piles on Alvarez. Escrow secures her vote; I conserve $50M.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

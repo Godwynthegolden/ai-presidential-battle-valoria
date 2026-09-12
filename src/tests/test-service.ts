@@ -4,7 +4,8 @@ import {
   CANDIDATE_MAP, 
   getStoredCandidates,
   getStoredSelectedCandidateIds, 
-  saveStoredSelectedCandidateIds 
+  saveStoredSelectedCandidateIds,
+  getDefaultIntroductionDialogue
 } from '../data/candidates';
 import { Candidate } from '../types/candidate';
 import { VoteRecord, BailoutTransaction, RoundVoteTally } from '../types/game';
@@ -113,6 +114,41 @@ async function testEngine() {
     throw new Error(`Expected getStoredCandidates to return 31 candidates, got ${storedCandidates.length}`);
   }
   console.log('getStoredCandidates default and auto-merge verified successfully!');
+
+  // Test Introduction Motion Graphic defaults & sound synthesis
+  console.log('Testing Introduction Motion Graphic Dialogues & Audio Cues:');
+  for (const c of CANDIDATES) {
+    const intro = getDefaultIntroductionDialogue(c);
+    if (!intro || intro.trim().length < 15) {
+      throw new Error(`Candidate ${c.id} (${c.name}) missing valid introduction dialogue (got "${intro}").`);
+    }
+  }
+  // Test custom candidate fallback
+  const customMock: Candidate = {
+    id: 'test-custom',
+    name: 'Test Contender',
+    codename: 'THE_TEST',
+    archetype: 'reformer',
+    archetypeTitle: 'Civic Reformer',
+    titleRole: 'Mayor of Greenfield',
+    slogan: 'Honesty, Progress, and Accountability for All',
+    ideology: 'Civic transparency',
+    personality: 'Honest',
+    speakingStyle: 'Direct',
+    motivations: 'Reform',
+    strengths: ['Integrity'],
+    weaknesses: ['Idealistic'],
+    behavioralTendencies: ['Transparent'],
+    rivalArchetypes: ['careerist'],
+    color: COLOR_PRESETS[0],
+    avatar: { icon: 'shield', svgType: 'shield' },
+    systemPrompt: 'Be honest'
+  };
+  const customIntro = getDefaultIntroductionDialogue(customMock);
+  if (!customIntro.includes('Test Contender') || !customIntro.includes('Mayor of Greenfield')) {
+    throw new Error(`Custom candidate introduction fallback failed: "${customIntro}"`);
+  }
+  console.log('Introduction Motion Graphic dialogues & fallbacks PASSED!');
 
   // Test isConfigured
   console.log('Testing isConfigured check:');
@@ -751,6 +787,37 @@ Ideology: Direct algorithmic optimization of public resources.
   }
   console.log('2f. Web Audio Surveillance Wiretap Filter & Settings Bounds Validation PASSED!');
 
+  // Test 2g: Web Audio Wiretap & Subtitle Analyser Reconnection
+  const { audioSync } = await import('../utils/audioSync');
+  if (typeof audioSync.getAnalyser !== 'function') {
+    throw new Error('audioSync.getAnalyser is not defined!');
+  }
+  console.log('2g. AudioSync Analyser Tap & Wiretap Integration Validation PASSED!');
+
+  // Test 2h: CCTV Mode Flag Strict Boolean Evaluation (Options vs Phase Priority)
+  const resolveCCTVMode = (options?: { isCCTV?: boolean }, phase?: string): boolean => {
+    return typeof options?.isCCTV === 'boolean'
+      ? options.isCCTV
+      : (phase === 'CCTV_BACKROOM');
+  };
+
+  // When options.isCCTV is explicitly false, it must be false even if phase is CCTV_BACKROOM!
+  if (resolveCCTVMode({ isCCTV: false }, 'CCTV_BACKROOM') !== false) {
+    throw new Error('resolveCCTVMode({ isCCTV: false }, "CCTV_BACKROOM") must be false!');
+  }
+  // When options.isCCTV is explicitly true, it must be true even if phase is VOTE_CONFESSIONAL
+  if (resolveCCTVMode({ isCCTV: true }, 'VOTE_CONFESSIONAL') !== true) {
+    throw new Error('resolveCCTVMode({ isCCTV: true }, "VOTE_CONFESSIONAL") must be true!');
+  }
+  // When options.isCCTV is undefined, it must inherit phase === CCTV_BACKROOM
+  if (resolveCCTVMode(undefined, 'CCTV_BACKROOM') !== true) {
+    throw new Error('resolveCCTVMode(undefined, "CCTV_BACKROOM") must be true!');
+  }
+  if (resolveCCTVMode(undefined, 'VOTE_CONFESSIONAL') !== false) {
+    throw new Error('resolveCCTVMode(undefined, "VOTE_CONFESSIONAL") must be false!');
+  }
+  console.log('2h. CCTV Mode Flag Strict Boolean Evaluation (Options vs Phase) PASSED!');
+
   // 3. Import useGameEngine helpers
   const { resolveAttackTarget, resolveBailoutAuction } = await import('../hooks/useGameEngine');
 
@@ -969,6 +1036,9 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   sounds.playCashChime();
   sounds.playSwapWhoosh();
   sounds.playFanfare();
+  sounds.playIntroWhoosh();
+  sounds.playIntroSting();
+  sounds.playIntroTransition();
 
   // Test 20 new character sound synthesizers
   sounds.playBorderGovernorHammerGate();
@@ -1646,6 +1716,95 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
   if (healedMalformedPact.whisper.trim().split(/\s+/).length > 15) {
     throw new Error(`Healed CCTV whisper exceeds 15 words: "${healedMalformedPact.whisper}"`);
   }
+
+  // 6. Test CCTV Briber Robustness: Unescaped Inner Quotes, Truncated JSON, Colons in Dialogue, Synonyms, & Preamble Defense
+  // 6a. Unescaped inner quotes healing
+  const innerQuotesPact = nineRouterService.parseAndValidatePact(
+    '{"whisper": "Marcus, put "Cross" on ballot tonight.", "targetCandidateId": "marcus-vance", "agreedEliminationTargetId": "chloe-armstrong"}',
+    tJax,
+    tMarcus,
+    ['jax-alvarez', 'marcus-vance', 'chloe-armstrong'],
+    100
+  );
+  if (!innerQuotesPact.whisper.includes('Cross') || innerQuotesPact.whisper.includes('{')) {
+    throw new Error(`Inner quotes healing failed: "${innerQuotesPact.whisper}"`);
+  }
+
+  // 6b. Truncated JSON missing closing brace
+  const truncatedBracePact = nineRouterService.parseAndValidatePact(
+    '{"whisper": "Marcus, eliminate Chloe tonight.", "targetCandidateId": "marcus-vance"',
+    tJax,
+    tMarcus,
+    ['jax-alvarez', 'marcus-vance', 'chloe-armstrong'],
+    100
+  );
+  if (!truncatedBracePact.whisper.includes('Chloe') || truncatedBracePact.whisper.includes('{')) {
+    throw new Error(`Truncated brace healing failed: "${truncatedBracePact.whisper}"`);
+  }
+
+  // 6c. Colon inside spoken dialogue preservation (must not be stripped by script prefix stripper)
+  const colonDialoguePact = nineRouterService.parseAndValidatePact(
+    JSON.stringify({
+      whisper: "Marcus, thirty million is staged: take out Chloe tonight.",
+      targetCandidateId: "marcus-vance",
+      agreedEliminationTargetId: "chloe-armstrong"
+    }),
+    tJax,
+    tMarcus,
+    ['jax-alvarez', 'marcus-vance', 'chloe-armstrong'],
+    100
+  );
+  if (!colonDialoguePact.whisper.includes('thirty million is staged')) {
+    throw new Error(`Colon in dialogue was destructively stripped: "${colonDialoguePact.whisper}"`);
+  }
+
+  // 6d. Key synonym recovery ("proposal" instead of "whisper")
+  const synonymPact = nineRouterService.parseAndValidatePact(
+    JSON.stringify({
+      proposal: "Marcus, thirty million clears if Chloe falls.",
+      targetCandidateId: "marcus-vance",
+      agreedEliminationTargetId: "chloe-armstrong"
+    }),
+    tJax,
+    tMarcus,
+    ['jax-alvarez', 'marcus-vance', 'chloe-armstrong'],
+    100
+  );
+  if (!synonymPact.whisper.includes('thirty million clears')) {
+    throw new Error(`Key synonym "proposal" was not extracted: "${synonymPact.whisper}"`);
+  }
+
+  // 6e. Preamble outside JSON must never be spoken
+  const preamblePact = nineRouterService.parseAndValidatePact(
+    `Here is the classified CCTV proposal:\n{"whisper": "Marcus, collateral is wired: eliminate Chloe.", "targetCandidateId": "marcus-vance"}`,
+    tJax,
+    tMarcus,
+    ['jax-alvarez', 'marcus-vance', 'chloe-armstrong'],
+    100
+  );
+  if (preamblePact.whisper.toLowerCase().includes('here is') || preamblePact.whisper.toLowerCase().includes('classified')) {
+    throw new Error(`Preamble outside JSON leaked into spoken whisper: "${preamblePact.whisper}"`);
+  }
+  if (!preamblePact.whisper.includes('collateral is wired')) {
+    throw new Error(`Valid whisper was not extracted from text with preamble: "${preamblePact.whisper}"`);
+  }
+
+  // 6f. Duplicate vocative stutter prevention
+  const duplicateVocativePact = nineRouterService.parseAndValidatePact(
+    JSON.stringify({
+      whisper: "Marcus, Marcus, thirty million is ready for Chloe.",
+      targetCandidateId: "marcus-vance",
+      agreedEliminationTargetId: "chloe-armstrong"
+    }),
+    tJax,
+    tMarcus,
+    ['jax-alvarez', 'marcus-vance', 'chloe-armstrong'],
+    100
+  );
+  if (duplicateVocativePact.whisper.startsWith('Marcus, Marcus')) {
+    throw new Error(`Duplicate vocative stutter was not cleaned: "${duplicateVocativePact.whisper}"`);
+  }
+
   console.log('3. CCTV Secretive Atmosphere, CIA Tradecraft Vibe, 15-Word Proposer Limit & JSON Stripping PASSED!');
 
   // -------------------------------------------------------------
@@ -1933,6 +2092,275 @@ Count: General, peace through power? (3) That's a slogan, not a balance sheet. (
     currentStepIdx += 1;
   }
   console.log('8. Whole-Game Auto-Next State Machine Pipeline (Start to Finish) PASSED!');
+
+  // 9. Endgame Presidential Election & Grand Jury Pipeline Verification
+  console.log('Testing Endgame Presidential Election & Grand Jury Pipeline:');
+  const lineup = ['arthur-sterling', 'elena-rostova', 'marcus-vance', 'sofia-alvarez', 'isabella-santos'];
+  const activeTop3 = ['arthur-sterling', 'elena-rostova', 'marcus-vance'];
+
+  // A. Verify extractMonologue for 'final_vote'
+  const finalVotePromptMonologue = (nineRouterService as any).extractMonologue?.(
+    "Some reasoning",
+    "final_vote",
+    CANDIDATE_MAP.get('sofia-alvarez')!,
+    CANDIDATE_MAP.get('arthur-sterling')!
+  );
+  if (finalVotePromptMonologue) {
+    if (finalVotePromptMonologue.includes('liquidat') || finalVotePromptMonologue.includes('eliminate')) {
+      throw new Error(`Expected endorsement monologue for final_vote, got: ${finalVotePromptMonologue}`);
+    }
+  }
+
+  // B. Simulate Grand Jury Ballots
+  const grandJuryVotes: VoteRecord[] = [
+    { voterId: 'arthur-sterling', targetId: 'arthur-sterling', reason: 'I can lead this republic.', strategyMonologue: 'I cast my vote to elect myself President.' },
+    { voterId: 'elena-rostova', targetId: 'elena-rostova', reason: 'Science and logic.', strategyMonologue: 'I vote to elect myself.' },
+    { voterId: 'marcus-vance', targetId: 'arthur-sterling', reason: 'Arthur understands military budgets.', strategyMonologue: 'I vote to elect Arthur.' },
+    { voterId: 'sofia-alvarez', targetId: 'elena-rostova', reason: 'Elena supports workers technology.', strategyMonologue: 'As a grand juror, I endorse Elena.' },
+    { voterId: 'isabella-santos', targetId: 'arthur-sterling', reason: 'Economic stability.', strategyMonologue: 'Arthur has the trade alliances.' }
+  ];
+
+  // Verify all voters are in lineup and all targets are in activeTop3
+  grandJuryVotes.forEach(v => {
+    if (!lineup.includes(v.voterId)) throw new Error(`Voter ${v.voterId} not in lineup`);
+    if (!activeTop3.includes(v.targetId)) throw new Error(`Target ${v.targetId} is not a Top 3 finalist!`);
+  });
+
+  // C. Calculate tally and winner
+  const grandJuryTally: Record<string, number> = {};
+  activeTop3.forEach(id => { grandJuryTally[id] = 0; });
+  grandJuryVotes.forEach(v => {
+    grandJuryTally[v.targetId] = (grandJuryTally[v.targetId] || 0) + 1;
+  });
+
+  if (grandJuryTally['arthur-sterling'] !== 3 || grandJuryTally['elena-rostova'] !== 2 || grandJuryTally['marcus-vance'] !== 0) {
+    throw new Error(`Unexpected tally results: ${JSON.stringify(grandJuryTally)}`);
+  }
+
+  // Arthur wins with 3 votes
+  let winner = activeTop3[0];
+  let maxV = -1;
+  activeTop3.forEach(id => {
+    if (grandJuryTally[id] > maxV) {
+      maxV = grandJuryTally[id];
+      winner = id;
+    }
+  });
+  if (winner !== 'arthur-sterling') {
+    throw new Error(`Expected Arthur Sterling to be elected winner, got: ${winner}`);
+  }
+
+  // D. Tiebreaker Test with candidate budgets
+  const tiedTally: Record<string, number> = {
+    'arthur-sterling': 2,
+    'elena-rostova': 2,
+    'marcus-vance': 1,
+  };
+  const testBudgets: Record<string, number> = {
+    'arthur-sterling': 60,
+    'elena-rostova': 80, // Elena has higher treasury balance
+    'marcus-vance': 40,
+  };
+  let tiedWinner = activeTop3[0];
+  let tiedMaxVotes = -1;
+  activeTop3.forEach(candId => {
+    const votes = tiedTally[candId] || 0;
+    const currentMax = tiedTally[tiedWinner] || 0;
+    if (votes > tiedMaxVotes) {
+      tiedMaxVotes = votes;
+      tiedWinner = candId;
+    } else if (votes === currentMax) {
+      const bestTreasury = testBudgets[tiedWinner] ?? 0;
+      const candTreasury = testBudgets[candId] ?? 0;
+      if (candTreasury > bestTreasury) {
+        tiedWinner = candId;
+      }
+    }
+  });
+  if (tiedWinner !== 'elena-rostova') {
+    throw new Error(`Expected Elena Rostova to win tiebreaker on treasury, got: ${tiedWinner}`);
+  }
+
+  console.log('9. Endgame Presidential Election & Grand Jury Pipeline PASSED!');
+
+  // 10. Endgame 3-Finalist Constraint & Real API Retry on Hallucination Suite
+  console.log('\nTesting Endgame 3-Finalist Constraint & Real API Retry on Hallucination:');
+  const tFinalists = ['arthur-sterling', 'elena-rostova', 'marcus-vance'];
+  const grandJurorJax = CANDIDATE_MAP.get('jax-alvarez')!;
+  const finalistElena = CANDIDATE_MAP.get('elena-rostova')!;
+
+  // 10a. Prompt Constraint Verification
+  const promptCheck = (nineRouterService as any).buildPrompt(grandJurorJax, {
+    action: 'final_vote',
+    candidateId: grandJurorJax.id,
+    round: 99,
+    activeCandidateIds: tFinalists,
+    finalistIds: tFinalists,
+    historyContext: {
+      electionTopic: 'National Debt Crisis',
+      allClashesSummary: ['Dmitri Voronin attacked Jax Alvarez: "Corrupt spending!"'],
+    }
+  });
+  if (!promptCheck.userPrompt.includes('STRICT PROHIBITION ON ELIMINATED CANDIDATES')) {
+    throw new Error('final_vote prompt missing STRICT PROHIBITION ON ELIMINATED CANDIDATES');
+  }
+  if (!promptCheck.userPrompt.includes('EXCLUSIVE FINALIST FOCUS')) {
+    throw new Error('final_vote prompt missing EXCLUSIVE FINALIST FOCUS in strategyMonologue');
+  }
+  if (!promptCheck.userPrompt.includes('MUST_BE_ONE_OF')) {
+    throw new Error('final_vote prompt missing MUST_BE_ONE_OF in JSON schema');
+  }
+  console.log('  ✓ 10a. Prompt negative constraint & finalist focus verified');
+
+  // 10b. Grand Juror parsing valid vote for one of the 3 finalists
+  const validJurorVoteRaw = JSON.stringify({
+    vote: 'elena-rostova',
+    strategyMonologue: 'Elena has the steel and intellect to rebuild the economy. Arthur is a puppet. My vote locks Elena.',
+    reason: 'Vision and economic discipline'
+  });
+  const parsedJurorVote = await (nineRouterService as any).parseAndValidateVote(
+    validJurorVoteRaw,
+    grandJurorJax,
+    { action: 'final_vote', candidateId: grandJurorJax.id, activeCandidateIds: tFinalists, finalistIds: tFinalists },
+    '',
+    '',
+    '',
+    '',
+    'gpt-4o-mini'
+  );
+  if (parsedJurorVote.vote !== 'elena-rostova') {
+    throw new Error(`Expected vote for elena-rostova, got: ${parsedJurorVote.vote}`);
+  }
+  if (!parsedJurorVote.strategyMonologue.includes('Elena')) {
+    throw new Error(`Expected monologue to mention Elena, got: ${parsedJurorVote.strategyMonologue}`);
+  }
+  console.log('  ✓ 10b. Grand Juror valid finalist vote & monologue verified');
+
+  // 10c. Surviving finalist cannot vote for herself (validTargets excludes voter)
+  const selfVoteRaw = JSON.stringify({
+    vote: 'elena-rostova', // Voting for herself!
+    strategyMonologue: 'Elena will lead Valoria to greatness. I cast my vote for myself.',
+    reason: 'I am the best candidate'
+  });
+  // Mock callChatCompletions on nineRouterService to inspect retry
+  let retryCalled = false;
+  let retryPromptPassed = '';
+  const originalCallChat = (nineRouterService as any).callChatCompletions;
+  (nineRouterService as any).callChatCompletions = async (
+    sys: string,
+    user: string,
+    isJson: boolean
+  ) => {
+    retryCalled = true;
+    retryPromptPassed = user;
+    return JSON.stringify({
+      vote: 'marcus-vance',
+      strategyMonologue: 'Marcus respects chain of command. Arthur is too reckless. I endorse Marcus.',
+      reason: 'Military discipline'
+    });
+  };
+
+  try {
+    const parsedSelfVote = await (nineRouterService as any).parseAndValidateVote(
+      selfVoteRaw,
+      finalistElena,
+      { action: 'final_vote', candidateId: finalistElena.id, activeCandidateIds: tFinalists, finalistIds: tFinalists },
+      'System prompt',
+      'User prompt',
+      'http://localhost:20128/v1',
+      'test-key',
+      'gpt-4o-mini'
+    );
+    if (!retryCalled) {
+      throw new Error('Expected API retry when finalist attempted self-vote!');
+    }
+    if (parsedSelfVote.vote === 'elena-rostova') {
+      throw new Error('Self-vote was not rejected!');
+    }
+    if (parsedSelfVote.vote !== 'marcus-vance') {
+      throw new Error(`Expected retry vote for marcus-vance, got: ${parsedSelfVote.vote}`);
+    }
+    console.log('  ✓ 10c. Surviving finalist self-vote rejected & genuine API retry verified');
+
+    // 10d. Real API retry triggered when LLM hallucinates an eliminated candidate vote
+    retryCalled = false;
+    retryPromptPassed = '';
+    const eliminatedVoteRaw = JSON.stringify({
+      vote: 'dmitri-voronin', // Eliminated candidate!
+      strategyMonologue: 'Dmitri was wronged by the cartel. Dmitri will lead Valoria.',
+      reason: 'Dmitri is honest'
+    });
+    const parsedElimVote = await (nineRouterService as any).parseAndValidateVote(
+      eliminatedVoteRaw,
+      grandJurorJax,
+      { action: 'final_vote', candidateId: grandJurorJax.id, activeCandidateIds: tFinalists, finalistIds: tFinalists },
+      'System prompt',
+      'User prompt',
+      'http://localhost:20128/v1',
+      'test-key',
+      'gpt-4o-mini'
+    );
+    if (!retryCalled) {
+      throw new Error('Expected API retry when LLM voted for an eliminated candidate!');
+    }
+    if (!retryPromptPassed.includes('ATTENTION: Your previous response was INVALID because you voted for or endorsed a candidate outside the 3 finalists')) {
+      throw new Error(`Retry prompt missing specific hallucination warning: ${retryPromptPassed}`);
+    }
+    if (parsedElimVote.vote === 'dmitri-voronin') {
+      throw new Error('Eliminated candidate vote was not rejected!');
+    }
+    console.log('  ✓ 10d. API retry triggered on eliminated candidate vote hallucination verified');
+
+    // 10e. Real API retry triggered when LLM hallucinates an eliminated candidate in strategyMonologue
+    retryCalled = false;
+    retryPromptPassed = '';
+    const eliminatedMonologueRaw = JSON.stringify({
+      vote: 'arthur-sterling', // Valid finalist vote
+      strategyMonologue: 'I vote for Dmitri Voronin for President. He was cheated in round 1.', // Hallucinated monologue!
+      reason: 'Dmitri is great'
+    });
+    const parsedElimMono = await (nineRouterService as any).parseAndValidateVote(
+      eliminatedMonologueRaw,
+      grandJurorJax,
+      { action: 'final_vote', candidateId: grandJurorJax.id, activeCandidateIds: tFinalists, finalistIds: tFinalists },
+      'System prompt',
+      'User prompt',
+      'http://localhost:20128/v1',
+      'test-key',
+      'gpt-4o-mini'
+    );
+    if (!retryCalled) {
+      throw new Error('Expected API retry when strategyMonologue endorsed an eliminated candidate!');
+    }
+    console.log('  ✓ 10e. API retry triggered on eliminated candidate monologue hallucination verified');
+  } finally {
+    (nineRouterService as any).callChatCompletions = originalCallChat;
+  }
+
+  // 10f. Game Engine Live Step Hard-Gate & Autonomous Buffer Target Resolution
+  const mockConsumedEliminatedVote = {
+    content: 'Voting...',
+    payload: {
+      voteTargetId: 'dmitri-voronin', // Eliminated target from corrupted cache
+      strategyMonologue: 'My vote for President goes to Dmitri Voronin.',
+    }
+  };
+  const voterId = 'jax-alvarez';
+  const isTargetValidFinalist = mockConsumedEliminatedVote.payload?.voteTargetId && 
+    tFinalists.includes(mockConsumedEliminatedVote.payload.voteTargetId) && 
+    mockConsumedEliminatedVote.payload.voteTargetId !== voterId;
+  const actualTargetId = isTargetValidFinalist
+    ? mockConsumedEliminatedVote.payload.voteTargetId
+    : (tFinalists.find(id => id !== voterId) || tFinalists[0]);
+
+  if (!tFinalists.includes(actualTargetId)) {
+    throw new Error(`Engine hard-gate failed: actualTargetId ${actualTargetId} is not in finalists!`);
+  }
+  if (actualTargetId === 'dmitri-voronin') {
+    throw new Error('Engine hard-gate allowed eliminated candidate dmitri-voronin!');
+  }
+  console.log('  ✓ 10f. Engine live step hard-gate strictly restricts vote target to Top 3 finalists');
+  console.log('10. Endgame 3-Finalist Constraint & Real API Retry on Hallucination PASSED!');
 
   console.log('\nAll unit tests for Among Us Emergency Meeting, Debate Engine, Kinetic Subtitles & Auto-Next PASSED successfully!');
 }

@@ -1,0 +1,140 @@
+[
+  {
+    "filename": "07_strategy_vote_04_silas-thorne.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 7,
+    "textSnippet": "Sterling believes her climate halo deflects scrutiny. Her $15M can't cover a bailout; consensus plus",
+    "sizeBytes": 249938,
+    "timestamp": 1789072839604
+  },
+  {
+    "filename": "04_round7_elimination_maya-lin.mp3",
+    "phase": "ELIMINATION",
+    "round": 7,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "textSnippet": "In every negotiation, knowing when to leave the table is itself a victory. Valoria, watch this room ",
+    "sizeBytes": 188080,
+    "timestamp": 1789072914673
+  },
+  {
+    "filename": "05_final_speech_01_elena-rostova.mp3",
+    "phase": "FINAL_SPEECHES",
+    "round": 99,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "textSnippet": "Thirty-five years, Senator Thorne, and eggs doubled on your watch—regulatory capture, not crisis. Ms",
+    "sizeBytes": 400821,
+    "timestamp": 1789072928754
+  },
+  {
+    "filename": "05_final_speech_02_vivienne-zhao.mp3",
+    "phase": "FINAL_SPEECHES",
+    "round": 99,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "textSnippet": "Rostova recalibrates ledgers while cartels feast. Thorne drafts his forty-thousandth memo while your",
+    "sizeBytes": 349412,
+    "timestamp": 1789072955314
+  },
+  {
+    "filename": "05_final_speech_03_silas-thorne.mp3",
+    "phase": "FINAL_SPEECHES",
+    "round": 99,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "textSnippet": "Tested, steady leadership tames grocery cartels—not untested experiments. Victoria's radical climate",
+    "sizeBytes": 365295,
+    "timestamp": 1789072978679
+  },
+  {
+    "filename": "99_strategy_jury_01_jax-alvarez.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Thorne's no saint, but thirty-five years means he answers to voters, not shareholders. Sterling's he",
+    "sizeBytes": 143777,
+    "timestamp": 1789073011793
+  },
+  {
+    "filename": "99_strategy_jury_05_victoria-sterling.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Silas is the establishment's comfortable rot; Vivienne builds the next oligarchy in silicon. Elena k",
+    "sizeBytes": 190588,
+    "timestamp": 1789073011857
+  },
+  {
+    "filename": "99_strategy_jury_08_vivienne-zhao.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Thorne's thirty-five years produced double-priced eggs—legacy code that never compiled. Elena's arit",
+    "sizeBytes": 236563,
+    "timestamp": 1789073017035
+  },
+  {
+    "filename": "99_strategy_jury_06_elijah-haddon.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Zhao calls hunger obsolete wetware—soulless. Rostova's austerity starves souls for spreadsheets. Tho",
+    "sizeBytes": 257461,
+    "timestamp": 1789073017106
+  },
+  {
+    "filename": "99_strategy_jury_02_elena-rostova.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Thorne's compassion theater is deficit bribery — 35 years, 14.2% food inflation. Zhao thinks in syst",
+    "sizeBytes": 251610,
+    "timestamp": 1789073019805
+  },
+  {
+    "filename": "99_strategy_jury_07_maya-lin.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Zhao's contempt disqualifies her. Thorne trades compassion theater for thirty-five years of failure.",
+    "sizeBytes": 175541,
+    "timestamp": 1789073020591
+  },
+  {
+    "filename": "99_strategy_jury_04_art-sterling.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Thorne never signed a paycheck. Rostova only audits other people's money. Zhao built an empire from ",
+    "sizeBytes": 228204,
+    "timestamp": 1789073020863
+  },
+  {
+    "filename": "99_strategy_jury_03_marcus-vance.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Thorne negotiates; negotiators concede. Zhao's contempt disqualifies her. Rostova breaks monopolies ",
+    "sizeBytes": 284211,
+    "timestamp": 1789073022932
+  },
+  {
+    "filename": "99_strategy_jury_09_silas-thorne.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Zhao would dismantle everything I built in thirty-five years. Elena respects institutions—she'll pre",
+    "sizeBytes": 280449,
+    "timestamp": 1789073023009
+  },
+  {
+    "filename": "99_strategy_jury_10_garrick-stone.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Thorne is the aristocracy I've spent thirty years indicting—legacy rot in a suit. Zhao optimizes for",
+    "sizeBytes": 201455,
+    "timestamp": 1789073023700
+  },
+  {
+    "filename": "06_presidential_inauguration_elena-rostova.mp3",
+    "phase": "WINNER",
+    "round": 100,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "textSnippet": "Valoria chose arithmetic over alchemy. To my opponents: your fairy tales lost; the ledger won. Infla",
+    "sizeBytes": 365713,
+    "timestamp": 1789073220815
+  }
+]

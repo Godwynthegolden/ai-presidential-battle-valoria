@@ -37,7 +37,8 @@ import {
   ChevronsRight,
   X,
   Flame,
-  Play
+  Play,
+  Film
 } from 'lucide-react';
 
 interface CharactersManagerViewProps {
@@ -56,6 +57,7 @@ interface CharactersManagerViewProps {
   onReorderActiveCandidates?: (newOrderedIds: string[]) => void;
   onShuffleActiveCandidates?: () => void;
   onReverseActiveCandidates?: () => void;
+  onOpenIntroductionMotionGraphic?: () => void;
   nineRouterConfig?: NineRouterConfigState;
   onOpenSettings?: () => void;
   isGameInProgress?: boolean;
@@ -77,6 +79,7 @@ export const CharactersManagerView: React.FC<CharactersManagerViewProps> = ({
   onReorderActiveCandidates,
   onShuffleActiveCandidates,
   onReverseActiveCandidates,
+  onOpenIntroductionMotionGraphic,
   nineRouterConfig,
   onOpenSettings,
   isGameInProgress = false,
@@ -246,8 +249,20 @@ export const CharactersManagerView: React.FC<CharactersManagerViewProps> = ({
             </div>
           </div>
 
-          {/* Quick Preset Roster Buttons */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Quick Preset Roster & Intro Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Introduction Motion Graphic Button */}
+            {onOpenIntroductionMotionGraphic && (
+              <button
+                onClick={onOpenIntroductionMotionGraphic}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white shadow-lg shadow-cyan-500/25 border border-cyan-400/50 transition cursor-pointer hover:scale-[1.02]"
+                title="Launch cinematic full-screen motion graphic introducing every character in this lineup"
+              >
+                <Film className="w-4 h-4 text-cyan-300 animate-pulse" />
+                <span>🎬 Introduction Motion Graphic</span>
+              </button>
+            )}
+
             {/* YouTube 11 Viral Order Preset */}
             <button
               onClick={() => onSetPresetRoster('youtube11')}

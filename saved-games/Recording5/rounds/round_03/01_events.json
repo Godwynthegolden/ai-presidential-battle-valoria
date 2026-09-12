@@ -1,0 +1,62 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 3,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 3,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena believes her central bank credentials shield her. Four accusers already sharpened the blade. Honoring Victoria's pact banks fifteen million while the room finishes her.",
+    "privateReason": "Pact honored, escrow secured, bandwagon guarantees elimination, preserves my $85M treasury.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 3,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Zhao counts on Rostova soaking the room's rage. Haddon's handshake plus my ballot drains her war chest forty million — credibility kept, kingpin crippled, shield preserved.",
+    "privateReason": "Honor the pact, bank escrow, drain Zhao's chest while Rostova absorbs the room's fire.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 3,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance trusts his $115M fortress. Two ballots drain eighty million, leaving him thirty-five—below bailout threshold. Maya's pact costs nothing; Elena keeps absorbing the room's fire.",
+    "privateReason": "Honor Maya's pact, drain Vance's war chest below bailout line, keep Elena as shield.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 3,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

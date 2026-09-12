@@ -1,0 +1,68 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 5,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Vivienne, Victoria's cornered—three accusers deep. Thirty million in escrow seals her fate tonight.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Victoria Sterling",
+      "whisperText": "Vivienne, Victoria's cornered—three accusers deep. Thirty million in escrow seals her fate tonight.",
+      "receiverResponse": "Algorithm agrees. Victoria flatlines tonight—count on it.",
+      "privateStrategy": "Victoria's the consensus kill; buying Vivienne prevents a split toward Elijah while keeping $85M for ballot bailouts. Elijah is next cycle's threat.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 5,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Everyone hunts Victoria, Silas. Blindside Haddon tonight; thirty million secures your Senate legacy.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Elijah Haddon",
+      "whisperText": "Everyone hunts Victoria, Silas. Blindside Haddon tonight; thirty million secures your Senate legacy.",
+      "receiverResponse": "Haddon's sermons end tonight. The funds better clear.",
+      "privateStrategy": "Victoria dies regardless—three accusers guarantee it. Wasting capital there is irrational. Haddon's $100M war chest threatens me next; Silas needs money, betrayal unlikely.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 5,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Maya circled you tonight, Victoria. Thirty million staged—Elena falls, your flank stays covered.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Maya circled you tonight, Victoria. Thirty million staged—Elena falls, your flank stays covered.",
+      "receiverResponse": "Noted. Elena counts her final numbers tonight, Senator.",
+      "privateStrategy": "Elena bleeds from three accusers; locking Victoria's vote costs $30M but seals the bloc. Retain $85M for ballot bailouts.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

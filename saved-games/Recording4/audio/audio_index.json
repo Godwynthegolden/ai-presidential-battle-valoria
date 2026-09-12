@@ -1,0 +1,44 @@
+[
+  {
+    "filename": "01_strategy_vote_07_maya-lin.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Alvarez assumes four accusers already sealed his fate without my ballot. Wrong. My vote honors Haddo",
+    "sizeBytes": 176377,
+    "timestamp": 1789059115945
+  },
+  {
+    "filename": "01_strategy_vote_08_vivienne-zhao.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Alvarez thinks four-stage consensus makes him mere collateral damage. Thorne's escrow guarantees maj",
+    "sizeBytes": 171780,
+    "timestamp": 1789059116045
+  },
+  {
+    "filename": "01_strategy_vote_09_silas-thorne.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Alvarez believes podium fury buys survival. Four votes already seal him; my ballot honors Zhao's pac",
+    "sizeBytes": 225279,
+    "timestamp": 1789059116177
+  },
+  {
+    "filename": "01_strategy_vote_10_garrick-stone.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Alvarez thinks four accusers exhausted the room's appetite. Wrong. Thorne's pact plus the bandwagon ",
+    "sizeBytes": 207724,
+    "timestamp": 1789059116197
+  },
+  {
+    "filename": "04_round1_elimination_jax-alvarez.mp3",
+    "phase": "ELIMINATION",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "textSnippet": "They silenced this steelworker tonight, but they can't silence the forgotten families of Valoria! Ke",
+    "sizeBytes": 170526,
+    "timestamp": 1789059280448
+  }
+]

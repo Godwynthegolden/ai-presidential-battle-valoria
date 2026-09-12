@@ -16,6 +16,7 @@ import { CharacterEditorModal } from '@/components/CharacterEditorModal';
 import { StrategicConfessionalModal } from '@/components/StrategicConfessionalModal';
 import { FullRoundBufferingModal } from '@/components/FullRoundBufferingModal';
 import { RenderMasterVideoModal } from '@/components/RenderMasterVideoModal';
+import { IntroductionMotionGraphicModal } from '@/components/IntroductionMotionGraphicModal';
 import { Candidate } from '@/types/candidate';
 import { CANDIDATE_MAP } from '@/data/candidates';
 import { 
@@ -48,6 +49,7 @@ export default function AIPlaygroundPage() {
     dialogueOnlyAudio: false,
     autoNextMode: false,
     autoNextDelay: 0.75,
+    introShowcaseDelay: 3.0,
   });
 
   const [activeView, setActiveView] = useState<'arena' | 'characters'>('arena');
@@ -59,6 +61,7 @@ export default function AIPlaygroundPage() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
   const [isRenderModalOpen, setIsRenderModalOpen] = useState(false);
+  const [isIntroGraphicOpen, setIsIntroGraphicOpen] = useState(false);
   const [sessionSaveName, setSessionSaveName] = useState('');
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -83,6 +86,7 @@ export default function AIPlaygroundPage() {
             dialogueOnlyAudio: parsed.dialogueOnlyAudio ?? false,
             autoNextMode: parsed.autoNextMode ?? false,
             autoNextDelay: typeof parsed.autoNextDelay === 'number' ? parsed.autoNextDelay : 0.75,
+            introShowcaseDelay: typeof parsed.introShowcaseDelay === 'number' ? parsed.introShowcaseDelay : 3.0,
           }));
           return;
         }
@@ -155,6 +159,10 @@ export default function AIPlaygroundPage() {
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
         return;
       }
+      // Strictly prevent global hotkeys (Space, Enter, ArrowRight) from starting or stepping debate when modals are open
+      if (isIntroGraphicOpen || isSettingsOpen || isIntelOpen || isEditorOpen || isTranscriptOpen || isRenderModalOpen) {
+        return;
+      }
       if (isFullRoundPrebuffering) {
         return;
       }
@@ -177,10 +185,16 @@ export default function AIPlaygroundPage() {
         }
         return;
       }
+      if (e.key === 'i' || e.key === 'I') {
+        setIsIntroGraphicOpen(prev => !prev);
+        return;
+      }
       if (e.key === 'r' || e.key === 'R') {
         if (state.stage.content && state.stage.speakerId) {
           const speaker = CANDIDATE_MAP.get(state.stage.speakerId) || candidates.find(c => c.id === state.stage.speakerId);
-          playSpeechAudio(state.stage.content, speaker?.voice?.voiceId, speaker?.id);
+          playSpeechAudio(state.stage.content, speaker?.voice?.voiceId, speaker?.id, {
+            isCCTV: state.phase === 'CCTV_BACKROOM'
+          });
         }
         return;
       }
@@ -209,7 +223,13 @@ export default function AIPlaygroundPage() {
     playSpeechAudio, 
     startGame, 
     nextStep, 
-    sessionSaveName
+    sessionSaveName,
+    isIntroGraphicOpen,
+    isSettingsOpen,
+    isIntelOpen,
+    isEditorOpen,
+    isTranscriptOpen,
+    isRenderModalOpen
   ]);
 
   // Pure Black Recording Standby Screen: Hold total black silence with 0 UI, 0 subtitles, 0 audio until user triggers recording
@@ -308,6 +328,16 @@ export default function AIPlaygroundPage() {
               <span className="hidden md:inline">Election Intel</span>
             </button>
 
+            {/* Introduction Motion Graphic Button */}
+            <button
+              onClick={() => setIsIntroGraphicOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-950/80 via-blue-950/80 to-cyan-950/80 hover:from-purple-900/90 hover:to-cyan-900/90 border border-cyan-500/50 hover:border-cyan-400 text-xs font-mono font-bold text-cyan-300 transition cursor-pointer shadow-sm shadow-cyan-500/10"
+              title="Launch Cinematic Introduction Motion Graphic (Shortcut: I)"
+            >
+              <Film className="w-4 h-4 text-cyan-400 animate-pulse" />
+              <span className="hidden md:inline">Intro Graphic</span>
+            </button>
+
             {/* Master Video Render Button */}
             <button
               onClick={() => setIsRenderModalOpen(true)}
@@ -359,6 +389,7 @@ export default function AIPlaygroundPage() {
             onReorderActiveCandidates={reorderActiveCandidates}
             onShuffleActiveCandidates={shuffleActiveCandidates}
             onReverseActiveCandidates={reverseActiveCandidates}
+            onOpenIntroductionMotionGraphic={() => setIsIntroGraphicOpen(true)}
             onBackToArena={() => setActiveView('arena')}
             nineRouterConfig={nineRouterConfig}
             onOpenSettings={() => setIsSettingsOpen(true)}
@@ -592,6 +623,16 @@ export default function AIPlaygroundPage() {
         isOpen={isRenderModalOpen}
         onClose={() => setIsRenderModalOpen(false)}
         currentSessionName={sessionSaveName || 'voiceT1'}
+      />
+
+      {/* Introduction Motion Graphic Modal (YouTube Broadcast Showcase) */}
+      <IntroductionMotionGraphicModal
+        isOpen={isIntroGraphicOpen}
+        onClose={() => setIsIntroGraphicOpen(false)}
+        candidates={candidates}
+        activeCandidateIds={state.participatingCandidateIds || state.activeCandidateIds}
+        nineRouterConfig={nineRouterConfig}
+        onStartElection={() => startGame(sessionSaveName)}
       />
     </main>
   );

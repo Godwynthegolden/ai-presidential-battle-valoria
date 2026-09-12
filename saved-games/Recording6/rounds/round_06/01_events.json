@@ -1,0 +1,50 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 6,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas Thorne assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "...",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 6,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur believes his media empire buys immunity from a room that already sentenced him. Three votes committed. My fourth collects the escrow and keeps Victoria bound to me.",
+    "privateReason": "Honoring Victoria's pact banks $15M escrow while the room's consensus guarantees Arthur's elimination.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 6,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Sterling believes his surname buys immunity. His $20M treasury can't fund a bailout. My ballot stacks with Maya's pact—cheap kill, fifteen million escrowed, war chest intact.",
+    "privateReason": "Honoring Maya's pact banks $15M escrow while bandwagon guarantees Arthur's sub-$40M liquidation tonight.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 6,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur assumes his billions buy another round. Vivienne's handshake plus consensus guarantees concentration; solo strikes on Maya's hundred million waste ballots. I bank the escrow, sign his exit.",
+    "privateReason": "Honoring Zhao's pact banks $15M, guarantees elimination, preserves my $20M for defense.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

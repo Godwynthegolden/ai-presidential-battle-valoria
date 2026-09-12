@@ -1,0 +1,374 @@
+[
+  {
+    "filename": "01_campaign_01_jax-alvarez.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "textSnippet": "Twenty years I poured steel till the mills went dark. Now Governor of Iron Valley—and I'm taking Val",
+    "sizeBytes": 131656,
+    "timestamp": 1789043009050
+  },
+  {
+    "filename": "01_campaign_02_elena-rostova.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "textSnippet": "Numbers don't lie. Politicians do. I'm Elena Rostova — the economist who balances impossible books. ",
+    "sizeBytes": 206888,
+    "timestamp": 1789043018577
+  },
+  {
+    "filename": "01_campaign_03_marcus-vance.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "textSnippet": "Thirty years defending this nation taught me one truth: peace belongs to the strong. Politicians sol",
+    "sizeBytes": 177213,
+    "timestamp": 1789043032833
+  },
+  {
+    "filename": "01_campaign_04_art-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "textSnippet": "Career politicians couldn't balance a checkbook. I turned a thousand dollars into ten billion. Valor",
+    "sizeBytes": 186826,
+    "timestamp": 1789043045291
+  },
+  {
+    "filename": "01_campaign_05_victoria-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "textSnippet": "The heiress who burned her inheritance to fund the frontline. Daddy's country club taught me their d",
+    "sizeBytes": 159241,
+    "timestamp": 1789043058280
+  },
+  {
+    "filename": "01_campaign_06_elijah-haddon.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "textSnippet": "Fifteen million souls gather around my pulpit weekly—tonight, all Valoria is my congregation. I've c",
+    "sizeBytes": 226114,
+    "timestamp": 1789043069576
+  },
+  {
+    "filename": "01_campaign_07_maya-lin.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "textSnippet": "Maya Lin. Eighty hostages came home without one bullet fired. Tonight, Valoria itself is the hostage",
+    "sizeBytes": 169690,
+    "timestamp": 1789043085082
+  },
+  {
+    "filename": "01_campaign_08_vivienne-zhao.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "textSnippet": "Taught silicon to speak with the human mind. Now I intend to teach Valoria's government to think.",
+    "sizeBytes": 99891,
+    "timestamp": 1789043102972
+  },
+  {
+    "filename": "01_campaign_09_silas-thorne.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "textSnippet": "Republics aren't saved by loud promises—they're steadied by practiced hands. Mine. Thirty-five years",
+    "sizeBytes": 228204,
+    "timestamp": 1789043110574
+  },
+  {
+    "filename": "01_campaign_10_garrick-stone.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "textSnippet": "Four governors convicted. Two oligarchs caged. Three car bombs—they failed. I've read the Capitol Is",
+    "sizeBytes": 178049,
+    "timestamp": 1789043126173
+  },
+  {
+    "filename": "02_round1_attack_02_elena-rostova_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "Alvarez mistakes fury for fiscal policy. Iron Valley's pension liability swelled under his watch—unf",
+    "sizeBytes": 256626,
+    "timestamp": 1789043153351
+  },
+  {
+    "filename": "02_round1_attack_03_marcus-vance_vs_maya-lin.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "textSnippet": "Eighty hostages came home because Lin paid the room—not mastered it. Diplomacy without deterrence is",
+    "sizeBytes": 251610,
+    "timestamp": 1789043180749
+  },
+  {
+    "filename": "02_round1_attack_04_art-sterling_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "Twenty years pouring steel, zero years balancing books! Alvarez ran Iron Valley like a bankrupt mill",
+    "sizeBytes": 311796,
+    "timestamp": 1789043216368
+  },
+  {
+    "filename": "02_round1_attack_05_victoria-sterling_vs_art-sterling.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "textSnippet": "Daddy claims he turned a thousand into ten billion? I've seen the real ledgers — Capitol Island brib",
+    "sizeBytes": 249102,
+    "timestamp": 1789043260256
+  },
+  {
+    "filename": "02_round1_attack_06_elijah-haddon_vs_elena-rostova.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "textSnippet": "No, but they never weep! She'd amputate Valoria's soul and call it surgery. A ledger knows no mercy;",
+    "sizeBytes": 185990,
+    "timestamp": 1789043289036
+  },
+  {
+    "filename": "02_round1_attack_07_maya-lin_vs_marcus-vance.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "textSnippet": "Marcus, I walked into rooms your soldiers couldn't. Deterrence without dialogue is noise with medals",
+    "sizeBytes": 247012,
+    "timestamp": 1789043316904
+  },
+  {
+    "filename": "02_round1_attack_08_vivienne-zhao_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "Alvarez mistakes cortisol for cognition. Every outburst on this stage is his platform's crash log. U",
+    "sizeBytes": 244087,
+    "timestamp": 1789043333720
+  },
+  {
+    "filename": "02_round1_attack_09_silas-thorne_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "My friends, thirty-five years taught me: fury makes riveting television, ruinous governance. Governo",
+    "sizeBytes": 308034,
+    "timestamp": 1789043350302
+  },
+  {
+    "filename": "02_round1_attack_10_garrick-stone_vs_marcus-vance.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "textSnippet": "Marcus Vance, you signed the defense contracts — the contractors signed the island ledgers. Exhibit ",
+    "sizeBytes": 241579,
+    "timestamp": 1789043371000
+  },
+  {
+    "filename": "03_round1_cctv_02_elena-rostova_and_silas-thorne.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "textSnippet": "Silas, Alvarez's elimination is already priced in. Thirty million escrowed—make the count unanimous.",
+    "sizeBytes": 109504,
+    "timestamp": 1789043446009
+  },
+  {
+    "filename": "03_round1_cctv_03_marcus-vance_and_silas-thorne.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "textSnippet": "Silas, you drew first blood on Alvarez. Thirty million escrowed—finish him tonight.",
+    "sizeBytes": 109504,
+    "timestamp": 1789043446167
+  },
+  {
+    "filename": "03_round1_cctv_04_art-sterling_and_elijah-haddon.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "textSnippet": "Haddon, four knives already in Alvarez. Thirty million tithed to your ministry makes the wound.",
+    "sizeBytes": 116191,
+    "timestamp": 1789043446203
+  },
+  {
+    "filename": "03_round1_cctv_05_victoria-sterling_and_vivienne-zhao.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "textSnippet": "Vivienne — you drew first blood. Thirty million escrowed; we finish what your scalpel started.",
+    "sizeBytes": 110340,
+    "timestamp": 1789043446221
+  },
+  {
+    "filename": "03_round1_cctv_06_elijah-haddon_and_elena-rostova.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "textSnippet": "Four wolves already circle Alvarez, Elena. Thirty million seals his fall tonight.",
+    "sizeBytes": 104906,
+    "timestamp": 1789043446324
+  },
+  {
+    "filename": "03_round1_cctv_07_maya-lin_and_garrick-stone.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "textSnippet": "Your ledgers wounded him, Garrick. Thirty million escrowed—finish Marcus Vance tonight.",
+    "sizeBytes": 100727,
+    "timestamp": 1789043446373
+  },
+  {
+    "filename": "03_round1_cctv_08_vivienne-zhao_and_elena-rostova.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "textSnippet": "Elena, Alvarez is legacy code awaiting deletion. Thirty million escrowed. Compile the majority.",
+    "sizeBytes": 112430,
+    "timestamp": 1789043446471
+  },
+  {
+    "filename": "01_strategy_vote_04_art-sterling.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Delivering address...",
+    "sizeBytes": 26330,
+    "timestamp": 1789043584301
+  },
+  {
+    "filename": "01_strategy_vote_05_victoria-sterling.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Delivering address...",
+    "sizeBytes": 20479,
+    "timestamp": 1789043584372
+  },
+  {
+    "filename": "01_strategy_vote_06_elijah-haddon.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Delivering address...",
+    "sizeBytes": 21732,
+    "timestamp": 1789043584571
+  },
+  {
+    "filename": "01_strategy_vote_07_maya-lin.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Delivering address...",
+    "sizeBytes": 25494,
+    "timestamp": 1789043588251
+  },
+  {
+    "filename": "01_strategy_vote_03_marcus-vance.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Alvarez assumes numbers shield him. Four blades already drawn. Honoring Thorne's pact banks fifteen ",
+    "sizeBytes": 227786,
+    "timestamp": 1789043588335
+  },
+  {
+    "filename": "01_strategy_vote_02_elena-rostova.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Alvarez assumes crowd fury is random noise. It's priced. Haddon, Zhao, Thorne concentrate four votes",
+    "sizeBytes": 179303,
+    "timestamp": 1789043588401
+  },
+  {
+    "filename": "01_strategy_vote_08_vivienne-zhao.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Alvarez assumes volume substitutes for viability. Four accusers, no fiscal base—my ballot banks Ster",
+    "sizeBytes": 215666,
+    "timestamp": 1789043588478
+  },
+  {
+    "filename": "01_strategy_vote_09_silas-thorne.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Alvarez believes union fury shields him. Two escrows banked, three votes converging. His populism di",
+    "sizeBytes": 244087,
+    "timestamp": 1789043597462
+  },
+  {
+    "filename": "01_strategy_vote_01_jax-alvarez.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liq",
+    "sizeBytes": 134163,
+    "timestamp": 1789043605440
+  },
+  {
+    "filename": "01_strategy_vote_10_garrick-stone.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 1,
+    "textSnippet": "Jackson Alvarez assumed their treasury gave them breathing room tonight. Striking now forces their l",
+    "sizeBytes": 139179,
+    "timestamp": 1789043625227
+  }
+]

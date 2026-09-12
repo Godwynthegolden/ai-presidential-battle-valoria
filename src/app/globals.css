@@ -130,3 +130,82 @@ body {
     filter: brightness(1.25);
   }
 }
+
+/* Cinematic Introduction Motion Graphic Effects */
+@keyframes holoLightWipe {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+@keyframes candidateFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.008);
+  }
+}
+
+@keyframes scanlineSweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.6;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(200%);
+    opacity: 0;
+  }
+}
+
+@keyframes powerSlamIn {
+  0% {
+    transform: scale(1.18) translateX(60px);
+    filter: brightness(2.2) contrast(1.2) blur(6px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.98) translateX(-4px);
+    filter: brightness(1.15) blur(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.0) translateX(0);
+    filter: brightness(1.0);
+    opacity: 1;
+  }
+}
+
+.animate-holo-wipe {
+  animation: holoLightWipe 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-candidate-float {
+  animation: candidateFloat 5.5s ease-in-out infinite;
+}
+
+.animate-scanline-sweep {
+  animation: scanlineSweep 2.8s ease-in-out infinite;
+}
+
+.animate-power-slam {
+  animation: powerSlamIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

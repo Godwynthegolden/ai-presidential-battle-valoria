@@ -1,0 +1,136 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 6,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "silas-thorne",
+          "reason": "Honoring Sterling's pact banks $15M escrow while draining Thorne's war chest below bailout threshold.",
+          "strategyMonologue": "Thorne believes a century of seniority and $100M buys immunity. Two concentrated votes force his $80M attrition. My ballot is the second signature on his liquidation.",
+          "audioBlobUrl": "blob:http://localhost:3000/ec663410-d8ee-47f2-b384-b58fc783630d",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "silas-thorne",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Elena Rostova",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "silas-thorne",
+          "reason": "Honoring the pact cripples Thorne's war chest, banks $15M escrow, keeps Elena as shield.",
+          "strategyMonologue": "Thorne assumes nine figures buy immunity. Two ballots trigger his eighty-million liquidation. Victoria's escrow pays fifteen—best ROI on tonight's ballot. Checkmate, Senator.",
+          "audioBlobUrl": "blob:http://localhost:3000/62edf7c5-81e0-4c36-821e-0b42fb9ba030",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "silas-thorne",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Arthur Sterling",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "elena-rostova",
+          "reason": "Honor the pact, bank $15M escrow, guarantee cheap elimination, preserve bailout capital.",
+          "strategyMonologue": "Elena believes the governor's gravitas shields her. Her $15M cannot buy a bailout; my ballot joins consensus, banks Zhao's fifteen, keeps sixty against Father's counter-strike.",
+          "audioBlobUrl": "blob:http://localhost:3000/aa219496-6367-4690-b88a-9b52c46820a9",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "silas-thorne",
+          "isBetrayal": true,
+          "betrayedAllyId": "vivienne-zhao",
+          "isHonoredPact": false,
+          "voterName": "Victoria Sterling",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "art-sterling",
+          "reason": "Honoring Lin's pact banks $15M while consensus eliminates the damaged lightning rod cheaply.",
+          "strategyMonologue": "Sterling believes his seventy million and bailout buffer insulate him. Three accusers guarantee concentration. My escrow with Lin banks fifteen million while the room performs liquidation.",
+          "audioBlobUrl": "blob:http://localhost:3000/99b1edc3-745c-41d1-b702-8f320d595c65",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "silas-thorne",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Arthur Sterling"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "maya-lin",
+          "reason": "Honor Zhao's pact, bank $15M, drain Lin's war chest, keep Sterling as meat shield.",
+          "strategyMonologue": "Lin banks on her hundred-million fortress deterring strikes. With Zhao's ballot stacked beside mine, her war chest hemorrhages forty million while Sterling absorbs the room's knives another round.",
+          "audioBlobUrl": "blob:http://localhost:3000/954d6150-3b92-4a4e-a219-e57b87e166b4",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "vivienne-zhao",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Maya Lin"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r6-1-silas-thorne",
+          "candidateId": "silas-thorne",
+          "round": 6,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 2,
+          "remainingVotes": 1,
+          "remainingBudget": 60,
+          "timestamp": 1789067645205,
+          "candidateName": "Silas Thorne"
+        },
+        {
+          "id": "bailout-r6-2-silas-thorne",
+          "candidateId": "silas-thorne",
+          "round": 6,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 20,
+          "timestamp": 1789067645205,
+          "candidateName": "Silas Thorne"
+        },
+        {
+          "id": "bailout-r6-3-elena-rostova",
+          "candidateId": "elena-rostova",
+          "round": 6,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 5,
+          "timestamp": 1789067645205,
+          "candidateName": "Elena Rostova"
+        },
+        {
+          "id": "bailout-r6-4-art-sterling",
+          "candidateId": "art-sterling",
+          "round": 6,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 0,
+          "timestamp": 1789067645205,
+          "candidateName": "Arthur Sterling"
+        }
+      ],
+      "eliminatedId": "art-sterling",
+      "eliminatedName": "Arthur Sterling",
+      "finalVoteCount": 0
+    }
+  }
+]

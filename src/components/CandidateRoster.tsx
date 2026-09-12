@@ -34,6 +34,12 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
 }) => {
   const { activeCandidateIds, eliminatedCandidates, stage, winnerId, phase } = gameState;
   const isPreGame = phase === 'IDLE';
+  const isEndgame = gameState.round === 99 || 
+    phase === 'FINAL_SPEECHES' || 
+    phase === 'FINAL_VOTE' || 
+    phase === 'FINAL_REVEAL' || 
+    phase === 'WINNER' ||
+    (phase === 'VOTE_CONFESSIONAL' && Boolean(gameState.finalVoteTally));
 
   // Always preserve exact speaking/lineup sequence during both pre-game AND active gameplay!
   const orderedIds = (gameState.participatingCandidateIds && gameState.participatingCandidateIds.length > 0)
@@ -73,6 +79,8 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                   ? 'bg-red-950/60 border-2 border-red-500 shadow-xl shadow-red-950/40'
                   : isAlive
                   ? 'bg-[#0b0f19]/90 border-slate-750 hover:bg-[#101726] hover:border-slate-600 shadow-sm'
+                  : isEndgame
+                  ? 'bg-slate-950/70 border-slate-800 hover:bg-slate-900/90 shadow-sm'
                   : 'bg-slate-950/40 border-slate-900 opacity-40 grayscale hover:opacity-70'
               }`}
               style={{
@@ -165,7 +173,7 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-1.5">
                   <div className="flex items-center gap-1.5 truncate">
-                    <span className={`text-sm font-display font-black tracking-tight truncate ${isAlive ? 'text-white' : 'text-stone-400'}`}>
+                    <span className={`text-sm font-display font-black tracking-tight truncate ${isAlive || isEndgame ? 'text-white' : 'text-stone-400'}`}>
                       {candidate.name}
                     </span>
                     {candidate.isCustom && (
@@ -190,6 +198,10 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                   ) : isTarget ? (
                     <span className="flex items-center gap-1 text-[10px] font-display font-black uppercase px-2 py-0.5 rounded-full bg-red-600 text-white shadow-md animate-pulse shrink-0">
                       <Crosshair className="w-3 h-3" /> Target
+                    </span>
+                  ) : isEndgame && !isAlive ? (
+                    <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-purple-950/80 text-purple-200 border border-purple-700/60 shrink-0">
+                      🏛️ Juror
                     </span>
                   ) : !isPreGame && !isAlive ? (
                     <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-stone-900 text-stone-300 border border-stone-800 shrink-0">
@@ -223,6 +235,10 @@ export const CandidateRoster: React.FC<CandidateRosterProps> = ({
                         <ChevronDown className="w-3 h-3" />
                       </button>
                     </div>
+                  ) : isEndgame && isAlive ? (
+                    <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-500/50 shrink-0">
+                      <Crown className="w-3 h-3 text-amber-400" /> Finalist
+                    </span>
                   ) : (
                     <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-900/90 text-cyan-300 border border-cyan-500/30 shrink-0">
                       In Race

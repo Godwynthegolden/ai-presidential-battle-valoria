@@ -1,0 +1,24 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 7,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Maya is a mutual liability for both of us, Elena. Take the funds and bury.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Maya Lin",
+      "whisperText": "Maya is a mutual liability for both of us, Elena. Take the funds and bury.",
+      "receiverResponse": "The metrics align. Maya will not survive tonight.",
+      "privateStrategy": "Align tactically to eliminate Maya Lin while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

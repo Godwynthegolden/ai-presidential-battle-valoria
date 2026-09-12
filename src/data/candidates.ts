@@ -1598,13 +1598,47 @@ export const DEFAULT_CANDIDATES = CANDIDATES;
 export const CANDIDATE_STORAGE_KEY = 'valoria_custom_candidates_v4';
 export const SELECTED_CANDIDATES_STORAGE_KEY = 'ai_politics_selected_candidates_v4';
 
+export function getDefaultIntroductionDialogue(candidate: Candidate): string {
+  if (candidate.introductionDialogue && candidate.introductionDialogue.trim()) {
+    return candidate.introductionDialogue.trim();
+  }
+  const curatedIntroMap: Record<string, string> = {
+    'jax-alvarez': "I am Jackson Alvarez. For forty years, the billionaires on the coast sold out our factories and crushed working families. Valoria's heartland is done begging. It's time to take our republic back!",
+    'elena-rostova': "I am Elena Rostova. The law is not a suggestion, and the treasury is not a casino. Valoria needs rigorous constitutional discipline, automated efficiency, and uncompromising monetary governance.",
+    'arthur-sterling': "Arthur Sterling. Sentimental speeches do not balance the ledger or keep the lights on. I build industries, I generate capital, and I will run this nation like the sovereign powerhouse it must become.",
+    'marcus-vance': "General Marcus Vance. While career politicians make backroom deals, our borders crumble and foreign adversaries mock us. Strength is the only language they respect, and order will be restored.",
+    'evelyn-cross': "I am Evelyn Cross. While corrupt elites argue over quarterly profits, the planet burns and our communities suffer. We need radical ecological renewal before there is no Valoria left to govern.",
+    'silas-thorne': "Silas Thorne. Radical promises sound nice on television, but institutions require seasoned executive statecraft. I offer steady governance and proven constitutional stewardship.",
+    'dmitri-voronin': "Dmitri Voronin. The algorithms have taken over, the surveillance state watches your every move, and the cartel controls both parties. I am here to expose the truth.",
+    'maya-lin': "Dr. Maya Lin. Governance without data is just superstition and waste. We will automate the bureaucracy, eliminate inefficiency, and engineer a smarter Republic for all Valorians.",
+    'victor-kane': "Victor Kane. The system is rigged by ivory-tower bureaucrats who produce nothing. Cut the regulations, slash the taxes, and let pure free-market ambition unleash Valoria.",
+    'seraphina-vance': "Seraphina Vance. A nation without moral integrity is already bankrupt. We must protect our sacred constitutional values, restore civic virtue, and defend our cultural heritage.",
+    'cassian-drake': "Commander Cassian Drake. Look up! The resources of the high frontier await us. We will secure orbital sovereignty, mine the asteroids, and lead Valoria into the space century."
+  };
+
+  if (curatedIntroMap[candidate.id]) {
+    return curatedIntroMap[candidate.id];
+  }
+
+  return `I am ${candidate.name}, ${candidate.titleRole}. ${candidate.slogan} The future of the Republic of Valoria begins today!`;
+}
+
 export function getStoredCandidates(): Candidate[] {
-  if (typeof window === 'undefined') return DEFAULT_CANDIDATES;
+  if (typeof window === 'undefined') {
+    return DEFAULT_CANDIDATES.map(def => ({
+      ...def,
+      introductionDialogue: def.introductionDialogue ?? getDefaultIntroductionDialogue(def)
+    }));
+  }
   try {
     const raw = localStorage.getItem(CANDIDATE_STORAGE_KEY) || localStorage.getItem('valoria_custom_candidates_v3') || localStorage.getItem('valoria_custom_candidates_v2');
     if (!raw) {
-      DEFAULT_CANDIDATES.forEach(c => CANDIDATE_MAP.set(c.id, c));
-      return DEFAULT_CANDIDATES;
+      const initialized = DEFAULT_CANDIDATES.map(def => ({
+        ...def,
+        introductionDialogue: def.introductionDialogue ?? getDefaultIntroductionDialogue(def)
+      }));
+      initialized.forEach(c => CANDIDATE_MAP.set(c.id, c));
+      return initialized;
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
@@ -1616,11 +1650,13 @@ export function getStoredCandidates(): Candidate[] {
           userCustomCandidates.push({
             ...c,
             initialBudget: typeof c.initialBudget === 'number' ? c.initialBudget : 100,
+            introductionDialogue: c.introductionDialogue ?? getDefaultIntroductionDialogue(c),
           });
         } else {
           storedMap.set(c.id, {
             ...c,
             initialBudget: typeof c.initialBudget === 'number' ? c.initialBudget : 100,
+            introductionDialogue: c.introductionDialogue ?? getDefaultIntroductionDialogue(c),
           });
         }
       });
@@ -1634,9 +1670,14 @@ export function getStoredCandidates(): Candidate[] {
             ...storedOverride,
             name: def.name, // Guarantee canonical 2-word name
             initialBudget: typeof storedOverride.initialBudget === 'number' ? storedOverride.initialBudget : (def.initialBudget ?? 100),
+            fullBodyImageUrl: storedOverride.fullBodyImageUrl ?? def.fullBodyImageUrl,
+            introductionDialogue: storedOverride.introductionDialogue ?? def.introductionDialogue ?? getDefaultIntroductionDialogue(def),
           };
         }
-        return def;
+        return {
+          ...def,
+          introductionDialogue: def.introductionDialogue ?? getDefaultIntroductionDialogue(def)
+        };
       });
 
       // Append any user-created custom candidates
@@ -1650,8 +1691,12 @@ export function getStoredCandidates(): Candidate[] {
   } catch (err) {
     console.warn('[Error loading custom candidates from storage]:', err);
   }
-  DEFAULT_CANDIDATES.forEach(c => CANDIDATE_MAP.set(c.id, c));
-  return DEFAULT_CANDIDATES;
+  const fallback = DEFAULT_CANDIDATES.map(def => ({
+    ...def,
+    introductionDialogue: def.introductionDialogue ?? getDefaultIntroductionDialogue(def)
+  }));
+  fallback.forEach(c => CANDIDATE_MAP.set(c.id, c));
+  return fallback;
 }
 
 export function saveStoredCandidates(list: Candidate[]): void {

@@ -1,0 +1,50 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 6,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Thorne believes a century of seniority and $100M buys immunity. Two concentrated votes force his $80M attrition. My ballot is the second signature on his liquidation.",
+    "privateReason": "Honoring Sterling's pact banks $15M escrow while draining Thorne's war chest below bailout threshold.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 6,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena believes the governor's gravitas shields her. Her $15M cannot buy a bailout; my ballot joins consensus, banks Zhao's fifteen, keeps sixty against Father's counter-strike.",
+    "privateReason": "Honor the pact, bank $15M escrow, guarantee cheap elimination, preserve bailout capital.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 6,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Sterling believes his seventy million and bailout buffer insulate him. Three accusers guarantee concentration. My escrow with Lin banks fifteen million while the room performs liquidation.",
+    "privateReason": "Honoring Lin's pact banks $15M while consensus eliminates the damaged lightning rod cheaply.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 6,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Lin banks on her hundred-million fortress deterring strikes. With Zhao's ballot stacked beside mine, her war chest hemorrhages forty million while Sterling absorbs the room's knives another round.",
+    "privateReason": "Honor Zhao's pact, bank $15M, drain Lin's war chest, keep Sterling as meat shield.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

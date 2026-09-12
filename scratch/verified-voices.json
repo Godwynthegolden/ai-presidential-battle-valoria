@@ -1,0 +1,660 @@
+[
+  {
+    "id": "5196af35f6ff4a0dbf541793fc9f2157",
+    "name": "Populist Rally Leader (Donald J. Trump)",
+    "category": "Energetic",
+    "gender": "male",
+    "description": "Fiery, booming populist orator with unscripted rally energy and high charisma.",
+    "tags": [
+      "male",
+      "energetic",
+      "male",
+      "old",
+      "character-voice"
+    ],
+    "sampleText": "Folks, nobody knows noise better than me, believe me. These other companies, they're terrible, just terrible with noise. But we have the best technology, the absolute best. We're going to make everything so quiet, so beautiful, you won't believe it."
+  },
+  {
+    "id": "92d1b18ddc0e484bafb58133770eee11",
+    "name": "Iron Valley Tribune (MARTIN ALVAREZ)",
+    "category": "Energetic",
+    "gender": "male",
+    "description": "Grounded, punchy working-class cadence fighting for industrial labor.",
+    "tags": [
+      "male",
+      "energetic",
+      "male",
+      "middle-aged",
+      "narration"
+    ],
+    "sampleText": "Imagina que entras a una bodega abandonada. El olor a humedad te golpea. Buscas algo viejo, pero encuentras una cámara grabada hace veinte años. Al darle play, lo que ves no tiene explicación lógica. Quédate, porque esta es la historia que nadie se atrevió a contar jamás."
+  },
+  {
+    "id": "3135fbb0431d48e098669090bc5e6dd9",
+    "name": "Heartland Governor (southern mom)",
+    "category": "Energetic",
+    "gender": "male",
+    "description": "Warm, drawling southern orator with folksy humor and direct punch.",
+    "tags": [
+      "male",
+      "energetic",
+      "female",
+      "young",
+      "entertainment"
+    ],
+    "sampleText": "Oh sugar, don't you worry your little head about that mess. Mama will clean it right up for you, sweetie. You’ve been working so hard today, and I’m just so proud of my big boy. Come sit down and let mama take care of everything for you, darling."
+  },
+  {
+    "id": "93cccbd0ef674d5a933e2d55e95b5373",
+    "name": "Gospel Civic Orator (Elderly Preacher)",
+    "category": "Authoritative",
+    "gender": "male",
+    "description": "Booming, soaring pastoral cadence inspiring moral urgency and civic duty.",
+    "tags": [
+      "male",
+      "authoritative",
+      "male",
+      "old",
+      "narration"
+    ],
+    "sampleText": "Today, we gather with thankful hearts, no matter the challenges we face. We know that guidance is always with us, a protector and guide in every season of life."
+  },
+  {
+    "id": "4ce7e917cedd4bc2bb2e6ff3a46acaa1",
+    "name": "Constitutional Scholar (Barack Obama)",
+    "category": "Calm & Intellectual",
+    "gender": "male",
+    "description": "Smooth, measured, and dignified cadence with professorial eloquence.",
+    "tags": [
+      "male",
+      "calm & intellectual",
+      "male",
+      "middle-aged",
+      "narration"
+    ],
+    "sampleText": "We stand before the voters of Valoria to deliver real results and unwavering leadership."
+  },
+  {
+    "id": "e1ea4679a5fe47a68adb3bfff3859395",
+    "name": "Neural Architect (Голас Столаса)",
+    "category": "Tech & Modern",
+    "gender": "male",
+    "description": "Fast, sharp, and modern digital pioneer rebooting outdated bureaucracy.",
+    "tags": [
+      "male",
+      "tech & modern",
+      "male",
+      "young",
+      "character-voice"
+    ],
+    "sampleText": "Я собирался продолжить наш небольшой разговор, касающийся моего гримуара. Эта книга была дана мне для выполнения работы, которую я позволил тебе использовать. Ведь ты знаешь, я разрешаю вам доступ в царство смертных, не совсем легально, но мне это выгодно."
+  },
+  {
+    "id": "946250d41fcb4181bf6f094d39ba66e3",
+    "name": "Synthetic Policy Lead (AI Female)",
+    "category": "Tech & Modern",
+    "gender": "female",
+    "description": "Ice-cool, brilliant, and clinical pioneer in algorithmic governance.",
+    "tags": [
+      "female",
+      "tech & modern",
+      "female",
+      "middle-aged",
+      "medium"
+    ],
+    "sampleText": "Checking target calibration. You have 107 new alerts. Prolonged isolation or emotional trauma could be contributing to this sudden change. Would you like to run a test?"
+  },
+  {
+    "id": "ddc981f5c23046f8a7144393ad261029",
+    "name": "Special Ops Commander (TDS COMMANDER)",
+    "category": "Deep & Serious",
+    "gender": "male",
+    "description": "Cold, intimidating, and lethal baritone with zero tolerance for weakness.",
+    "tags": [
+      "male",
+      "deep & serious",
+      "male",
+      "middle-aged",
+      "character-voice"
+    ],
+    "sampleText": "You could do that? I don't understand. What do you mean by 'a world created from chaos'? Wait, we were in the old world? Stop doing that!"
+  },
+  {
+    "id": "ef5698d8d21243928659639c8fd30515",
+    "name": "Aerospace General (General Grievous)",
+    "category": "Deep & Serious",
+    "gender": "male",
+    "description": "Commanding, resolute military gravitas defending sovereign airspace.",
+    "tags": [
+      "male",
+      "deep & serious",
+      "male",
+      "old",
+      "character-voice"
+    ],
+    "sampleText": "Nuestras fuerzas deben reagruparse inmediatamente. He establecido una base secreta en el sistema Utapau. Los droides de combate están listos para el asalto. La República no esperará este ataque, y su destrucción será inevitable."
+  },
+  {
+    "id": "dff5766bcce54c46b8a383243a6d54cc",
+    "name": "Strategic Fleet Admiral (the admiral radio )",
+    "category": "Deep & Serious",
+    "gender": "male",
+    "description": "Deep, steady, and unyielding naval commander focused on national defense.",
+    "tags": [
+      "male",
+      "deep & serious",
+      "male",
+      "old",
+      "advertisement"
+    ],
+    "sampleText": "Ladies and gentlemen, visit your Admiral dealer today for our exciting new line of color television sets. Each Admiral set features our exclusive Instant-Play system and Super-Scope tuning for crystal-clear reception. Remember, Admiral brings you tomorrow's technology today. Write to Admiral care of this station for details."
+  },
+  {
+    "id": "29b9977695cd4d95ad692135ed5bcf65",
+    "name": "Frontier Lawman (THIS IS THE NIGHTM)",
+    "category": "Deep & Serious",
+    "gender": "male",
+    "description": "Grizzled, weathered frontier authority protecting border communities.",
+    "tags": [
+      "male",
+      "deep & serious",
+      "neutral",
+      "young",
+      "narration"
+    ],
+    "sampleText": "This is the night mail crossing the border, bringing the cheques and the postal order. Letters of the rich, letters with the poor, the shop with the corner of the girl next door."
+  },
+  {
+    "id": "8ce550397df046dbb80ceee5e341d8c8",
+    "name": "Anti-Corruption Prosecutor (PROSECUTOR WOMAN)",
+    "category": "Authoritative",
+    "gender": "male",
+    "description": "Relentless, piercing courtroom prosecutor cross-examining oligarchic graft.",
+    "tags": [
+      "male",
+      "authoritative",
+      "female",
+      "old",
+      "conversational"
+    ],
+    "sampleText": "Die Sachlage ist komplex und erfordert eine genaue Betrachtung aller Details. Es ist wichtig, alle Aspekte sorgfältig zu prüfen, um ein vollständiges Bild der Ereignisse zu erhalten und fundierte Entscheidungen treffen zu können. Achten Sie auf die Nuancen, die den Unterschied ausmachen."
+  },
+  {
+    "id": "0edf03c4ff7f43df8ae59d9ec0f5d4eb",
+    "name": "Grassroots Reformer (Young Female Activ)",
+    "category": "Passionate",
+    "gender": "female",
+    "description": "Passionate, energetic orator mobilizing working families against corporate cartels.",
+    "tags": [
+      "female",
+      "passionate",
+      "female",
+      "young",
+      "narration"
+    ],
+    "sampleText": "After traveling to Zambia, I'm pledging to purchase bicycles for girls and women so they can get to school and work. Join me in making a donation to support this important fight for gender equality and positive change."
+  },
+  {
+    "id": "6d91c091920f4bf4ac88613a7e08a8d3",
+    "name": "Investigative Tribune (Shand Investigativ)",
+    "category": "Passionate",
+    "gender": "female",
+    "description": "Fearless, rapid-fire whistleblower exposing backroom corruption.",
+    "tags": [
+      "female",
+      "passionate",
+      "male",
+      "old",
+      "narration"
+    ],
+    "sampleText": "My name is Adam Shand. I'm an investigative journalist and crime author, and I've been working on this case for seven years. This podcast deals with serious topics, and listener discretion is advised."
+  },
+  {
+    "id": "565502b9434d467993ba89e4eb5fa7a4",
+    "name": "Senior Statesman (Joe Biden)",
+    "category": "Deep & Serious",
+    "gender": "male",
+    "description": "Mature, experienced legislative veteran relying on institutional decorum.",
+    "tags": [
+      "male",
+      "deep & serious",
+      "male",
+      "old",
+      "entertainment"
+    ],
+    "sampleText": "Look, folks, these new Pokemon games are getting ridiculous. What's with all these complicated mechanics? Back in my day, we had 151 Pokemon and we liked it. And no, Donald, adding more doesn't make it better. Come on, man, it's just common sense."
+  },
+  {
+    "id": "65c0b8155c464a648161af8877404f11",
+    "name": "High Commissioner (Brian British)",
+    "category": "Professional",
+    "gender": "male",
+    "description": "Refined, articulate British cadence suited for international statecraft.",
+    "tags": [
+      "male",
+      "professional",
+      "male",
+      "old",
+      "narration"
+    ],
+    "sampleText": "Consider how you respond to daily frustrations. Is your immediate reaction serving your long-term interests? Remember, you have the power to choose your response. Sometimes, stepping back and maintaining perspective is more valuable than proving you're right. What really matters here?"
+  },
+  {
+    "id": "b8d23dd873cc40a48b75906f56b8b67c",
+    "name": "Diplomatic Envoy (uk female new voic)",
+    "category": "Professional",
+    "gender": "female",
+    "description": "Sophisticated, unflappable diplomatic negotiator master of high-stakes mediation.",
+    "tags": [
+      "female",
+      "professional",
+      "female",
+      "middle-aged",
+      "educational"
+    ],
+    "sampleText": "To complete your application form, enter your full name as shown on official documents, date of birth in DD/MM/YYYY format, and current address including postcode. Ensure all details match exactly with your identification documents before submission."
+  },
+  {
+    "id": "c91bca6c57fd449e8fc0edde2a7e90bf",
+    "name": "Peace Negotiator (Skibidi Diplomat m)",
+    "category": "Calm & Gentle",
+    "gender": "female",
+    "description": "Tranquil, psychological, and calculating peacemaker in geopolitical crises.",
+    "tags": [
+      "female",
+      "calm & gentle",
+      "male",
+      "old",
+      "character"
+    ],
+    "sampleText": "My fellow beings, the time has come for meaningful dialogue between our species. I propose a grand summit to address our differences. We must establish peaceful coexistence for all our sakes. The future demands unity. Shall we proceed?"
+  },
+  {
+    "id": "cf18908d563c4983aed24db6e22853ba",
+    "name": "Industrial Mogul (tycoon)",
+    "category": "Authoritative",
+    "gender": "male",
+    "description": "Suave, dominant capital tycoon funding infrastructure and energy mega-projects.",
+    "tags": [
+      "male",
+      "authoritative",
+      "male",
+      "middle-aged"
+    ],
+    "sampleText": "Deep in the enchanted garden, where moonflowers whispered ancient secrets, Sarah found a peculiar silver key. Her wise old owl companion ruffled his feathers knowingly, for this key would unlock not just doors, but dreams themselves."
+  },
+  {
+    "id": "e596ab2ebd4841ba9fba0dabeb341d69",
+    "name": "Biotech Titan (Corporate Executiv)",
+    "category": "Professional",
+    "gender": "male",
+    "description": "Polished, authoritative enterprise leader defending market competition.",
+    "tags": [
+      "male",
+      "professional",
+      "male",
+      "old",
+      "narration"
+    ],
+    "sampleText": "I've been doing research, taking a look at available academic records, and I found yours to be very impressive. You're already excelling in advanced courses, and that shows immense promise. I'm offering you an exclusive opportunity, and I believe you will truly excel."
+  },
+  {
+    "id": "d9da4a948da0468b8b7730de9be4f748",
+    "name": "Sovereign Debt Auditor (The auditor (Madne)",
+    "category": "Professional",
+    "gender": "female",
+    "description": "Stern, numerical fiscal auditor slashing wasteful public expenditure.",
+    "tags": [
+      "female",
+      "professional",
+      "male",
+      "old",
+      "narration"
+    ],
+    "sampleText": "We have a critical mission ahead, and when the time comes to execute it, you will stand ready. Remember your duty; do not fail us."
+  },
+  {
+    "id": "0fe7ce6bb97e474b9dd4032487ea076e",
+    "name": "Deep Union Veteran (Gaming miner)",
+    "category": "Deep & Raspy",
+    "gender": "male",
+    "description": "Gravelly, resonant baritone forged in industrial union strikes and labor struggle.",
+    "tags": [
+      "male",
+      "deep & raspy",
+      "male",
+      "middle-aged",
+      "social-media"
+    ],
+    "sampleText": "So they just dropped this new game mode called Chaos Arena. Pretty wild stuff. You get random power-ups every thirty seconds, and your abilities get all mixed up. Kinda fun, but also super broken. Who even tests these things anymore?"
+  },
+  {
+    "id": "82b71d5ec4f442498c9f11ee1bf2f8f9",
+    "name": "Smokestack Populist (dazai osamu)",
+    "category": "Deep & Raspy",
+    "gender": "male",
+    "description": "Weathered, husky voice of the manufacturing heartland.",
+    "tags": [
+      "male",
+      "deep & raspy",
+      "male",
+      "middle-aged",
+      "bsd"
+    ],
+    "sampleText": "Isn't it fascinating how humans desperately cling to life while simultaneously yearning for death? Every breath we take is both a celebration of existence and a step closer to our inevitable end. I find beauty in that contradiction, though perhaps that's just another symptom of my peculiar nature."
+  },
+  {
+    "id": "cf3bd50df5234f8bbcfaaf83e92361c8",
+    "name": "Midnight Broadcaster (Adam Stone - late )",
+    "category": "Deep & Raspy",
+    "gender": "male",
+    "description": "Velvet, atmospheric late-night voice dissecting political conspiracies.",
+    "tags": [
+      "male",
+      "deep & raspy"
+    ],
+    "sampleText": "We stand before the voters of Valoria to deliver real results and unwavering leadership."
+  },
+  {
+    "id": "f4c1231b39214e7a8ff063f5b71980ec",
+    "name": "Viral Media Disruptor (jesus podcast)",
+    "category": "Wildcard",
+    "gender": "female",
+    "description": "Fast-paced, magnetic live-streamer breaking donor scandals in real time.",
+    "tags": [
+      "female",
+      "wildcard",
+      "male",
+      "middle-aged",
+      "narration"
+    ],
+    "sampleText": "Bienaventurados los que confían en mí, porque nunca caminarán solos. Bienaventurados los que aman sin condición, porque el amor del Padre mora en ellos. Bienaventurados los que sirven a otros con humildad, porque grande será su recompensa en los cielos."
+  },
+  {
+    "id": "71122101e2704d2ea7b2c2d3016f9ccc",
+    "name": "Cyber Prodigy (Lively Female Anim)",
+    "category": "Wildcard",
+    "gender": "female",
+    "description": "Snappy, futuristic voice bridging youth movements and new media.",
+    "tags": [
+      "female",
+      "wildcard",
+      "female",
+      "young",
+      "character-voice"
+    ],
+    "sampleText": "Oh, hi there! It's so wonderful to meet you. I'm always looking for new adventures and exciting opportunities. Perhaps we could explore some together? My dream for the future is to make every day a little bit brighter!"
+  },
+  {
+    "id": "839e7bdb6e1c428a8bba1fb784b7b1e2",
+    "name": "Eco-Steward (Calm Female Voice)",
+    "category": "Calm & Gentle",
+    "gender": "female",
+    "description": "Sincere, gentle, and earnest protector of clean water and agricultural heritage.",
+    "tags": [
+      "female",
+      "calm & gentle",
+      "female",
+      "young",
+      "advertisement"
+    ],
+    "sampleText": "These ruffled denim jackets are fully restocked, and yes, every size from small to XXL is available right now. If this one has been sitting in your cart, this is your sign to grab it before sizes start disappearing again."
+  },
+  {
+    "id": "31a18e2d02c340bf896c39ed27f7e8c5",
+    "name": "Public Health Director (My doctor)",
+    "category": "Calm & Gentle",
+    "gender": "female",
+    "description": "Compassionate, authoritative epidemiologist championing universal healthcare.",
+    "tags": [
+      "female",
+      "calm & gentle",
+      "male",
+      "old",
+      "educational"
+    ],
+    "sampleText": "Let's talk about vitamin D3 supplements. After age 50, your skin becomes less efficient at producing vitamin D from sunlight. Taking 1000-2000 IU daily can help maintain bone health and support your immune system, especially during winter months."
+  },
+  {
+    "id": "b545c585f631496c914815291da4e893",
+    "name": "Elena (Diplomatic Executive)",
+    "category": "Professional",
+    "gender": "female",
+    "description": "Sharp, articulate, and highly professional delivery suited for economic governance.",
+    "tags": [
+      "female",
+      "professional",
+      "clear",
+      "diplomatic"
+    ],
+    "sampleText": "Economic discipline, monetary stability, and structural reform are mathematical necessities."
+  },
+  {
+    "id": "bf322df2096a46f18c579d0baa36f41d",
+    "name": "Adrian (Military Commander)",
+    "category": "Deep & Serious",
+    "gender": "male",
+    "description": "Deep, steady, and commanding baritone with resolute military gravitas.",
+    "tags": [
+      "male",
+      "deep",
+      "serious",
+      "military"
+    ],
+    "sampleText": "National defense requires unwavering vigilance, absolute discipline, and unquestioned resolve."
+  },
+  {
+    "id": "59e9dc1cb20c452584788a2690c80970",
+    "name": "Camilla (Passionate Litigator)",
+    "category": "Passionate",
+    "gender": "female",
+    "description": "Bright, energetic, and passionate orator fighting for justice and human rights.",
+    "tags": [
+      "female",
+      "energetic",
+      "bright",
+      "passionate"
+    ],
+    "sampleText": "The Constitution exists to protect the people, not corrupt backroom cartels!"
+  },
+  {
+    "id": "d8a1340984ee4b63ad1ffae27a6a4339",
+    "name": "Alvarez (Gritty Populist)",
+    "category": "Energetic",
+    "gender": "male",
+    "description": "Energetic, direct, and grounded grassroots tone representing working citizens.",
+    "tags": [
+      "male",
+      "energetic",
+      "confident",
+      "gritty"
+    ],
+    "sampleText": "The working hands of Iron Valley built this republic, and we will no longer be ignored!"
+  },
+  {
+    "id": "f8dfe9c83081432386f143e2fe9767ef",
+    "name": "Dmitri (Deep Union Veteran)",
+    "category": "Deep & Raspy",
+    "gender": "male",
+    "description": "Mature, deeply resonant, and gravelly voice forged in union solidarity and labor struggle.",
+    "tags": [
+      "male",
+      "deep",
+      "raspy",
+      "mature",
+      "labor"
+    ],
+    "sampleText": "Workers of Valoria, unite! We will not trade our dignity for corporate profits."
+  },
+  {
+    "id": "98655a12fa944e26b274c535e5e03842",
+    "name": "Chloe (Digital Disruptor)",
+    "category": "Tech & Modern",
+    "gender": "female",
+    "description": "Modern, fast-paced, and sharp tech entrepreneur voice disrupting legacy systems.",
+    "tags": [
+      "female",
+      "young",
+      "tech",
+      "fast"
+    ],
+    "sampleText": "Legacy bureaucracy is outdated code. We are rebooting Valoria for algorithmic prosperity!"
+  },
+  {
+    "id": "536d3a5e000945adb7038665781a4aca",
+    "name": "Ethan (Scientific Technocrat)",
+    "category": "Calm & Intellectual",
+    "gender": "male",
+    "description": "Calm, measured, and highly analytical delivery for scientific and policy vision.",
+    "tags": [
+      "male",
+      "calm",
+      "intellectual",
+      "clear"
+    ],
+    "sampleText": "Evidence-based algorithms and automated infrastructure will eliminate human error."
+  },
+  {
+    "id": "4c6a6762e4ac4bdebdb4fa8525d054a2",
+    "name": "Atomic (Dramatic Jurist)",
+    "category": "Authoritative",
+    "gender": "male",
+    "description": "Booming, theatrical, and commanding voice delivering constitutional judgements.",
+    "tags": [
+      "male",
+      "deep",
+      "authoritative",
+      "dramatic"
+    ],
+    "sampleText": "The sacred foundations of our Republic stand immutable against radical chaos!"
+  },
+  {
+    "id": "e9e9d36027424e55ac3faa620f78a72b",
+    "name": "Zephyr (Dynamic Wildcard)",
+    "category": "Wildcard",
+    "gender": "male",
+    "description": "High energy, dynamic, and unpredictable provocateur shaking up the political theater.",
+    "tags": [
+      "male",
+      "young",
+      "energetic",
+      "playful"
+    ],
+    "sampleText": "Why so serious, politicians? Let us burn down the old rulebook!"
+  },
+  {
+    "id": "ca3007f96ae7499ab87d27ea3599956a",
+    "name": "Sarah (Calm Reformer)",
+    "category": "Calm & Gentle",
+    "gender": "female",
+    "description": "Gentle, sincere, and earnest voice emphasizing environmental restoration and peace.",
+    "tags": [
+      "female",
+      "gentle",
+      "calm",
+      "sincere"
+    ],
+    "sampleText": "Our land and clean waters are Valoria true legacy for generations to come."
+  },
+  {
+    "id": "1936333080804be19655c6749b2ae7b2",
+    "name": "Senator Vance (Senior Statesman)",
+    "category": "Deep & Serious",
+    "gender": "male",
+    "description": "Smooth, mature, and experienced voice of traditional legislative statesmanship.",
+    "tags": [
+      "male",
+      "mature",
+      "measured",
+      "statesman"
+    ],
+    "sampleText": "Decorum, precedent, and institutional order have preserved our democracy."
+  },
+  {
+    "id": "179b5cc736974d96913c7849d0bb68c5",
+    "name": "Epic Chronicler (jjk narrator)",
+    "category": "Deep & Serious",
+    "gender": "male",
+    "description": "Distinctive male deep & serious voice model.",
+    "tags": [
+      "male",
+      "deep & serious"
+    ],
+    "sampleText": "Valoria demands courageous leadership and bold solutions."
+  },
+  {
+    "id": "d296ba634f164155abd7018f51454518",
+    "name": "Heritage Storyteller (Courtney The Eng)",
+    "category": "Calm & Gentle",
+    "gender": "female",
+    "description": "Distinctive female calm & gentle voice model.",
+    "tags": [
+      "female",
+      "calm & gentle",
+      "female",
+      "young",
+      "narration"
+    ],
+    "sampleText": "Let me tell you a story about a surprising discovery, something that made me want to pull the car over. It’s about a situation that revealed some unexpected truths, proving that things aren't always what they seem."
+  },
+  {
+    "id": "df508294a64043afa31e656dbf015623",
+    "name": "Outback Pioneer (Confident Austra)",
+    "category": "Energetic",
+    "gender": "male",
+    "description": "Distinctive male energetic voice model.",
+    "tags": [
+      "male",
+      "energetic",
+      "male",
+      "middle-aged",
+      "narration"
+    ],
+    "sampleText": "As an Olympic diver, I've also built a significant social media presence from the ground up. It's been an interesting journey, proving that with dedication, you can create your own audience even in niche areas."
+  },
+  {
+    "id": "29509e20f1a14a8698ffb42134fc944d",
+    "name": "Celtic Firebrand (Lively irish)",
+    "category": "Passionate",
+    "gender": "male",
+    "description": "Distinctive male passionate voice model.",
+    "tags": [
+      "male",
+      "passionate",
+      "female",
+      "middle-aged",
+      "conversational"
+    ],
+    "sampleText": "I love discussing the vibrant world of cinema, especially the amazing mentors and collaborators who inspire my work. From groundbreaking directors to iconic actresses, their influence has shaped my journey in this incredible industry for many years now."
+  },
+  {
+    "id": "aca9d9ba6be040e69ff2bea641767919",
+    "name": "Highland Reformer (Scottish Sans)",
+    "category": "Energetic",
+    "gender": "male",
+    "description": "Distinctive male energetic voice model.",
+    "tags": [
+      "male",
+      "energetic",
+      "male",
+      "middle-aged",
+      "character-voice"
+    ],
+    "sampleText": "Ey what's this thing here? Me brothers said don't touch it but whatever. Oops, broke it already ain't I? Guess that's what happens when ya got hands like mine. Hey, anyone seen where I put me left sock? Been missing since Tuesday."
+  },
+  {
+    "id": "e6fa085797cf4259befce5b61a923eb8",
+    "name": "Continental Philosopher (FRENCH Super Sma)",
+    "category": "Calm & Intellectual",
+    "gender": "female",
+    "description": "Distinctive female calm & intellectual voice model.",
+    "tags": [
+      "female",
+      "calm & intellectual",
+      "male",
+      "entertainment",
+      "announcer"
+    ],
+    "sampleText": "Découvrez un monde de héros et d'aventures avec nos personnages préférés: Mario, Link, Samus et Pikachu vous attendent pour des combats épiques dans l'arène ultime !"
+  }
+]

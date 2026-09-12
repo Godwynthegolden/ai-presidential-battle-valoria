@@ -1,0 +1,178 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, the market's already short Stone. Thirty million in escrow closes his position tonight.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Silas, the market's already short Stone. Thirty million in escrow closes his position tonight.",
+      "receiverResponse": "Thirty-five years taught me when to sign. Stone falls tonight.",
+      "privateStrategy": "Consensus kills Stone anyway; my thirty million buys Thorne's institutional debt, not the vote. Preserving seventy million for future bailouts against Zhao and Sterling.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria, the prosecutor came for our name. Thirty million staged—bury Stone tonight.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Victoria, the prosecutor came for our name. Thirty million staged—bury Stone tonight.",
+      "receiverResponse": "Family votes together. Stone won't survive the count.",
+      "privateStrategy": "Stone attacked me publicly; room consensus favors his exit. Victoria shares my treasury strength—sealing family bloc guarantees Stone's elimination and a Sterling duopoly later.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, the room's already chosen Stone. Fifteen upfront, fifteen when the count buries him.",
+    "details": {
+      "location": "West Wing Corridor 3",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Silas, the room's already chosen Stone. Fifteen upfront, fifteen when the count buries him.",
+      "receiverResponse": "Agreed. Consensus handles the knives; your money closes the file.",
+      "privateStrategy": "Stone's the consensus kill—cheap insurance with Thorne. Preserve remaining millions for ballot bailouts or a late blindside at Father.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur, the room already judges Stone. Thirty million seals the verdict tonight.",
+    "details": {
+      "location": "Capitol Cloakroom Cam 04",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Arthur, the room already judges Stone. Thirty million seals the verdict tonight.",
+      "receiverResponse": "The verdict was coming anyway. Your coin just speeds it.",
+      "privateStrategy": "Stone is consensus-doomed; riding the wave costs least. Arthur wants him gone regardless. Preserve $85M for ballot bailouts; next round target Zhao.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "The room already convicted Stone, Elena. Thirty million clears when his ballot falls.",
+    "details": {
+      "location": "Sub-Basement Boiler Room",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "The room already convicted Stone, Elena. Thirty million clears when his ballot falls.",
+      "receiverResponse": "The numbers favor it. Stone falls with my vote.",
+      "privateStrategy": "Stone is the consensus kill; buying Elena locks the count cheaply. Preserve $85M for ballot bailouts, then strike Zhao or Victoria next round.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Elena is a mutual liability for both of us, Silas. Take the funds and bury.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Elena is a mutual liability for both of us, Silas. Take the funds and bury.",
+      "receiverResponse": "Agreed. Keep your head down until the ballots unseal.",
+      "privateStrategy": "Align tactically to eliminate Elena Rostova while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Maya calls you a hammer, Marcus. Thirty million staged—Stone falls tonight, then we silence her.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Maya calls you a hammer, Marcus. Thirty million staged—Stone falls tonight, then we silence her.",
+      "receiverResponse": "Understood, Senator. Stone's finished. Then we discuss the envoy.",
+      "privateStrategy": "Stone's elimination is consensus; buying Vance locks the numbers, isolates Maya, preserves my war chest for a bailout or blindside against Victoria.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena, Thorne buries me tonight, then you. Thirty million escrowed—indict the senator.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Silas Thorne",
+      "whisperText": "Elena, Thorne buries me tonight, then you. Thirty million escrowed—indict the senator.",
+      "receiverResponse": "The ledger balances. Thorne's name goes in the urn.",
+      "privateStrategy": "Thorne architects the anti-Stone consensus; eliminating him collapses the coalition. Elena's depleted treasury makes her buyable. Sterling follows next ballot.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

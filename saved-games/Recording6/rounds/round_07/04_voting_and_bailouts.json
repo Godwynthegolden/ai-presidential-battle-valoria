@@ -1,0 +1,74 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 7,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "maya-lin",
+          "reason": "Maya's sub-$40M balance guarantees elimination; pact escrow pays me $15M risk-free.",
+          "strategyMonologue": "Maya thinks the handshake shields her. Thirty-eight million—below bailout threshold. Consensus plus my ballot liquidates her; the escrow fifteen million rebuilds my balance sheet. Checkmate.",
+          "audioBlobUrl": "blob:http://localhost:3000/e2a16f09-0845-452a-bed8-986d54ba9850",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "vivienne-zhao",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Maya Lin"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "vivienne-zhao",
+          "reason": "Honor pact: bank $15M, drain Zhao's war chest, preserve Sterling as shield.",
+          "strategyMonologue": "Zhao assumes eighty million buys immunity. Two concentrated ballots force forty million attrition. Sterling remains my shield, I bank fifteen million, and the kingpin bleeds.",
+          "audioBlobUrl": "blob:http://localhost:3000/aa07637c-b78c-4ea9-9f13-8d645f0d8ace",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Maya Lin",
+          "targetName": "Vivienne Zhao"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "victoria-sterling",
+          "reason": "Sterling's terminally wounded; my vote seals cheap consensus, banks escrow, keeps Lin shielding me.",
+          "strategyMonologue": "Sterling believes her philanthropic halo deflects scrutiny. Fifteen million—zero bailout capacity. Three votes stack already; mine guarantees liquidation while Lin's pact shields my flank next round.",
+          "audioBlobUrl": "blob:http://localhost:3000/febda259-430e-4ed9-875a-ca84d69c69eb",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Victoria Sterling"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "victoria-sterling",
+          "reason": "Consensus guarantees elimination; honoring Zhao's pact banks escrow and preserves my balance sheet.",
+          "strategyMonologue": "Sterling believes her climate halo deflects scrutiny. Her $15M can't cover a bailout; consensus plus Zhao's handshake guarantees liquidation. I bank the escrow and sign her political obituary.",
+          "audioBlobUrl": "blob:http://localhost:3000/f4d0ba98-6838-41e1-a4ba-43d49c42c02b",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "vivienne-zhao",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Victoria Sterling"
+        }
+      ],
+      "bailoutTransactions": [],
+      "eliminatedId": "maya-lin",
+      "eliminatedName": "Maya Lin",
+      "finalVoteCount": 1
+    }
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 5,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria assumes her ninety-five million buys immunity from the room's verdict. Wrong. Haddon's handshake concentrates the ballots; her war chest liquidates while my escrow compounds quietly.",
+    "privateReason": "Honoring Haddon's pact banks $15M escrow while concentrated votes drain Victoria's war chest.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 5,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria assumes her ninety-five million and philanthropic halo deflect the room. Three accusations primed the circuit; my ballot completes it, banking Maya's escrow while my balance stays armored.",
+    "privateReason": "Consensus plus Maya's pact guarantees elimination; preserves my $120M and banks escrow.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 5,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "content": "Haddon preaches from his $85M fortress, certain the mob swarms Victoria. My ballot plus Zhao's pact vote forces his treasury into liquidation while fifteen million banks my survival.",
+    "privateReason": "Honoring Zhao's pact banks $15M, drains Haddon's war chest, and keeps Victoria as shield.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

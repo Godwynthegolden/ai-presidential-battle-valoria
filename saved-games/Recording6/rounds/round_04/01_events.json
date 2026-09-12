@@ -1,0 +1,74 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas assumes his $95M fortress deters aggression while the room hunts me. Stacking votes forces his $80M attrition; the escrow lifts me to $55M. Checkmate.",
+    "privateReason": "Honor pact, bank $15M escrow, drain the richest kingpin's war chest.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Marcus believes his medals buy immunity. Three knives already gleam in his back—mine banks Father's fifteen million. The general falls; my war chest compounds to ninety-five.",
+    "privateReason": "Pact escrow plus bandwagon concentration guarantees elimination while conserving my $80M.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance thinks his medals and sixty million buy mercy. Three accusers already preach his fall. My ballot joins their choir, banks Victoria's fifteen million, keeps Thorne in my debt.",
+    "privateReason": "Honoring Victoria's pact banks $15M, joins three accusers, guarantees Vance's fall cheaply.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance believes his medals shield him. Three accusers already aim at his chest. My ballot honors Haddon's pact, banks fifteen million, and buries my gravest rival tonight.",
+    "privateReason": "Pact-locked consensus guarantees elimination, banks escrow cash, removes my strongest military rival.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Marcus assumes his medals buy mercy. Three accusers already signed his liquidation order. My ballot merely executes the algorithm—and Maya's escrow funds my next blindside.",
+    "privateReason": "Three accusers guarantee his fall; my vote honors the pact and banks $15M.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance believes his sixty million and medals shield him. Three accusers plus Zhao's pact guarantee concentration. My escrow pays fifteen million—survival math trumps sentiment. Checkmate.",
+    "privateReason": "Consensus plus Zhao's pact guarantees elimination and banks $15M escrow for survival.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

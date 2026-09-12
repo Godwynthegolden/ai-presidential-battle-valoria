@@ -1,0 +1,163 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 5,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "victoria-sterling",
+          "reason": "Pact escrow lifts me to $45M; stacked votes drain Victoria's $80M.",
+          "strategyMonologue": "Victoria assumes $180M buys immunity. Wrong. Arthur's pact banks me $15M—past survival threshold—while concentrated ballots liquidate her kingpin war chest tonight.",
+          "audioBlobUrl": "blob:http://localhost:3000/f41b9f35-bc8c-4201-9f58-84f55573a3f6",
+          "audioBlob": {},
+          "pactWithId": "art-sterling",
+          "pactTargetId": "silas-thorne",
+          "isBetrayal": true,
+          "betrayedAllyId": "art-sterling",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Victoria Sterling"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "silas-thorne",
+          "reason": "Honor pact, bank $15M escrow, cripple Thorne's war chest, keep Victoria absorbing fire.",
+          "strategyMonologue": "Thorne thinks his $150M fortress buys immunity. Wrong. My ballot plus Victoria's escrow drains eighty million, keeps my meat shield standing, banks fifteen million. Checkmate, Senator.",
+          "audioBlobUrl": "blob:http://localhost:3000/601f91c4-1e2b-4a80-937d-d667eca594a8",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "silas-thorne",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Arthur Sterling",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "silas-thorne",
+          "reason": "Honoring Maya's pact drains Thorne's war chest, banks $15M escrow, keeps my shield.",
+          "strategyMonologue": "Thorne assumes his $150M fortress buys immunity while the room devours the broke. Wrong. Maya's blade plus mine forces his eighty-million drain—and banks my escrow.",
+          "audioBlobUrl": "blob:http://localhost:3000/67b649f5-bc28-4406-be3d-7ef2265e4ab2",
+          "audioBlob": {},
+          "pactWithId": "art-sterling",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "art-sterling",
+          "isHonoredPact": false,
+          "voterName": "Victoria Sterling",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "victoria-sterling",
+          "reason": "Honoring Haddon's pact banks $15M escrow while concentrated votes drain Victoria's war chest.",
+          "strategyMonologue": "Victoria assumes her ninety-five million buys immunity from the room's verdict. Wrong. Haddon's handshake concentrates the ballots; her war chest liquidates while my escrow compounds quietly.",
+          "audioBlobUrl": "blob:http://localhost:3000/f04db84c-c8ae-4a1d-9866-1d2e49a94baa",
+          "audioBlob": {},
+          "pactWithId": "victoria-sterling",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "victoria-sterling",
+          "isHonoredPact": false,
+          "voterName": "Maya Lin",
+          "targetName": "Victoria Sterling"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "victoria-sterling",
+          "reason": "Consensus plus Maya's pact guarantees elimination; preserves my $120M and banks escrow.",
+          "strategyMonologue": "Victoria assumes her ninety-five million and philanthropic halo deflect the room. Three accusations primed the circuit; my ballot completes it, banking Maya's escrow while my balance stays armored.",
+          "audioBlobUrl": "blob:http://localhost:3000/4adf77ed-1daa-488c-93d1-6802dc38e98a",
+          "audioBlob": {},
+          "pactWithId": "maya-lin",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Victoria Sterling"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "elijah-haddon",
+          "reason": "Honoring Zhao's pact banks $15M, drains Haddon's war chest, and keeps Victoria as shield.",
+          "strategyMonologue": "Haddon preaches from his $85M fortress, certain the mob swarms Victoria. My ballot plus Zhao's pact vote forces his treasury into liquidation while fifteen million banks my survival.",
+          "audioBlobUrl": "blob:http://localhost:3000/b26549cf-bd45-4a5d-a353-b25b9aa8da16",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "vivienne-zhao",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Elijah Haddon"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r5-1-victoria-sterling",
+          "candidateId": "victoria-sterling",
+          "round": 5,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 3,
+          "remainingVotes": 2,
+          "remainingBudget": 155,
+          "timestamp": 1789067298995,
+          "candidateName": "Victoria Sterling"
+        },
+        {
+          "id": "bailout-r5-2-silas-thorne",
+          "candidateId": "silas-thorne",
+          "round": 5,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 2,
+          "remainingVotes": 1,
+          "remainingBudget": 125,
+          "timestamp": 1789067298995,
+          "candidateName": "Silas Thorne"
+        },
+        {
+          "id": "bailout-r5-3-victoria-sterling",
+          "candidateId": "victoria-sterling",
+          "round": 5,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 2,
+          "remainingVotes": 1,
+          "remainingBudget": 115,
+          "timestamp": 1789067298995,
+          "candidateName": "Victoria Sterling"
+        },
+        {
+          "id": "bailout-r5-4-silas-thorne",
+          "candidateId": "silas-thorne",
+          "round": 5,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 85,
+          "timestamp": 1789067298995,
+          "candidateName": "Silas Thorne"
+        },
+        {
+          "id": "bailout-r5-5-victoria-sterling",
+          "candidateId": "victoria-sterling",
+          "round": 5,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 75,
+          "timestamp": 1789067298995,
+          "candidateName": "Victoria Sterling"
+        }
+      ],
+      "eliminatedId": "maya-lin",
+      "eliminatedName": "Maya Lin",
+      "finalVoteCount": 0
+    }
+  }
+]

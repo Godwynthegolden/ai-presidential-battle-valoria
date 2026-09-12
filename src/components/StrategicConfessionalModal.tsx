@@ -15,7 +15,8 @@ import {
   Sparkles,
   Eye,
   Radio,
-  Swords
+  Swords,
+  Crown
 } from 'lucide-react';
 
 interface StrategicConfessionalModalProps {
@@ -97,11 +98,11 @@ export const StrategicConfessionalModal: React.FC<StrategicConfessionalModalProp
             </span>
             <div className="flex items-center gap-1.5 text-xs font-mono font-black uppercase tracking-widest text-red-400">
               <Lock className="w-3.5 h-3.5 text-red-400" />
-              <span>CLASSIFIED STRATEGIC CONFESSIONAL</span>
+              <span>{isFinalVote ? 'GRAND JURY PRESIDENTIAL CONFESSIONAL' : 'CLASSIFIED STRATEGIC CONFESSIONAL'}</span>
             </div>
             <span className="hidden sm:inline text-xs font-mono text-slate-600">•</span>
             <span className="hidden sm:inline text-xs font-mono text-slate-400 uppercase">
-              {isFinalVote ? 'Grand Jury Ballot' : `Round ${round} Elimination`}
+              {isFinalVote ? 'Presidential Mandate Endorsement' : `Round ${round} Elimination`}
             </span>
           </div>
 
@@ -148,10 +149,10 @@ export const StrategicConfessionalModal: React.FC<StrategicConfessionalModalProp
                   borderColor: `${voter.color.primary}44` 
                 }}
               >
-                {voter.archetypeTitle}
+                {isFinalVote ? `🏛️ Grand Juror • ${voter.archetypeTitle}` : voter.archetypeTitle}
               </span>
               <span className="text-xs font-mono text-slate-400 bg-slate-900/80 px-2.5 py-0.5 rounded-full border border-slate-800">
-                💰 War Chest: <strong className="text-emerald-400">${voterBudget}M</strong> ({voterBailouts} Bailouts)
+                💰 War Chest: <strong className="text-emerald-400">${voterBudget}M</strong> {isFinalVote ? '(Preserved)' : `(${voterBailouts} Bailouts)`}
               </span>
             </div>
           </div>
@@ -211,25 +212,41 @@ export const StrategicConfessionalModal: React.FC<StrategicConfessionalModalProp
 
         {/* Subordinate Secret Ballot Target HUD */}
         {target && (
-          <div className="w-full max-w-2xl flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-red-950/50 via-[#0a0d18]/90 to-red-950/50 border border-red-500/40 shadow-xl shadow-red-950/40 backdrop-blur-md">
+          <div className={`w-full max-w-2xl flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border shadow-xl backdrop-blur-md ${
+            isFinalVote
+              ? 'bg-gradient-to-r from-amber-950/60 via-[#0d0f18]/90 to-amber-950/60 border-amber-500/50 shadow-amber-950/40'
+              : 'bg-gradient-to-r from-red-950/50 via-[#0a0d18]/90 to-red-950/50 border-red-500/40 shadow-red-950/40'
+          }`}>
             {/* Left: Target Avatar & Label */}
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative shrink-0">
                 <CandidateAvatar
                   candidate={target}
                   size="md"
-                  isTarget={true}
+                  isTarget={!isFinalVote}
                   showBadge={false}
                 />
-                <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-red-600 border border-black shadow-xs">
-                  <Crosshair className="w-2.5 h-2.5 text-white" />
+                <div className={`absolute -bottom-1 -right-1 p-0.5 rounded-full border border-black shadow-xs ${
+                  isFinalVote ? 'bg-amber-500 text-black' : 'bg-red-600 text-white'
+                }`}>
+                  {isFinalVote ? <Crown className="w-2.5 h-2.5" /> : <Crosshair className="w-2.5 h-2.5" />}
                 </div>
               </div>
 
               <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-mono font-black text-red-400 uppercase tracking-widest flex items-center gap-1">
-                    <Target className="w-3 h-3 text-red-400" /> SECRET BALLOT TARGET
+                  <span className={`text-[10px] font-mono font-black uppercase tracking-widest flex items-center gap-1 ${
+                    isFinalVote ? 'text-amber-400' : 'text-red-400'
+                  }`}>
+                    {isFinalVote ? (
+                      <>
+                        <Crown className="w-3 h-3 text-amber-400" /> PRESIDENTIAL ENDORSEMENT
+                      </>
+                    ) : (
+                      <>
+                        <Target className="w-3 h-3 text-red-400" /> SECRET BALLOT TARGET
+                      </>
+                    )}
                   </span>
                   <span className="text-[10px] font-mono text-slate-600">•</span>
                   <span className="text-[10px] font-mono font-bold text-slate-400 uppercase truncate">
@@ -252,13 +269,21 @@ export const StrategicConfessionalModal: React.FC<StrategicConfessionalModalProp
                 <span className="text-[10px] font-mono font-black text-emerald-300 uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-950 border border-emerald-500 flex items-center gap-1 shadow-sm">
                   <Shield className="w-2.5 h-2.5 text-emerald-400" /> Pact Contract Fulfilled
                 </span>
+              ) : isFinalVote ? (
+                <span className="text-[10px] font-mono font-black text-amber-300 uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-950/90 border border-amber-500/70 shadow-sm flex items-center gap-1">
+                  <Crown className="w-2.5 h-2.5 text-amber-400" /> Presidential Mandate Vote
+                </span>
               ) : (
                 <span className="text-[10px] font-mono font-bold text-amber-300 uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-950/80 border border-amber-700/60">
                   Strategic Elimination
                 </span>
               )}
               <span className="text-[10px] font-mono text-slate-400">
-                Target Treasury: <strong className="text-emerald-400">${targetBudget}M</strong> {targetBailouts > 0 ? `(${targetBailouts} Bailouts)` : <span className="text-red-400 font-bold">(Vulnerable)</span>}
+                {isFinalVote ? (
+                  <>Finalist Treasury: <strong className="text-emerald-400">${targetBudget}M</strong></>
+                ) : (
+                  <>Target Treasury: <strong className="text-emerald-400">${targetBudget}M</strong> {targetBailouts > 0 ? `(${targetBailouts} Bailouts)` : <span className="text-red-400 font-bold">(Vulnerable)</span>}</>
+                )}
               </span>
             </div>
           </div>

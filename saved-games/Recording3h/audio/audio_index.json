@@ -1,0 +1,210 @@
+[
+  {
+    "filename": "01_campaign_01_jax-alvarez.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "textSnippet": "Twenty years pouring steel, watched the mills go dark. I'm running so forgotten families take their ",
+    "sizeBytes": 135417,
+    "timestamp": 1789046636026
+  },
+  {
+    "filename": "01_campaign_02_elena-rostova.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "textSnippet": "Valoria's debt-to-GDP ratio: 127%. Emotional politics wrote that number. I balance ledgers. Fiscal d",
+    "sizeBytes": 228204,
+    "timestamp": 1789046645808
+  },
+  {
+    "filename": "01_campaign_03_marcus-vance.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "textSnippet": "Marcus Vance. Forty years defending Valoria. I held the line when others wavered. Now, one final cal",
+    "sizeBytes": 214830,
+    "timestamp": 1789046661394
+  },
+  {
+    "filename": "01_campaign_04_art-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "textSnippet": "Twenty-five years. Three billion-dollar empires. Zero bankruptcies. Career politicians bankrupted Va",
+    "sizeBytes": 215666,
+    "timestamp": 1789046676134
+  },
+  {
+    "filename": "01_campaign_05_victoria-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "textSnippet": "I'm the heiress who burned the inheritance papers. I've dined with the oligarchs — now I'm funding t",
+    "sizeBytes": 150464,
+    "timestamp": 1789046691023
+  },
+  {
+    "filename": "01_campaign_06_elijah-haddon.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "textSnippet": "Fifteen million souls gather weekly to hear Bishop Elijah Haddon preach. Tonight, all Valoria is my ",
+    "sizeBytes": 169690,
+    "timestamp": 1789046702910
+  },
+  {
+    "filename": "01_campaign_07_maya-lin.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "textSnippet": "Eighty hostages. Zero bullets. Everyone came home. Peace isn't shouted—it's negotiated. I've mastere",
+    "sizeBytes": 171362,
+    "timestamp": 1789046714706
+  },
+  {
+    "filename": "01_campaign_08_vivienne-zhao.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "textSnippet": "Democracy is legacy code. I wrote the neural lace; tonight, I begin debugging Valoria. Vivienne Zhao",
+    "sizeBytes": 181393,
+    "timestamp": 1789046726701
+  },
+  {
+    "filename": "01_campaign_09_silas-thorne.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "textSnippet": "Thirty-five years, four administrations, one unwavering hand. When storms tested Valoria, I kept her",
+    "sizeBytes": 209814,
+    "timestamp": 1789046739443
+  },
+  {
+    "filename": "01_campaign_10_garrick-stone.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "textSnippet": "Four governors convicted. Two oligarchs imprisoned. Three car bombs couldn't stop me. Valoria—the in",
+    "sizeBytes": 153390,
+    "timestamp": 1789046753847
+  },
+  {
+    "filename": "02_round1_attack_02_elena-rostova_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "Alvarez's cure for drug cartels? Price caps — Venezuela's playbook. His platform balloons our defici",
+    "sizeBytes": 224861,
+    "timestamp": 1789046779620
+  },
+  {
+    "filename": "02_round1_attack_03_marcus-vance_vs_maya-lin.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "textSnippet": "Maya Lin negotiates with enemies. Valoria needs enemies defeated. Cartels extort the sick—she'd sche",
+    "sizeBytes": 285465,
+    "timestamp": 1789046794919
+  },
+  {
+    "filename": "02_round1_attack_04_art-sterling_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "Eight-hundred-percent insulin hikes? Disgusting. But Alvarez's fix—government price controls—is soci",
+    "sizeBytes": 292988,
+    "timestamp": 1789046814277
+  },
+  {
+    "filename": "02_round1_attack_05_victoria-sterling_vs_art-sterling.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "textSnippet": "Daddy, I've sat at your pharma dinners—insulin at eight hundred percent is your \"shareholder value.\"",
+    "sizeBytes": 216501,
+    "timestamp": 1789046833776
+  },
+  {
+    "filename": "02_round1_attack_06_elijah-haddon_vs_elena-rostova.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "textSnippet": "Rostova audits ledgers but never souls! She calls dying mothers \"emotional politics\"—I call it spiri",
+    "sizeBytes": 262477,
+    "timestamp": 1789046848662
+  },
+  {
+    "filename": "02_round1_attack_07_maya-lin_vs_marcus-vance.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "textSnippet": "Marcus, I brought eighty Valorian hostages home without firing a shot — you'd have sent flag-draped ",
+    "sizeBytes": 252028,
+    "timestamp": 1789046878840
+  },
+  {
+    "filename": "02_round1_attack_08_vivienne-zhao_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "Alvarez's platform runs on rusted twentieth-century firmware—pure emotional noise, zero cognitive ba",
+    "sizeBytes": 282539,
+    "timestamp": 1789046895940
+  },
+  {
+    "filename": "02_round1_attack_09_silas-thorne_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "Friends, across four administrations I've forged real healthcare consensus. Governor Alvarez offers ",
+    "sizeBytes": 295914,
+    "timestamp": 1789046914957
+  },
+  {
+    "filename": "02_round1_attack_10_garrick-stone_vs_marcus-vance.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "textSnippet": "Marcus Vance, Exhibit A: forty years of blank-check defense budgets while insulin became a luxury. H",
+    "sizeBytes": 246177,
+    "timestamp": 1789046935151
+  }
+]

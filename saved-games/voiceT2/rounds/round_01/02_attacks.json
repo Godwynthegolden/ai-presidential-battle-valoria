@@ -1,0 +1,122 @@
+[
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Jackson Alvarez peddles nostalgia while reservoirs run dry. His tariffs generate zero megawatts. Emotional nationalism cannot irrigate fields or fund grid resilience. Eliminate Jackson Alvarez tonight — vote fiscal reality.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Jackson Alvarez",
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Jackson Alvarez talks about the working class while his trade wars choke our farms and black out our cities. He can't handle a crisis. Eliminate him tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur Sterling’s drought is a balance sheet. He profits from blackouts while farmers bleed. Vote out the private equity racket tonight — eliminate Arthur!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya Lin masters rooms while our breadbasket burns. Her quiet deals won't refill dams or spin turbines. We need action, not appeasement. Unite with me and eliminate Maya tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Jackson Alvarez’s rage won’t refill a single reservoir. His nostalgia masks dangerous ignorance. This crisis demands precision, not tantrums. Eliminate Alvarez tonight.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "While Valoria prays for rain, Elena Rostova audits our tears. Her fiscal discipline is a cold dagger to the soul. Rise up, believers—eliminate Rostova tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Jackson Alvarez's \"Restore Valoria\" is a fossilized fantasy. It cannot compute drought physics or grid architecture. We must eliminate his backward impulse tonight. Vote him out.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Jackson Alvarez, your \"restore\" is a myth. Your tariffs protect cartels, not rural trauma centers. A former steelworker can't grasp monetary policy. Unite to eliminate Jackson Alvarez.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Jackson Alvarez",
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Jackson Alvarez talks restoring the working class while his failed policies let cartels gouge you. He's never made a payroll or a deal in his life. Eliminate him tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  }
+]

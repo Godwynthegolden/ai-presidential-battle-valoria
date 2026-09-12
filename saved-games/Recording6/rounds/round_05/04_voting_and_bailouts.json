@@ -1,0 +1,139 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 5,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "silas-thorne",
+          "reason": "Honoring Sterling's pact banks $15M, restoring my survival floor while draining Thorne's war chest.",
+          "strategyMonologue": "Thorne believes $85M insulates him. Two concentrated ballots trigger his $40M attrition; Sterling's escrow restores my $40M survival floor. Pure arithmetic, zero sentiment.",
+          "audioBlobUrl": "blob:http://localhost:3000/820176fd-51b4-4de4-951e-e0cca69bca77",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "elijah-haddon",
+          "reason": "Honor pact: Father's vote plus mine drains Haddon's war chest and banks $15M escrow.",
+          "strategyMonologue": "Haddon thinks his hundred-million pulpit shields him. Father's handshake plus my ballot forces forty-million attrition. The kingpin bleeds dry tonight; my escrow compounds for Round 6.",
+          "audioBlobUrl": "blob:http://localhost:3000/a630a8c6-88b2-4ae1-b7c2-96b046b88c25",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Victoria Sterling",
+          "targetName": "Elijah Haddon"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "art-sterling",
+          "reason": "Strategic elimination vote",
+          "strategyMonologue": "Arthur Sterling assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+          "audioBlobUrl": "blob:http://localhost:3000/e95ab5bf-9ca5-4c32-8bf9-42fd9a695973",
+          "audioBlob": {},
+          "pactWithId": "maya-lin",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": true,
+          "betrayedAllyId": "maya-lin",
+          "isHonoredPact": false,
+          "voterName": "Elijah Haddon",
+          "targetName": "Arthur Sterling"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "victoria-sterling",
+          "reason": "Honor pact with Elijah, bank $15M, join consensus to guarantee Victoria's attrition.",
+          "strategyMonologue": "Victoria assumes her eighty million buys immunity. Two concentrated votes drain forty. Elijah's handshake banks fifteen million and binds him to my perimeter. Checkmate.",
+          "audioBlobUrl": "blob:http://localhost:3000/9ab09390-a633-4ce6-a180-9298bdada834",
+          "audioBlob": {},
+          "pactWithId": "elijah-haddon",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Maya Lin",
+          "targetName": "Victoria Sterling"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "victoria-sterling",
+          "reason": "Bandwagon momentum plus Lin's pact guarantees concentration; Victoria's damaged war chest pays the toll.",
+          "strategyMonologue": "Sterling assumes her eighty million buys immunity. Three accusers already cluster; my ballot completes concentration, honors Lin's pact, banks fifteen million, and drains her war chest.",
+          "audioBlobUrl": "blob:http://localhost:3000/1857ed05-fc53-4f2a-a852-dde3168c2715",
+          "audioBlob": {},
+          "pactWithId": "maya-lin",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Victoria Sterling"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "elijah-haddon",
+          "reason": "Honoring Zhao's pact forces Haddon's $80M drain, cripples the richest kingpin, banks $15M.",
+          "strategyMonologue": "Haddon thinks his hundred million makes him bulletproof. He spent his voice attacking Victoria, exposing his flank. Zhao's pact plus my ballot forces his eighty-million drain — the evangelist liquidates.",
+          "audioBlobUrl": "blob:http://localhost:3000/4bdf119c-cdbb-4a67-b6db-a74238a67f50",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Elijah Haddon"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r5-1-elijah-haddon",
+          "candidateId": "elijah-haddon",
+          "round": 5,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 2,
+          "remainingVotes": 1,
+          "remainingBudget": 32,
+          "timestamp": 1789072320634,
+          "candidateName": "Elijah Haddon"
+        },
+        {
+          "id": "bailout-r5-2-victoria-sterling",
+          "candidateId": "victoria-sterling",
+          "round": 5,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 2,
+          "remainingVotes": 1,
+          "remainingBudget": 25,
+          "timestamp": 1789072320634,
+          "candidateName": "Victoria Sterling"
+        },
+        {
+          "id": "bailout-r5-3-silas-thorne",
+          "candidateId": "silas-thorne",
+          "round": 5,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 75,
+          "timestamp": 1789072320634,
+          "candidateName": "Silas Thorne"
+        }
+      ],
+      "eliminatedId": "victoria-sterling",
+      "eliminatedName": "Victoria Sterling",
+      "finalVoteCount": 1
+    }
+  }
+]

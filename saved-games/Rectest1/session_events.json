@@ -1,0 +1,92 @@
+[
+  {
+    "id": "evt-1",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "Twenty years pouring steel before suits shipped my mill overseas. Hedge funds buy the homes we built. Tonight, working-class fury answers: Jackson Alvarez.",
+    "timestamp": 1788942544786
+  },
+  {
+    "id": "evt-2",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Politicians print promises. I audited them. Ten years guarding Valoria's currency taught me one law: arithmetic outlives applause. Elena Rostova. Fiscal discipline. Sustainable growth.",
+    "timestamp": 1788944140667
+  },
+  {
+    "id": "evt-3",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Wolves circle Valoria. My life's been holding the line. Now I take new ground. General Marcus Vance. Strength at the border. Peace through power.",
+    "timestamp": 1788944185435
+  },
+  {
+    "id": "evt-4",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "Valoria needs a turnaround, not a handout. I've built empires from nothing—billions created, payrolls signed. I'm Arthur Sterling, and I close deals.",
+    "timestamp": 1788944215200
+  },
+  {
+    "id": "evt-5",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "I grew up watching billionaires buy your future over dessert. I renounced the inheritance—now I'm spending it on you. Generational revolution starts tonight.",
+    "timestamp": 1788944225930
+  },
+  {
+    "id": "evt-6",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "content": "Shepherds don't abandon flocks in storms! I've healed souls before fifteen million viewers—now Valoria is my congregation, her wounded soul my ministry.",
+    "timestamp": 1788944250815
+  },
+  {
+    "id": "evt-7",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "Eighty hostages walked free because I read the room while others readied weapons. Valoria needs that calm. Master the room. Peace through precision.",
+    "timestamp": 1788944305701
+  },
+  {
+    "id": "evt-8",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Valoria runs on legacy code. I built the neural lace that rewired human cognition itself. Vivienne Zhao — time to debug the republic.",
+    "timestamp": 1788944316059
+  },
+  {
+    "id": "evt-9",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Thirty-five years, four administrations, one steady hand. While others shout, I deliver. Valoria deserves proven leadership—not a gamble. Tested leadership. Steady Valoria.",
+    "timestamp": 1788944383907
+  },
+  {
+    "id": "evt-10",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "content": "Four governors convicted. Two oligarchs imprisoned. Three car bombs survived. The biggest corruption case in Valoria's history just walked onto this stage. Me.",
+    "timestamp": 1788944399094
+  }
+]

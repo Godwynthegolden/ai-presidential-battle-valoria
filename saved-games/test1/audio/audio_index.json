@@ -1,0 +1,368 @@
+[
+  {
+    "filename": "01_campaign_01_jax-alvarez.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "sizeBytes": 191424,
+    "timestamp": 1788213419391.6753
+  },
+  {
+    "filename": "01_campaign_02_elena-rostova.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "sizeBytes": 233638,
+    "timestamp": 1788213429654.6313
+  },
+  {
+    "filename": "01_campaign_03_art-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "sizeBytes": 328097,
+    "timestamp": 1788213435879.7932
+  },
+  {
+    "filename": "01_campaign_04_victoria-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "sizeBytes": 214830,
+    "timestamp": 1788213441146.371
+  },
+  {
+    "filename": "01_campaign_05_marcus-vance.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "sizeBytes": 304273,
+    "timestamp": 1788213445250.197
+  },
+  {
+    "filename": "01_campaign_06_maya-lin.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "sizeBytes": 267910,
+    "timestamp": 1788213447343.495
+  },
+  {
+    "filename": "01_campaign_07_elijah-haddon.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "sizeBytes": 243251,
+    "timestamp": 1788213450269.1177
+  },
+  {
+    "filename": "01_campaign_08_vivienne-zhao.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "sizeBytes": 272090,
+    "timestamp": 1788213453214.1128
+  },
+  {
+    "filename": "01_campaign_09_silas-thorne.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "sizeBytes": 319737,
+    "timestamp": 1788213455979.2605
+  },
+  {
+    "filename": "01_campaign_10_garrick-stone.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "sizeBytes": 278777,
+    "timestamp": 1788213459318.3643
+  },
+  {
+    "filename": "01_campaign_11_sora-kim.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "sora-kim",
+    "sizeBytes": 271672,
+    "timestamp": 1788213463327.4746
+  },
+  {
+    "filename": "02_round1_attack_02_elena-rostova_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "targetId": "jax-alvarez",
+    "sizeBytes": 199365,
+    "timestamp": 1788213474479.2556
+  },
+  {
+    "filename": "02_round1_attack_03_art-sterling_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "targetId": "jax-alvarez",
+    "sizeBytes": 171362,
+    "timestamp": 1788213477023.5137
+  },
+  {
+    "filename": "02_round1_attack_04_victoria-sterling_vs_art-sterling.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "targetId": "art-sterling",
+    "sizeBytes": 149628,
+    "timestamp": 1788213479799.6982
+  },
+  {
+    "filename": "02_round1_attack_05_marcus-vance_vs_maya-lin.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "targetId": "maya-lin",
+    "sizeBytes": 192678,
+    "timestamp": 1788213482985.8262
+  },
+  {
+    "filename": "02_round1_attack_06_maya-lin_vs_marcus-vance.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "targetId": "marcus-vance",
+    "sizeBytes": 160913,
+    "timestamp": 1788213484128.1194
+  },
+  {
+    "filename": "02_round1_attack_07_elijah-haddon_vs_elena-rostova.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "targetId": "elena-rostova",
+    "sizeBytes": 203127,
+    "timestamp": 1788213486237.6597
+  },
+  {
+    "filename": "02_round1_attack_08_vivienne-zhao_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "targetId": "jax-alvarez",
+    "sizeBytes": 249102,
+    "timestamp": 1788213488736.3154
+  },
+  {
+    "filename": "02_round1_attack_09_silas-thorne_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "targetId": "jax-alvarez",
+    "sizeBytes": 249102,
+    "timestamp": 1788213490900.5403
+  },
+  {
+    "filename": "02_round1_attack_10_garrick-stone_vs_art-sterling.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "targetId": "art-sterling",
+    "sizeBytes": 193514,
+    "timestamp": 1788213493269.2554
+  },
+  {
+    "filename": "02_round1_attack_11_sora-kim_vs_marcus-vance.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "sora-kim",
+    "targetId": "marcus-vance",
+    "sizeBytes": 202291,
+    "timestamp": 1788213495447.4446
+  },
+  {
+    "filename": "02_round2_attack_02_art-sterling_vs_garrick-stone.mp3",
+    "phase": "ATTACK",
+    "round": 2,
+    "speakerId": "art-sterling",
+    "targetId": "garrick-stone",
+    "sizeBytes": 231548,
+    "timestamp": 1788213819860.7134
+  },
+  {
+    "filename": "02_round2_attack_03_victoria-sterling_vs_elena-rostova.mp3",
+    "phase": "ATTACK",
+    "round": 2,
+    "speakerId": "victoria-sterling",
+    "targetId": "elena-rostova",
+    "sizeBytes": 177213,
+    "timestamp": 1788213822102.7634
+  },
+  {
+    "filename": "02_round2_attack_04_marcus-vance_vs_maya-lin.mp3",
+    "phase": "ATTACK",
+    "round": 2,
+    "speakerId": "marcus-vance",
+    "targetId": "maya-lin",
+    "sizeBytes": 203127,
+    "timestamp": 1788213834049.7285
+  },
+  {
+    "filename": "02_round2_attack_05_maya-lin_vs_marcus-vance.mp3",
+    "phase": "ATTACK",
+    "round": 2,
+    "speakerId": "maya-lin",
+    "targetId": "marcus-vance",
+    "sizeBytes": 190588,
+    "timestamp": 1788213834588.182
+  },
+  {
+    "filename": "02_round2_attack_06_elijah-haddon_vs_elena-rostova.mp3",
+    "phase": "ATTACK",
+    "round": 2,
+    "speakerId": "elijah-haddon",
+    "targetId": "elena-rostova",
+    "sizeBytes": 206052,
+    "timestamp": 1788213835141.5173
+  },
+  {
+    "filename": "02_round2_attack_07_vivienne-zhao_vs_elijah-haddon.mp3",
+    "phase": "ATTACK",
+    "round": 2,
+    "speakerId": "vivienne-zhao",
+    "targetId": "elijah-haddon",
+    "sizeBytes": 172616,
+    "timestamp": 1788213835400.759
+  },
+  {
+    "filename": "02_round2_attack_08_silas-thorne_vs_garrick-stone.mp3",
+    "phase": "ATTACK",
+    "round": 2,
+    "speakerId": "silas-thorne",
+    "targetId": "garrick-stone",
+    "sizeBytes": 233638,
+    "timestamp": 1788213836116.4922
+  },
+  {
+    "filename": "02_round2_attack_09_garrick-stone_vs_art-sterling.mp3",
+    "phase": "ATTACK",
+    "round": 2,
+    "speakerId": "garrick-stone",
+    "targetId": "art-sterling",
+    "sizeBytes": 197275,
+    "timestamp": 1788213841321.9402
+  },
+  {
+    "filename": "02_round2_attack_10_sora-kim_vs_marcus-vance.mp3",
+    "phase": "ATTACK",
+    "round": 2,
+    "speakerId": "sora-kim",
+    "targetId": "marcus-vance",
+    "sizeBytes": 226114,
+    "timestamp": 1788213843916.4597
+  },
+  {
+    "filename": "03_round1_cctv_01_jax-alvarez_and_elijah-haddon.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "targetId": "elijah-haddon",
+    "sizeBytes": 96965,
+    "timestamp": 1788213587770.6135
+  },
+  {
+    "filename": "03_round1_cctv_02_elena-rostova_and_silas-thorne.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "targetId": "silas-thorne",
+    "sizeBytes": 119953,
+    "timestamp": 1788213587770.6135
+  },
+  {
+    "filename": "03_round1_cctv_03_art-sterling_and_maya-lin.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "targetId": "maya-lin",
+    "sizeBytes": 147538,
+    "timestamp": 1788213587881.1797
+  },
+  {
+    "filename": "03_round1_cctv_04_victoria-sterling_and_garrick-stone.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "targetId": "garrick-stone",
+    "sizeBytes": 106578,
+    "timestamp": 1788213589394.136
+  },
+  {
+    "filename": "03_round1_cctv_05_marcus-vance_and_elena-rostova.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "targetId": "elena-rostova",
+    "sizeBytes": 117863,
+    "timestamp": 1788213589397.1357
+  },
+  {
+    "filename": "03_round1_cctv_06_maya-lin_and_sora-kim.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "targetId": "sora-kim",
+    "sizeBytes": 120789,
+    "timestamp": 1788213589554.4731
+  },
+  {
+    "filename": "03_round1_cctv_07_elijah-haddon_and_silas-thorne.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "targetId": "silas-thorne",
+    "sizeBytes": 114101,
+    "timestamp": 1788213589723.9824
+  },
+  {
+    "filename": "03_round1_cctv_08_vivienne-zhao_and_silas-thorne.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "targetId": "silas-thorne",
+    "sizeBytes": 140015,
+    "timestamp": 1788213589833.8535
+  },
+  {
+    "filename": "03_round1_cctv_09_silas-thorne_and_elena-rostova.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "targetId": "elena-rostova",
+    "sizeBytes": 121207,
+    "timestamp": 1788213589893.1238
+  },
+  {
+    "filename": "03_round1_cctv_10_garrick-stone_and_maya-lin.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "targetId": "maya-lin",
+    "sizeBytes": 170526,
+    "timestamp": 1788213589993.4395
+  },
+  {
+    "filename": "03_round1_cctv_11_sora-kim_and_garrick-stone.mp3",
+    "phase": "CCTV_BACKROOM",
+    "round": 1,
+    "speakerId": "sora-kim",
+    "targetId": "garrick-stone",
+    "sizeBytes": 107414,
+    "timestamp": 1788213590058.1567
+  },
+  {
+    "filename": "04_round1_elimination_jax-alvarez.mp3",
+    "phase": "ELIMINATION",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "sizeBytes": 125804,
+    "timestamp": 1788213801813.5027
+  }
+]

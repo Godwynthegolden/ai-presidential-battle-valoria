@@ -1,0 +1,422 @@
+[
+  {
+    "id": "evt-1",
+    "type": "cctv_pact",
+    "round": 7,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Maya is a mutual liability for both of us, Elena. Take the funds and bury.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Maya Lin",
+      "whisperText": "Maya is a mutual liability for both of us, Elena. Take the funds and bury.",
+      "receiverResponse": "The metrics align. Maya will not survive tonight.",
+      "privateStrategy": "Align tactically to eliminate Maya Lin while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    },
+    "timestamp": 1789072792318
+  },
+  {
+    "id": "evt-2",
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya thinks the handshake shields her. Thirty-eight million—below bailout threshold. Consensus plus my ballot liquidates her; the escrow fifteen million rebuilds my balance sheet. Checkmate.",
+    "privateReason": "Maya's sub-$40M balance guarantees elimination; pact escrow pays me $15M risk-free.",
+    "isBetrayal": true,
+    "isHonoredPact": false,
+    "timestamp": 1789072838411
+  },
+  {
+    "id": "evt-3",
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Sterling believes her philanthropic halo deflects scrutiny. Fifteen million—zero bailout capacity. Three votes stack already; mine guarantees liquidation while Lin's pact shields my flank next round.",
+    "privateReason": "Sterling's terminally wounded; my vote seals cheap consensus, banks escrow, keeps Lin shielding me.",
+    "isBetrayal": true,
+    "isHonoredPact": false,
+    "timestamp": 1789072838491
+  },
+  {
+    "id": "evt-4",
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Sterling believes her climate halo deflects scrutiny. Her $15M can't cover a bailout; consensus plus Zhao's handshake guarantees liquidation. I bank the escrow and sign her political obituary.",
+    "privateReason": "Consensus guarantees elimination; honoring Zhao's pact banks escrow and preserves my balance sheet.",
+    "isBetrayal": true,
+    "isHonoredPact": false,
+    "timestamp": 1789072838594
+  },
+  {
+    "id": "evt-5",
+    "type": "vote_tally",
+    "round": 7,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "maya-lin",
+          "reason": "Maya's sub-$40M balance guarantees elimination; pact escrow pays me $15M risk-free.",
+          "strategyMonologue": "Maya thinks the handshake shields her. Thirty-eight million—below bailout threshold. Consensus plus my ballot liquidates her; the escrow fifteen million rebuilds my balance sheet. Checkmate.",
+          "audioBlobUrl": "blob:http://localhost:3000/e2a16f09-0845-452a-bed8-986d54ba9850",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "vivienne-zhao",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Maya Lin"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "vivienne-zhao",
+          "reason": "Honor pact: bank $15M, drain Zhao's war chest, preserve Sterling as shield.",
+          "strategyMonologue": "Zhao assumes eighty million buys immunity. Two concentrated ballots force forty million attrition. Sterling remains my shield, I bank fifteen million, and the kingpin bleeds.",
+          "audioBlobUrl": "blob:http://localhost:3000/aa07637c-b78c-4ea9-9f13-8d645f0d8ace",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Maya Lin",
+          "targetName": "Vivienne Zhao"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "victoria-sterling",
+          "reason": "Sterling's terminally wounded; my vote seals cheap consensus, banks escrow, keeps Lin shielding me.",
+          "strategyMonologue": "Sterling believes her philanthropic halo deflects scrutiny. Fifteen million—zero bailout capacity. Three votes stack already; mine guarantees liquidation while Lin's pact shields my flank next round.",
+          "audioBlobUrl": "blob:http://localhost:3000/febda259-430e-4ed9-875a-ca84d69c69eb",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Victoria Sterling"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "victoria-sterling",
+          "reason": "Consensus guarantees elimination; honoring Zhao's pact banks escrow and preserves my balance sheet.",
+          "strategyMonologue": "Sterling believes her climate halo deflects scrutiny. Her $15M can't cover a bailout; consensus plus Zhao's handshake guarantees liquidation. I bank the escrow and sign her political obituary.",
+          "audioBlobUrl": "blob:http://localhost:3000/f4d0ba98-6838-41e1-a4ba-43d49c42c02b",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "vivienne-zhao",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Victoria Sterling"
+        }
+      ],
+      "bailoutTransactions": [],
+      "eliminatedId": "maya-lin",
+      "eliminatedName": "Maya Lin",
+      "finalVoteCount": 1
+    },
+    "timestamp": 1789072838951
+  },
+  {
+    "id": "evt-6",
+    "type": "elimination",
+    "round": 7,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "In every negotiation, knowing when to leave the table is itself a victory. Valoria, watch this room carefully. My work continues—quietly, precisely, always for you.",
+    "details": {
+      "voteCount": 1
+    },
+    "timestamp": 1789072914633
+  },
+  {
+    "id": "evt-7",
+    "type": "final_speech",
+    "round": 99,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Thirty-five years, Senator Thorne, and eggs doubled on your watch—regulatory capture, not crisis. Ms. Zhao, your empire profits from the very cartels gouging our families; AI subsidies are unfunded fantasies. I offer structural antitrust enforcement, competitive markets, balanced budgets. Fiscal discipline ends grocery shocks. Vote Rostova. Vote arithmetic.",
+    "timestamp": 1789072928720
+  },
+  {
+    "id": "evt-8",
+    "type": "final_speech",
+    "round": 99,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Rostova recalibrates ledgers while cartels feast. Thorne drafts his forty-thousandth memo while your children go hungry. Their legacy systems cannot compute this crisis—only neural-precision optimization can. I rewired the human brain; I will rewire Valoria's food economy. Grand Jury: vote evolution. Vote Zhao.",
+    "timestamp": 1789072955278
+  },
+  {
+    "id": "evt-9",
+    "type": "final_speech",
+    "round": 99,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Tested, steady leadership tames grocery cartels—not untested experiments. Victoria's radical climate schemes and Maya's backroom brinkmanship cannot fill your family's pantry. Thirty-five years of bipartisan results can. Tonight, I humbly ask for your trust—and your decisive vote.",
+    "timestamp": 1789072978623
+  },
+  {
+    "id": "evt-10",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "jax-alvarez",
+    "voterName": "Jackson Alvarez",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Thorne's no saint, but thirty-five years means he answers to voters, not shareholders. Sterling's hedge-fund money reeks. The old lion gets my vote.",
+    "privateReason": "Thorne fights for forgotten factory towns; Sterling serves her investors, not our families.",
+    "timestamp": 1789073011750
+  },
+  {
+    "id": "evt-11",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Silas is the establishment's comfortable rot; Vivienne builds the next oligarchy in silicon. Elena knows every offshore ledger my father hid — she'll strangle the racket from inside.",
+    "privateReason": "Elena knows the financial machine's guts; she'll dismantle dynastic wealth from within.",
+    "timestamp": 1789073011816
+  },
+  {
+    "id": "evt-12",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Thorne's thirty-five years produced double-priced eggs—legacy code that never compiled. Elena's arithmetic is the only rigorous operating system on that ballot. I elect competence, not sentiment. Elena wins.",
+    "privateReason": "Elena computes reality; Thorne performs it. Precision governs; sentimentality starves. She earns the presidency.",
+    "timestamp": 1789073016994
+  },
+  {
+    "id": "evt-13",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Zhao calls hunger obsolete wetware—soulless. Rostova's austerity starves souls for spreadsheets. Thorne speaks compassion, flawed vessel though he is. He heals; the others dissect. My flock elects him.",
+    "privateReason": "Thorne alone honors family and compassion; the others worship spreadsheets and silicon.",
+    "timestamp": 1789073017060
+  },
+  {
+    "id": "evt-14",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne's compassion theater is deficit bribery — 35 years, 14.2% food inflation. Zhao thinks in systems, not sentiment. Cold competence governs; emotional arithmetic bankrupts. Zhao gets my presidency.",
+    "privateReason": "Zhao's structural systems-thinking beats Thorne's deficit-funded compassion theater that bankrupted Valoria.",
+    "timestamp": 1789073019766
+  },
+  {
+    "id": "evt-15",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Zhao's contempt disqualifies her. Thorne trades compassion theater for thirty-five years of failure. Elena's arithmetic cuts true — she attacked me, but precision governs. She gets my presidency.",
+    "privateReason": "Elena's analytical spine can break monopolies; Zhao's contempt and Thorne's theater cannot.",
+    "timestamp": 1789073020567
+  },
+  {
+    "id": "evt-16",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "art-sterling",
+    "voterName": "Arthur Sterling",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne never signed a paycheck. Rostova only audits other people's money. Zhao built an empire from zero—like me. Founders govern; bureaucrats talk. My vote elects Zhao.",
+    "privateReason": "Only finalist who built a private-sector empire. Founders outperform bureaucrats. Deal done.",
+    "timestamp": 1789073020839
+  },
+  {
+    "id": "evt-17",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "marcus-vance",
+    "voterName": "Marcus Vance",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Thorne negotiates; negotiators concede. Zhao's contempt disqualifies her. Rostova breaks monopolies like enemy formations—ruthless, decisive. Command requires spine. She has it. Vote cast.",
+    "privateReason": "Rostova shows the decisiveness and iron will Valoria's defense demands.",
+    "timestamp": 1789073022907
+  },
+  {
+    "id": "evt-18",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Zhao would dismantle everything I built in thirty-five years. Elena respects institutions—she'll preserve my corridors, my committees. The economist is controllable. The technocrat is extinction. Rostova wins tonight.",
+    "privateReason": "Zhao threatens my legacy; Elena preserves the institutional order I built.",
+    "timestamp": 1789073022982
+  },
+  {
+    "id": "evt-19",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "garrick-stone",
+    "voterName": "Garrick Stone",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Thorne is the aristocracy I've spent thirty years indicting—legacy rot in a suit. Zhao optimizes for shareholders. Rostova follows evidence, breaks monopolies. She gets my verdict.",
+    "privateReason": "Rostova's evidence-first mind matches my prosecutorial war; Thorne is the aristocracy itself.",
+    "timestamp": 1789073023645
+  },
+  {
+    "id": "evt-20",
+    "type": "final_vote",
+    "round": 99,
+    "details": {
+      "votes": [
+        {
+          "voterId": "jax-alvarez",
+          "targetId": "silas-thorne",
+          "reason": "Thorne fights for forgotten factory towns; Sterling serves her investors, not our families.",
+          "strategyMonologue": "Thorne's no saint, but thirty-five years means he answers to voters, not shareholders. Sterling's hedge-fund money reeks. The old lion gets my vote.",
+          "audioBlobUrl": "blob:http://localhost:3000/1f3813c5-b62f-48ab-9411-f77283b02389",
+          "audioBlob": {},
+          "voterName": "Jackson Alvarez",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "elena-rostova",
+          "targetId": "vivienne-zhao",
+          "reason": "Zhao's structural systems-thinking beats Thorne's deficit-funded compassion theater that bankrupted Valoria.",
+          "strategyMonologue": "Thorne's compassion theater is deficit bribery — 35 years, 14.2% food inflation. Zhao thinks in systems, not sentiment. Cold competence governs; emotional arithmetic bankrupts. Zhao gets my presidency.",
+          "audioBlobUrl": "blob:http://localhost:3000/040fa28f-29b1-471d-82ff-66348de6e72b",
+          "audioBlob": {},
+          "voterName": "Elena Rostova",
+          "targetName": "Vivienne Zhao"
+        },
+        {
+          "voterId": "marcus-vance",
+          "targetId": "elena-rostova",
+          "reason": "Rostova shows the decisiveness and iron will Valoria's defense demands.",
+          "strategyMonologue": "Thorne negotiates; negotiators concede. Zhao's contempt disqualifies her. Rostova breaks monopolies like enemy formations—ruthless, decisive. Command requires spine. She has it. Vote cast.",
+          "audioBlobUrl": "blob:http://localhost:3000/dd6ae08b-616b-4075-810f-23dc4ef276be",
+          "audioBlob": {},
+          "voterName": "Marcus Vance",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "vivienne-zhao",
+          "reason": "Only finalist who built a private-sector empire. Founders outperform bureaucrats. Deal done.",
+          "strategyMonologue": "Thorne never signed a paycheck. Rostova only audits other people's money. Zhao built an empire from zero—like me. Founders govern; bureaucrats talk. My vote elects Zhao.",
+          "audioBlobUrl": "blob:http://localhost:3000/35352a84-ce23-4871-afc2-2f28123da5f5",
+          "audioBlob": {},
+          "voterName": "Arthur Sterling",
+          "targetName": "Vivienne Zhao"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "elena-rostova",
+          "reason": "Elena knows the financial machine's guts; she'll dismantle dynastic wealth from within.",
+          "strategyMonologue": "Silas is the establishment's comfortable rot; Vivienne builds the next oligarchy in silicon. Elena knows every offshore ledger my father hid — she'll strangle the racket from inside.",
+          "audioBlobUrl": "blob:http://localhost:3000/dff77714-6d83-4cc0-9a1e-023f51a2ac25",
+          "audioBlob": {},
+          "voterName": "Victoria Sterling",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "silas-thorne",
+          "reason": "Thorne alone honors family and compassion; the others worship spreadsheets and silicon.",
+          "strategyMonologue": "Zhao calls hunger obsolete wetware—soulless. Rostova's austerity starves souls for spreadsheets. Thorne speaks compassion, flawed vessel though he is. He heals; the others dissect. My flock elects him.",
+          "audioBlobUrl": "blob:http://localhost:3000/1dfb4c73-b09f-4ab9-9bee-922f627412f8",
+          "audioBlob": {},
+          "voterName": "Elijah Haddon",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "elena-rostova",
+          "reason": "Elena's analytical spine can break monopolies; Zhao's contempt and Thorne's theater cannot.",
+          "strategyMonologue": "Zhao's contempt disqualifies her. Thorne trades compassion theater for thirty-five years of failure. Elena's arithmetic cuts true — she attacked me, but precision governs. She gets my presidency.",
+          "audioBlobUrl": "blob:http://localhost:3000/11c55fb0-63ac-4f4c-af45-ab8115e22733",
+          "audioBlob": {},
+          "voterName": "Maya Lin",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "elena-rostova",
+          "reason": "Elena computes reality; Thorne performs it. Precision governs; sentimentality starves. She earns the presidency.",
+          "strategyMonologue": "Thorne's thirty-five years produced double-priced eggs—legacy code that never compiled. Elena's arithmetic is the only rigorous operating system on that ballot. I elect competence, not sentiment. Elena wins.",
+          "audioBlobUrl": "blob:http://localhost:3000/f4834441-1c1f-4dc0-a8db-90576538d4c6",
+          "audioBlob": {},
+          "voterName": "Vivienne Zhao",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "elena-rostova",
+          "reason": "Zhao threatens my legacy; Elena preserves the institutional order I built.",
+          "strategyMonologue": "Zhao would dismantle everything I built in thirty-five years. Elena respects institutions—she'll preserve my corridors, my committees. The economist is controllable. The technocrat is extinction. Rostova wins tonight.",
+          "audioBlobUrl": "blob:http://localhost:3000/c061cbf8-09ea-4525-801a-ef3bc1b6770a",
+          "audioBlob": {},
+          "voterName": "Silas Thorne",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "garrick-stone",
+          "targetId": "elena-rostova",
+          "reason": "Rostova's evidence-first mind matches my prosecutorial war; Thorne is the aristocracy itself.",
+          "strategyMonologue": "Thorne is the aristocracy I've spent thirty years indicting—legacy rot in a suit. Zhao optimizes for shareholders. Rostova follows evidence, breaks monopolies. She gets my verdict.",
+          "audioBlobUrl": "blob:http://localhost:3000/655bbbc4-3fc2-43db-91f8-655ae39c166d",
+          "audioBlob": {},
+          "voterName": "Garrick Stone",
+          "targetName": "Elena Rostova"
+        }
+      ],
+      "winnerId": "elena-rostova",
+      "winnerName": "Elena Rostova"
+    },
+    "timestamp": 1789073023677
+  },
+  {
+    "id": "evt-21",
+    "type": "winner",
+    "round": 100,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Valoria chose arithmetic over alchemy. To my opponents: your fairy tales lost; the ledger won. Inflation at 14.2 percent was engineered by monopoly margins, not markets. My first decree: immediate forensic audit of supermarket cartels and enforcement of structural competition law. Fiscal discipline begins at dinner.",
+    "timestamp": 1789073220725
+  }
+]

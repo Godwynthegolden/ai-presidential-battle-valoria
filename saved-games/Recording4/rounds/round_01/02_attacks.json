@@ -1,0 +1,121 @@
+[
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Bankers' bonuses? Under my decade, inflation fell 9.2%—check the record. Alvarez prescribes rent caps; price controls bankrupted Caracas. His temper writes checks Valoria's treasury can't cash. Eliminate the arithmetic error.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Jackson Alvarez",
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya masters rooms while Wall Street conquers our homes. Sixty percent of Valoria occupied—her response? Negotiate. Appeasement reclaims nothing. Retreat is her strategy. Valoria needs a commander who fights, not a diplomat who whispers.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez poured steel twenty years — congratulations, Jackson, I built the towers your pension funds rent from me! Valoria needs a CEO who's signed ten thousand paychecks, not a temper with a union card. Fire him!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Daddy dearest calls Valoria a \"fixer-upper.\" At his Montauk donor dinners, Sterling toasts evicting families as \"portfolio optimization.\" I've seen the spreadsheets. Arthur doesn't run countries—he liquidates them. Tonight, the board's adjourned.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova balanced her books while hedge funds bought our children's bedrooms! She guarded the currency, never the cradle. A ledger without love is a famine of the soul. Cast her from this table!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance, my whispers freed eighty hostages; your firepower never housed one. Hedge funds don't fear tanks—they fear leverage. Read the room, General: a man with only hammers sees only nails. Send yourself home. I negotiate; Valoria wins.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez confuses muscle memory for monetary policy. Rent caps are a failed algorithm—Caracas already ran that simulation. His amygdala fires before his prefrontal cortex does. Valoria: delete this legacy hardware tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "My colleagues, I've watched thirty-five years of fiery newcomers. Governor Alvarez brings furnace-heat fury but no fiscal blueprint—just weaponized grievance. Anger never housed a family. Tonight, choose steady hands over striking sparks.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Sixty percent of Valoria's homes seized—no shot fired. Vance guarded borders while hedge funds occupied our families' futures. That's not strength; that's dereliction. The grand jury's verdict is in: eliminate Vance.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Marcus Vance"
+    }
+  }
+]

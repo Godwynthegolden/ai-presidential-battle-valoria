@@ -1,0 +1,69 @@
+[
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Arsonist? Darling, I'm the fire brigade. Rostova defended our currency while her Oxford chums feasted off inflation—cold arithmetic, warm nothing. Families can't eat spreadsheets. Tonight, balance her ledger: eliminate Elena.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Elena Rostova",
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Beloved, Rostova says she'll govern the arithmetic—while mothers govern empty tables! A ledger has no heartbeat, no grace. When the widow counts coins for bread, send the spreadsheet home tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria, I've talked armed men off ledges. You perform fury you can't cash. Chaos is theater, not calibrated leverage—and your fortune still sits in the vaults you vow to torch. End the performance tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Victoria Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Thorne, thirty-five years of \"steady leadership\" produced twelve-dollar eggs. Your consensus algorithm has one output: stagnation. The grocery shock is your legacy code crashing. Deprecate the senator tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Silas Thorne"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "My friends, Elena Rostova offers struggling families a spreadsheet where dinner should be. Her austerity slashes the programs that fill empty pantries. Valoria deserves steady hands—not a cold ledger. Let's balance her books tonight.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Vivienne Zhao",
+      "voteCallTargetName": "Elena Rostova"
+    }
+  }
+]

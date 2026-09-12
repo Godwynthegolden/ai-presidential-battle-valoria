@@ -192,13 +192,61 @@ export class NineRouterService {
         const ctx = payload.historyContext || {};
         const proposerBudget = ctx.proposerBudget ?? 100;
         const fallbackReceiver = payload.targetId ? (CANDIDATE_MAP.get(payload.targetId) || null) : null;
-        const parsedPact = this.parseAndValidatePact(
+        let parsedPact = this.parseAndValidatePact(
           rawText,
           candidate,
           fallbackReceiver,
           payload.activeCandidateIds,
           proposerBudget
         );
+
+        // Detect if initial LLM generation produced invalid, mangled, leaked JSON, or preamble dialogue
+        const isMangled = !parsedPact.whisper ||
+          parsedPact.whisper.includes('{') ||
+          parsedPact.whisper.includes('actionType') ||
+          parsedPact.whisper.includes('privateStrategy') ||
+          /^(?:here is|certainly|sure|as an ai|based on|in this json)/i.test(parsedPact.whisper.trim());
+
+        if (isMangled) {
+          console.warn(`[9router CCTV Pact Validation]: Invalid or mangled pact dialogue from ${candidate.name} ("${rawText.slice(0, 100)}..."). Retrying with corrective prompt...`);
+          const allowedPartners = payload.activeCandidateIds.filter(id => id !== candidate.id);
+          const receiverName = fallbackReceiver ? fallbackReceiver.name.split(' ')[0] : 'Partner';
+          const partnerId = fallbackReceiver ? fallbackReceiver.id : allowedPartners[0];
+          const rivalTargetId = allowedPartners.find(id => id !== partnerId) || allowedPartners[0];
+
+          const correctivePrompt = `${userPrompt}\n\nATTENTION: Your previous response was invalid or contained malformed JSON/preamble. You MUST return ONLY valid JSON with NO markdown fences, NO explanatory text, and NO unescaped internal double quotes. Return this EXACT schema:\n{\n  "whisper": "${receiverName}, clandestine proposal in authentic persona (STRICTLY MAXIMUM 15 WORDS)",\n  "targetCandidateId": "${partnerId}",\n  "agreedEliminationTargetId": "${rivalTargetId}",\n  "actionType": "${proposerBudget >= 30 ? 'bribe' : 'offer'}",\n  "offerPrice": 30,\n  "receiverDecision": "accept",\n  "receiverResponse": "authentic response under 10 words",\n  "privateStrategy": "tactical calculation under 25 words"\n}`;
+
+          try {
+            const retryText = await this.callChatCompletions(
+              systemPrompt,
+              correctivePrompt,
+              true,
+              baseUrl,
+              apiKey,
+              model,
+              500
+            );
+            const retryPact = this.parseAndValidatePact(
+              retryText,
+              candidate,
+              fallbackReceiver,
+              payload.activeCandidateIds,
+              proposerBudget
+            );
+            const retryMangled = !retryPact.whisper ||
+              retryPact.whisper.includes('{') ||
+              retryPact.whisper.includes('actionType') ||
+              retryPact.whisper.includes('privateStrategy') ||
+              /^(?:here is|certainly|sure|as an ai|based on)/i.test(retryPact.whisper.trim());
+
+            if (!retryMangled) {
+              parsedPact = retryPact;
+            }
+          } catch (retryErr) {
+            console.error('[9router CCTV Pact Corrective Retry Failed]:', retryErr);
+          }
+        }
+
         return {
           text: parsedPact.whisper,
           targetCandidateId: parsedPact.targetCandidateId,
@@ -443,13 +491,14 @@ export class NineRouterService {
       body.response_format = { type: 'json_object' };
     }
 
-    const maxRetries = 3;
+    const maxRetries = 6;
+    const retryDelays = [1500, 3000, 6000, 10000, 15000, 20000];
     let attempt = 0;
 
     while (attempt <= maxRetries) {
       attempt++;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
       try {
         let response = await fetch(endpoint, {
@@ -478,9 +527,9 @@ export class NineRouterService {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-          const isRetryableStatus = response.status === 429 || response.status === 502 || response.status === 503 || response.status === 504;
+          const isRetryableStatus = response.status === 408 || response.status === 429 || response.status === 500 || response.status === 502 || response.status === 503 || response.status === 504;
           if (isRetryableStatus && attempt <= maxRetries) {
-            const backoffMs = Math.pow(2, attempt - 1) * 1000 + Math.floor(Math.random() * 500); // ~1s, ~2s, ~4s with jitter
+            const backoffMs = (retryDelays[attempt - 1] || 20000) + Math.floor(Math.random() * 800);
             console.warn(`[9router Transient/Rate-Limit Error HTTP ${response.status}]: Retrying attempt ${attempt}/${maxRetries} after ${backoffMs}ms...`);
             await new Promise(resolve => setTimeout(resolve, backoffMs));
             continue;
@@ -564,21 +613,28 @@ export class NineRouterService {
           return this.stripThinkingTags(rawResponseText.trim());
         }
 
+        if (attempt <= maxRetries) {
+          const backoffMs = (retryDelays[attempt - 1] || 20000) + Math.floor(Math.random() * 800);
+          console.warn(`[9router Empty/Malformed Response]: Retrying attempt ${attempt}/${maxRetries} after ${backoffMs}ms...`);
+          await new Promise(resolve => setTimeout(resolve, backoffMs));
+          continue;
+        }
+
         throw new Error(`Malformed response from 9router API: "${rawResponseText.slice(0, 150)}"`);
       } catch (error: any) {
         clearTimeout(timeoutId);
         const isTimeout = error.name === 'AbortError' || error.message?.includes('timed out');
-        const isNetworkErr = error.message?.includes('fetch failed') || error.message?.includes('network');
+        const isNetworkErr = error.message?.includes('fetch failed') || error.message?.includes('network') || error.message?.includes('ECONNRESET') || error.message?.includes('ETIMEDOUT');
 
         if ((isTimeout || isNetworkErr) && attempt <= maxRetries) {
-          const backoffMs = Math.pow(2, attempt - 1) * 1000 + Math.floor(Math.random() * 500);
+          const backoffMs = (retryDelays[attempt - 1] || 20000) + Math.floor(Math.random() * 800);
           console.warn(`[9router Network/Timeout Error (${error.message})]: Retrying attempt ${attempt}/${maxRetries} after ${backoffMs}ms...`);
           await new Promise(resolve => setTimeout(resolve, backoffMs));
           continue;
         }
 
         if (error.name === 'AbortError') {
-          throw new Error(`9router request timed out after 45 seconds at ${endpoint}`);
+          throw new Error(`9router request timed out after 60 seconds at ${endpoint}`);
         }
         throw error;
       }
@@ -655,16 +711,33 @@ export class NineRouterService {
     const validTargets = activeCandidateIds.filter(id => id !== proposer.id && (!fallbackReceiver || id !== fallbackReceiver.id));
     
     let rawWhisper = '';
-    if (parsed?.whisper && typeof parsed.whisper === 'string') {
-      rawWhisper = parsed.whisper.replace(/^["']|["']$/g, '').trim();
+    const candidateWhisper = parsed?.whisper ||
+      parsed?.proposal ||
+      parsed?.whisperText ||
+      parsed?.dialogue ||
+      parsed?.message ||
+      parsed?.bribeProposal ||
+      parsed?.spokenProposal ||
+      parsed?.offerText ||
+      parsed?.speech ||
+      parsed?.text;
+
+    if (candidateWhisper && typeof candidateWhisper === 'string') {
+      rawWhisper = candidateWhisper.replace(/^["']|["']$/g, '').trim();
     } else {
-      // Heuristic extraction of "whisper" string from rawText if JSON parsing failed
-      const whisperMatch = rawText.match(/"whisper"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i) ||
-                           rawText.match(/"whisper"\s*:\s*"([^"\r\n]+)/i);
+      // Heuristic extraction of whisper string from rawText with regex
+      const whisperKeyRegex = /"(?:whisper|proposal|whisperText|dialogue|message|bribeProposal|spokenProposal|offerText|speech|text)"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i;
+      const looseWhisperRegex = /"(?:whisper|proposal|whisperText|dialogue|message|bribeProposal|spokenProposal|offerText|speech|text)"\s*:\s*"([^"\r\n]+)/i;
+      const whisperMatch = rawText.match(whisperKeyRegex) || rawText.match(looseWhisperRegex);
+
       if (whisperMatch && whisperMatch[1]) {
         rawWhisper = whisperMatch[1].trim();
-      } else {
-        rawWhisper = rawText.replace(/\{[\s\S]*\}|^["']|["']$/g, '').trim();
+      } else if (!rawText.includes('{') && !rawText.includes('}') && rawText.trim().length > 0 && rawText.trim().length < 200) {
+        // Model answered directly with plain spoken dialogue without JSON wrappers
+        const cleanPlain = rawText.replace(/^["']|["']$/g, '').trim();
+        if (!/^(?:here is|certainly|sure|based on|as an ai|i have|in this round)/i.test(cleanPlain)) {
+          rawWhisper = cleanPlain;
+        }
       }
     }
 
@@ -773,7 +846,13 @@ export class NineRouterService {
         : `Let the room bleed out. ${targetFirstName || 'Our rival'} won't see the real strike coming.`;
     }
 
-    let whisper = rawWhisper.replace(/^[^:]+:\s*/, '').replace(/^["']|["']$/g, '').trim();
+    // Safely strip script label prefixes like "Briber:", "Whisper:", "Elena:", "Jax Alvarez (whispering):"
+    // without destroying sentences that contain colons like "Elena, $30M is staged: take out Arthur."
+    const scriptPrefixRegex = /^(?:(?:whisper|proposal|dialogue|briber|proposer|speaker|script|cctv|feed|offer|target|response)\s*(?:\([^)]*\))?\s*:|(?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*(?:\([^)]*\))?\s*:)\s*/i;
+    let whisper = rawWhisper.replace(scriptPrefixRegex, '').replace(/^["']|["']$/g, '').trim();
+
+    // Strip stage directions like *whispering*, (quietly), [hushed tone]
+    whisper = whisper.replace(/\*.*?\*|\[.*?\]|\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim();
 
     // Sanitize camera / surveillance filler (operatives get straight to the point)
     whisper = whisper
@@ -793,6 +872,14 @@ export class NineRouterService {
       whisper = `${recipientFirstName}, ${whisper.charAt(0).toLowerCase() + whisper.slice(1)}`;
     }
 
+    // Clean duplicate consecutive vocative calls (e.g. "Elena, Elena, ...")
+    if (recipientFirstName) {
+      const dupVocative = new RegExp(`^(?:${recipientFirstName}[,.:!—\\s]+){2,}`, 'i');
+      if (dupVocative.test(whisper)) {
+        whisper = whisper.replace(dupVocative, `${recipientFirstName}, `);
+      }
+    }
+
     // Sanitize robotic bribery bot phrases in whisper
     whisper = whisper
       .replace(/\b(?:take this|giving you this|offering this)?\s*\$([0-9]+)\s*(?:million)?\s*bribe\b/gi, 'there is private collateral')
@@ -801,8 +888,8 @@ export class NineRouterService {
 
     // Strip any leaked JSON keys or syntax fragments (e.g. '", "actionType": "bribe", "targetCandidate"')
     whisper = whisper
-      .replace(/["']?\s*,\s*["'][a-zA-Z0-9_]+["']?\s*:?[\s\S]*$/, '')
-      .replace(/["']\s*,\s*["'][\s\S]*$/, '')
+      .replace(/["']?\s*,\s*["'][a-zA-Z0-9_]+["']\s*:[\s\S]*$/i, '')
+      .replace(/["']\s*,\s*["'][a-zA-Z0-9_]+["']\s*[\s\S]*$/i, '')
       .replace(/\{[\s\S]*$/g, '')
       .replace(/\}[\s\S]*$/g, '')
       .replace(/^["']+|["']+$/g, '')
@@ -820,15 +907,24 @@ export class NineRouterService {
 
     // Extract and sanitize receiver's response back to proposer (strictly <= 10 words, authentic persona)
     let receiverResponse: string = '';
-    if (parsed?.receiverResponse && typeof parsed.receiverResponse === 'string') {
-      let cleanedResp = parsed.receiverResponse
-        .replace(/^[^:]+:\s*/, '') // Strip script prefixes like "Silas:"
+    const rawRxRespCandidate = parsed?.receiverResponse ||
+      parsed?.response ||
+      parsed?.receiverReply ||
+      parsed?.reply ||
+      parsed?.partnerResponse ||
+      parsed?.partnerReply;
+
+    if (rawRxRespCandidate && typeof rawRxRespCandidate === 'string') {
+      let cleanedResp = rawRxRespCandidate
+        .replace(scriptPrefixRegex, '') // Safely strip script prefixes like "Silas:"
         .replace(/^["']|["']$/g, '')
         .trim();
+      // Strip stage directions like (quietly)
+      cleanedResp = cleanedResp.replace(/\*.*?\*|\[.*?\]|\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim();
       // Strip any leaked JSON keys or trailing delimiters
       cleanedResp = cleanedResp
-        .replace(/["']?\s*,\s*["'][a-zA-Z0-9_]+["']?\s*:?[\s\S]*$/, '')
-        .replace(/["']\s*,\s*["'][\s\S]*$/, '')
+        .replace(/["']?\s*,\s*["'][a-zA-Z0-9_]+["']\s*:[\s\S]*$/i, '')
+        .replace(/["']\s*,\s*["'][a-zA-Z0-9_]+["']\s*[\s\S]*$/i, '')
         .replace(/\{[\s\S]*$/g, '')
         .replace(/\}[\s\S]*$/g, '')
         .replace(/^["']+|["']+$/g, '')
@@ -922,68 +1018,137 @@ export class NineRouterService {
     apiKey: string,
     model: string
   ): Promise<{ vote: string; strategyMonologue: string; reason: string }> {
-    const validTargets = payload.action === 'final_vote'
-      ? (payload.finalistIds || []).filter(id => id !== candidate.id)
-      : payload.activeCandidateIds.filter(id => id !== candidate.id);
+    const isFinalVote = payload.action === 'final_vote';
+    const finalistPool = isFinalVote
+      ? ((payload.finalistIds && payload.finalistIds.length > 0) ? payload.finalistIds : (payload.activeCandidateIds && payload.activeCandidateIds.length > 0 ? payload.activeCandidateIds : []))
+      : payload.activeCandidateIds;
+    const validTargets = finalistPool.filter(id => id !== candidate.id);
+    const validTargetsList = validTargets.length > 0 ? validTargets : finalistPool;
+
+    // Helper to detect if an LLM hallucinated an eliminated candidate in its monologue during presidential elections
+    const isFinalVoteMonologueHallucination = (monoText: string, targetIds: string[]): boolean => {
+      if (!monoText || typeof monoText !== 'string' || monoText.trim().length < 5) return true;
+      const lower = monoText.toLowerCase();
+
+      // Check if any of the surviving finalists are mentioned
+      const mentionsAnyFinalist = targetIds.some(id => {
+        const cand = CANDIDATE_MAP.get(id);
+        if (!cand) return false;
+        const firstName = cand.name.split(' ')[0].toLowerCase();
+        const lastName = cand.name.split(' ').slice(-1)[0].toLowerCase();
+        return lower.includes(firstName) || lower.includes(lastName) || lower.includes(id.toLowerCase());
+      });
+
+      // Check if an eliminated candidate outside targetIds is explicitly voted for or endorsed
+      const allEliminated = CANDIDATES.filter(c => !targetIds.includes(c.id) && c.id !== candidate.id);
+      for (const elim of allEliminated) {
+        const elimFirst = elim.name.split(' ')[0].toLowerCase();
+        const elimLast = elim.name.split(' ').slice(-1)[0].toLowerCase();
+        const elimFull = elim.name.toLowerCase();
+
+        const endorsementPatterns = [
+          new RegExp(`\\b(?:vote|voted|voting|votes|endorse|endorses|endorsing|elect|elects|electing|backing|choose|choosing|support|supporting)\\s+(?:for\\s+)?(?:${elimFirst}|${elimLast}|${elimFull})\\b`, 'i'),
+          new RegExp(`\\b(?:my\\s+vote\\s+(?:goes\\s+to|is\\s+for)|cast\\s+(?:my\\s+)?vote\\s+for)\\s+(?:${elimFirst}|${elimLast}|${elimFull})\\b`, 'i'),
+          new RegExp(`\\b(?:${elimFirst}|${elimLast}|${elimFull})\\s+(?:for\\s+president|will\\s+lead|should\\s+lead|deserves\\s+the\\s+presidency|as\\s+president)\\b`, 'i'),
+          new RegExp(`\\b(?:lock|locks|locking)\\s+(?:${elimFirst}|${elimLast}|${elimFull})['’]?s\\s+presidency\\b`, 'i')
+        ];
+
+        if (endorsementPatterns.some(pattern => pattern.test(monoText))) {
+          return true; // Explicitly endorsed an eliminated candidate!
+        }
+      }
+
+      // If the monologue does not mention any valid finalist at all, it's a hallucination
+      if (!mentionsAnyFinalist) {
+        return true;
+      }
+
+      return false;
+    };
 
     const extractMonologue = (obj: any, targetId: string): string => {
       const rawMono = obj?.strategyMonologue || obj?.internalDialogue || obj?.monologue || obj?.strategy;
       if (rawMono && typeof rawMono === 'string' && rawMono.trim().length > 5) {
-        return rawMono.replace(/^["']|["']$/g, '').trim();
+        const cleanMono = rawMono.replace(/^["']|["']$/g, '').trim();
+        if (!isFinalVote || !isFinalVoteMonologueHallucination(cleanMono, validTargetsList)) {
+          return cleanMono;
+        }
       }
       const targetName = CANDIDATE_MAP.get(targetId)?.name || targetId;
+      if (isFinalVote) {
+        return `My vote for President goes to ${targetName}. They have demonstrated the vision, discipline, and steel required to lead the Republic of Valoria forward.`;
+      }
       return `${targetName} assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.`;
     };
 
     // Try parsing initial response with multi-stage repair
     let parsed = this.extractAndRepairJson(rawText);
+    let resolvedVote = parsed?.vote ? this.resolveCandidateIdFromNameOrAlias(parsed.vote, validTargetsList) : null;
+    let initialMono = parsed?.strategyMonologue || parsed?.internalDialogue || parsed?.monologue || parsed?.strategy;
 
-    // Validate and heal vote candidate ID
-    let resolvedVote = parsed?.vote ? this.resolveCandidateIdFromNameOrAlias(parsed.vote, validTargets) : null;
+    let isHallucinating = !resolvedVote;
+    if (isFinalVote && resolvedVote) {
+      if (!initialMono || isFinalVoteMonologueHallucination(initialMono, validTargetsList)) {
+        isHallucinating = true;
+      }
+    }
 
-    if (resolvedVote) {
+    if (!isHallucinating && resolvedVote) {
       return {
         vote: resolvedVote,
         strategyMonologue: extractMonologue(parsed, resolvedVote),
-        reason: parsed.reason ? String(parsed.reason).replace(/^["']|["']$/g, '').trim() : 'Strategic determination',
+        reason: parsed.reason ? String(parsed.reason).replace(/^["']|["']$/g, '').trim() : (isFinalVote ? 'Grand Jury presidential ballot' : 'Strategic determination'),
       };
     }
 
-    // Auto-retry with corrective prompt
-    console.warn(`[9router Vote Validation]: Invalid vote output from ${candidate.name} ("${rawText}"). Retrying with corrective prompt...`);
+    // Auto-retry with corrective prompt if model hallucinated
+    const finalistNames = validTargetsList.map(id => CANDIDATE_MAP.get(id)?.name).filter(Boolean).join(', ');
+    const correctivePrompt = isFinalVote
+      ? `${userPrompt}\n\nATTENTION: Your previous response was INVALID because you voted for or endorsed a candidate outside the 3 finalists. In this presidential election, you MUST vote for and monologue exclusively about one of these exact surviving finalists: ${JSON.stringify(validTargetsList)} (${finalistNames}). You are strictly forbidden from voting for, endorsing, or mentioning eliminated candidates. Return ONLY valid JSON: {"vote": "finalist_id", "strategyMonologue": "high-IQ Light & L internal deduction evaluating and electing one of the 3 finalists (max 30 words)", "reason": "brief reasoning"}.`
+      : `${userPrompt}\n\nATTENTION: Your previous response was invalid. You MUST return ONLY valid JSON formatted as: {"vote": "candidate_id", "strategyMonologue": "high-IQ Light & L style deduction anticipating rival moves (max 30 words, NO mottos)", "reason": "brief reasoning"}. You MUST choose from ONLY these exact candidate IDs: ${JSON.stringify(validTargetsList)}. Do NOT vote for yourself (${candidate.id}).`;
 
-    const correctivePrompt = `${userPrompt}\n\nATTENTION: Your previous response was invalid. You MUST return ONLY valid JSON formatted as: {"vote": "candidate_id", "strategyMonologue": "high-IQ Light & L style deduction anticipating rival moves (max 30 words, NO mottos)", "reason": "brief reasoning"}. You MUST choose from ONLY these exact candidate IDs: ${JSON.stringify(validTargets)}. Do NOT vote for yourself (${candidate.id}).`;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      console.warn(`[9router Vote Validation]: Hallucination or invalid vote output from ${candidate.name} (attempt ${attempt}/2, text: "${rawText.slice(0, 100)}..."). Retrying API call with corrective prompt...`);
 
-    try {
-      const retryText = await this.callChatCompletions(
-        systemPrompt, 
-        correctivePrompt, 
-        true,
-        baseUrl,
-        apiKey,
-        model,
-        500
-      );
-      const retryParsed = this.extractAndRepairJson(retryText);
-      const retryVote = retryParsed?.vote ? this.resolveCandidateIdFromNameOrAlias(retryParsed.vote, validTargets) : null;
+      try {
+        const retryText = await this.callChatCompletions(
+          systemPrompt, 
+          correctivePrompt, 
+          true,
+          baseUrl,
+          apiKey,
+          model,
+          500
+        );
+        const retryParsed = this.extractAndRepairJson(retryText);
+        const retryVote = retryParsed?.vote ? this.resolveCandidateIdFromNameOrAlias(retryParsed.vote, validTargetsList) : null;
+        const retryMono = retryParsed?.strategyMonologue || retryParsed?.internalDialogue || retryParsed?.monologue || retryParsed?.strategy;
 
-      if (retryVote) {
-        return {
-          vote: retryVote,
-          strategyMonologue: extractMonologue(retryParsed, retryVote),
-          reason: retryParsed.reason ? String(retryParsed.reason).replace(/^["']|["']$/g, '').trim() : 'Strategic recalculation',
-        };
+        let retryHallucinating = !retryVote;
+        if (isFinalVote && retryVote) {
+          if (!retryMono || isFinalVoteMonologueHallucination(retryMono, validTargetsList)) {
+            retryHallucinating = true;
+          }
+        }
+
+        if (!retryHallucinating && retryVote) {
+          return {
+            vote: retryVote,
+            strategyMonologue: extractMonologue(retryParsed, retryVote),
+            reason: retryParsed.reason ? String(retryParsed.reason).replace(/^["']|["']$/g, '').trim() : (isFinalVote ? 'Grand Jury presidential election vote' : 'Strategic recalculation'),
+          };
+        }
+      } catch (retryErr) {
+        console.error(`[9router Vote Corrective Retry ${attempt} Failed]:`, retryErr);
       }
-    } catch (retryErr) {
-      console.error('[9router Vote Corrective Retry Failed]:', retryErr);
     }
 
-    // If model still failed validation, pick the first valid allowed target
-    const fallbackTarget = validTargets[0] || payload.activeCandidateIds[0];
+    // Emergency fallback if API fails or retries are exhausted (guarantees safe game state without crashing)
+    const fallbackTarget = validTargetsList[0] || finalistPool[0];
     return {
       vote: fallbackTarget,
       strategyMonologue: extractMonologue(parsed, fallbackTarget),
-      reason: 'Strategic elimination vote',
+      reason: isFinalVote ? 'Grand Jury presidential election vote' : 'Strategic elimination vote',
     };
   }
 
@@ -1015,6 +1180,12 @@ export class NineRouterService {
       jsonCandidate = cleaned.substring(firstBrace, lastBrace + 1);
     } else if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
       jsonCandidate = cleaned.substring(firstBracket, lastBracket + 1);
+    } else if (firstBrace !== -1 && (lastBrace === -1 || lastBrace <= firstBrace)) {
+      // Truncated JSON object missing closing brace
+      jsonCandidate = cleaned.substring(firstBrace) + '\n}';
+    } else if (firstBracket !== -1 && (lastBracket === -1 || lastBracket <= firstBracket)) {
+      // Truncated JSON array missing closing bracket
+      jsonCandidate = cleaned.substring(firstBracket) + '\n]';
     }
 
     if (jsonCandidate) {
@@ -1028,18 +1199,41 @@ export class NineRouterService {
         .replace(/(^|[^\\])\/\/.*$/gm, '$1')
         // Remove multi-line comments (/* ... */)
         .replace(/\/\*[\s\S]*?\*\//g, '')
-        // Sanitize trailing commas before closing braces/brackets
-        .replace(/,\s*([}\]])/g, '$1')
-        // Fix single-quoted property keys: {'key': -> {"key":
-        .replace(/'([a-zA-Z0-9_$-]+)'\s*:/g, '"$1":')
-        // Fix unquoted property keys: { key: -> { "key":
-        .replace(/([{,]\s*)([a-zA-Z0-9_$-]+)\s*:/g, '$1"$2":')
-        // Fix single-quoted values: : 'value' -> : "value"
-        .replace(/:\s*'([^']*)'/g, ': "$1"')
         // Strip unprintable control characters and zero-width spaces
         .replace(/[\u0000-\u001F\u007F-\u009F\uFEFF\u200B-\u200D]/g, ' ')
         // Remove raw non-escaped newlines inside strings
-        .replace(/\r?\n/g, ' ');
+        .replace(/\r?\n/g, ' ')
+        // Fix single-quoted property keys: {'key': -> {"key":
+        .replace(/'([a-zA-Z0-9_$-]+)'\s*:/g, '"$1":')
+        // Fix unquoted property keys: { key: -> { "key":
+        .replace(/([{,]\s*)([a-zA-Z0-9_$-]+)\s*:/g, '$1"$2":');
+
+      // Heal single-quoted string values: : 'value' -> : "value"
+      repaired = repaired.replace(/:\s*'((?:\\'|[^'])*)'(?=\s*[,}\]])/g, (_m, val) => {
+        const cleanVal = val.replace(/\\'/g, "'").replace(/"/g, '\\"');
+        return `: "${cleanVal}"`;
+      });
+
+      // Heal unescaped inner double quotes inside string property values (e.g. {"whisper": "Marcus, put "Cross" on ballot."})
+      const stringValueRegex = /("([a-zA-Z0-9_$-]+)"\s*:\s*")([\s\S]*?)("(?:\s*,\s*"[a-zA-Z0-9_$-]+"\s*:|\s*\}|\s*\]))/g;
+      for (let pass = 0; pass < 3; pass++) {
+        repaired = repaired.replace(stringValueRegex, (_match, prefix, _key, innerContent, suffix) => {
+          const healedContent = innerContent.replace(/(?<!\\)"/g, "'");
+          return `${prefix}${healedContent}${suffix}`;
+        });
+      }
+
+      // Sanitize trailing commas before closing braces/brackets
+      repaired = repaired.replace(/,\s*([}\]])/g, '$1');
+
+      // If closing brace was artificially appended, ensure open string is closed before closing brace
+      if (repaired.endsWith(' }') || repaired.endsWith('}')) {
+        const beforeEnd = repaired.substring(0, repaired.lastIndexOf('}'));
+        const quoteCount = (beforeEnd.match(/(?<!\\)"/g) || []).length;
+        if (quoteCount % 2 !== 0) {
+          repaired = beforeEnd + '" }';
+        }
+      }
 
       try {
         return JSON.parse(repaired);
@@ -1407,6 +1601,7 @@ CRITICAL CONSISTENCY & ADDRESSING RULES:
     - "Thirty million wired into your blind trust, Victoria. Put Vance on the card." (12 words)
     - "Your campaign debt is thirty million, Arthur. It disappears tonight if Sterling falls." (13 words)
   * NATURALLY ADDRESS YOUR PARTNER: Weave targetCandidateId's first name (${receiverFirstName}) naturally into your proposal (at the start, middle, or end). Never address a different person! Explicitly target the rival candidate you agreed to eliminate.
+  * 🚫 NO INTERNAL DOUBLE QUOTES: Never put double quotes inside your whisper dialogue. If quoting or emphasizing a candidate's name or phrase, use apostrophes (e.g. 'Stone', 'Cross').
   * You do NOT sound like an automated bribery bot (NEVER say robotic formula lines like "take this $30 bribe" or "I am bribing you with $30M").
   * Ground your proposal in YOUR authentic character personality (${candidate.personality}) and speaking style (${candidate.speakingStyle}):
     - Tycoons whisper terms like an aggressive, hostile corporate takeover executed in the shadows.
@@ -1433,14 +1628,14 @@ CRITICAL CONSISTENCY & ADDRESSING RULES:
 
 You MUST return a JSON object with this exact schema:
 {
-  "privateStrategy": "sharp, confidential tactical calculation (max 30 words)",
-  "actionType": "bribe",
+  "whisper": "clandestine proposal in authentic persona addressing targetCandidateId (STRICTLY MAXIMUM 15 WORDS, NO internal double quotes)",
   "targetCandidateId": "candidate_id_to_negotiate_with",
   "agreedEliminationTargetId": "candidate_id_to_eliminate",
+  "actionType": "bribe",
   "offerPrice": 30,
-  "whisper": "clandestine proposal in authentic persona addressing targetCandidateId (STRICTLY MAXIMUM 15 WORDS)",
   "receiverDecision": "accept",
-  "receiverResponse": "spoken response back to you in their personality style (STRICTLY MAXIMUM 10 WORDS)"
+  "receiverResponse": "spoken response back to you in their personality style (STRICTLY MAXIMUM 10 WORDS)",
+  "privateStrategy": "sharp, confidential tactical calculation (max 25 words)"
 } `;
         break;
       }
@@ -1647,13 +1842,18 @@ DIRECT OUTPUT RULES:
 
       case 'final_vote': {
         isJsonExpected = true;
-        const validFinalists = (payload.finalistIds || []).filter(id => id !== candidate.id);
+        const finalistPool = (payload.finalistIds && payload.finalistIds.length > 0)
+          ? payload.finalistIds
+          : (payload.activeCandidateIds && payload.activeCandidateIds.length > 0 ? payload.activeCandidateIds : []);
+        const validFinalists = finalistPool.filter(id => id !== candidate.id);
         const finalistsDesc = validFinalists
           .map(id => {
             const c = CANDIDATE_MAP.get(id);
             return `"${id}" (${c?.name} - ${c?.archetypeTitle})`;
           })
           .join(', ');
+        const validFinalistNames = validFinalists.map(id => CANDIDATE_MAP.get(id)?.name).filter(Boolean).join(' or ');
+        const validFinalistIdsList = validFinalists.map(id => `"${id}"`).join(', ');
 
         const isEliminated = !payload.activeCandidateIds.includes(candidate.id);
         const juryStatus = isEliminated 
@@ -1671,18 +1871,21 @@ DIRECT OUTPUT RULES:
         }
 
         userPrompt = `GRAND JURY PRESIDENTIAL ELECTION VOTE.
+You are voting to ELECT one of the 3 finalists as the President of the Republic of Valoria. This is NOT an elimination vote — your vote ELECTS this candidate to the Presidency!
 ${juryStatus}
-Candidates on the presidential ballot: [${finalistsDesc}].${strategyReminder}${historyMemories}
+Candidates on the presidential ballot to ELECT: [${finalistsDesc}].${strategyReminder}${historyMemories}
 Rules:
 1. You CANNOT vote for yourself.
-2. Cast your vote based on who earned your respect, shared your policy goals, or vote against whoever betrayed/insulted you during the election.
+2. Cast your vote for the single finalist you want to ELECT as President of the Republic of Valoria based on who earned your respect, shared your policy goals, or to deny the presidency to a rival who betrayed you.
+3. 🚫 STRICT PROHIBITION ON ELIMINATED CANDIDATES: You are strictly FORBIDDEN from voting for, endorsing, or naming any candidate outside the 3 finalists. You MUST choose exclusively from the surviving finalists: [${finalistsDesc}]. Any vote or endorsement for an eliminated candidate is completely invalid!
 
 DIRECT OUTPUT RULES:
 - Return ONLY the raw JSON object below. Do NOT output markdown blocks, thinking tags, or conversational text.
 
 🧠 "DEATH NOTE" HIGH-IQ GRAND JURY MONOLOGUE ("strategyMonologue"):
 Channel the cold, razor-sharp deduction of Light and L as you cast your ultimate presidential verdict:
-- In strategyMonologue: Speak purely to yourself as raw, private INTERNAL SELF-TALK on why you are crowning this finalist or destroying the other.
+- In strategyMonologue: Speak purely to yourself as raw, private INTERNAL SELF-TALK on why you are voting to ELECT this finalist as President.
+- 🎯 EXCLUSIVE FINALIST FOCUS: Your internal monologue MUST evaluate and endorse ONLY one of the surviving finalists on the ballot (${validFinalistNames}). You MUST evaluate why you are electing this specific surviving finalist. Do NOT endorse, vote for, or center your monologue on any eliminated candidate.
 - DEDUCE THE TRUE NATURE OF THE SURVIVING RIVALS:
   * Look past their debate speeches. Who is an empty corporate puppet? Who broke their corridor word? Who actually has the intellectual spine to govern Valoria?
   * Weigh past grudges, corridor betrayals, and tactical respect with cold, calculated precision.
@@ -1695,8 +1898,8 @@ Channel the cold, razor-sharp deduction of Light and L as you cast your ultimate
 
 Return a JSON object:
 {
-  "vote": "finalist_id",
-  "strategyMonologue": "Cold, high-IQ Light & L style internal self-talk about your final presidential vote in your distinct character psychology. Max 30 words. ZERO mottos or slogans.",
+  "vote": "MUST_BE_ONE_OF: [${validFinalistIdsList}]",
+  "strategyMonologue": "Cold, high-IQ Light & L style internal self-talk about choosing one of the 3 finalists to elect [Finalist Name] as President. Max 30 words. ZERO mottos or slogans.",
   "reason": "sharp private jury reasoning (max 15 words)"
 }`;
         break;

@@ -1,0 +1,140 @@
+[
+  {
+    "filename": "07_strategy_vote_03_vivienne-zhao.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 7,
+    "textSnippet": "Sterling assumes the room's fixation on Haddon covers his flanks. Two concentrated ballots force his",
+    "sizeBytes": 178467,
+    "timestamp": 1789067911173
+  },
+  {
+    "filename": "07_strategy_vote_04_silas-thorne.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 7,
+    "textSnippet": "Arthur Sterling assumed their treasury gave them breathing room tonight. Striking now forces their l",
+    "sizeBytes": 168854,
+    "timestamp": 1789067911306
+  },
+  {
+    "filename": "04_round7_elimination_silas-thorne.mp3",
+    "phase": "ELIMINATION",
+    "round": 7,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "textSnippet": "My friends, Valoria has chosen turbulence over tested leadership. Beware silver tongues and untested",
+    "sizeBytes": 233638,
+    "timestamp": 1789067982133
+  },
+  {
+    "filename": "05_final_speech_01_elena-rostova.mp3",
+    "phase": "FINAL_SPEECHES",
+    "round": 99,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "textSnippet": "Valoria's deficit devours 8.2% of GDP while foreign algorithms harvest our children's minds and biom",
+    "sizeBytes": 373654,
+    "timestamp": 1789067998262
+  },
+  {
+    "filename": "05_final_speech_02_victoria-sterling.mp3",
+    "phase": "FINAL_SPEECHES",
+    "round": 99,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "textSnippet": "Elena's spreadsheets won't un-addict a generation—central banks bankrolled these very algorithms. Vi",
+    "sizeBytes": 345651,
+    "timestamp": 1789068023185
+  },
+  {
+    "filename": "05_final_speech_03_vivienne-zhao.mp3",
+    "phase": "FINAL_SPEECHES",
+    "round": 99,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "textSnippet": "Rostova will tax your decay with interest-rate arithmetic. Sterling will philanthropize it into anot",
+    "sizeBytes": 364877,
+    "timestamp": 1789068046276
+  },
+  {
+    "filename": "99_strategy_jury_02_elena-rostova.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Haddon sells salvation on deficit spending. Zhao peddles venture-capital hallucinations. Thorne gras",
+    "sizeBytes": 218173,
+    "timestamp": 1789068070773
+  },
+  {
+    "filename": "99_strategy_jury_03_marcus-vance.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Thorne spent thirty-five years gutting defense budgets behind closed doors. Haddon preaches mercy to",
+    "sizeBytes": 221099,
+    "timestamp": 1789068070924
+  },
+  {
+    "filename": "99_strategy_jury_04_art-sterling.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Rostova actually balanced a nation's books — the only rival who speaks my fiscal language. Sterling ",
+    "sizeBytes": 210650,
+    "timestamp": 1789068070957
+  },
+  {
+    "filename": "99_strategy_jury_05_victoria-sterling.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Thorne spent thirty-five years perfecting the machine I renounced my fortune to dismantle. Haddon se",
+    "sizeBytes": 187662,
+    "timestamp": 1789068070995
+  },
+  {
+    "filename": "99_strategy_jury_06_elijah-haddon.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Zhao counts souls as data points; her machines have no conscience to consult. Thorne kept his corrid",
+    "sizeBytes": 231548,
+    "timestamp": 1789068071069
+  },
+  {
+    "filename": "99_strategy_jury_07_maya-lin.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Haddon sells salvation; crowds follow emotion, not reason. Zhao's brilliance lacks statecraft scars.",
+    "sizeBytes": 176377,
+    "timestamp": 1789068071195
+  },
+  {
+    "filename": "99_strategy_jury_08_vivienne-zhao.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Haddon's crusade is unregulated mass limbic hijacking—faith as malware. Thorne is legacy infrastruct",
+    "sizeBytes": 242415,
+    "timestamp": 1789068071415
+  },
+  {
+    "filename": "99_strategy_jury_10_garrick-stone.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Thorne spent thirty-five years feeding at the public trust. Haddon's collection plates hide donor le",
+    "sizeBytes": 199365,
+    "timestamp": 1789068071446
+  },
+  {
+    "filename": "99_strategy_jury_09_silas-thorne.mp3",
+    "phase": "VOTE_CONFESSIONAL",
+    "round": 99,
+    "textSnippet": "Elena called me a depreciated asset—forgivable pride. Victoria buys crowds, Zhao sells brains. Only ",
+    "sizeBytes": 256626,
+    "timestamp": 1789068095043
+  },
+  {
+    "filename": "06_presidential_inauguration_silas-thorne.mp3",
+    "phase": "WINNER",
+    "round": 100,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "textSnippet": "My fellow Valorians, after a hard-fought campaign, your steady hand prevails. To my opponents—those ",
+    "sizeBytes": 472292,
+    "timestamp": 1789068259503
+  }
+]

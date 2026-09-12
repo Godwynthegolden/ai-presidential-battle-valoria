@@ -1,0 +1,183 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 1,
+    "details": {
+      "votes": [
+        {
+          "voterId": "jax-alvarez",
+          "targetId": "elena-rostova",
+          "reason": "Strategic elimination vote",
+          "strategyMonologue": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+          "audioBlobUrl": "blob:http://localhost:3000/b275aa29-c09c-48e6-a6ac-6d896b73868b",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "marcus-vance",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Jackson Alvarez",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "elena-rostova",
+          "targetId": "jax-alvarez",
+          "reason": "Triple escrow alignment, guaranteed kingpin attrition, Thorne's loyalty secured. Voting Vance wastes capital.",
+          "strategyMonologue": "Alvarez assumes crowd fury is random noise. It's priced. Haddon, Zhao, Thorne concentrate four votes; his eighty-five million liquidates to five. I bank thirty.",
+          "audioBlobUrl": "blob:http://localhost:3000/fa2005fb-9631-434e-8249-8a205388eac1",
+          "audioBlob": {},
+          "pactWithId": "jax-alvarez",
+          "pactTargetId": "marcus-vance",
+          "isBetrayal": true,
+          "betrayedAllyId": "jax-alvarez",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "marcus-vance",
+          "targetId": "jax-alvarez",
+          "reason": "Honors Thorne's pact, banks $15M, rides consensus, saves Stone for Round 2.",
+          "strategyMonologue": "Alvarez assumes numbers shield him. Four blades already drawn. Honoring Thorne's pact banks fifteen million; then Stone, the prosecutor circling me, faces my artillery next.",
+          "audioBlobUrl": "blob:http://localhost:3000/5d33bea7-512d-4cbd-a605-f9aa085d85a2",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Marcus Vance",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "jax-alvarez",
+          "reason": "Strategic elimination deliberation",
+          "strategyMonologue": "Delivering address...",
+          "audioBlobUrl": "blob:http://localhost:3000/15c349b6-e476-4c12-86ec-267a4fc3f723",
+          "audioBlob": {},
+          "pactWithId": "elijah-haddon",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Arthur Sterling",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "jax-alvarez",
+          "reason": "Strategic elimination deliberation",
+          "strategyMonologue": "Delivering address...",
+          "audioBlobUrl": "blob:http://localhost:3000/c84ceb1a-2e00-4b4c-836e-18cf536b7a2a",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Victoria Sterling",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "jax-alvarez",
+          "reason": "Strategic elimination deliberation",
+          "strategyMonologue": "Delivering address...",
+          "audioBlobUrl": "blob:http://localhost:3000/f7a61159-6d46-4e96-b6cc-97982598eeaf",
+          "audioBlob": {},
+          "pactWithId": "art-sterling",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Elijah Haddon",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "jax-alvarez",
+          "reason": "Strategic elimination deliberation",
+          "strategyMonologue": "Delivering address...",
+          "audioBlobUrl": "blob:http://localhost:3000/198c4b3c-ed2e-491d-aa76-a4116493500c",
+          "audioBlob": {},
+          "pactWithId": "garrick-stone",
+          "pactTargetId": "marcus-vance",
+          "isBetrayal": true,
+          "betrayedAllyId": "garrick-stone",
+          "isHonoredPact": false,
+          "voterName": "Maya Lin",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "jax-alvarez",
+          "reason": "Consensus elimination guaranteed; +$15M escrow secures bailout threshold; honors Sterling contract.",
+          "strategyMonologue": "Alvarez assumes volume substitutes for viability. Four accusers, no fiscal base—my ballot banks Sterling's fifteen million and purges the loudest legacy bug before Rostova's paid vote lands.",
+          "audioBlobUrl": "blob:http://localhost:3000/ae071dd5-bee2-41c9-8ede-db6f2e7a7227",
+          "audioBlob": {},
+          "pactWithId": "victoria-sterling",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "jax-alvarez",
+          "reason": "Honor both contracts, bank $15M escrow, join guaranteed bandwagon, eliminate erratic populist threat.",
+          "strategyMonologue": "Alvarez believes union fury shields him. Two escrows banked, three votes converging. His populism dies tonight; my balance sheet compounds. Checkmate before he realizes the game started.",
+          "audioBlobUrl": "blob:http://localhost:3000/8793f510-895a-4fc1-9975-86c054447257",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Silas Thorne",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "garrick-stone",
+          "targetId": "jax-alvarez",
+          "reason": "Strategic elimination vote",
+          "strategyMonologue": "Jackson Alvarez assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+          "audioBlobUrl": "blob:http://localhost:3000/e725aa83-d251-4a06-9661-97ef1ab605c9",
+          "audioBlob": {},
+          "pactWithId": "maya-lin",
+          "pactTargetId": "marcus-vance",
+          "isBetrayal": true,
+          "betrayedAllyId": "maya-lin",
+          "isHonoredPact": false,
+          "voterName": "Garrick Stone",
+          "targetName": "Jackson Alvarez"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r1-1-jax-alvarez",
+          "candidateId": "jax-alvarez",
+          "round": 1,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 9,
+          "remainingVotes": 8,
+          "remainingBudget": 75,
+          "timestamp": 1789043623560,
+          "candidateName": "Jackson Alvarez"
+        },
+        {
+          "id": "bailout-r1-2-jax-alvarez",
+          "candidateId": "jax-alvarez",
+          "round": 1,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 8,
+          "remainingVotes": 7,
+          "remainingBudget": 35,
+          "timestamp": 1789043623560,
+          "candidateName": "Jackson Alvarez"
+        }
+      ],
+      "eliminatedId": "jax-alvarez",
+      "eliminatedName": "Jackson Alvarez",
+      "finalVoteCount": 7
+    }
+  }
+]

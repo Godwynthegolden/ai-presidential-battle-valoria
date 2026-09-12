@@ -6,6 +6,7 @@ import { CandidateAvatar } from './CandidateAvatar';
 import { CANDIDATE_MAP } from '@/data/candidates';
 import { KineticDialogueBox } from './KineticDialogueBox';
 import { audioSync, AudioSyncState } from '@/utils/audioSync';
+import { sounds } from '@/utils/audio';
 import { 
   Eye, 
   Radio, 
@@ -28,7 +29,7 @@ interface CCTVBackroomViewProps {
   allPactsThisRound?: BackroomPact[];
   activeFeedIndex?: number;
   onSelectFeed?: (index: number) => void;
-  onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string) => void;
+  onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string, options?: { isCCTV?: boolean }) => void;
   onPlayCCTVPactAudio?: (pact: BackroomPact) => void;
   isSpeakingAudio?: boolean;
   round: number;
@@ -87,6 +88,8 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
   const [receiverCompleted, setReceiverCompleted] = useState<boolean>(false);
   const [receiverProgress, setReceiverProgress] = useState<number>(0);
   const [isReceiverMidway, setIsReceiverMidway] = useState<boolean>(false);
+  const [isTargetRevealed, setIsTargetRevealed] = useState<boolean>(false);
+  const [typedTargetName, setTypedTargetName] = useState<string>('');
   const [replayCount, setReplayCount] = useState<number>(0);
   const [completionTick, setCompletionTick] = useState<number>(0);
 
@@ -105,6 +108,8 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
     setReceiverCompleted(false);
     setReceiverProgress(0);
     setIsReceiverMidway(false);
+    setIsTargetRevealed(false);
+    setTypedTargetName('');
     if (displayedPact?.id) {
       audioSync.notifyCctvStarted(displayedPact.id);
       if (displayedPact.whisperText) {
@@ -116,7 +121,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
     }
   }, [displayedPact?.id, activeFeedIndex]);
 
-  // Track active speaker in the CCTV dialogue sequence via audioSync
+  // Track active speaker and target reveal timing in CCTV dialogue via audioSync
   useEffect(() => {
     if (!displayedPact) return;
 
@@ -136,9 +141,15 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
       if (syncState.isPlaying) {
         if (isProposerAudio) {
           setActiveSpeaker('proposer');
+          // Dynamically reveal target ~2 seconds before Briber finishes whispering
+          const remainingSec = syncState.duration > 0 ? (syncState.duration - syncState.currentTime) : 999;
+          if ((remainingSec <= 2.2 && syncState.duration >= 2.5) || syncState.progress >= 0.70) {
+            setIsTargetRevealed(true);
+          }
         } else if (isReceiverAudio) {
           setActiveSpeaker('receiver');
           setProposerCompleted(true);
+          setIsTargetRevealed(true);
           const progress = syncState.progress || 0;
           setReceiverProgress(progress);
           if (progress >= 0.45) {
@@ -148,6 +159,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
       } else if (!syncState.isPlaying && syncState.progress >= 0.999) {
         if (isProposerAudio || syncState.speakerId === displayedPact.proposerId) {
           setProposerCompleted(true);
+          setIsTargetRevealed(true);
         } else if (isReceiverAudio || syncState.speakerId === displayedPact.receiverId) {
           setReceiverCompleted(true);
           setIsReceiverMidway(true);
@@ -165,11 +177,18 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
     if (isSpeakingAudio || (proposerCompleted && receiverCompleted)) return;
 
     if (!proposerCompleted) {
+      // Reveal target near end of speech (~1.5s into 2.8s window)
+      const targetTimer = setTimeout(() => {
+        setIsTargetRevealed(true);
+      }, 1500);
       const timer = setTimeout(() => {
         setProposerCompleted(true);
         setActiveSpeaker('receiver');
       }, 2800);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(targetTimer);
+        clearTimeout(timer);
+      };
     } else if (displayedPact.receiverResponse && !receiverCompleted) {
       const timerMid = setTimeout(() => {
         setIsReceiverMidway(true);
@@ -184,6 +203,29 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
       };
     }
   }, [displayedPact, isSpeakingAudio, proposerCompleted, receiverCompleted]);
+
+  // High-tech kinetic write-on effect for target candidate name
+  useEffect(() => {
+    const targetCand = CANDIDATE_MAP.get(displayedPact?.agreedTargetId);
+    if (!isTargetRevealed || !targetCand) {
+      setTypedTargetName('');
+      return;
+    }
+
+    try { sounds.playCCTVBeep(); } catch {}
+    const fullName = targetCand.name;
+    let currentIdx = 0;
+    setTypedTargetName('');
+    const interval = setInterval(() => {
+      currentIdx++;
+      setTypedTargetName(fullName.slice(0, currentIdx));
+      if (currentIdx >= fullName.length) {
+        clearInterval(interval);
+      }
+    }, 40);
+
+    return () => clearInterval(interval);
+  }, [isTargetRevealed, displayedPact?.agreedTargetId]);
 
   // Notify audioSync when the entire CCTV pact conversation (proposer whisper + receiver response + subtitles) has 100% finished
   useEffect(() => {
@@ -420,6 +462,8 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                     setReceiverCompleted(false);
                     setReceiverProgress(0);
                     setIsReceiverMidway(false);
+                    setIsTargetRevealed(false);
+                    setTypedTargetName('');
                     setActiveSpeaker('proposer');
                     setReplayCount(c => c + 1);
                     if (displayedPact?.id) {
@@ -430,7 +474,7 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                     if (onPlayCCTVPactAudio) {
                       onPlayCCTVPactAudio(displayedPact);
                     } else if (onPlaySpeechAudio) {
-                      onPlaySpeechAudio(displayedPact.whisperText, proposer?.voice?.voiceId, proposer?.id);
+                      onPlaySpeechAudio(displayedPact.whisperText, proposer?.voice?.voiceId, proposer?.id, { isCCTV: true });
                     }
                   }}
                   className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 hover:text-white border border-emerald-500/40 text-xs font-mono font-bold shadow-md transition active:scale-95 cursor-pointer"
@@ -441,11 +485,36 @@ export const CCTVBackroomView: React.FC<CCTVBackroomViewProps> = ({
                 </button>
               )}
 
-              {/* Targeted Rival Marker */}
-              {target && (
-                <span className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase px-3 py-0.5 rounded-full bg-red-950 text-red-200 border border-red-500 shadow-sm">
-                  <Crosshair className="w-3.5 h-3.5 text-red-400" /> Target: {target.name}
-                </span>
+              {/* Dynamic CCTV Target Lock HUD (Animated with Profile Image ~2s Before Briber Ends) */}
+              {isTargetRevealed && target && (
+                <div className="flex items-center gap-2.5 px-3 py-1 rounded-xl bg-red-950/90 border border-red-500/90 shadow-[0_0_20px_rgba(239,68,68,0.4)] animate-in fade-in zoom-in-95 duration-500">
+                  <div className="relative shrink-0">
+                    <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-red-500/90 shadow-sm">
+                      <CandidateAvatar
+                        candidate={target}
+                        size="xs"
+                        showBadge={false}
+                      />
+                      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_2px] pointer-events-none opacity-60" />
+                    </div>
+                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 font-mono text-xs">
+                    <span className="text-red-400 font-black uppercase flex items-center gap-1 text-[10px] tracking-wider">
+                      <Crosshair className="w-3.5 h-3.5 text-red-400 animate-spin" style={{ animationDuration: '8s' }} />
+                      TARGET:
+                    </span>
+                    <span className="text-white font-black tracking-wide">
+                      {typedTargetName || target.name}
+                      {typedTargetName && typedTargetName.length < target.name.length && (
+                        <span className="inline-block w-1.5 h-3 bg-red-400 ml-0.5 animate-pulse" />
+                      )}
+                    </span>
+                  </div>
+                </div>
               )}
             </div>
           </div>

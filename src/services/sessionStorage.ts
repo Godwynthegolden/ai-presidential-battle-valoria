@@ -32,6 +32,7 @@ export interface SessionManifest {
     totalBribesOffered: number;
     totalBribesAccepted: number;
     totalBribesBetrayed: number;
+    totalInternalDialogues: number;
     totalBailoutTransactions: number;
     totalDollarsSpentOnBailouts: number;
     totalEliminations: number;
@@ -126,6 +127,7 @@ export class SessionStorageService {
         totalBribesOffered: 0,
         totalBribesAccepted: 0,
         totalBribesBetrayed: 0,
+        totalInternalDialogues: 0,
         totalBailoutTransactions: 0,
         totalDollarsSpentOnBailouts: 0,
         totalEliminations: 0,
@@ -190,7 +192,7 @@ export class SessionStorageService {
   public async saveEvent(
     sessionName: string,
     eventData: {
-      type: 'campaign_speech' | 'attack' | 'cctv_pact' | 'vote_tally' | 'elimination' | 'final_speech' | 'final_vote' | 'winner' | 'system';
+      type: 'campaign_speech' | 'attack' | 'cctv_pact' | 'strategy_monologue' | 'vote_tally' | 'elimination' | 'final_speech' | 'final_vote' | 'winner' | 'system';
       round?: number;
       speakerId?: string;
       speakerName?: string;
@@ -200,6 +202,9 @@ export class SessionStorageService {
       content?: string;
       details?: any;
       timestamp?: number;
+      // voter convenience aliases
+      voterId?: string;
+      voterName?: string;
     }
   ): Promise<{ success: boolean }> {
     const safeName = sanitizeSessionName(sessionName);
@@ -220,6 +225,13 @@ export class SessionStorageService {
       await fs.promises.mkdir(roundDirPath, { recursive: true });
     }
 
+    // Standardize speakerId / speakerName from voter aliases if provided
+    const normalizedEvent = {
+      ...eventData,
+      speakerId: eventData.speakerId || eventData.voterId,
+      speakerName: eventData.speakerName || eventData.voterName,
+    };
+
     // 1. Append to session_events.json
     const eventsPath = path.join(sessionDir, 'session_events.json');
     let events: any[] = [];
@@ -232,7 +244,7 @@ export class SessionStorageService {
     
     events.push({
       id: `evt-${events.length + 1}`,
-      ...eventData,
+      ...normalizedEvent,
       timestamp,
     });
 
@@ -244,6 +256,7 @@ export class SessionStorageService {
       if (eventData.type === 'campaign_speech') roundFileName = '01_campaign_speeches.json';
       else if (eventData.type === 'attack') roundFileName = '02_attacks.json';
       else if (eventData.type === 'cctv_pact') roundFileName = '03_cctv_pacts.json';
+      else if (eventData.type === 'strategy_monologue') roundFileName = round === 99 || eventData.details?.isGrandJury ? '01b_internal_dialogues.json' : '03b_internal_dialogues.json';
       else if (eventData.type === 'vote_tally') roundFileName = '04_voting_and_bailouts.json';
       else if (eventData.type === 'elimination') roundFileName = '05_elimination.json';
       else if (eventData.type === 'final_speech') roundFileName = '01_final_speeches.json';
@@ -258,7 +271,7 @@ export class SessionStorageService {
           roundEvents = JSON.parse(raw);
         } catch {}
       }
-      roundEvents.push(eventData);
+      roundEvents.push(normalizedEvent);
       await fs.promises.writeFile(roundFilePath, JSON.stringify(roundEvents, null, 2), 'utf8');
     } catch (err) {
       console.warn('[SessionStorage saveEvent round file warning]:', err);
@@ -279,6 +292,9 @@ export class SessionStorageService {
           if (eventData.details?.bribeOffered) manifest.summaryStats.totalBribesOffered++;
           if (eventData.details?.receiverDecision === 'accept') manifest.summaryStats.totalBribesAccepted++;
           if (eventData.details?.receiverDecision === 'accept_and_betray') manifest.summaryStats.totalBribesBetrayed++;
+        }
+        if (eventData.type === 'strategy_monologue') {
+          manifest.summaryStats.totalInternalDialogues = (manifest.summaryStats.totalInternalDialogues || 0) + 1;
         }
         if (eventData.type === 'vote_tally' && Array.isArray(eventData.details?.bailoutTransactions)) {
           manifest.summaryStats.totalBailoutTransactions += eventData.details.bailoutTransactions.length;
@@ -447,6 +463,22 @@ export class SessionStorageService {
           `- **Pact Decision:** ${decisionText}`,
           details?.whisperText ? `- **Whisper Dialogue:** *"${details.whisperText}"*` : '',
           details?.privateStrategy ? `- **Private Tactical Memo:** *"${details.privateStrategy}"*` : '',
+        ].filter(Boolean).join('\n') + '\n';
+
+      case 'strategy_monologue':
+        const isGrandJury = round === 99 || details?.isGrandJury;
+        const actionLabel = isGrandJury ? 'Grand Jury Presidential Confessional' : 'Confidential Strategy Confessional';
+        const targetLabel = isGrandJury ? 'Endorsing' : 'Targeting';
+        const reasonTitle = isGrandJury ? 'Grand Jury Strategic Mandate' : 'Private Tactical Motivation';
+        const betrayalTag = details?.isBetrayal ? ' ⚠️ *(Pact Betrayed!)*' : details?.isHonoredPact ? ' 🤝 *(Pact Honored)*' : '';
+        const voterDisplay = speakerName || eventData.voterName || 'Candidate';
+        const targetDisplay = targetName || eventData.targetName || 'Rival';
+
+        return [
+          `### 🔒 ${isGrandJury ? '🏛️' : `Round ${round}`} ${actionLabel}: **${voterDisplay}** (${targetLabel}: **${targetDisplay}**)${betrayalTag}`,
+          ``,
+          `> "${content}"`,
+          details?.privateReason ? `\n*${reasonTitle}:* *"${details.privateReason}"*` : '',
         ].filter(Boolean).join('\n') + '\n';
 
       case 'vote_tally':
@@ -755,6 +787,15 @@ export class SessionStorageService {
           if (match) {
             speakerId = match[1];
             targetId = match[2];
+          }
+        } else if (filename.includes('_strategy_vote_') || filename.includes('_strategy_jury_') || filename.includes('_strategy_')) {
+          phase = 'VOTE_CONFESSIONAL';
+          const match = filename.replace('.mp3', '').match(/strategy_(?:vote|jury)_\d+_(.+)/i);
+          if (match) {
+            speakerId = match[1];
+          }
+          if (filename.includes('_strategy_jury_')) {
+            round = 99;
           }
         } else if (filename.includes('_elimination_')) {
           phase = 'ELIMINATION';

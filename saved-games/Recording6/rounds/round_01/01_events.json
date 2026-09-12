@@ -1,0 +1,86 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "art-sterling",
+    "voterName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez thinks his $80M war chest buys survival. Four accusers say otherwise. My ballot banks Victoria's $15M escrow while conserving my hundred million for Vance and Zhao.",
+    "privateReason": "Cheapest guaranteed kill; honoring Sterling's pact banks $15M escrow, preserves capital.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez assumes his union wall holds. Four donor-class knives say otherwise. My ballot rides the consensus, banks the escrow, keeps my fortress flush for Round Two.",
+    "privateReason": "Alvarez falls regardless; honoring Father's pact banks $15M while my treasury stays intact.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Jackson Alvarez assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova watches Alvarez absorb four knives and assumes the room's aimed elsewhere. Haddon's handshake doubles my ballot—her forty million drains tonight, my escrow banks fifteen.",
+    "privateReason": "Alvarez dies regardless; honoring Haddon banks $15M and drains Rostova's war chest.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez assumes populist noise shields him. Four accusers already compute his termination — my ballot costs nothing, banks Thorne's escrow, and queues Sterling for Round Two's liquidation.",
+    "privateReason": "Four votes guarantee his exit; my fifth banks $15M and cements Thorne's alliance.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez thinks populist fire shields him. Four accusers guarantee concentration. Zhao's pact banks fifteen million while the room spends its capital. His exit shields my ledger.",
+    "privateReason": "Consensus guarantees elimination; pact banks $15M; preserves my $70M defense fund.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "garrick-stone",
+    "voterName": "Garrick Stone",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez believes his steelworker chorus shields him. Four witnesses already testified. My ballot is the fifth fingerprint on the indictment — elimination guaranteed, fifteen million banked, war chest intact.",
+    "privateReason": "Bandwagon guarantees elimination, pact escrow pays $15M, preserves my capital.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

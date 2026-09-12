@@ -1,0 +1,102 @@
+[
+  {
+    "filename": "01_campaign_01_jax-alvarez.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "textSnippet": "Twenty years pouring steel before suits shipped my mill overseas. Hedge funds buy the homes we built",
+    "sizeBytes": 174288,
+    "timestamp": 1788942545131
+  },
+  {
+    "filename": "01_campaign_02_elena-rostova.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "textSnippet": "Politicians print promises. I audited them. Ten years guarding Valoria's currency taught me one law:",
+    "sizeBytes": 219427,
+    "timestamp": 1788944140774
+  },
+  {
+    "filename": "01_campaign_03_marcus-vance.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "textSnippet": "Wolves circle Valoria. My life's been holding the line. Now I take new ground. General Marcus Vance.",
+    "sizeBytes": 193514,
+    "timestamp": 1788944185506
+  },
+  {
+    "filename": "01_campaign_04_art-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "textSnippet": "Valoria needs a turnaround, not a handout. I've built empires from nothing—billions created, payroll",
+    "sizeBytes": 199365,
+    "timestamp": 1788944215248
+  },
+  {
+    "filename": "01_campaign_05_victoria-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "textSnippet": "I grew up watching billionaires buy your future over dessert. I renounced the inheritance—now I'm sp",
+    "sizeBytes": 174288,
+    "timestamp": 1788944226082
+  },
+  {
+    "filename": "01_campaign_06_elijah-haddon.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "textSnippet": "Shepherds don't abandon flocks in storms! I've healed souls before fifteen million viewers—now Valor",
+    "sizeBytes": 194768,
+    "timestamp": 1788944250846
+  },
+  {
+    "filename": "01_campaign_07_maya-lin.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "textSnippet": "Eighty hostages walked free because I read the room while others readied weapons. Valoria needs that",
+    "sizeBytes": 158405,
+    "timestamp": 1788944305775
+  },
+  {
+    "filename": "01_campaign_08_vivienne-zhao.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "textSnippet": "Valoria runs on legacy code. I built the neural lace that rewired human cognition itself. Vivienne Z",
+    "sizeBytes": 148792,
+    "timestamp": 1788944316104
+  },
+  {
+    "filename": "01_campaign_09_silas-thorne.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "textSnippet": "Thirty-five years, four administrations, one steady hand. While others shout, I deliver. Valoria des",
+    "sizeBytes": 231548,
+    "timestamp": 1788944383865
+  },
+  {
+    "filename": "01_campaign_10_garrick-stone.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "textSnippet": "Four governors convicted. Two oligarchs imprisoned. Three car bombs survived. The biggest corruption",
+    "sizeBytes": 172616,
+    "timestamp": 1788944399142
+  }
+]

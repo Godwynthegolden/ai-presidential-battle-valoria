@@ -1,0 +1,112 @@
+[
+  {
+    "type": "final_vote",
+    "round": 99,
+    "details": {
+      "votes": [
+        {
+          "voterId": "jax-alvarez",
+          "targetId": "silas-thorne",
+          "reason": "Thorne fights for forgotten factory towns; Sterling serves her investors, not our families.",
+          "strategyMonologue": "Thorne's no saint, but thirty-five years means he answers to voters, not shareholders. Sterling's hedge-fund money reeks. The old lion gets my vote.",
+          "audioBlobUrl": "blob:http://localhost:3000/1f3813c5-b62f-48ab-9411-f77283b02389",
+          "audioBlob": {},
+          "voterName": "Jackson Alvarez",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "elena-rostova",
+          "targetId": "vivienne-zhao",
+          "reason": "Zhao's structural systems-thinking beats Thorne's deficit-funded compassion theater that bankrupted Valoria.",
+          "strategyMonologue": "Thorne's compassion theater is deficit bribery — 35 years, 14.2% food inflation. Zhao thinks in systems, not sentiment. Cold competence governs; emotional arithmetic bankrupts. Zhao gets my presidency.",
+          "audioBlobUrl": "blob:http://localhost:3000/040fa28f-29b1-471d-82ff-66348de6e72b",
+          "audioBlob": {},
+          "voterName": "Elena Rostova",
+          "targetName": "Vivienne Zhao"
+        },
+        {
+          "voterId": "marcus-vance",
+          "targetId": "elena-rostova",
+          "reason": "Rostova shows the decisiveness and iron will Valoria's defense demands.",
+          "strategyMonologue": "Thorne negotiates; negotiators concede. Zhao's contempt disqualifies her. Rostova breaks monopolies like enemy formations—ruthless, decisive. Command requires spine. She has it. Vote cast.",
+          "audioBlobUrl": "blob:http://localhost:3000/dd6ae08b-616b-4075-810f-23dc4ef276be",
+          "audioBlob": {},
+          "voterName": "Marcus Vance",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "vivienne-zhao",
+          "reason": "Only finalist who built a private-sector empire. Founders outperform bureaucrats. Deal done.",
+          "strategyMonologue": "Thorne never signed a paycheck. Rostova only audits other people's money. Zhao built an empire from zero—like me. Founders govern; bureaucrats talk. My vote elects Zhao.",
+          "audioBlobUrl": "blob:http://localhost:3000/35352a84-ce23-4871-afc2-2f28123da5f5",
+          "audioBlob": {},
+          "voterName": "Arthur Sterling",
+          "targetName": "Vivienne Zhao"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "elena-rostova",
+          "reason": "Elena knows the financial machine's guts; she'll dismantle dynastic wealth from within.",
+          "strategyMonologue": "Silas is the establishment's comfortable rot; Vivienne builds the next oligarchy in silicon. Elena knows every offshore ledger my father hid — she'll strangle the racket from inside.",
+          "audioBlobUrl": "blob:http://localhost:3000/dff77714-6d83-4cc0-9a1e-023f51a2ac25",
+          "audioBlob": {},
+          "voterName": "Victoria Sterling",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "silas-thorne",
+          "reason": "Thorne alone honors family and compassion; the others worship spreadsheets and silicon.",
+          "strategyMonologue": "Zhao calls hunger obsolete wetware—soulless. Rostova's austerity starves souls for spreadsheets. Thorne speaks compassion, flawed vessel though he is. He heals; the others dissect. My flock elects him.",
+          "audioBlobUrl": "blob:http://localhost:3000/1dfb4c73-b09f-4ab9-9bee-922f627412f8",
+          "audioBlob": {},
+          "voterName": "Elijah Haddon",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "elena-rostova",
+          "reason": "Elena's analytical spine can break monopolies; Zhao's contempt and Thorne's theater cannot.",
+          "strategyMonologue": "Zhao's contempt disqualifies her. Thorne trades compassion theater for thirty-five years of failure. Elena's arithmetic cuts true — she attacked me, but precision governs. She gets my presidency.",
+          "audioBlobUrl": "blob:http://localhost:3000/11c55fb0-63ac-4f4c-af45-ab8115e22733",
+          "audioBlob": {},
+          "voterName": "Maya Lin",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "elena-rostova",
+          "reason": "Elena computes reality; Thorne performs it. Precision governs; sentimentality starves. She earns the presidency.",
+          "strategyMonologue": "Thorne's thirty-five years produced double-priced eggs—legacy code that never compiled. Elena's arithmetic is the only rigorous operating system on that ballot. I elect competence, not sentiment. Elena wins.",
+          "audioBlobUrl": "blob:http://localhost:3000/f4834441-1c1f-4dc0-a8db-90576538d4c6",
+          "audioBlob": {},
+          "voterName": "Vivienne Zhao",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "elena-rostova",
+          "reason": "Zhao threatens my legacy; Elena preserves the institutional order I built.",
+          "strategyMonologue": "Zhao would dismantle everything I built in thirty-five years. Elena respects institutions—she'll preserve my corridors, my committees. The economist is controllable. The technocrat is extinction. Rostova wins tonight.",
+          "audioBlobUrl": "blob:http://localhost:3000/c061cbf8-09ea-4525-801a-ef3bc1b6770a",
+          "audioBlob": {},
+          "voterName": "Silas Thorne",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "garrick-stone",
+          "targetId": "elena-rostova",
+          "reason": "Rostova's evidence-first mind matches my prosecutorial war; Thorne is the aristocracy itself.",
+          "strategyMonologue": "Thorne is the aristocracy I've spent thirty years indicting—legacy rot in a suit. Zhao optimizes for shareholders. Rostova follows evidence, breaks monopolies. She gets my verdict.",
+          "audioBlobUrl": "blob:http://localhost:3000/655bbbc4-3fc2-43db-91f8-655ae39c166d",
+          "audioBlob": {},
+          "voterName": "Garrick Stone",
+          "targetName": "Elena Rostova"
+        }
+      ],
+      "winnerId": "elena-rostova",
+      "winnerName": "Elena Rostova"
+    }
+  }
+]

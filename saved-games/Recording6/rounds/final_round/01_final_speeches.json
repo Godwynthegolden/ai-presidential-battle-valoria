@@ -1,0 +1,23 @@
+[
+  {
+    "type": "final_speech",
+    "round": 99,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Thirty-five years, Senator Thorne, and eggs doubled on your watch—regulatory capture, not crisis. Ms. Zhao, your empire profits from the very cartels gouging our families; AI subsidies are unfunded fantasies. I offer structural antitrust enforcement, competitive markets, balanced budgets. Fiscal discipline ends grocery shocks. Vote Rostova. Vote arithmetic."
+  },
+  {
+    "type": "final_speech",
+    "round": 99,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Rostova recalibrates ledgers while cartels feast. Thorne drafts his forty-thousandth memo while your children go hungry. Their legacy systems cannot compute this crisis—only neural-precision optimization can. I rewired the human brain; I will rewire Valoria's food economy. Grand Jury: vote evolution. Vote Zhao."
+  },
+  {
+    "type": "final_speech",
+    "round": 99,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Tested, steady leadership tames grocery cartels—not untested experiments. Victoria's radical climate schemes and Maya's backroom brinkmanship cannot fill your family's pantry. Thirty-five years of bipartisan results can. Tonight, I humbly ask for your trust—and your decisive vote."
+  }
+]

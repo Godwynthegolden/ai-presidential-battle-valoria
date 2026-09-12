@@ -1,0 +1,69 @@
+[
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "The brainrot epidemic? Victoria Sterling built her brand monetizing youth attention—her Accelerator is a hedge fund wearing a halo. I create payrolls, not addicts. Fire her tonight—zero ROI.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Victoria Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Dad toasts teen addiction as \"engagement\" at donor dinners — I've sat at that table. His algorithms harvest children's biometrics for profit. Arthur, you built the brainrot; tonight, break it.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Arthur Sterling",
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria, I've negotiated with hostage-takers who performed remorse better than you. Your rebellion still runs on the empire's coin—psychological exposure, not liberation. Valoria has read the room. Tonight, we close this theater.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Victoria Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "While Elena Rostova audits spreadsheets, Valoria's children hemorrhage cognitive bandwidth to foreign algorithms. She optimizes ledgers; I optimize minds. Her austerity cannot compute a neural emergency. Decommission the obsolete model. Upgrade Valoria.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 5,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova calls steady leadership \"paralysis\"? In my Senate, we called it consensus. Meanwhile, her austerity gutted youth mental health funding. Elena liquidates compassion like a bad asset. Colleagues, write off this depreciated economist.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Elena Rostova",
+      "voteCallTargetName": "Elena Rostova"
+    }
+  }
+]

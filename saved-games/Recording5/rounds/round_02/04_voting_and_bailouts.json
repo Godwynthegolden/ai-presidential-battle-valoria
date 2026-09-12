@@ -1,0 +1,169 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 2,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "garrick-stone",
+          "reason": "Strategic determination",
+          "strategyMonologue": "Stone thinks prosecutor immunity shields his balance sheet. Two accusers posted his losses; my ballot completes the liquidation.",
+          "audioBlobUrl": "blob:http://localhost:3000/16bdef88-12ba-453b-a4f1-49f841d514b5",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "garrick-stone",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Elena Rostova",
+          "targetName": "Garrick Stone"
+        },
+        {
+          "voterId": "marcus-vance",
+          "targetId": "garrick-stone",
+          "reason": "Stone targets me next. Eliminating him honors the pact, banks $15M, secures my flank.",
+          "strategyMonologue": "Stone marked me for Round 3 — his prosecutor's badge won't stop a preemptive strike. Consensus guarantees his removal, banks Elena's $15M, secures my perimeter.",
+          "audioBlobUrl": "blob:http://localhost:3000/3cf44c4c-d3b4-4cee-bcc8-62a9388c73e2",
+          "audioBlob": {},
+          "pactWithId": "art-sterling",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "art-sterling",
+          "isHonoredPact": false,
+          "voterName": "Marcus Vance",
+          "targetName": "Garrick Stone"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "elena-rostova",
+          "reason": "Strategic elimination vote",
+          "strategyMonologue": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+          "audioBlobUrl": "blob:http://localhost:3000/9cb6c6dc-1f11-4bce-882a-24e9a7471736",
+          "audioBlob": {},
+          "pactWithId": "marcus-vance",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Arthur Sterling",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "garrick-stone",
+          "reason": "Consensus plus Arthur's pact guarantees Stone's elimination; my vote costs nothing and banks escrow.",
+          "strategyMonologue": "Stone believes his prosecutor's badge deters me. Three ballots already bleed him dry. Mine lands free, banks fifteen million, keeps my treasury armored for Vance next round.",
+          "audioBlobUrl": "blob:http://localhost:3000/2f3179bb-d43b-49e4-b16a-64b10fc86cb4",
+          "audioBlob": {},
+          "pactWithId": "art-sterling",
+          "pactTargetId": "garrick-stone",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Victoria Sterling",
+          "targetName": "Garrick Stone"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "garrick-stone",
+          "reason": "Honoring Sterling's pact banks escrow; consensus guarantees Stone's elimination while preserving my capital.",
+          "strategyMonologue": "Stone believes his prosecutor's files shield him. Two votes already stain his ledger; mine is the third nail. Sterling's pact banks fifteen million while her fortune guards my flank.",
+          "audioBlobUrl": "blob:http://localhost:3000/6f7e507b-b0ef-4e98-9191-d0e57cde24bb",
+          "audioBlob": {},
+          "pactWithId": "art-sterling",
+          "pactTargetId": "garrick-stone",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Elijah Haddon",
+          "targetName": "Garrick Stone"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "garrick-stone",
+          "reason": "Honor the pact, bank escrow, join consensus—cheap elimination preserves my hidden capital.",
+          "strategyMonologue": "Stone assumes the prosecutor's badge shields him. Two votes already bleed him; Haddon's pact adds my third. Cheap elimination, escrow banked, treasury hidden for Vance next round.",
+          "audioBlobUrl": "blob:http://localhost:3000/ffd66e09-6adc-4d89-a20f-f50e43c26697",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "garrick-stone",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Maya Lin",
+          "targetName": "Garrick Stone"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "garrick-stone",
+          "reason": "Honors the Lin pact, banks escrow, eliminates the prosecutor threatening my empire's audit trail.",
+          "strategyMonologue": "Stone assumes his prosecutor's halo deters ballots. Probability of three-vote convergence: ninety percent. I join it, bank the escrow, and delete the one man who could audit my ledger.",
+          "audioBlobUrl": "blob:http://localhost:3000/913c82c3-9758-48d8-9c31-cb92c11b7bf5",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Garrick Stone"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "elena-rostova",
+          "reason": "Zhao's pact doubles votes, drains Rostova eighty million, banks fifteen million, keeps Stone as shield.",
+          "strategyMonologue": "Rostova assumes the room piles onto Stone. Wrong. With Zhao's ballot, two votes liquidate eighty million, stranding her at twenty. I bank fifteen and keep Stone absorbing fire.",
+          "audioBlobUrl": "blob:http://localhost:3000/bea3d77e-8d6c-41cb-a49a-d10b5f89f068",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "garrick-stone",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "garrick-stone",
+          "targetId": "victoria-sterling",
+          "reason": "Both pact and bandwagon target me; I strike the richest Sterling war chest instead.",
+          "strategyMonologue": "Thorne's pact targeted me — a rigged contract, void on its face. Arthur grandstanded; Victoria funds the machine. My ballot indicts the deepest war chest. Follow the money.",
+          "audioBlobUrl": "blob:http://localhost:3000/c68de1b4-3773-440a-ae99-28ae757a2b3b",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "silas-thorne",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Garrick Stone",
+          "targetName": "Victoria Sterling"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r2-1-garrick-stone",
+          "candidateId": "garrick-stone",
+          "round": 2,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 6,
+          "remainingVotes": 5,
+          "remainingBudget": 55,
+          "timestamp": 1789066112773,
+          "candidateName": "Garrick Stone"
+        },
+        {
+          "id": "bailout-r2-2-garrick-stone",
+          "candidateId": "garrick-stone",
+          "round": 2,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 5,
+          "remainingVotes": 4,
+          "remainingBudget": 15,
+          "timestamp": 1789066112773,
+          "candidateName": "Garrick Stone"
+        }
+      ],
+      "eliminatedId": "garrick-stone",
+      "eliminatedName": "Garrick Stone",
+      "finalVoteCount": 4
+    }
+  }
+]

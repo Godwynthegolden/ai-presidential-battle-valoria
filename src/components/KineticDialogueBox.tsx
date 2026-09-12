@@ -113,8 +113,7 @@ export const KineticDialogueBox: React.FC<KineticDialogueBoxProps> = ({
       setActiveIndex(-1);
       setVocalEnergy(0);
     } else if (speechStarted) {
-      // Guard: Only start from 0 if speech has not revealed words yet and has not completed!
-      if (!hasCompleted && revealedCountRef.current === 0) {
+      if (!hasCompleted) {
         setRevealedCount(0);
         revealedCountRef.current = 0;
         setActiveIndex(-1);
@@ -249,7 +248,7 @@ export const KineticDialogueBox: React.FC<KineticDialogueBoxProps> = ({
         };
 
         fallbackRafRef.current = requestAnimationFrame(tick);
-      }, 1000);
+      }, 120);
     } else if (!isSpeaking) {
       cancelFallback();
       setActiveIndex(-1);

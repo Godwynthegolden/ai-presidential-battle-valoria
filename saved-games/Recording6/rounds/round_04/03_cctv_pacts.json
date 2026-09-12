@@ -1,0 +1,134 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya, Victoria's $120M buys every future ballot. Fifteen million escrowed—her ledger closes tonight.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Victoria Sterling",
+      "whisperText": "Maya, Victoria's $120M buys every future ballot. Fifteen million escrowed—her ledger closes tonight.",
+      "receiverResponse": "I need those funds. Victoria falls tonight, Governor.",
+      "privateStrategy": "Victoria's $120M treasury dominates every future ballot. Eliminate her through cash-starved Maya; Arthur's weaker finances self-correct later.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, your war chest is starving. Thirty million escrowed—help bury Marcus tonight.",
+    "details": {
+      "location": "Capitol Cloakroom Cam 04",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Silas, your war chest is starving. Thirty million escrowed—help bury Marcus tonight.",
+      "receiverResponse": "Gently done, my dear. The general retires quietly tonight.",
+      "privateStrategy": "Marcus is consensus-doomed; buying Silas locks the majority cheaply. Preserve sixty-five million for ballot bailouts, then blindside Elijah or Father next round.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya, the room already hung him. Thirty million in escrow—let Vance's name fall first.",
+    "details": {
+      "location": "Sub-Basement Boiler Room",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Maya, the room already hung him. Thirty million in escrow—let Vance's name fall first.",
+      "receiverResponse": "The general retires tonight. Keep your flock in line.",
+      "privateStrategy": "Vance bleeds from three accusers; riding consensus costs little. Escrow seals Maya's vote. Zhao attacked me next—she's round five's target.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, your war chest is thin. Thirty million escrowed — Marcus falls tonight.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Silas, your war chest is thin. Thirty million escrowed — Marcus falls tonight.",
+      "receiverResponse": "The committee owes you, Maya. His name goes in.",
+      "privateStrategy": "Vance is the room's consensus target; Thorne is cash-starved and already hostile toward him. Cheap kill preserves $85M for ballot-defense bailouts.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, your war chest reads twenty million. Thirty escrowed—Marcus retires tonight.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Silas, your war chest reads twenty million. Thirty escrowed—Marcus retires tonight.",
+      "receiverResponse": "Consensus, Doctor. The general retires with dignity—or without it.",
+      "privateStrategy": "Thorne's $20M treasury makes him the cheapest vote-lock. Ride the anti-Vance consensus, eliminate a military rival, preserve $65M for ballot bailouts.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena falls by consensus; my escrow locks Haddon's vote, blocking Victoria from redirecting it at.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Arthur Sterling",
+      "whisperText": "Elena falls by consensus; my escrow locks Haddon's vote, blocking Victoria from redirecting it at.",
+      "receiverResponse": "Your terms are logged. Watch the reveal very closely.",
+      "privateStrategy": "Align tactically to eliminate Arthur Sterling while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept_and_betray",
+      "bribeAccepted": true
+    }
+  }
+]

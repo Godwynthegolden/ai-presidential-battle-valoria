@@ -1,0 +1,109 @@
+[
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Twelve-dollar eggs while Lin \"negotiates\"? Appeasement feeds cartels the same way it feeds enemies. Food security IS national security. Her backroom tables starve soldiers' families. A commander secures supply lines — Lin surrenders them.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Twelve-dollar eggs and Stone's answer? More subpoenas! Twenty years, zero groceries delivered, zero ROI — both party machines want him gone. Worst dealmaker in Valoria. Indictments don't stock shelves, folks. Elect a businessman. Fire the prosecutor.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Garrick Stone"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Arithmetic error? Darling, I watched Rostova raise interest rates at donor dinners while mothers skipped dinner. Her austerity is the real gouging — cold spreadsheets, cold heart, empty carts. Eliminate the error.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Elena Rostova",
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Beloved, Rostova governs the arithmetic while Valoria's mothers weep over empty baskets! Twelve-dollar eggs? She calls it discipline—I call it a cold heart in a cold spreadsheet! Cast out this winter of the soul!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "General, I freed eighty hostages without firing a bullet — you'd spend ten thousand. Vance brings rifles to a grocery crisis; you can't shell a supermarket. His bravado starves families. Read the room, Valoria — retire him.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "content": "Haddon's response to twelve-dollar eggs? Prayer — an unverified protocol with zero efficacy data. Fifteen million souls, one luxury jet, empty baskets. His platform is emotional malware infecting the national cortex. Purge it.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elijah Haddon"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Colleagues, Garrick Stone's proud résumé is simply a list of enemies — governors, oligarchs, entire party machines. Consensus feeds families; feuds fill headlines. Valoria deserves a builder, not a bomb-thrower with a subpoena. Retire the prosecutor.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Garrick Stone"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Sterling claims indictments don't stock shelves? Exhibit A: his shell-company grocery mergers doubled your bill overnight. He'd run Valoria like a Fortune 500—workers get fired first. Jury of Valoria: fire Arthur Sterling.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Arthur Sterling",
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  }
+]

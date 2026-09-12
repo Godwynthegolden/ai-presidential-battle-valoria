@@ -1,0 +1,173 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 1,
+    "details": {
+      "votes": [
+        {
+          "voterId": "jax-alvarez",
+          "targetId": "elena-rostova",
+          "reason": "Elena called for my head on stage. My bribe's already paid; this vote secures the escrow and silences a banker.",
+          "pactWithId": "elijah-haddon",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Jackson Alvarez",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "elena-rostova",
+          "targetId": "jax-alvarez",
+          "reason": "Alvarez's nationalization threatens fiscal stability. Silas pact secured; bandwagon consensus. Rational elimination preserves treasury.",
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Elena Rostova",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "jax-alvarez",
+          "reason": "Bandwagon plus paid contract secures escrow payout. Eliminating Alvarez is high ROI.",
+          "pactWithId": "maya-lin",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Arthur Sterling",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "art-sterling",
+          "reason": "Honor the corridor pact with Garrick; eliminating Father first drains the dynasty's war chest.",
+          "pactWithId": "garrick-stone",
+          "pactTargetId": "art-sterling",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Victoria Sterling",
+          "targetName": "Arthur Sterling"
+        },
+        {
+          "voterId": "marcus-vance",
+          "targetId": "sora-kim",
+          "reason": "Silence the hacker's insolence. Honor the pact. Eliminate Sora Kim.",
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "sora-kim",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Marcus Vance",
+          "targetName": "Sora Kim"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "jax-alvarez",
+          "reason": "Strategic elimination vote",
+          "pactWithId": "art-sterling",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Maya Lin",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "art-sterling",
+          "reason": "Thorne's pact honors our moral alliance; the billionaire's profiteering poisons Valoria's soul. Unite against avarice.",
+          "pactWithId": "jax-alvarez",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "jax-alvarez",
+          "isHonoredPact": false,
+          "voterName": "Elijah Haddon",
+          "targetName": "Arthur Sterling"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "jax-alvarez",
+          "reason": "Honor pact with Silas, join consensus, burn his capital not mine. Eliminate Alvarez.",
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "jax-alvarez",
+          "reason": "Honor the pact, secure escrow, and ride the consensus wave against Alvarez.",
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Silas Thorne",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "garrick-stone",
+          "targetId": "art-sterling",
+          "reason": "Honor anti-Sterling bloc, secure escrow payout, consolidate anti-corruption lane.",
+          "pactWithId": "victoria-sterling",
+          "pactTargetId": "art-sterling",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Garrick Stone",
+          "targetName": "Arthur Sterling"
+        },
+        {
+          "voterId": "sora-kim",
+          "targetId": "vivienne-zhao",
+          "reason": "Collect Maya's escrow, let Garrick sink Jackson. Clean profit, clean kill.",
+          "pactWithId": "maya-lin",
+          "pactTargetId": "vivienne-zhao",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Sora Kim",
+          "targetName": "Vivienne Zhao"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r1-1-jax-alvarez",
+          "candidateId": "jax-alvarez",
+          "round": 1,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 5,
+          "remainingVotes": 4,
+          "remainingBudget": 45,
+          "timestamp": 1788213739460,
+          "candidateName": "Jackson Alvarez"
+        },
+        {
+          "id": "bailout-r1-2-jax-alvarez",
+          "candidateId": "jax-alvarez",
+          "round": 1,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 4,
+          "remainingVotes": 3,
+          "remainingBudget": 5,
+          "timestamp": 1788213739460,
+          "candidateName": "Jackson Alvarez"
+        },
+        {
+          "id": "bailout-r1-3-art-sterling",
+          "candidateId": "art-sterling",
+          "round": 1,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 3,
+          "remainingVotes": 2,
+          "remainingBudget": 30,
+          "timestamp": 1788213739460,
+          "candidateName": "Arthur Sterling"
+        }
+      ],
+      "eliminatedId": "jax-alvarez",
+      "eliminatedName": "Jackson Alvarez",
+      "finalVoteCount": 3
+    }
+  }
+]

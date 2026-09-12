@@ -35,7 +35,7 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
 
   // Compile full event stream
   const allEvents: Array<{
-    type: 'speech' | 'attack' | 'pact' | 'vote' | 'elimination' | 'winner';
+    type: 'speech' | 'attack' | 'pact' | 'confessional' | 'vote' | 'elimination' | 'winner';
     title: string;
     speakerId?: string;
     targetId?: string;
@@ -107,8 +107,30 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
       });
     });
 
-    // 3.5. Bailout Auction in Round r
+    // 3.4. Strategic Voter Confessionals (Internal Dialogues) in Round r
     const roundVoteTally = gameState.votesByRound[r];
+    if (roundVoteTally?.votes && roundVoteTally.votes.length > 0) {
+      roundVoteTally.votes.forEach(v => {
+        if (v.strategyMonologue) {
+          const pactNote = v.isBetrayal ? ' [⚠️ Pact Betrayed!]' : v.isHonoredPact ? ' [🤝 Pact Honored]' : '';
+          allEvents.push({
+            type: 'confessional',
+            title: `Round ${r} Strategy Confessional${pactNote}`,
+            speakerId: v.voterId,
+            targetId: v.targetId,
+            text: v.strategyMonologue,
+            details: {
+              reason: v.reason,
+              isBetrayal: v.isBetrayal,
+              isHonoredPact: v.isHonoredPact,
+            },
+            round: r,
+          });
+        }
+      });
+    }
+
+    // 3.5. Bailout Auction in Round r
     if (roundVoteTally?.bailoutTransactions && roundVoteTally.bailoutTransactions.length > 0) {
       roundVoteTally.bailoutTransactions.forEach(tx => {
         const cand = CANDIDATE_MAP.get(tx.candidateId);
@@ -145,6 +167,26 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
       round: 98,
     });
   });
+
+  // 5.5. Grand Jury Presidential Confessionals
+  if (gameState.finalVoteTally?.votes && gameState.finalVoteTally.votes.length > 0) {
+    gameState.finalVoteTally.votes.forEach(v => {
+      if (v.strategyMonologue) {
+        allEvents.push({
+          type: 'confessional',
+          title: 'Grand Jury Presidential Confessional',
+          speakerId: v.voterId,
+          targetId: v.targetId,
+          text: v.strategyMonologue,
+          details: {
+            reason: v.reason,
+            isGrandJury: true,
+          },
+          round: 99,
+        });
+      }
+    });
+  }
 
   // 6. Winner Speech
   if (winnerId && victorySpeech) {
@@ -210,7 +252,7 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
           <span className="text-xs font-mono text-slate-400 uppercase flex items-center gap-1 mr-1">
             <Filter className="w-3.5 h-3.5 text-cyan-400" />
           </span>
-          {['all', 'speech', 'attack', 'pact', 'elimination', 'winner'].map(t => (
+          {['all', 'speech', 'attack', 'pact', 'confessional', 'vote', 'elimination', 'winner'].map(t => (
             <button
               key={t}
               onClick={() => setFilterType(t)}
@@ -262,7 +304,11 @@ export const TranscriptDrawer: React.FC<TranscriptDrawerProps> = ({
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full bg-slate-900 text-slate-300 border border-slate-750">
+                    <span className={`text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full border ${
+                      event.type === 'confessional'
+                        ? 'bg-amber-950/70 text-amber-300 border-amber-700/60 shadow-sm'
+                        : 'bg-slate-900 text-slate-300 border-slate-750'
+                    }`}>
                       {event.title}
                     </span>
                   </div>

@@ -58,6 +58,7 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
     attacksByRound, 
     pactsByRound, 
     votesByRound, 
+    finalVoteTally,
     eliminatedCandidates, 
     victorySpeech, 
     winnerId,
@@ -157,6 +158,23 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
     });
   });
 
+  // 5.5 Grand Jury Presidential Endorsement Votes
+  if (finalVoteTally?.votes) {
+    finalVoteTally.votes.forEach((v, vIdx) => {
+      events.push({
+        id: `final-vote-${v.voterId}-${v.targetId}-${vIdx}`,
+        type: 'vote',
+        round: 99,
+        title: 'Grand Jury Presidential Ballot',
+        speakerId: v.voterId,
+        targetId: v.targetId,
+        text: v.strategyMonologue || v.reason,
+        isBetrayal: v.isBetrayal,
+        isHonoredPact: v.isHonoredPact,
+      });
+    });
+  }
+
   // 6. Winner Inauguration
   if (winnerId && victorySpeech) {
     events.push({
@@ -178,7 +196,7 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
         if (filterType === 'attacks') return e.type === 'attack';
         if (filterType === 'pacts') return e.type === 'pact';
         if (filterType === 'speeches') return e.type === 'speech';
-        if (filterType === 'eliminations') return e.type === 'elimination' || e.type === 'winner';
+        if (filterType === 'eliminations') return e.type === 'elimination' || e.type === 'winner' || e.type === 'vote';
         return true;
       });
 
@@ -198,7 +216,7 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
               </span>
             </h2>
             <p className="text-[11px] text-slate-400 font-sans">
-              Instant visual stream of speeches, attacks &amp; secret alliances
+              Chronological log of televised speeches, attacks, CCTV leaks, and voting showdowns.
             </p>
           </div>
         </div>
@@ -261,6 +279,8 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
                     ? 'bg-red-950/25 border-red-900/40 hover:border-red-600/70'
                     : item.type === 'pact'
                     ? 'bg-emerald-950/25 border-emerald-900/40 hover:border-emerald-600/70'
+                    : item.type === 'vote'
+                    ? 'bg-amber-950/25 border-amber-600/50 hover:border-amber-400/80 shadow-xs'
                     : item.type === 'elimination'
                     ? 'bg-rose-950/30 border-rose-900/50 hover:border-rose-600'
                     : item.type === 'winner'
@@ -287,13 +307,13 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
                     )}
 
                     {/* Interaction Arrow & Target / Partner Avatar */}
-                    {item.type === 'attack' && target && (
+                    {(item.type === 'attack' || item.type === 'vote') && target && (
                       <>
-                        <span className="text-red-400 font-black text-xs shrink-0">&rarr;</span>
+                        <span className={`${item.type === 'vote' ? 'text-amber-400' : 'text-red-400'} font-black text-xs shrink-0`}>&rarr;</span>
                         <div 
                           onClick={() => onSelectCandidate(target)}
                           className="cursor-pointer hover:scale-105 transition shrink-0"
-                          title={`Target: ${target.name}`}
+                          title={`${item.type === 'vote' ? 'Endorsed' : 'Target'}: ${target.name}`}
                         >
                           <CandidateAvatar
                             candidate={target}
@@ -331,7 +351,11 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
                     {/* Character Names in Bold */}
                     <div className="truncate text-xs font-display font-black text-white">
                       {speaker?.name.split(' ')[0]}
-                      {target && <span className="text-red-400 font-bold ml-1">vs {target.name.split(' ')[0]}</span>}
+                      {target && (
+                        <span className={`${item.type === 'vote' ? 'text-amber-400' : 'text-red-400'} font-bold ml-1`}>
+                          {item.type === 'vote' ? 'voted' : 'vs'} {target.name.split(' ')[0]}
+                        </span>
+                      )}
                       {partner && <span className="text-emerald-400 font-bold ml-1">+ {partner.name.split(' ')[0]}</span>}
                     </div>
                   </div>
@@ -351,6 +375,10 @@ export const BroadcastTimeline: React.FC<BroadcastTimelineProps> = ({
                     ) : item.type === 'pact' ? (
                       <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-600/70">
                         <Eye className="w-2.5 h-2.5 text-emerald-400" /> CCTV Leak
+                      </span>
+                    ) : item.type === 'vote' ? (
+                      <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-amber-950 text-amber-300 border border-amber-500/70">
+                        <Vote className="w-2.5 h-2.5 text-amber-400" /> Endorsement
                       </span>
                     ) : item.type === 'elimination' ? (
                       <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-rose-950 text-rose-300 border border-rose-600/70">

@@ -1,0 +1,122 @@
+[
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone calls drought negligence? I built companies, he built subpoenas. His asset seizures won't generate one megawatt. He makes enemies, not solutions. We must eliminate Garrick Stone tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Garrick Stone"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Arthur calls drought a management failure while his media empire ignores climate science. Private reservoirs won't feed our people. Wall Street won't fix the grid. Unite and eliminate Arthur Sterling!",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Elena Rostova",
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya Lin's secret deals won't fill a reservoir or feed a nation. Her appeasement leaves us powerless. We need strength, not precision. Vote out Maya Lin tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Victoria Sterling offers theater, not power. Desalination won't refill our reservoirs tonight. Your chaos endangers the grid. We must unite and eliminate Victoria Sterling now.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena Rostova treats farmers like line items, not souls. Her austerity starves our children. Valoria needs faith, not frozen spreadsheets. Vote out Rostova tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "content": "Elijah Haddon’s faith-based fantasy treats drought with prayer—a primitive bug in Valoria’s evolutionary code. We must upgrade our leadership. Vote him out tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elijah Haddon"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Garrick Stone's subpoenas won't refill a single reservoir. His witch hunts divide us while our grid fails. We need steady solutions, not vendettas. Unite and eliminate Garrick Stone tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Garrick Stone"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur calls my subpoenas enemies? Exhibit A: his private reservoirs—stockholders' water. Sterling's ROI leaves Valoria dry. Vote him out tonight.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Arthur Sterling",
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "sora-kim",
+    "speakerName": "Sora Kim",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Marcus Vance sees a reservoir and thinks \"foxhole.\" His strength is just legacy code — obsolete, glitching, starving Valoria. We can't patch this nation with a general. Eliminate Marcus tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Marcus Vance"
+    }
+  }
+]

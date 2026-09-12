@@ -1,0 +1,93 @@
+[
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "Twenty years I poured molten steel in Iron Valley—blisters, burns, and grit. Now billionaires buy our homes like trinkets. I'm running to take Valoria back."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Sentiment bankrupts nations; arithmetic saves them. Elena Rostova — the governor who steadied your currency. Now I steady the state. Fiscal discipline. Sustainable growth."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Thirty-eight years in uniform. I held the Northern Border while politicians bargained. Valoria stands soft. I've come to make her unbreakable. Peace through power."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "Twenty years pouring steel before suits shipped my mill overseas. Hedge funds buy the homes we built. Tonight, working-class fury answers: Jackson Alvarez."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Politicians print promises. I audited them. Ten years guarding Valoria's currency taught me one law: arithmetic outlives applause. Elena Rostova. Fiscal discipline. Sustainable growth."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Wolves circle Valoria. My life's been holding the line. Now I take new ground. General Marcus Vance. Strength at the border. Peace through power."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "Valoria needs a turnaround, not a handout. I've built empires from nothing—billions created, payrolls signed. I'm Arthur Sterling, and I close deals."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "I grew up watching billionaires buy your future over dessert. I renounced the inheritance—now I'm spending it on you. Generational revolution starts tonight."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "content": "Shepherds don't abandon flocks in storms! I've healed souls before fifteen million viewers—now Valoria is my congregation, her wounded soul my ministry."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "Eighty hostages walked free because I read the room while others readied weapons. Valoria needs that calm. Master the room. Peace through precision."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Valoria runs on legacy code. I built the neural lace that rewired human cognition itself. Vivienne Zhao — time to debug the republic."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Thirty-five years, four administrations, one steady hand. While others shout, I deliver. Valoria deserves proven leadership—not a gamble. Tested leadership. Steady Valoria."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "content": "Four governors convicted. Two oligarchs imprisoned. Three car bombs survived. The biggest corruption case in Valoria's history just walked onto this stage. Me."
+  }
+]

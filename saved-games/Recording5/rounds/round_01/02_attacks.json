@@ -1,0 +1,121 @@
+[
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez treats policy like the algorithms he condemns: pure emotional triggers, zero cost modeling. His ban rhetoric lacks enforcement budgets, lacks fiscal analysis. A man confusing applause with arithmetic cannot audit a crisis. Expunge the volatility.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Jackson Alvarez",
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya Lin calls biometric theft a negotiation problem. Wrong. That data is enemy reconnaissance. She reads rooms; I read war plans. Her diplomacy surrendered our children's minds. Retreat her from this stage.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "I call it a hostile takeover of your kids' attention. He's got no exit strategy, just rage. Valoria, divest from this failed foreman tonight. Sterling delivers returns.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Darlings, I've sat at those dinners. Father toasted the app's executives: \"Dopamine is the new oil, our children the wells.\" Sterling Media banked the ad contracts. Arthur monetized the brainrot. Liquidate him.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Beloved, Elena Rostova can balance a ledger, but never a child's broken spirit. She counts our children as line items—God counts them as souls. Tonight, heal Valoria: send the cold accountant home.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "War plans didn't stop the leak, Vance—it happened on your watch. You had the borders, the budgets, the command. An algorithm outmaneuvered you. Your aggression is a tell. Read the room, Marcus: stand down.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez's campaign is brainrot in a hard hat—adrenaline in, applause out, zero cost modeling. Twenty years pouring steel left his amygdala overclocked and his prefrontal cortex offline. Decommission this legacy hardware tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Colleagues, I've guided crisis legislation through four administrations. Governor Alvarez? Passion, certainly; governance, no. Mill-town fury writes no treaties, bans no algorithms. Valoria deserves tested hands, not untested tempers. Retire him tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance reads war plans? Exhibit A: foreign algorithms harvested our children's biometrics on his watch. Dereliction of counter-espionage duty. The only thing Marcus secured was his pension. Indict him at the ballot box.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Marcus Vance"
+    }
+  }
+]

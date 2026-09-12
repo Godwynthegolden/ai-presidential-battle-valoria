@@ -250,7 +250,11 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
         sounds.playSwapWhoosh();
       } else {
         setPhase('ELIMINATION_LOCKED');
-        sounds.playEliminationBuzzer();
+        if (isFinalVote) {
+          sounds.playFanfare();
+        } else {
+          sounds.playEliminationBuzzer();
+        }
       }
       return;
     }
@@ -263,7 +267,11 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
         sounds.playSwapWhoosh();
       } else {
         setPhase('ELIMINATION_LOCKED');
-        sounds.playEliminationBuzzer();
+        if (isFinalVote) {
+          sounds.playFanfare();
+        } else {
+          sounds.playEliminationBuzzer();
+        }
       }
       return;
     }
@@ -273,7 +281,7 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
       onComplete?.();
       return;
     }
-  }, [phase, currentBallotIndex, currentBailoutIndex, totalBallots, totalBailouts, tally.votes, onComplete]);
+  }, [phase, currentBallotIndex, currentBailoutIndex, totalBallots, totalBailouts, tally.votes, isFinalVote, onComplete]);
 
   // Self-Driving Motion Graphic Timer
   useEffect(() => {
@@ -301,7 +309,11 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
 
   const choppingBlockCandidate = sortedCandidateList[0] ? CANDIDATE_MAP.get(sortedCandidateList[0].candidateId) : null;
   const eliminatedCandidate = eliminatedId ? CANDIDATE_MAP.get(eliminatedId) : choppingBlockCandidate;
-  const winningCandidate = winnerId ? CANDIDATE_MAP.get(winnerId) : (sortedCandidateList[0] ? CANDIDATE_MAP.get(sortedCandidateList[0].candidateId) : null);
+  const winningCandidate = winnerId 
+    ? CANDIDATE_MAP.get(winnerId) 
+    : (sortedCandidateList[0] 
+        ? CANDIDATE_MAP.get(sortedCandidateList[0].candidateId) 
+        : (activeCandidateIds[0] ? CANDIDATE_MAP.get(activeCandidateIds[0]) : null));
 
   const isBetrayalEvent = phase === 'BALLOTS' && Boolean(activeVote?.isBetrayal);
 
@@ -427,14 +439,17 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
       {/* ========================================================================= */}
       <div className="relative z-20 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 my-2 min-h-0 overflow-hidden">
         
-        {/* LEFT COLUMN: LIVE STANDINGS LEADERBOARD & VOTER ATTRIBUTION (5 COLS) */}
-        <div className="lg:col-span-5 h-full flex flex-col gap-2 overflow-y-auto pr-1 custom-scrollbar">
-          <div className="flex items-center justify-between px-2 text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider">
-            <span>Contender Standings</span>
-            <span>Elimination Votes</span>
+        {/* LEFT COLUMN: LIVE STANDINGS LEADERBOARD & VOTER ATTRIBUTION (6 COLS - 50/50 BROADCAST SPLIT) */}
+        <div className="lg:col-span-6 xl:col-span-6 h-full flex flex-col gap-2 overflow-y-auto pr-1.5 custom-scrollbar">
+          <div className="flex items-center justify-between px-2.5 py-1 text-xs font-mono font-black text-slate-300 uppercase tracking-widest border-b border-slate-800/90">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-sm shadow-cyan-400" />
+              Contender Standings
+            </span>
+            <span className="text-slate-400 font-bold">{isFinalVote ? '👑 Presidential Mandate' : '💀 Elimination Votes'}</span>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             {sortedCandidateList.map((st, rank) => {
               const cand = CANDIDATE_MAP.get(st.candidateId);
               if (!cand) return null;
@@ -459,155 +474,177 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
               return (
                 <div
                   key={st.candidateId}
-                  className={`relative flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-2xl border transition-all duration-500 ${
+                  className={`relative flex flex-col gap-2 p-3 sm:p-3.5 rounded-2xl border transition-all duration-500 backdrop-blur-md ${
                     isWinner
-                      ? 'bg-gradient-to-r from-amber-950/90 via-[#0e1424] to-slate-950 border-amber-400 shadow-xl shadow-amber-500/25 scale-[1.01]'
+                      ? 'bg-gradient-to-r from-amber-950/90 via-[#0e1424] to-slate-950 border-amber-400 shadow-2xl shadow-amber-500/30 scale-[1.01]'
                       : isEliminated
-                      ? 'bg-red-950/80 border-2 border-red-500 shadow-2xl shadow-red-950/80 animate-pulse'
+                      ? 'bg-red-950/85 border-2 border-red-500 shadow-2xl shadow-red-950/90 animate-pulse'
                       : isCurrentTarget
-                      ? 'bg-slate-900 border-cyan-400 shadow-lg shadow-cyan-500/20 scale-[1.01]'
+                      ? 'bg-slate-900/95 border-2 border-cyan-400 shadow-xl shadow-cyan-500/25 scale-[1.01]'
                       : isTopChoppingBlock
-                      ? 'bg-red-950/40 border-red-500 shadow-lg shadow-red-950/40 ring-1 ring-red-500/60'
-                      : 'bg-slate-950/80 border-slate-800/80'
+                      ? 'bg-gradient-to-r from-red-950/60 via-slate-950/90 to-red-950/40 border-2 border-red-500 shadow-xl shadow-red-950/50 ring-1 ring-red-500/60'
+                      : 'bg-gradient-to-r from-slate-900/80 via-slate-950/80 to-slate-900/80 border-slate-750/80 shadow-md hover:border-slate-650'
                   }`}
                 >
-                  {/* Danger Zone Banner on Chopping Block Leader */}
+                  {/* Danger Zone Banner on Chopping Block Leader / Mandate Leader */}
                   {isTopChoppingBlock && !isEliminated && !isWinner && (
-                    <div className="flex items-center justify-between px-2 py-0.5 rounded-lg bg-red-950 border border-red-700/80 text-red-300 font-mono text-[9px] font-black uppercase tracking-wider mb-0.5">
-                      <span className="flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3 text-red-400 animate-pulse" />
-                        ON THE CHOPPING BLOCK (ELIMINATION RISK)
+                    <div className={`flex items-center justify-between px-2.5 py-1 rounded-xl border font-mono text-[10px] font-black uppercase tracking-wider mb-0.5 shadow-sm ${
+                      isFinalVote
+                        ? 'bg-amber-950/90 border-amber-400 text-amber-200'
+                        : 'bg-red-950/90 border-red-500 text-red-100 animate-pulse'
+                    }`}>
+                      <span className="flex items-center gap-1.5">
+                        {isFinalVote ? (
+                          <>
+                            <Crown className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                            LEADING PRESIDENTIAL CONTENDER
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+                            ON THE CHOPPING BLOCK (ELIMINATION RISK)
+                          </>
+                        )}
                       </span>
-                      <span>
-                        {canAffordBailouts > 0 ? `💰 ${canAffordBailouts} Bailout Available` : `💀 UNPROTECTED ($${st.budget})`}
+                      <span className="font-bold">
+                        {isFinalVote ? '👑 Mandate Leader' : (canAffordBailouts > 0 ? `💰 ${canAffordBailouts} Bailout Available` : `💀 UNPROTECTED ($${st.budget}M)`)}
                       </span>
                     </div>
                   )}
 
-                  {/* Top Row: Rank, Avatar, Name, War Chest Treasury, Live Votes */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[11px] font-mono font-black w-5 text-center rounded-md py-0.5 ${
-                        rank === 0 ? 'bg-red-950 text-red-400 border border-red-700' : 'bg-slate-900 text-slate-400'
+                  {/* Top Row: Rank, Large Profile Avatar, Name, War Chest Treasury, Live Votes */}
+                  <div className="flex items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                      <span className={`text-xs sm:text-sm font-mono font-black w-6 sm:w-7 h-6 sm:h-7 flex items-center justify-center shrink-0 rounded-lg shadow-sm ${
+                        rank === 0 ? 'bg-red-950 text-red-300 border border-red-600' : 'bg-slate-900 text-slate-300 border border-slate-700'
                       }`}>
                         #{rank + 1}
                       </span>
-                      <CandidateAvatar 
-                        candidate={cand} 
-                        size="xs" 
-                        isEliminated={isEliminated} 
-                        isPresident={isWinner} 
-                        showBadge={false}
-                      />
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs sm:text-sm font-display font-black text-white">
+                      
+                      {/* Luxury Scaled Profile Avatar (Broadcast Scale) */}
+                      <div className="shrink-0 relative">
+                        <CandidateAvatar 
+                          candidate={cand} 
+                          size="sm" 
+                          isEliminated={isEliminated} 
+                          isPresident={isWinner} 
+                          showBadge={false}
+                        />
+                      </div>
+
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm sm:text-base md:text-lg font-display font-black text-white tracking-wide leading-tight truncate">
                             {cand.name}
                           </span>
                           {/* War Chest Treasury Badge */}
-                          <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-700 flex items-center gap-0.5">
-                            <DollarSign className="w-2.5 h-2.5 text-emerald-400" />
+                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-950/90 text-emerald-300 border border-emerald-500/80 shadow-xs flex items-center gap-1 shrink-0">
+                            <DollarSign className="w-3 h-3 text-emerald-400" />
                             ${st.budget}M
                           </span>
                         </div>
-                        <span className="text-[10px] text-slate-400 truncate max-w-[130px] sm:max-w-[170px]">
+                        <span className="text-xs text-slate-300 font-medium truncate max-w-[180px] sm:max-w-[240px] md:max-w-[300px] mt-0.5">
                           {cand.titleRole}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2 shrink-0">
                       {/* Floating -$40M Bailout Tag */}
                       {st.hasBailedOutThisTick && (
-                        <span className="flex items-center gap-1 text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 shadow-md animate-bounce">
-                          <Banknote className="w-3 h-3" /> -$40M [SAVED!]
+                        <span className="flex items-center gap-1 text-[10px] font-mono font-black uppercase px-2.5 py-1 rounded-full bg-emerald-400 text-slate-950 shadow-lg animate-bounce">
+                          <Banknote className="w-3.5 h-3.5" /> -$40M [SAVED!]
                         </span>
                       )}
 
                       {totalVotesRemoved > 0 && !st.hasBailedOutThisTick && (
-                        <span className="flex items-center gap-1 text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-600">
+                        <span className="flex items-center gap-1 text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500">
                           -${totalSpent}M ({totalVotesRemoved} bailed)
                         </span>
                       )}
 
                       {isWinner && (
-                        <span className="flex items-center gap-1 text-[10px] font-display font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-black">
-                          <Crown className="w-3 h-3" /> Elected
+                        <span className="flex items-center gap-1 text-xs font-display font-black uppercase px-3 py-1 rounded-full bg-amber-400 text-black shadow-md">
+                          <Crown className="w-3.5 h-3.5" /> Elected
                         </span>
                       )}
 
                       {isEliminated && (
-                        <span className="flex items-center gap-1 text-[10px] font-display font-black uppercase px-2 py-0.5 rounded-full bg-red-600 text-white">
-                          <Skull className="w-3 h-3" /> Eliminated
+                        <span className="flex items-center gap-1 text-xs font-display font-black uppercase px-3 py-1 rounded-full bg-red-600 text-white shadow-md">
+                          <Skull className="w-3.5 h-3.5" /> Eliminated
                         </span>
                       )}
 
                       {/* Monospace Vote Counter */}
-                      <span className={`text-xs sm:text-sm font-black font-mono px-2 py-0.5 rounded-lg border transition-transform ${
-                        isCurrentTarget ? 'bg-cyan-950 border-cyan-400 text-cyan-300 scale-105' : 'bg-slate-900 border-slate-750 text-white'
+                      <span className={`text-sm sm:text-base font-black font-mono px-3 py-1 rounded-xl border shadow-sm transition-transform ${
+                        isCurrentTarget ? 'bg-cyan-950 border-cyan-400 text-cyan-300 scale-105 ring-1 ring-cyan-400' : 'bg-slate-900 border-slate-700 text-white'
                       }`}>
                         {st.votes} {st.votes === 1 ? 'Vote' : 'Votes'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Dynamic Progress Meter */}
-                  <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-slate-800">
+                  {/* Dynamic Progress Meter (Enlarged High-Sheen Neon Bar) */}
+                  <div className="w-full h-2.5 sm:h-3 rounded-full bg-slate-900/90 overflow-hidden border border-slate-800 shadow-inner">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ease-out ${
                         isWinner
-                          ? 'bg-gradient-to-r from-amber-400 to-yellow-300 shadow-sm shadow-amber-400'
+                          ? 'bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 shadow-md shadow-amber-400/50'
                           : isEliminated
-                          ? 'bg-gradient-to-r from-red-600 to-rose-500 shadow-sm shadow-red-500'
+                          ? 'bg-gradient-to-r from-red-600 via-rose-500 to-red-400 shadow-md shadow-red-500/50'
                           : isTopChoppingBlock
-                          ? 'bg-gradient-to-r from-red-500 to-amber-500'
-                          : 'bg-gradient-to-r from-cyan-500 to-blue-500 shadow-sm shadow-cyan-500'
+                          ? 'bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 shadow-md shadow-red-500/40'
+                          : 'bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-500 shadow-md shadow-cyan-500/40'
                       }`}
                       style={{ width: `${Math.max(percentage, st.votes > 0 ? 8 : 0)}%` }}
                     />
                   </div>
 
                   {/* ========================================================================= */}
-                  {/* ⭐ USER REQUIREMENT: VOTER NAME AND PICTURE UNDER PROGRESS BAR */}
+                  {/* ⭐ HIGH-VISIBILITY VOTER ATTRIBUTION CHIPS (BROADCAST TIER) */}
                   {/* ========================================================================= */}
                   {votesForCandidate.length > 0 && (
-                    <div className="flex items-center flex-wrap gap-1.5 pt-1 mt-0.5 border-t border-slate-800/60 animate-fade-in">
-                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1">
-                        <Vote className="w-2.5 h-2.5 text-cyan-400" />
-                        Voted By:
+                    <div className="flex items-center flex-wrap gap-2 pt-1.5 mt-0.5 border-t border-slate-800/80 animate-fade-in">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1.5">
+                        <Vote className={`w-3 h-3 ${isFinalVote ? 'text-amber-400' : 'text-cyan-400'}`} />
+                        {isFinalVote ? 'Endorsed By:' : 'Voted By:'}
                       </span>
-                      <div className="flex items-center flex-wrap gap-1">
+                      <div className="flex items-center flex-wrap gap-1.5">
                         {votesForCandidate.map((v, vIdx) => {
                           const voter = CANDIDATE_MAP.get(v.voterId);
                           if (!voter) return null;
                           return (
                             <div
                               key={vIdx}
-                              className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] font-mono font-bold shadow-xs transition-all duration-300 animate-step-transition ${
+                              className={`flex items-center gap-1.5 pl-1 pr-2.5 py-0.5 rounded-full border text-xs font-mono font-bold shadow-sm transition-all duration-300 animate-step-transition ${
                                 v.isBetrayal
-                                  ? 'bg-red-950/90 border-red-500 text-red-200 animate-pulse ring-1 ring-red-500'
+                                  ? 'bg-red-950 border-red-500 text-red-100 ring-1 ring-red-500 animate-pulse shadow-md shadow-red-950'
                                   : v.isHonoredPact
-                                  ? 'bg-emerald-950/90 border-emerald-500 text-emerald-200'
-                                  : 'bg-slate-900/90 border-slate-700 text-slate-200'
+                                  ? 'bg-emerald-950 border-emerald-400 text-emerald-100'
+                                  : isFinalVote
+                                  ? 'bg-amber-950/90 border-amber-500 text-amber-100'
+                                  : 'bg-slate-900 border-slate-700 text-slate-100'
                               }`}
                               title={
                                 v.isBetrayal
                                   ? `${voter.name} (BETRAYED corridor pact!)`
                                   : v.isHonoredPact
                                   ? `${voter.name} (Kept $30 alliance pact)`
+                                  : isFinalVote
+                                  ? `${voter.name} voted to elect ${cand.name} as President`
                                   : `${voter.name} cast elimination ballot`
                               }
                             >
                               <CandidateAvatar candidate={voter} size="xs" showBadge={false} />
-                              <span className="text-white font-sans text-[10px]">{voter.name.split(' ')[0]}</span>
+                              <span className="text-white font-sans text-xs font-semibold">{voter.name.split(' ')[0]}</span>
                               {v.isBetrayal && (
-                                <span className="text-[8px] font-black uppercase text-red-300 bg-red-900/80 px-1 py-0.2 rounded flex items-center gap-0.5">
-                                  <Swords className="w-2.5 h-2.5 text-red-300" /> Betrayal
+                                <span className="text-[9px] font-black uppercase text-red-200 bg-red-900/90 px-1.5 py-0.2 rounded-full flex items-center gap-0.5">
+                                  <Swords className="w-2.5 h-2.5 text-red-200" /> Betrayal
                                 </span>
                               )}
                               {v.isHonoredPact && (
-                                <span className="text-[8px] font-black uppercase text-emerald-300 bg-emerald-900/80 px-1 py-0.2 rounded flex items-center gap-0.5">
-                                  <ShieldCheck className="w-2.5 h-2.5 text-emerald-300" /> Pact
+                                <span className="text-[9px] font-black uppercase text-emerald-200 bg-emerald-900/90 px-1.5 py-0.2 rounded-full flex items-center gap-0.5">
+                                  <ShieldCheck className="w-2.5 h-2.5 text-emerald-200" /> Pact
                                 </span>
                               )}
                             </div>
@@ -622,8 +659,8 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
           </div>
         </div>
 
-        {/* RIGHT COLUMN: ACTIVE SPOTLIGHT VIEWPORT (7 COLS - YOUTUBE EDIT CENTERPIECE) */}
-        <div className="lg:col-span-7 h-full flex flex-col justify-center items-center relative overflow-hidden rounded-3xl bg-slate-950/90 border border-slate-800 p-4 sm:p-6 md:p-8 shadow-2xl">
+        {/* RIGHT COLUMN: ACTIVE SPOTLIGHT VIEWPORT (6 COLS - 50/50 BROADCAST SPLIT) */}
+        <div className="lg:col-span-6 xl:col-span-6 h-full flex flex-col justify-center items-center relative overflow-hidden rounded-3xl bg-slate-950/90 border border-slate-800 p-4 sm:p-6 md:p-8 shadow-2xl">
           
           {/* 1. CLEAN INTRO SCENE */}
           {phase === 'CLEAN_INTRO' && (
@@ -632,10 +669,12 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                 <Vote className="w-12 h-12 animate-pulse" />
               </div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white uppercase tracking-wider">
-                Unsealing Capitol Ballots...
+                {isFinalVote ? 'Unsealing Presidential Ballots...' : 'Unsealing Capitol Ballots...'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 font-mono max-w-md">
-                All contenders have registered their confidential votes. Surveillance verification and $40M bailout auctions will commence automatically.
+                {isFinalVote
+                  ? 'All Grand Jury members have registered their confidential presidential ballots. The 50th President of Valoria is about to be determined.'
+                  : 'All contenders have registered their confidential votes. Surveillance verification and $40M bailout auctions will commence automatically.'}
               </p>
             </div>
           )}
@@ -665,17 +704,25 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                     {activeVoter.name}
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">
-                    VOTER
+                    {isFinalVote ? 'GRAND JUROR' : 'VOTER'}
                   </span>
                 </div>
 
                 {/* Animated Connector Beam */}
                 <div className="flex flex-col items-center justify-center px-2">
-                  <span className="text-xs font-mono font-black text-red-400 uppercase tracking-wider mb-1">
-                    CAST VOTE
+                  <span className={`text-xs font-mono font-black uppercase tracking-wider mb-1 ${
+                    isFinalVote ? 'text-amber-400' : 'text-red-400'
+                  }`}>
+                    {isFinalVote ? 'ELECT VOTE' : 'CAST VOTE'}
                   </span>
-                  <div className="w-12 sm:w-16 h-1 rounded-full bg-gradient-to-r from-cyan-400 to-red-500 animate-pulse shadow-sm shadow-red-500" />
-                  <ArrowRight className="w-5 h-5 text-red-400 mt-1" />
+                  <div className={`w-12 sm:w-16 h-1 rounded-full animate-pulse shadow-sm ${
+                    isFinalVote
+                      ? 'bg-gradient-to-r from-cyan-400 to-amber-400 shadow-amber-500'
+                      : 'bg-gradient-to-r from-cyan-400 to-red-500 shadow-red-500'
+                  }`} />
+                  <ArrowRight className={`w-5 h-5 mt-1 ${
+                    isFinalVote ? 'text-amber-400' : 'text-red-400'
+                  }`} />
                 </div>
 
                 {/* Target Box */}
@@ -684,8 +731,10 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
                   <span className="text-xs sm:text-sm font-display font-black text-white">
                     {activeTarget.name}
                   </span>
-                  <span className="text-[10px] font-mono text-red-400 font-bold uppercase">
-                    TARGET (+1 VOTE)
+                  <span className={`text-[10px] font-mono font-bold uppercase ${
+                    isFinalVote ? 'text-amber-400' : 'text-red-400'
+                  }`}>
+                    {isFinalVote ? 'VOTE TO ELECT (+1 VOTE)' : 'TARGET (+1 VOTE)'}
                   </span>
                 </div>
               </div>
@@ -724,31 +773,58 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
           )}
 
           {/* 3. INITIAL BALLOTS TALLIED SCENE */}
-          {phase === 'VOTES_TALLIED' && choppingBlockCandidate && (
-            <div className="flex flex-col items-center justify-center text-center gap-4 animate-fade-in max-w-md">
-              <div className="p-4 rounded-3xl bg-amber-500/15 border border-amber-500/40 text-amber-300 shadow-2xl">
-                <AlertTriangle className="w-12 h-12 animate-pulse" />
-              </div>
-              <h2 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-wide">
-                Initial Ballots Counted!
-              </h2>
-              <div className="p-4 rounded-2xl bg-red-950/60 border border-red-600/80 flex items-center gap-3">
-                <CandidateAvatar candidate={choppingBlockCandidate} size="sm" showBadge={false} />
-                <div className="text-left">
-                  <span className="text-xs font-mono text-red-400 font-bold uppercase block">
-                    ON THE CHOPPING BLOCK:
-                  </span>
-                  <span className="text-base font-display font-black text-white">
-                    {choppingBlockCandidate.name} ({sortedCandidateList[0].votes} Votes)
-                  </span>
+          {phase === 'VOTES_TALLIED' && (
+            isFinalVote ? (
+              <div className="flex flex-col items-center justify-center text-center gap-4 animate-fade-in max-w-md">
+                <div className="p-4 rounded-3xl bg-amber-500/15 border border-amber-500/40 text-amber-300 shadow-2xl shadow-amber-500/30">
+                  <Crown className="w-12 h-12 text-amber-400 animate-bounce" />
                 </div>
+                <h2 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-wide">
+                  Final Presidential Ballots Counted!
+                </h2>
+                {winningCandidate && (
+                  <div className="p-4 rounded-2xl bg-amber-950/60 border border-amber-500/80 flex items-center gap-3">
+                    <CandidateAvatar candidate={winningCandidate} size="sm" showBadge={false} />
+                    <div className="text-left">
+                      <span className="text-xs font-mono text-amber-400 font-bold uppercase block">
+                        PROJECTED PRESIDENT-ELECT:
+                      </span>
+                      <span className="text-base font-display font-black text-white">
+                        {winningCandidate.name} ({sortedCandidateList[0]?.votes ?? 0} Mandate Votes)
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <p className="text-xs text-slate-400 font-mono">
+                  Certifying official presidential election results...
+                </p>
               </div>
-              <p className="text-xs text-slate-400 font-mono">
-                {totalBailouts > 0 
-                  ? 'Emergency $40M Capitol Vote Bailouts will now process sequentially...' 
-                  : 'No bailouts available. Preparing final elimination lock...'}
-              </p>
-            </div>
+            ) : choppingBlockCandidate ? (
+              <div className="flex flex-col items-center justify-center text-center gap-4 animate-fade-in max-w-md">
+                <div className="p-4 rounded-3xl bg-amber-500/15 border border-amber-500/40 text-amber-300 shadow-2xl">
+                  <AlertTriangle className="w-12 h-12 animate-pulse" />
+                </div>
+                <h2 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-wide">
+                  Initial Ballots Counted!
+                </h2>
+                <div className="p-4 rounded-2xl bg-red-950/60 border border-red-600/80 flex items-center gap-3">
+                  <CandidateAvatar candidate={choppingBlockCandidate} size="sm" showBadge={false} />
+                  <div className="text-left">
+                    <span className="text-xs font-mono text-red-400 font-bold uppercase block">
+                      ON THE CHOPPING BLOCK:
+                    </span>
+                    <span className="text-base font-display font-black text-white">
+                      {choppingBlockCandidate.name} ({sortedCandidateList[0].votes} Votes)
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400 font-mono">
+                  {totalBailouts > 0 
+                    ? 'Emergency $40M Capitol Vote Bailouts will now process sequentially...' 
+                    : 'No bailouts available. Preparing final elimination lock...'}
+                </p>
+              </div>
+            ) : null
           )}
 
           {/* 4. BAILOUT AUCTION SCENE */}
@@ -806,15 +882,36 @@ export const VoteRevealBoard: React.FC<VoteRevealBoardProps> = ({
             <div className="flex flex-col items-center justify-center text-center gap-5 animate-fade-in max-w-lg relative">
               {isFinalVote && winningCandidate ? (
                 <>
-                  <div className="p-5 rounded-full bg-amber-500/20 border-2 border-amber-400 text-amber-300 shadow-2xl shadow-amber-500/40 animate-bounce">
-                    <Crown className="w-16 h-16 text-amber-400" />
+                  <div className="relative">
+                    <CandidateAvatar candidate={winningCandidate} size="lg" showBadge={false} />
+                    
+                    {/* Metallic Golden ELECTED Stamp */}
+                    <div 
+                      ref={eliminationStampRef}
+                      className="absolute -bottom-2 -right-4 px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-display font-black text-lg uppercase tracking-widest border-2 border-white shadow-2xl shadow-amber-500/50 transform rotate-[-6deg]"
+                    >
+                      ELECTED
+                    </div>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-white uppercase tracking-wider">
-                    {winningCandidate.name}
-                  </h2>
-                  <div className="px-4 py-1.5 rounded-full bg-amber-400 text-black font-display font-black text-sm uppercase tracking-widest shadow-xl">
-                    Elected 50th President of Valoria
+
+                  <div className="flex flex-col items-center gap-1 mt-2">
+                    <div className="p-2.5 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 shadow-xl mb-1">
+                      <Crown className="w-8 h-8 text-amber-400 animate-bounce" />
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-white uppercase tracking-wider">
+                      {winningCandidate.name}
+                    </h2>
+                    <div className="px-4 py-1.5 rounded-full bg-amber-400 text-black font-display font-black text-sm uppercase tracking-widest shadow-xl">
+                      Elected 50th President of Valoria
+                    </div>
+                    <span className="text-xs font-mono text-amber-300 font-bold uppercase mt-1">
+                      Secured Mandate with {tally.tally[winningCandidate.id] || 0} Grand Jury Votes
+                    </span>
                   </div>
+
+                  <p className="text-xs text-slate-400 font-mono">
+                    Official Presidential Inauguration ceremony commencing...
+                  </p>
                 </>
               ) : eliminatedCandidate ? (
                 <>

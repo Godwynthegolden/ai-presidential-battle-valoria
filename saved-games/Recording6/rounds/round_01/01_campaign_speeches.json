@@ -1,0 +1,72 @@
+[
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "My mill buddies call me Jack. These hands poured steel—now they're fists for every family Valoria forgot. Restore Valoria to the working class!"
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Valoria's ledger is hemorrhaging. A decade defending your currency taught me: sentiment isn't a budget. I'll govern the arithmetic. Rostova. Fiscal discipline. Sustainable growth."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Forty years defending Valoria. I held the Northern Border when others blinked. Now I take the field for one final mission — your survival."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "I've never missed a payroll in forty years—career politicians have never made one. Valoria becomes my next billion-dollar turnaround, starting tonight."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "The heiress who torched her inheritance. I grew up at billionaire dinner tables; tonight, I burn them down. Fund the people."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "content": "Fifteen million souls know my voice. Tonight, all Valoria hears it—Elijah Haddon, called to heal our fractured land through faith and family."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "Eighty hostages. One table. Zero bullets. I negotiate wars into endings — now I'll master this room, and keep Valoria from sleepwalking into one."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Valoria runs on obsolete wetware. I built the neural lace rewiring human cognition. Now, I rewire the state. Vivienne Zhao — upgrade, or be upgraded."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Capitol District sent me to the Senate thirty-five years ago. Four administrations later, I'm still standing—because Valoria deserves tested leadership, not experiments."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "content": "Twenty years. Four governors convicted. Two oligarchs behind bars. Three car bombs couldn't stop me. The people's prosecutor has entered the arena."
+  }
+]

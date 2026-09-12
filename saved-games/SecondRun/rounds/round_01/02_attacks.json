@@ -1,0 +1,121 @@
+[
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez mistakes fury for fiscal policy. Iron Valley's pension liability swelled under his watch—unfunded, unexamined. Markets punish volatility; so should voters. His economics are emotionally leveraged junk. Downgrade him tonight.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Jackson Alvarez",
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Eighty hostages came home because Lin paid the room—not mastered it. Diplomacy without deterrence is surrender with better manners. Valoria needs a Commander-in-Chief, not a backroom bargainer. Cut her loose tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Twenty years pouring steel, zero years balancing books! Alvarez ran Iron Valley like a bankrupt mill—unfunded pensions, explosive losses, no returns. I've signed more payrolls before breakfast. Liquidate this failing asset tonight, shareholders!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Daddy claims he turned a thousand into ten billion? I've seen the real ledgers — Capitol Island bribes, offshore shells, dinners where democracy was the appetizer. Family meeting's over, Arthur. Consider yourself liquidated.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "No, but they never weep! She'd amputate Valoria's soul and call it surgery. A ledger knows no mercy; a leader must. Pray for her — then vote her home!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Marcus, I walked into rooms your soldiers couldn't. Deterrence without dialogue is noise with medals. Your rearmament obsession left us exposed while Capitol Island's bribes bloomed. De-escalate, Marcus—tonight, permanently.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez mistakes cortisol for cognition. Every outburst on this stage is his platform's crash log. Unfunded pensions, zero fiscal architecture—a governor who can't debug Iron Valley. Purge the obsolete code. Eliminate Alvarez.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "My friends, thirty-five years taught me: fury makes riveting television, ruinous governance. Governor Alvarez mistakes a raised voice for a rising paycheck. Let's retire this untested experiment—Valoria deserves tested hands, not trembling fists.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Marcus Vance, you signed the defense contracts — the contractors signed the island ledgers. Exhibit A. General, who cashed the Capitol Island checks? Peace through power? No — treason through bribery. The jury's in this room.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Marcus Vance"
+    }
+  }
+]

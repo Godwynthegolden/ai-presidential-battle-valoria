@@ -1,0 +1,121 @@
+[
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez's $2,000 monthly check adds forty billion annually to debt already at 130% of GDP. That's not compassion—it's arithmetic malpractice. Iron Valley's mills died under his watch. Eliminate the mathematically illiterate.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Jackson Alvarez",
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya Lin \"reads rooms\" while our borders bleed. Negotiators beg—soldiers defend. At 130% debt, her appeasement invites invasion. Valoria needs a Commander-in-Chief, not a hostage diplomat. Vote strength. Vote Marcus.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez wants $2,000 checks with a debt bomb ticking — that's not stimulus, that's Chapter Eleven! Twenty years pouring steel, zero years balancing books. I turn around dying companies. Shareholders — cash him out tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "My father wants to run Valoria like a Fortune 500? He runs Sterling Media on Cayman tax shelters and closed-door lobbying dinners while your pensions burned. Daddy dearest — first eviction: tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova counts our suffering like ledger entries! A woman who audits the widow's pension but never held her trembling hand! Valoria doesn't need a calculator—it needs a shepherd. Send this cold arithmetic home tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "But word budget. Let me refine:\n\nDraft 4:",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez mistakes adrenal discharge for fiscal policy. His platform: raw sentiment in, borrowed capital out—a closed-loop rage engine accelerating insolvency. Nostalgia cannot service debt. Tonight, uninstall this obsolete processor.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "My colleagues, thirty-five years in that chamber taught me: fire makes fine speeches, but governance requires patience. Jackson's mills closed on his watch; now he promises checks our children must repay. Retire this untested extremist.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance calls diplomacy treason? Exhibit A: forty years of blank-check rearmament while defense contractors dined at his table. A general who treats peace as surrender is a clear and present danger. Indict him tonight—vote.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Marcus Vance"
+    }
+  }
+]

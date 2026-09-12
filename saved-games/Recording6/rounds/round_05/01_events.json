@@ -1,0 +1,38 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 5,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria assumes her eighty million buys immunity. Two concentrated votes drain forty. Elijah's handshake banks fifteen million and binds him to my perimeter. Checkmate.",
+    "privateReason": "Honor pact with Elijah, bank $15M, join consensus to guarantee Victoria's attrition.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 5,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Sterling assumes her eighty million buys immunity. Three accusers already cluster; my ballot completes concentration, honors Lin's pact, banks fifteen million, and drains her war chest.",
+    "privateReason": "Bandwagon momentum plus Lin's pact guarantees concentration; Victoria's damaged war chest pays the toll.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 5,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "content": "Haddon thinks his hundred million makes him bulletproof. He spent his voice attacking Victoria, exposing his flank. Zhao's pact plus my ballot forces his eighty-million drain — the evangelist liquidates.",
+    "privateReason": "Honoring Zhao's pact forces Haddon's $80M drain, cripples the richest kingpin, banks $15M.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

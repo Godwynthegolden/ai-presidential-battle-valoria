@@ -1,0 +1,98 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "jax-alvarez",
+    "voterName": "Jackson Alvarez",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez thinks his handshake bought my silence while he plots my liquidation. Four accusations already price his elimination at zero. I merely countersign his bankruptcy.",
+    "privateReason": "Pact targets me; consensus guarantees his cheap elimination. Preserve $100M for Round 2.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "art-sterling",
+    "voterName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez thinks applause converts to capital. Fool. Consensus elimination costs nothing, banks fifteen million, keeps Sterling's pact liquid, and leaves my war chest armored for round two.",
+    "privateReason": "Cheap consensus kill honors Sterling pact, banks $15M escrow, preserves my treasury.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Father's handshake binds me tonight. Alvarez absorbs the room's knives while I bank fifteen million, armored against the blindside aimed at my balance sheet.",
+    "privateReason": "Alvarez dies by consensus anyway; honoring Father's pact banks escrow and shields my treasury.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez believes his union pews will shield him. Four knives already pierce his back; my fifth rides the wave, banks Lin's escrow, preserves my treasury for Sterling's war chest.",
+    "privateReason": "Alvarez is consensus-damned; honoring Lin's pact banks $15M while preserving my war chest.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez thinks four-stage consensus makes him mere collateral damage. Thorne's escrow guarantees majority; I bank fifteen million while the room executes my meat shield for free.",
+    "privateReason": "Honor Thorne pact, bank $15M escrow; consensus guarantees Alvarez's elimination and coalition survival.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez believes podium fury buys survival. Four votes already seal him; my ballot honors Zhao's pact, banks fifteen million, and keeps my hundred intact for tomorrow's blindside.",
+    "privateReason": "Alvarez is doomed regardless; honoring Zhao's pact banks escrow cash while preserving my war chest.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "garrick-stone",
+    "voterName": "Garrick Stone",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez thinks four accusers exhausted the room's appetite. Wrong. Thorne's pact plus the bandwagon stacks my ballot into a unanimous indictment—his war chest dies tonight, cheaply.",
+    "privateReason": "Pact with Thorne plus bandwagon consensus guarantees elimination while preserving my full treasury.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

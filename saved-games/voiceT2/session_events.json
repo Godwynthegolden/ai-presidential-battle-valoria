@@ -1,0 +1,132 @@
+[
+  {
+    "id": "evt-1",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "They hiked lifesaving drugs 400% and shut down your hospitals. I'll break the cartels, cap prices, and bring manufacturing home. Restore Valoria to the working class.",
+    "timestamp": 1788386629830
+  },
+  {
+    "id": "evt-2",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "400% price gouging is market failure. My plan: break cartels with antitrust enforcement, audit hospital budgets, tie subsidies to rural care. Fiscal discipline delivers affordable medicine. Vote Elena Rostova for sustainable growth.",
+    "timestamp": 1788386683380
+  },
+  {
+    "id": "evt-3",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "This crisis is a balance sheet failure. My plan? Break the cartels, slash taxes to 10%, and let market forces rebuild rural care. Socialists offer handouts; I offer ROI. Elect a CEO, not a politician. Let's run Valoria profitably.",
+    "timestamp": 1788386695343
+  },
+  {
+    "id": "evt-4",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "I'll tax billionaire pharma looters, reopen rural hospitals, and give youth the power to heal Valoria. Fund the People.",
+    "timestamp": 1788386720983
+  },
+  {
+    "id": "evt-5",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Cartels and monopolies prey on the weak. I will deploy military medics to rural trauma zones, seize price-gouging assets, and enforce order. Strength at the Border. Peace Through Power.",
+    "timestamp": 1788386724905
+  },
+  {
+    "id": "evt-6",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "I freed eighty hostages without a bullet. Now I will free Valoria from cartel extortion. Calibrated leverage to cap lifesaving prices and reopen rural trauma centers. Peace through precision—elect the negotiator who masters the room.",
+    "timestamp": 1788386730479
+  },
+  {
+    "id": "evt-7",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "content": "Valoria bleeds while cartels count their silver. I will break this greed with righteous conviction, reopen our rural trauma centers, and heal our land through faith and family—not profit margins.",
+    "timestamp": 1788386734083
+  },
+  {
+    "id": "evt-8",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Your biology is a bottleneck; my neural-lace telemedicine and algorithmic pricing grid will dissolve the cartels' monopoly. Evolve or be obsolete. Elect a mind, not a mouth. Upgrade Human Potential. Lead the Synthetic Century.",
+    "timestamp": 1788386746536
+  },
+  {
+    "id": "evt-9",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "As President, I will forge a bipartisan compact: emergency price caps on essential medicines and a rural hospital stabilization fund. No radical experiments, just tested, measured action. That is steady leadership for a Valoria that works.",
+    "timestamp": 1788386761723
+  },
+  {
+    "id": "evt-10",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "content": "A dying rural child denied insulin while cartel CEOs hoard billions. As President, I will subpoena every price-fixing boardroom, seize the monopolies' assets, and guarantee lifesaving medicine as a public trust. The indictment is coming.",
+    "timestamp": 1788386772332
+  },
+  {
+    "id": "evt-11",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "sora-kim",
+    "speakerName": "Sora Kim",
+    "content": "The pharma cartel runs zero-day exploits on your lives—400% price spikes, closed trauma centers. I'll open-source drug pricing, audit hospital monopolies, and patch this broken system. Vote Sora Kim: encryption for democracy, transparency for healthcare.",
+    "timestamp": 1788386785609
+  },
+  {
+    "id": "evt-12",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Jackson Alvarez, your \"restore\" is a myth. Your tariffs protect cartels, not rural trauma centers. A former steelworker can't grasp monetary policy. Unite to eliminate Jackson Alvarez.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Jackson Alvarez",
+      "voteCallTargetName": "Jackson Alvarez"
+    },
+    "timestamp": 1788386803391
+  },
+  {
+    "id": "evt-13",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Jackson Alvarez talks restoring the working class while his failed policies let cartels gouge you. He's never made a payroll or a deal in his life. Eliminate him tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    },
+    "timestamp": 1788386810147
+  }
+]

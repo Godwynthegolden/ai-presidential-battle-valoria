@@ -1,0 +1,37 @@
+[
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "Three mills shut. Groceries doubled. That’s not economics, that’s theft. I’m Jackson Alvarez. I’ll tariff the cheaters, break the monopolies, and forge new steel jobs. Restore Valoria to the working class!"
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Fourteen percent inflation is a tax on the poor. I will slash the deficit, automate tax enforcement, and performance-audit every budget. No fairy-tale subsidies. Fiscal discipline ends this stagflation, and delivers sustainable growth. Elect me."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "Crippling inflation? I'll slash corporate taxes to 10%, privatize rail and energy, and unleash Valoria's industrial might. Career politicians never created a single job. I'll run this country like a Fortune 500 company and make you rich. Vote Sterling."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "Smash the donor-dinner racket and fund the frontline. I’ll tax dynastic billionaires at 90%, seed open-source clean steel, and slash your grocery bills. Break the empire, fund the people. Elect me—Victoria Sterling."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Foreign imports shuttered Iron Valley. I will seal the border, tax their goods, and rebuild our steel. Grocery prices drop when our economy fights back. Strength at the Border. Peace Through Power. Elect a General."
+  }
+]

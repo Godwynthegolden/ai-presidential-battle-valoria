@@ -1,0 +1,156 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Thorne assembled tonight's bloc, Marcus. Cut the operator, the coalition collapses. Thirty million escrowed.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Silas Thorne",
+      "whisperText": "Thorne assembled tonight's bloc, Marcus. Cut the operator, the coalition collapses. Thirty million escrowed.",
+      "receiverResponse": "Thorne's a threat to national security. Consider him neutralized.",
+      "privateStrategy": "Four-vote bloc targets me. Eliminating Thorne decapitates their coordination. Vance shares the threat—his vote plus mine fractures the consensus.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria, Elena's stock is in freefall. Thirty million escrowed—we close her position tonight.",
+    "details": {
+      "location": "West Wing Corridor 3",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Victoria, Elena's stock is in freefall. Thirty million escrowed—we close her position tonight.",
+      "receiverResponse": "Elegant terms, Arthur. My capital's already working against her anyway.",
+      "privateStrategy": "Elena's four accusations make her the safe consensus kill. Aligning with Victoria builds a Sterling bloc while preserving my war chest for ballot bailouts.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Elena's already bleeding out, Silas. Spend your ballot on Arthur. Escrow clears at reveal.",
+    "details": {
+      "location": "Capitol Cloakroom Cam 04",
+      "agreedTargetName": "Arthur Sterling",
+      "whisperText": "Elena's already bleeding out, Silas. Spend your ballot on Arthur. Escrow clears at reveal.",
+      "receiverResponse": "Sterling's empire ends quietly. My vote is yours, Victoria.",
+      "privateStrategy": "Elena dies regardless—four accusers. Redirect capital to blindside Father; killing Arthur breaks the empire and removes my richest threat.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Zhao mocked my flock, Marcus. Her billions threaten your command—thirty million staged. Bury her.",
+    "details": {
+      "location": "Sub-Basement Boiler Room",
+      "agreedTargetName": "Vivienne Zhao",
+      "whisperText": "Zhao mocked my flock, Marcus. Her billions threaten your command—thirty million staged. Bury her.",
+      "receiverResponse": "Consider her neutralized. Keep your flock praying, preacher.",
+      "privateStrategy": "Elena falls regardless—free consensus. Zhao's $120M and her onstage attack make her my true threat. Vance's hammer plus my treasury blindsides her tonight.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Everyone's burning Elena—our hands stay clean. Thirty million staged. Vance falls tonight, Vivienne.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "Everyone's burning Elena—our hands stay clean. Thirty million staged. Vance falls tonight, Vivienne.",
+      "receiverResponse": "Vance measured everyone but you. He won't survive the count.",
+      "privateStrategy": "Elena dies regardless—four knives already in her. While the room stares",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, thirty in private collateral is staged for your race. Make sure Elena doesn't survive.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Silas, thirty in private collateral is staged for your race. Make sure Elena doesn't survive.",
+      "receiverResponse": "We understand each other. You'll get what you deserve.",
+      "privateStrategy": "Align tactically to eliminate Elena Rostova while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept_and_betray",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena, orchestrate a secret counter-blindside!",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "Elena, orchestrate a secret counter-blindside!",
+      "receiverResponse": "The metrics align. Marcus will not survive tonight.",
+      "privateStrategy": "Align tactically to eliminate Marcus Vance while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

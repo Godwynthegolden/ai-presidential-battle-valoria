@@ -1,0 +1,46 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 6,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, Arthur's architecture is already collapsing. Thirty million ensures his ballot flatlines tonight.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Silas, Arthur's architecture is already collapsing. Thirty million ensures his ballot flatlines tonight.",
+      "receiverResponse": "Agreed, Doctor. Sterling's chapter closes tonight—count on it.",
+      "privateStrategy": "Arthur is politically flatlined; riding consensus costs nothing. Preserve $65M as bailout shield, then strike Maya's $100M war chest next round.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 6,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya, Elena's exit is already arithmetic. Thirty-five million makes my ballot official. Quietly, professionally.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Maya, Elena's exit is already arithmetic. Thirty-five million makes my ballot official. Quietly, professionally.",
+      "receiverResponse": "Half now. And Silas—your tells showed an hour ago.",
+      "privateStrategy": "Elena is doomed; my vote is redundant there. Monetize it. $110M war chest funds double bailouts, then blindside Maya or Vivienne.",
+      "bribeOffered": false,
+      "bribeAmount": 35,
+      "upfrontPaid": 17,
+      "escrowPending": 18,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

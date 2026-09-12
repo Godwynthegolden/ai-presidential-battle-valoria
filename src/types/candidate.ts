@@ -76,7 +76,10 @@ export interface Candidate {
   };
   voice?: CandidateVoiceConfig; // Fish Audio Voice reference
   customAvatarUrl?: string; // Cropped custom uploaded photo / avatar
+  fullBodyImageUrl?: string; // Full-body transparent PNG cutout for Introduction Motion Graphic
+  introductionDialogue?: string; // YouTube Introduction Motion Graphic spoken statement
   isCustom?: boolean;       // Flag if created by user
   initialBudget?: number;   // Initial campaign dollars ($80, $100, $120, etc.)
   systemPrompt: string;
 }
+

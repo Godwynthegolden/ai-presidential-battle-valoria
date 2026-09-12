@@ -468,7 +468,9 @@ export function useGameEngine(
         audioSync.attachAudio(audio, targetText, targetSpeakerId ?? undefined);
       }
 
-      const isCCTV = Boolean(options?.isCCTV);
+      const isCCTV = typeof options?.isCCTV === 'boolean' 
+        ? options.isCCTV 
+        : (state.phase === 'CCTV_BACKROOM');
       const wiretapStrength = configRef.current?.cctvWiretapAudioEffect ?? 80;
 
       const handleEnd = () => {
@@ -519,15 +521,19 @@ export function useGameEngine(
       return;
     }
 
+    const isCCTVMode = typeof options?.isCCTV === 'boolean' 
+      ? options.isCCTV 
+      : (state.phase === 'CCTV_BACKROOM');
     const res = await synthesizeSpeechAudio(text, voiceId, speakerCandidateId);
     if (res.audioBlobUrl) {
       playAudioUrl(res.audioBlobUrl, {
         ...options,
+        isCCTV: isCCTVMode,
         text: options?.text || text,
         speakerId: options?.speakerId || speakerCandidateId,
       });
     }
-  }, [state.playback.soundEnabled, stopSpeechAudio, synthesizeSpeechAudio, playAudioUrl]);
+  }, [state.playback.soundEnabled, state.phase, stopSpeechAudio, synthesizeSpeechAudio, playAudioUrl]);
 
   const playCCTVPactAudio = useCallback((pact: BackroomPact) => {
     if (!pact || !state.playback.soundEnabled) return;
@@ -617,22 +623,40 @@ export function useGameEngine(
       config: requestConfig,
     };
 
-    const res = await fetch('/api/llm/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...requestPayload,
-        config: requestConfig,
-        nineRouterConfig: requestConfig,
-      }),
-    });
+    const clientMaxRetries = 4;
+    const clientDelays = [2000, 4000, 8000, 12000];
+    let lastError: any = null;
 
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || `HTTP ${res.status}: AI generation failed via 9router`);
+    for (let attempt = 1; attempt <= clientMaxRetries; attempt++) {
+      try {
+        const res = await fetch('/api/llm/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...requestPayload,
+            config: requestConfig,
+            nineRouterConfig: requestConfig,
+          }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const errMsg = data.error || `HTTP ${res.status}: AI generation failed via 9router`;
+          throw new Error(errMsg);
+        }
+
+        return data.result !== undefined ? data.result : data;
+      } catch (err: any) {
+        lastError = err;
+        if (attempt < clientMaxRetries) {
+          const delay = (clientDelays[attempt - 1] || 10000) + Math.floor(Math.random() * 1000);
+          console.warn(`[callLLM]: Generation error for ${payload.candidateId} (attempt ${attempt}/${clientMaxRetries}): "${err.message}". Retrying in ${delay}ms...`);
+          await new Promise(r => setTimeout(r, delay));
+        }
+      }
     }
 
-    return data.result !== undefined ? data.result : data;
+    throw lastError || new Error(`AI generation via 9router failed after ${clientMaxRetries} attempts.`);
   };
 
   /**
@@ -1010,7 +1034,7 @@ export function useGameEngine(
           targetId: descriptor.targetId,
           actionType: descriptor.actionType,
           headline: descriptor.headline,
-          content: 'Delivering address...',
+          content: '',
           audioBlobUrl: null,
           audioBlob: null,
           isReady: false,
@@ -1031,7 +1055,7 @@ export function useGameEngine(
 
     // Helper to validate whether a prepared step is valid for this descriptor
     const isStepValid = (prep: PreparedStep): boolean => {
-      if (!prep.isReady || prep.error) return false;
+      if (!prep.isReady || prep.error || !prep.content) return false;
 
       // 1. Check speaker matches if descriptor specified a speaker
       if (speakerId && prep.speakerId && prep.speakerId !== speakerId) {
@@ -1039,15 +1063,31 @@ export function useGameEngine(
         return false;
       }
 
-      // 2. Check neither speaker nor target is in eliminatedCandidates
+      // 2. Check neither speaker nor target is in eliminatedCandidates (unless casting Grand Jury ballot)
+      const isGrandJuryStep = descriptor.round === 99 || 
+        descriptor.llmPayload?.action === 'final_vote' || 
+        descriptor.phase === 'FINAL_SPEECHES' || 
+        descriptor.phase === 'FINAL_VOTE' || 
+        descriptor.stepKey.startsWith('grand_jury_vote');
+
       const eliminatedIds = new Set((state.eliminatedCandidates || []).map(e => e.candidateId));
-      if (prep.speakerId && eliminatedIds.has(prep.speakerId) && actionType !== 'eliminated') {
+      if (!isGrandJuryStep && prep.speakerId && eliminatedIds.has(prep.speakerId) && actionType !== 'eliminated') {
         console.warn(`[fetchOrConsumeStep]: Rejecting ${prep.stepKey} - speaker ${prep.speakerId} is already eliminated`);
         return false;
       }
       if (prep.targetId && eliminatedIds.has(prep.targetId)) {
         console.warn(`[fetchOrConsumeStep]: Rejecting ${prep.stepKey} - target ${prep.targetId} is already eliminated`);
         return false;
+      }
+
+      // For Grand Jury final votes, target MUST belong to the surviving finalists and cannot be the speaker
+      if (isGrandJuryStep && (descriptor.llmPayload?.action === 'final_vote' || descriptor.stepKey.startsWith('grand_jury_vote'))) {
+        const finalistList = descriptor.llmPayload?.finalistIds || descriptor.llmPayload?.activeCandidateIds || [];
+        const prepVoteTarget = prep.payload?.voteTargetId || prep.payload?.targetCandidateId || prep.targetId;
+        if (prepVoteTarget && finalistList.length > 0 && (!finalistList.includes(prepVoteTarget) || prepVoteTarget === prep.speakerId)) {
+          console.warn(`[fetchOrConsumeStep]: Rejecting cached ${prep.stepKey} - vote target ${prepVoteTarget} is invalid or not in surviving finalists:`, finalistList);
+          return false;
+        }
       }
 
       // 3. For attacks, check target matches requested target
@@ -1127,8 +1167,14 @@ export function useGameEngine(
       }
     }
 
-    // 4. Fallback: Preload right now and await both LLM and TTS concurrently
-    const prep = await preloadStep(descriptor);
+    // 4. Live execution: Preload right now with persistent retries until genuine AI content is returned
+    let prep = await preloadStep(descriptor);
+    if (!prep.isReady || prep.error || !prep.content) {
+      console.warn(`[fetchOrConsumeStep]: Preload had error (${prep.error}). Retrying fresh generation for ${stepKey}...`);
+      preparedStepsRef.current.delete(stepKey);
+      lookaheadBufferRef.current.delete(stepKey);
+      prep = await preloadStep(descriptor);
+    }
     preparedStepsRef.current.delete(stepKey);
     lookaheadBufferRef.current.delete(stepKey);
     setLookaheadBufferCount(preparedStepsRef.current.size);
@@ -1477,6 +1523,7 @@ export function useGameEngine(
           } else {
             simActiveIds = remainingAfterElim;
             simPhase = 'FINAL_SPEECHES';
+            simRound = 99;
             simSpeakerIndex = -1;
           }
         }
@@ -1487,6 +1534,7 @@ export function useGameEngine(
           simSpeakerIndex = -1;
         } else {
           simPhase = 'FINAL_SPEECHES';
+          simRound = 99;
           simSpeakerIndex = -1;
         }
       } else if (simPhase === 'FINAL_SPEECHES') {
@@ -2890,14 +2938,21 @@ export function useGameEngine(
           recordSessionEvent({
             type: 'strategy_monologue',
             round,
+            speakerId: voterId,
+            speakerName: voterCand?.name || voterId,
             voterId,
             voterName: voterCand?.name || voterId,
             targetId: actualTargetId,
             targetName: targetCand?.name || actualTargetId,
             content: monologue,
-            privateReason: votePayload?.privateReason || 'Strategic elimination deliberation',
-            isBetrayal,
-            isHonoredPact,
+            headline: `Round ${round} Strategy Confessional: ${voterCand?.name || voterId}`,
+            details: {
+              privateReason: votePayload?.privateReason || 'Strategic elimination deliberation',
+              isBetrayal,
+              isHonoredPact,
+              targetCandidateId: actualTargetId,
+              targetCandidateName: targetCand?.name || actualTargetId,
+            },
           });
 
           // Record audio file
@@ -2905,7 +2960,7 @@ export function useGameEngine(
             recordSessionAudio(
               `0${round}_strategy_vote_${String(voterIdx + 1).padStart(2, '0')}_${voterId}.mp3`,
               audioBlob,
-              { phase: 'VOTE_CONFESSIONAL', round, voterId, voterName: voterCand?.name || voterId, textSnippet: monologue.slice(0, 100) }
+              { phase: 'VOTE_CONFESSIONAL', round, speakerId: voterId, speakerName: voterCand?.name || voterId, targetId: actualTargetId, targetName: targetCand?.name || actualTargetId, textSnippet: monologue.slice(0, 100) }
             );
           }
 
@@ -3092,7 +3147,7 @@ export function useGameEngine(
       // -------------------------------------------------------------
       // 4b. STRATEGIC VOTER CONFESSIONALS (Full-screen internal monologues before ballot reveal)
       if (phase === 'VOTE_CONFESSIONAL') {
-        const isFinal = round === 99 || state.phase === 'FINAL_VOTE';
+        const isFinal = round === 99 || state.phase === 'FINAL_VOTE' || Boolean(state.finalVoteTally);
         const tally = isFinal ? state.finalVoteTally : state.votesByRound[round];
         const votesList = tally?.votes || [];
         const nextVoterIdx = currentSpeakerIndex + 1;
@@ -3103,12 +3158,15 @@ export function useGameEngine(
 
           setState(prev => ({
             ...prev,
+            round: isFinal ? 99 : prev.round,
             currentSpeakerIndex: nextVoterIdx,
             stage: {
               ...prev.stage,
               speakerId: nextVote.voterId,
               targetId: nextVote.targetId,
-              headline: `ROUND ${prev.round}: CONFIDENTIAL STRATEGY CONFESSIONAL (${nextVoterIdx + 1} of ${votesList.length})`,
+              headline: isFinal
+                ? `GRAND JURY STRATEGY CONFESSIONAL (${nextVoterIdx + 1} of ${votesList.length})`
+                : `ROUND ${prev.round}: CONFIDENTIAL STRATEGY CONFESSIONAL (${nextVoterIdx + 1} of ${votesList.length})`,
               content: nextVote.strategyMonologue || 'Confidential strategic deliberation...',
               isLoading: false,
             },
@@ -3116,7 +3174,9 @@ export function useGameEngine(
               {
                 id: `tick-${Date.now()}`,
                 type: 'vote',
-                message: `🔒 ${nextVoter?.name} Strategy: "${(nextVote.strategyMonologue || '').slice(0, 80)}..."`,
+                message: isFinal
+                  ? `🏛️ GRAND JURY: ${nextVoter?.name} Final Ballot Strategy: "${(nextVote.strategyMonologue || '').slice(0, 80)}..."`
+                  : `🔒 ${nextVoter?.name} Strategy: "${(nextVote.strategyMonologue || '').slice(0, 80)}..."`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
@@ -3124,9 +3184,9 @@ export function useGameEngine(
           }));
 
           if (nextVote.audioBlobUrl) {
-            playAudioUrl(nextVote.audioBlobUrl, { text: nextVote.strategyMonologue, speakerId: nextVote.voterId });
+            playAudioUrl(nextVote.audioBlobUrl, { isCCTV: false, text: nextVote.strategyMonologue, speakerId: nextVote.voterId });
           } else if (nextVote.strategyMonologue) {
-            playSpeechAudio(nextVote.strategyMonologue, nextVoter?.voice?.voiceId, nextVote.voterId);
+            playSpeechAudio(nextVote.strategyMonologue, nextVoter?.voice?.voiceId, nextVote.voterId, { isCCTV: false });
           }
 
           isExecutingStep.current = false;
@@ -3139,6 +3199,7 @@ export function useGameEngine(
             setState(prev => ({
               ...prev,
               phase: 'FINAL_REVEAL',
+              round: 99,
               stage: {
                 ...prev.stage,
                 speakerId: prev.winnerId,
@@ -3475,6 +3536,7 @@ export function useGameEngine(
           setState(prev => ({
             ...prev,
             phase: 'FINAL_SPEECHES',
+            round: 99,
             currentSpeakerIndex: 0,
             stage: {
               speakerId: firstFinalist.id,
@@ -3501,7 +3563,7 @@ export function useGameEngine(
           const stepDescriptor = {
             stepKey: `final_speech-0-${firstFinalist.id}`,
             phase: 'FINAL_SPEECHES' as GamePhase,
-            round,
+            round: 99,
             speakerId: firstFinalist.id,
             targetId: null,
             actionType: 'speech' as const,
@@ -3509,7 +3571,7 @@ export function useGameEngine(
             llmPayload: {
               action: 'final_speech' as const,
               candidateId: firstFinalist.id,
-              round,
+              round: 99,
               activeCandidateIds,
               finalistIds: activeCandidateIds,
               historyContext: {
@@ -3565,6 +3627,7 @@ export function useGameEngine(
           dispatchBackgroundPreload({
             ...state,
             phase: 'FINAL_SPEECHES',
+            round: 99,
             currentSpeakerIndex: 0,
             finalSpeeches: updatedFinalSpeeches,
           });
@@ -3608,7 +3671,7 @@ export function useGameEngine(
           const stepDescriptor = {
             stepKey: `final_speech-${nextIndex}-${finalist.id}`,
             phase: 'FINAL_SPEECHES' as GamePhase,
-            round,
+            round: 99,
             speakerId: finalist.id,
             targetId: null,
             actionType: 'speech' as const,
@@ -3616,7 +3679,7 @@ export function useGameEngine(
             llmPayload: {
               action: 'final_speech' as const,
               candidateId: finalist.id,
-              round,
+              round: 99,
               activeCandidateIds,
               finalistIds: activeCandidateIds,
               historyContext: {
@@ -3672,6 +3735,7 @@ export function useGameEngine(
           dispatchBackgroundPreload({
             ...state,
             phase: 'FINAL_SPEECHES',
+            round: 99,
             currentSpeakerIndex: nextIndex,
             finalSpeeches: updatedFinalSpeeches,
           });
@@ -3679,15 +3743,20 @@ export function useGameEngine(
           // All 3 finalists delivered speeches! Transition to FINAL GRAND JURY VOTE
           sounds.playGavel();
 
+          const allVoters = (participatingCandidateIds && participatingCandidateIds.length > 0)
+            ? participatingCandidateIds
+            : (state.participatingCandidateIds || state.activeCandidateIds);
+
           setState(prev => ({
             ...prev,
             phase: 'FINAL_VOTE',
+            round: 99,
             stage: {
               speakerId: null,
               targetId: null,
               actionType: 'vote',
               headline: 'GRAND JURY VOTE: ELECTING THE PRESIDENT OF VALORIA',
-              content: `All ${participatingCandidateIds.length} election members (finalists & jury) are casting their secret final votes...`,
+              content: `All ${allVoters.length} election members (finalists & jury) are casting their secret final votes to ELECT the next President...`,
               isLoading: true,
               isRevealingVotes: false,
               revealedVoteIndex: 0,
@@ -3697,7 +3766,7 @@ export function useGameEngine(
               {
                 id: `tick-${Date.now()}`,
                 type: 'system',
-                message: `🏛️ GRAND JURY CONVENED. All ${participatingCandidateIds.length} participating members casting their final ballots!`,
+                message: `🏛️ GRAND JURY CONVENED. All ${allVoters.length} participating members casting their final ballots to elect the President!`,
                 timestamp: Date.now(),
               },
               ...prev.tickerLog,
@@ -3709,7 +3778,7 @@ export function useGameEngine(
           );
 
           // Gather final votes from all participating candidates with strategic monologues
-          const votePromises = participatingCandidateIds.map(async (voterId, voterIdx) => {
+          const votePromises = allVoters.map(async (voterId, voterIdx) => {
             const voterCand = CANDIDATE_MAP.get(voterId);
             const stepDescriptor: StepDescriptor = {
               stepKey: `grand_jury_vote-${voterIdx}-${voterId}`,
@@ -3718,7 +3787,7 @@ export function useGameEngine(
               speakerId: voterId,
               targetId: null,
               actionType: 'vote',
-              headline: `GRAND JURY STRATEGY CONFESSIONAL (${voterIdx + 1} of ${participatingCandidateIds.length})`,
+              headline: `GRAND JURY STRATEGY CONFESSIONAL (${voterIdx + 1} of ${allVoters.length})`,
               llmPayload: {
                 action: 'final_vote',
                 candidateId: voterId,
@@ -3734,7 +3803,12 @@ export function useGameEngine(
 
             const consumed = await fetchOrConsumeStep(stepDescriptor);
             const votePayload = consumed.payload;
-            const actualTargetId = votePayload?.voteTargetId || activeCandidateIds[0];
+            const isTargetValidFinalist = votePayload?.voteTargetId && 
+              activeCandidateIds.includes(votePayload.voteTargetId) && 
+              votePayload.voteTargetId !== voterId;
+            const actualTargetId = isTargetValidFinalist
+              ? votePayload.voteTargetId
+              : (activeCandidateIds.find(id => id !== voterId) || activeCandidateIds[0]);
             const targetCand = CANDIDATE_MAP.get(actualTargetId);
             const monologue = votePayload?.strategyMonologue || consumed.content || `My vote for President goes to ${targetCand?.name}. They demonstrated the strength, vision, and steel necessary to lead Valoria forward.`;
 
@@ -3754,26 +3828,34 @@ export function useGameEngine(
             recordSessionEvent({
               type: 'strategy_monologue',
               round: 99,
+              speakerId: voterId,
+              speakerName: voterCand?.name || voterId,
               voterId,
               voterName: voterCand?.name || voterId,
               targetId: actualTargetId,
               targetName: targetCand?.name || actualTargetId,
               content: monologue,
-              privateReason: votePayload?.privateReason || 'Grand Jury final vote',
+              headline: `Grand Jury Presidential Confessional: ${voterCand?.name || voterId}`,
+              details: {
+                privateReason: votePayload?.privateReason || 'Grand Jury final vote to elect President',
+                isGrandJury: true,
+                targetCandidateId: actualTargetId,
+                targetCandidateName: targetCand?.name || actualTargetId,
+              },
             });
 
             if (audioBlob) {
               recordSessionAudio(
                 `99_strategy_jury_${String(voterIdx + 1).padStart(2, '0')}_${voterId}.mp3`,
                 audioBlob,
-                { phase: 'VOTE_CONFESSIONAL', round: 99, voterId, voterName: voterCand?.name || voterId, textSnippet: monologue.slice(0, 100) }
+                { phase: 'VOTE_CONFESSIONAL', round: 99, speakerId: voterId, speakerName: voterCand?.name || voterId, targetId: actualTargetId, targetName: targetCand?.name || actualTargetId, textSnippet: monologue.slice(0, 100) }
               );
             }
 
             return {
               voterId,
               targetId: actualTargetId,
-              reason: votePayload?.privateReason || 'Grand Jury final vote',
+              reason: votePayload?.privateReason || 'Grand Jury final vote to elect President',
               strategyMonologue: monologue,
               audioBlobUrl,
               audioBlob,
@@ -3799,6 +3881,13 @@ export function useGameEngine(
             if (count > highestVotes) {
               highestVotes = count;
               electedWinnerId = fid;
+            } else if (count === highestVotes) {
+              // Tiebreaker: candidate with the higher war chest treasury balance wins
+              const currentWinnerBudget = state.candidateBudgets[electedWinnerId] ?? 0;
+              const contenderBudget = state.candidateBudgets[fid] ?? 0;
+              if (contenderBudget > currentWinnerBudget) {
+                electedWinnerId = fid;
+              }
             }
           });
 
@@ -3830,6 +3919,7 @@ export function useGameEngine(
           setState(prev => ({
             ...prev,
             phase: 'VOTE_CONFESSIONAL',
+            round: 99,
             currentSpeakerIndex: 0,
             finalVoteTally: finalTally,
             winnerId: electedWinnerId,
@@ -3856,9 +3946,9 @@ export function useGameEngine(
           }));
 
           if (firstJuryVote?.audioBlobUrl) {
-            playAudioUrl(firstJuryVote.audioBlobUrl, { text: firstJuryVote.strategyMonologue, speakerId: firstJuryVote.voterId });
+            playAudioUrl(firstJuryVote.audioBlobUrl, { isCCTV: false, text: firstJuryVote.strategyMonologue, speakerId: firstJuryVote.voterId });
           } else if (firstJuryVote?.strategyMonologue) {
-            playSpeechAudio(firstJuryVote.strategyMonologue, firstJuryVoter?.voice?.voiceId, firstJuryVote.voterId);
+            playSpeechAudio(firstJuryVote.strategyMonologue, firstJuryVoter?.voice?.voiceId, firstJuryVote.voterId, { isCCTV: false });
           }
         }
 
@@ -4900,9 +4990,10 @@ export function useGameEngine(
         try {
           const juryPrep = await preloadStep(juryDesc);
           const payload = juryPrep.payload || {};
-          const voteTarget = (payload.targetCandidateId && finalists.includes(payload.targetCandidateId))
-            ? payload.targetCandidateId
-            : finalists[jIdx % finalists.length];
+          const rawVoteTarget = payload.voteTargetId || payload.targetCandidateId;
+          const voteTarget = (rawVoteTarget && finalists.includes(rawVoteTarget) && rawVoteTarget !== voterId)
+            ? rawVoteTarget
+            : (finalists.find(f => f !== voterId) || finalists[0]);
           grandJuryVotes[voteTarget] = (grandJuryVotes[voteTarget] || 0) + 1;
         } catch (e) {
           console.warn(`[Autonomous Buffer Error for Grand Jury ${juryDesc.stepKey}]:`, e);

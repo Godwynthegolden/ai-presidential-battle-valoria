@@ -1,0 +1,109 @@
+[
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Eighty hostages came home because Lin paid the room. Now she'd \"negotiate\" with algorithms stealing our children's minds and biometrics. You don't read threats—you destroy them. Ban the apps. Eliminate the appeaser.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone's growth metric? Indictments! Four governors, zero payrolls created. I turn crises into market share—he turns courtrooms into car-bomb magnets. Shareholders, this stock's worthless. Sell. Vote him off my board.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Garrick Stone"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "My Accelerator funds recovery clinics, not addiction, Elena. You'd audit a child's breakdown as a budget line — I've watched you toast algorithm barons at my father's Geneva dinners. A deficit of warmth. Eliminate the spreadsheet.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Elena Rostova",
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "The Good Shepherd leaves ninety-nine to find one lost child. Rostova counts all hundred — and audits the lost! No warmth, no mercy, a spreadsheet where souls should be. Cast this winter out tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance calls my diplomacy \"paying the room.\" No, Marcus—I read rooms. You only break them. Your hammer-first instincts left our children's biometrics undefended. Valoria, retire the hammer tonight.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "content": "Valoria's children are dopamine hostages, and Haddon's clinical protocol is... hymns? His jet logs more miles than his miracles. Faith is legacy firmware—unpatchable, obsolete. Decommission the bishop. Purge him tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elijah Haddon"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "My colleagues, prosecutor Stone mistakes indictments for governance. Thirty-five years taught me: institutions outlast vendettas. His blacklist politics would criminalize half this chamber. Valoria needs consensus, not a subpoena with a podium. Retire the prosecutor.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Garrick Stone"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 2,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Sell my stock, Sterling? Oligarchs bombed me three times—I'm still trading. Exhibit A: your algorithms addicted Valoria's children and leaked their biometrics—for profit. Ladies and gentlemen of the jury: render your verdict tonight.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Arthur Sterling",
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  }
+]

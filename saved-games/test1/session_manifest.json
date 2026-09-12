@@ -1,0 +1,121 @@
+{
+  "sessionName": "test1",
+  "originalName": "test1",
+  "createdAt": "2026-08-31T21:56:39.276Z",
+  "status": "in_progress",
+  "topic": "The Breadbasket Drought & Hydro-Power Grid Collapse: A historic 3-year drought has crippled the agricultural Breadbasket provinces and dropped hydro-electric reservoirs to critical levels, causing rolling blackouts.",
+  "candidatesCount": 11,
+  "candidates": [
+    {
+      "id": "jax-alvarez",
+      "name": "Jackson Alvarez",
+      "codename": "THE POPULIST",
+      "archetype": "populist",
+      "titleRole": "Governor of Iron Valley & Former Steelworker",
+      "slogan": "Restore Valoria to the Working Class!",
+      "initialBudget": 100
+    },
+    {
+      "id": "elena-rostova",
+      "name": "Elena Rostova",
+      "codename": "THE TECHNOCRAT",
+      "archetype": "technocrat",
+      "titleRole": "Oxford-Educated Economist & Ex-Central Banker",
+      "slogan": "Fiscal Discipline. Sustainable Growth.",
+      "initialBudget": 100
+    },
+    {
+      "id": "art-sterling",
+      "name": "Arthur Sterling",
+      "codename": "THE TYCOON",
+      "archetype": "capitalist",
+      "titleRole": "Chairman of Sterling Capital & Media Holdings",
+      "slogan": "Run Valoria Like a Fortune 500 Company!",
+      "initialBudget": 100
+    },
+    {
+      "id": "victoria-sterling",
+      "name": "Victoria Sterling",
+      "codename": "THE POPULIST HEIRESS",
+      "archetype": "wildcard",
+      "titleRole": "Founder of the Valoria Youth Climate Accelerator",
+      "slogan": "Break the Family Empire. Fund the People.",
+      "initialBudget": 120
+    },
+    {
+      "id": "marcus-vance",
+      "name": "Marcus Vance",
+      "codename": "THE GENERAL",
+      "archetype": "hawk",
+      "titleRole": "Former Joint Chief & Defense Minister",
+      "slogan": "Strength at the Border. Peace Through Power.",
+      "initialBudget": 100
+    },
+    {
+      "id": "maya-lin",
+      "name": "Maya Lin",
+      "codename": "THE HOSTAGE NEGOTIATOR",
+      "archetype": "careerist",
+      "titleRole": "Former Special Envoy to Ostrov & Hostage Task Force Leader",
+      "slogan": "Master the Room. Peace Through Precision.",
+      "initialBudget": 100
+    },
+    {
+      "id": "elijah-haddon",
+      "name": "Elijah Haddon",
+      "codename": "THE TELEVANGELIST",
+      "archetype": "traditionalist",
+      "titleRole": "Presiding Bishop of the National Faith Fellowship (50k Members)",
+      "slogan": "Heal the Soul of Valoria. Return to Faith & Family.",
+      "initialBudget": 100
+    },
+    {
+      "id": "vivienne-zhao",
+      "name": "Vivienne Zhao",
+      "codename": "THE NEUROTECH VISIONARY",
+      "archetype": "technocrat",
+      "titleRole": "Founder & CEO of Synapse Dynamics",
+      "slogan": "Upgrade Human Potential. Lead the Synthetic Century.",
+      "initialBudget": 120
+    },
+    {
+      "id": "silas-thorne",
+      "name": "Silas Thorne",
+      "codename": "THE DIPLOMAT",
+      "archetype": "careerist",
+      "titleRole": "Senior Senator from Capitol District & Ex-Foreign Envoy",
+      "slogan": "Tested Leadership for a Steady Valoria.",
+      "initialBudget": 100
+    },
+    {
+      "id": "garrick-stone",
+      "name": "Garrick Stone",
+      "codename": "THE CARTEL CRUSADER",
+      "archetype": "reformer",
+      "titleRole": "Chief Prosecutor of the Federal Anti-Corruption Task Force",
+      "slogan": "No Oligarch is Above the Law. The Indictment is Coming.",
+      "initialBudget": 80
+    },
+    {
+      "id": "sora-kim",
+      "name": "Sora Kim",
+      "codename": "THE AI ETHICAL HACKER",
+      "archetype": "wildcard",
+      "titleRole": "Founder of the Digital Sovereignty Front & Ex-NSA Whitehat",
+      "slogan": "Open Source the Republic. Patch the Corrupt Bureaucracy.",
+      "initialBudget": 80
+    }
+  ],
+  "summaryStats": {
+    "totalRounds": 2,
+    "totalCampaignSpeeches": 11,
+    "totalAttacks": 19,
+    "totalCctvPacts": 10,
+    "totalBribesOffered": 10,
+    "totalBribesAccepted": 10,
+    "totalBribesBetrayed": 0,
+    "totalBailoutTransactions": 3,
+    "totalDollarsSpentOnBailouts": 120,
+    "totalEliminations": 1
+  }
+}

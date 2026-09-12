@@ -1,0 +1,38 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya thinks the handshake shields her. Thirty-eight million—below bailout threshold. Consensus plus my ballot liquidates her; the escrow fifteen million rebuilds my balance sheet. Checkmate.",
+    "privateReason": "Maya's sub-$40M balance guarantees elimination; pact escrow pays me $15M risk-free.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Sterling believes her philanthropic halo deflects scrutiny. Fifteen million—zero bailout capacity. Three votes stack already; mine guarantees liquidation while Lin's pact shields my flank next round.",
+    "privateReason": "Sterling's terminally wounded; my vote seals cheap consensus, banks escrow, keeps Lin shielding me.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Sterling believes her climate halo deflects scrutiny. Her $15M can't cover a bailout; consensus plus Zhao's handshake guarantees liquidation. I bank the escrow and sign her political obituary.",
+    "privateReason": "Consensus guarantees elimination; honoring Zhao's pact banks escrow and preserves my balance sheet.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

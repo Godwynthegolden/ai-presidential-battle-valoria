@@ -1,0 +1,24 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 7,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Vivienne, your quantum, my old boys' network. Twenty million, and Elena's ledger closes tonight.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Vivienne, your quantum, my old boys' network. Twenty million, and Elena's ledger closes tonight.",
+      "receiverResponse": "Payment authorized. Consider Elena deprecated by morning, Senator.",
+      "privateStrategy": "Elena and Victoria branded me corrupt; Vivienne already hunts Elena. Selling my vote funds a bailout shield against Sterling's war chest.",
+      "bribeOffered": false,
+      "bribeAmount": 20,
+      "upfrontPaid": 10,
+      "escrowPending": 10,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

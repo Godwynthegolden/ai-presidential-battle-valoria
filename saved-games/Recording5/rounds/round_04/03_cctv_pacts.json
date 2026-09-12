@@ -1,0 +1,90 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Vivienne, the room hunts Elena. Flip your blade to my father — thirty million clears.",
+    "details": {
+      "location": "Sub-Basement Boiler Room",
+      "agreedTargetName": "Arthur Sterling",
+      "whisperText": "Vivienne, the room hunts Elena. Flip your blade to my father — thirty million clears.",
+      "receiverResponse": "Neural capital appreciates liquidity. Arthur's signal terminates tonight.",
+      "privateStrategy": "Elena's doomed regardless — spending there is waste. Vivienne's broke; $30M flips her to Father. Behead the media empire while Rostova absorbs every vote.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Vivienne, the room's already condemned Marcus. Thirty million escrowed—cast the decisive vote.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "Vivienne, the room's already condemned Marcus. Thirty million escrowed—cast the decisive vote.",
+      "receiverResponse": "Probability favors it. Marcus terminates tonight—witness the count.",
+      "privateStrategy": "Marcus is consensus-doomed; binding Zhao's vote guarantees the kill while anchoring my richest rival to my ledger, conserving $85M for ballot emergencies.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, your siege speech primed the room. Thirty million escrowed—finish Vance tonight.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "Silas, your siege speech primed the room. Thirty million escrowed—finish Vance tonight.",
+      "receiverResponse": "Quietly done, Doctor. His siege ends at the count.",
+      "privateStrategy": "Vance carries three accusations; his elimination is consensus-cheap. Buying",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 4,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya, the chamber thirsts for Vance's exit. Thirty million escrowed—seal his retirement tonight.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "Maya, the chamber thirsts for Vance's exit. Thirty million escrowed—seal his retirement tonight.",
+      "receiverResponse": "Precision work, Silas. My vote lands where you placed it.",
+      "privateStrategy": "Vance bleeds from three accusers; eliminating him consolidates establishment votes. Maya's hatred guarantees compliance. Escrow protects my capital from betrayal.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

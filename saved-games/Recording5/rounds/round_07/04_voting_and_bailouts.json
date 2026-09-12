@@ -1,0 +1,87 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 7,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "silas-thorne",
+          "reason": "Thorne is consensus-priced, sub-$40M vulnerable; honoring Sterling's pact banks $15M escrow.",
+          "strategyMonologue": "Thorne assumes thirty-five years of Senate favors buy immunity. His $20M sits below bailout threshold—instant liquidation. My Sterling escrow pays $15M. Checkmate.",
+          "audioBlobUrl": "blob:http://localhost:3000/bb811c0c-d228-48b1-b7f7-ff850b4839c7",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": true,
+          "betrayedAllyId": "vivienne-zhao",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "elena-rostova",
+          "reason": "Strategic determination",
+          "strategyMonologue": "Elena thinks hunting Thorne shields her. Her $35M can't cover a bailout. Vivienne's ballot plus mine liquidates the governor—and escrow lifts",
+          "audioBlobUrl": "blob:http://localhost:3000/15cb5e12-e337-4a6a-935e-615f619badc0",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "silas-thorne",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Victoria Sterling",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "art-sterling",
+          "reason": "Honor pact secures $15M escrow; concentrated votes drain Sterling to $5M, keeping Haddon as shield.",
+          "strategyMonologue": "Sterling assumes the room's fixation on Haddon covers his flanks. Two concentrated ballots force his forty-million bailout—five million remaining. Liquidation by arithmetic.",
+          "audioBlobUrl": "blob:http://localhost:3000/1cd4f02f-2dce-4511-9092-2d4bff3b08c2",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Arthur Sterling"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "art-sterling",
+          "reason": "Strategic elimination vote",
+          "strategyMonologue": "Arthur Sterling assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+          "audioBlobUrl": "blob:http://localhost:3000/3a458a9b-b44f-453e-b164-24faf4db7166",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "vivienne-zhao",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Arthur Sterling"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r7-1-elena-rostova",
+          "candidateId": "elena-rostova",
+          "round": 7,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 10,
+          "timestamp": 1789067910973,
+          "candidateName": "Elena Rostova"
+        }
+      ],
+      "eliminatedId": "silas-thorne",
+      "eliminatedName": "Silas Thorne",
+      "finalVoteCount": 1
+    }
+  }
+]

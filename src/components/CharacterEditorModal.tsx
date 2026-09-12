@@ -6,6 +6,7 @@ import { CandidateAvatar } from './CandidateAvatar';
 import { ImageCropperModal } from './ImageCropperModal';
 import { NineRouterConfigState } from './NineRouterSettingsModal';
 import { CURATED_VOICES, FishVoiceModel } from '@/services/fishAudio';
+import { getDefaultIntroductionDialogue } from '@/data/candidates';
 import { 
   X, 
   Sparkles, 
@@ -32,7 +33,10 @@ import {
   Mic,
   Music,
   Radio,
-  DollarSign
+  DollarSign,
+  Film,
+  Link,
+  FileImage
 } from 'lucide-react';
 
 const SVG_ICONS: Array<{ type: CandidateSvgIcon; label: string }> = [
@@ -221,12 +225,21 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
   const activeAudioRef = React.useRef<HTMLAudioElement | null>(null);
   const activeAudioUrlRef = React.useRef<string | null>(null);
 
+  // Full-body portrait upload state
+  const [isUploadingFullBody, setIsUploadingFullBody] = useState(false);
+  const [fullBodyUploadError, setFullBodyUploadError] = useState<string | null>(null);
+  const [showFullBodyUrlInput, setShowFullBodyUrlInput] = useState(false);
+  const [fullBodyUrlValue, setFullBodyUrlValue] = useState('');
+  const fullBodyInputRef = React.useRef<HTMLInputElement | null>(null);
+
   // Candidate Form State
   const [form, setForm] = useState<Candidate>(() => {
     const defaultVoice = CURATED_VOICES[0];
     if (candidateToEdit) {
       return {
         ...candidateToEdit,
+        fullBodyImageUrl: candidateToEdit.fullBodyImageUrl,
+        introductionDialogue: candidateToEdit.introductionDialogue || getDefaultIntroductionDialogue(candidateToEdit),
         voice: candidateToEdit.voice || {
           voiceId: defaultVoice.id,
           voiceName: defaultVoice.name,
@@ -264,6 +277,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
         category: defaultVoice.category,
         speed: 1.0,
       },
+      introductionDialogue: 'I am a new presidential contender in the Republic of Valoria. Together we will restore true democratic power to the people!',
       systemPrompt: 'You are a bold presidential contender in the Republic of Valoria. Speak with authenticity, intelligence, and conviction.',
       isCustom: true,
     };
@@ -275,6 +289,8 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
     if (candidateToEdit) {
       setForm({
         ...candidateToEdit,
+        fullBodyImageUrl: candidateToEdit.fullBodyImageUrl,
+        introductionDialogue: candidateToEdit.introductionDialogue || getDefaultIntroductionDialogue(candidateToEdit),
         voice: candidateToEdit.voice || {
           voiceId: defaultVoice.id,
           voiceName: defaultVoice.name,
@@ -284,6 +300,7 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
         }
       });
       setCustomColorHex(candidateToEdit.color.primary || '#3b82f6');
+      setFullBodyUrlValue(candidateToEdit.fullBodyImageUrl || '');
     } else {
       setForm({
         id: `custom_${Date.now()}`,
@@ -313,13 +330,66 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
           category: defaultVoice.category,
           speed: 1.0,
         },
+        introductionDialogue: 'I am a new presidential contender in the Republic of Valoria. Together we will restore true democratic power to the people!',
         systemPrompt: 'You are a bold presidential contender in the Republic of Valoria. Speak with authenticity, intelligence, and conviction.',
         isCustom: true,
       });
       setCustomColorHex(COLOR_PRESETS[0].primary);
+      setFullBodyUrlValue('');
       setActiveTab('ai_generate');
     }
   }, [candidateToEdit, isOpen]);
+
+  const handleFullBodyFile = async (file: File) => {
+    if (!file) return;
+    setIsUploadingFullBody(true);
+    setFullBodyUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('candidateId', form.id || 'candidate');
+
+      const res = await fetch('/api/candidates/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          setForm(prev => ({ ...prev, fullBodyImageUrl: data.url }));
+          setFullBodyUrlValue(data.url);
+          setIsUploadingFullBody(false);
+          return;
+        }
+      }
+
+      // Fallback to FileReader base64
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64Url = e.target?.result as string;
+        setForm(prev => ({ ...prev, fullBodyImageUrl: base64Url }));
+        setFullBodyUrlValue('');
+        setIsUploadingFullBody(false);
+      };
+      reader.onerror = () => {
+        setFullBodyUploadError('Failed to read image file');
+        setIsUploadingFullBody(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.warn('[Full body upload server error, falling back to base64]:', err);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64Url = e.target?.result as string;
+        setForm(prev => ({ ...prev, fullBodyImageUrl: base64Url }));
+        setFullBodyUrlValue('');
+        setIsUploadingFullBody(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Cleanup audio on unmount or close
   useEffect(() => {
@@ -803,6 +873,135 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
               </div>
             </div>
 
+            {/* Full-Body Transparent Portrait PNG (For YouTube Introduction Motion Graphic) */}
+            <div className="flex flex-col gap-2 p-3 rounded-2xl bg-gradient-to-b from-cyan-950/20 to-slate-950/60 border border-cyan-500/30">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-mono font-bold text-cyan-300 flex items-center gap-1.5">
+                  <Film className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Full-Body Portrait (PNG):</span>
+                </label>
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-500/40">
+                  {form.fullBodyImageUrl ? '✓ PNG Loaded' : 'Recommended'}
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-mono leading-tight">
+                Transparent PNG cutout displayed on the right side of the YouTube Intro Motion Graphic.
+              </p>
+
+              {/* Full-Body Image Preview Thumbnail */}
+              {form.fullBodyImageUrl ? (
+                <div className="relative w-full h-36 rounded-xl border border-cyan-500/40 overflow-hidden flex items-center justify-center bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:12px_12px] bg-slate-950 shadow-inner group">
+                  {/* Atmospheric Glow behind character */}
+                  <div 
+                    className="absolute w-24 h-24 rounded-full blur-2xl opacity-40 pointer-events-none"
+                    style={{ backgroundColor: form.color.primary }}
+                  />
+                  <img 
+                    src={form.fullBodyImageUrl} 
+                    alt={`${form.name} Full-Body`} 
+                    className="h-full w-auto object-contain z-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute bottom-1 right-1 z-20 flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => fullBodyInputRef.current?.click()}
+                      className="px-2 py-1 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-500/40 text-[10px] font-mono font-bold backdrop-blur-sm transition cursor-pointer"
+                      title="Replace Full-Body PNG"
+                    >
+                      Replace
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForm(prev => ({ ...prev, fullBodyImageUrl: undefined }));
+                        setFullBodyUrlValue('');
+                      }}
+                      className="p-1 rounded-lg bg-red-950/90 hover:bg-red-900 text-red-300 border border-red-800 text-[10px] font-mono backdrop-blur-sm transition cursor-pointer"
+                      title="Remove Full-Body Image"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div 
+                  onClick={() => fullBodyInputRef.current?.click()}
+                  className="w-full h-24 border border-dashed border-cyan-500/30 hover:border-cyan-400 rounded-xl flex flex-col items-center justify-center gap-1 p-2 text-center cursor-pointer transition bg-slate-900/40 hover:bg-cyan-950/30 group"
+                >
+                  <Upload className="w-4 h-4 text-cyan-400 transition-transform group-hover:-translate-y-0.5" />
+                  <span className="text-[11px] font-mono font-bold text-white block">
+                    Upload Transparent PNG
+                  </span>
+                  <span className="text-[9px] text-slate-500 font-mono block">
+                    Click to browse or drop PNG portrait
+                  </span>
+                </div>
+              )}
+
+              {/* Uploading Spinner */}
+              {isUploadingFullBody && (
+                <div className="flex items-center gap-2 text-[10px] font-mono text-cyan-300">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <span>Uploading full-body portrait...</span>
+                </div>
+              )}
+
+              {/* Upload Error */}
+              {fullBodyUploadError && (
+                <div className="text-[10px] font-mono text-red-300 bg-red-950/50 p-1.5 rounded-lg border border-red-800">
+                  ⚠️ {fullBodyUploadError}
+                </div>
+              )}
+
+              {/* URL Direct Input Toggle */}
+              <div className="flex items-center justify-between text-[10px] font-mono">
+                <button
+                  type="button"
+                  onClick={() => setShowFullBodyUrlInput(prev => !prev)}
+                  className="text-slate-400 hover:text-cyan-300 flex items-center gap-1 transition cursor-pointer"
+                >
+                  <Link className="w-3 h-3" />
+                  <span>{showFullBodyUrlInput ? 'Hide URL input' : 'Paste Image URL'}</span>
+                </button>
+              </div>
+
+              {showFullBodyUrlInput && (
+                <div className="flex items-center gap-1.5 pt-1">
+                  <input
+                    type="text"
+                    value={fullBodyUrlValue}
+                    onChange={(e) => setFullBodyUrlValue(e.target.value)}
+                    placeholder="https://... or /uploads/..."
+                    className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-[11px] font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (fullBodyUrlValue.trim()) {
+                        setForm(prev => ({ ...prev, fullBodyImageUrl: fullBodyUrlValue.trim() }));
+                        setShowFullBodyUrlInput(false);
+                      }
+                    }}
+                    className="px-2 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-black text-[10px] font-mono font-bold transition cursor-pointer"
+                  >
+                    Apply
+                  </button>
+                </div>
+              )}
+
+              {/* Hidden file input */}
+              <input
+                ref={fullBodyInputRef}
+                type="file"
+                accept="image/png,image/webp,image/jpeg"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFullBodyFile(file);
+                }}
+                className="hidden"
+              />
+            </div>
+
             {/* SVG Icon Picker */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-mono font-bold text-slate-400">
@@ -1028,6 +1227,110 @@ export const CharacterEditorModal: React.FC<CharacterEditorModalProps> = ({
                 onChange={(e) => setForm(prev => ({ ...prev, ideology: e.target.value }))}
                 className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
               />
+            </div>
+
+            {/* Row 3.2: Introduction Dialogue for YouTube Motion Graphic */}
+            <div className="flex flex-col gap-2.5 p-4 rounded-2xl bg-gradient-to-b from-blue-950/25 via-slate-950/80 to-slate-950 border border-cyan-500/40 shadow-inner">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-cyan-950/80 border border-cyan-600/50 text-cyan-300 shadow-xs">
+                    <Film className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-mono font-bold text-cyan-200 uppercase tracking-wider flex items-center gap-1.5">
+                      Introduction Dialogue (YouTube Motion Graphic)
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-mono">
+                      Spoken statement delivered during the Introduction Motion Graphic sequence.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Word & Duration Counter */}
+                {(() => {
+                  const words = (form.introductionDialogue || '').trim().split(/\s+/).filter(Boolean);
+                  const wordCount = words.length;
+                  const estimatedSecs = Math.max(1, Math.round(wordCount / 2.7));
+                  return (
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
+                      <span className="text-cyan-300 font-bold">{wordCount} words</span>
+                      <span className="text-slate-600">&bull;</span>
+                      <span className="text-amber-300">~{estimatedSecs}s audio</span>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Textarea */}
+              <textarea
+                rows={3}
+                value={form.introductionDialogue || ''}
+                onChange={(e) => setForm(prev => ({ ...prev, introductionDialogue: e.target.value }))}
+                placeholder="e.g. I am Jackson Alvarez. For forty years, the billionaires on the coast sold out our factories..."
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 leading-relaxed custom-scrollbar font-sans"
+              />
+
+              {/* Action Buttons: Audition Speech & Suggest from Persona */}
+              <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const suggested = getDefaultIntroductionDialogue(form);
+                    setForm(prev => ({ ...prev, introductionDialogue: suggested }));
+                  }}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-[11px] font-mono transition cursor-pointer"
+                  title="Suggest introduction dialogue based on character archetype and slogan"
+                >
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <span>Suggest from Persona</span>
+                </button>
+
+                {/* Audition Intro Speech Button */}
+                {(() => {
+                  const isIntroLoading = loadingVoiceKey === 'intro_audition';
+                  const isIntroPlaying = playingVoiceKey === 'intro_audition';
+
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isIntroPlaying || isIntroLoading) {
+                          handleStopAudio();
+                        } else {
+                          handleTestVoice(
+                            form.voice?.voiceId || CURATED_VOICES[0].id,
+                            'intro_audition',
+                            form.introductionDialogue || getDefaultIntroductionDialogue(form)
+                          );
+                        }
+                      }}
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition shadow-md cursor-pointer ${
+                        isIntroPlaying
+                          ? 'bg-red-900 hover:bg-red-800 text-white animate-pulse shadow-red-950'
+                          : 'bg-cyan-600 hover:bg-cyan-500 text-slate-950 shadow-cyan-950/40'
+                      }`}
+                      title="Audition spoken dialogue using candidate's assigned voice model"
+                    >
+                      {isIntroLoading ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Synthesizing...</span>
+                        </>
+                      ) : isIntroPlaying ? (
+                        <>
+                          <Square className="w-3.5 h-3.5 fill-current" />
+                          <span>Stop Intro Speech</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                          <span>Audition Intro Speech</span>
+                        </>
+                      )}
+                    </button>
+                  );
+                })()}
+              </div>
             </div>
 
             {/* Row 3.5: Campaign Treasury & War Chest ($ Millions) */}

@@ -1,0 +1,229 @@
+[
+  {
+    "id": "evt-1",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "Twenty years pouring steel, watched the mills go dark. I'm running so forgotten families take their country back. Restore Valoria to the Working Class!",
+    "timestamp": 1789046635923
+  },
+  {
+    "id": "evt-2",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Valoria's debt-to-GDP ratio: 127%. Emotional politics wrote that number. I balance ledgers. Fiscal discipline. Sustainable growth. Rostova. Audit me.",
+    "timestamp": 1789046645778
+  },
+  {
+    "id": "evt-3",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Marcus Vance. Forty years defending Valoria. I held the line when others wavered. Now, one final call: peace demands power. Power demands me.",
+    "timestamp": 1789046661363
+  },
+  {
+    "id": "evt-4",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "Twenty-five years. Three billion-dollar empires. Zero bankruptcies. Career politicians bankrupted Valoria—tonight, the boardroom takes the gavel. Sterling's open for business.",
+    "timestamp": 1789046676125
+  },
+  {
+    "id": "evt-5",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "I'm the heiress who burned the inheritance papers. I've dined with the oligarchs — now I'm funding their funeral. Break the empire. Fund the people.",
+    "timestamp": 1789046690945
+  },
+  {
+    "id": "evt-6",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "content": "Fifteen million souls gather weekly to hear Bishop Elijah Haddon preach. Tonight, all Valoria is my congregation — and I come to heal her soul.",
+    "timestamp": 1789046702750
+  },
+  {
+    "id": "evt-7",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "Eighty hostages. Zero bullets. Everyone came home. Peace isn't shouted—it's negotiated. I've mastered deadlier rooms than this one. Valoria—watch me work.",
+    "timestamp": 1789046714599
+  },
+  {
+    "id": "evt-8",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Democracy is legacy code. I wrote the neural lace; tonight, I begin debugging Valoria. Vivienne Zhao. Upgrade human potential. Lead the synthetic century.",
+    "timestamp": 1789046726672
+  },
+  {
+    "id": "evt-9",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Thirty-five years, four administrations, one unwavering hand. When storms tested Valoria, I kept her steady. Now that tested leadership seeks the highest office.",
+    "timestamp": 1789046739334
+  },
+  {
+    "id": "evt-10",
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "content": "Four governors convicted. Two oligarchs imprisoned. Three car bombs couldn't stop me. Valoria—the indictment is coming, and no one is above the law.",
+    "timestamp": 1789046753795
+  },
+  {
+    "id": "evt-11",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez's cure for drug cartels? Price caps — Venezuela's playbook. His platform balloons our deficit while treating mathematics as optional. Valoria cannot afford sentiment. Retire this arithmetic error tonight.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Jackson Alvarez",
+      "voteCallTargetName": "Jackson Alvarez"
+    },
+    "timestamp": 1789046779450
+  },
+  {
+    "id": "evt-12",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya Lin negotiates with enemies. Valoria needs enemies defeated. Cartels extort the sick—she'd schedule a summit. Appeasement invites aggression. I secure nations; she drafts memos. Retire the diplomat. Vote strength.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    },
+    "timestamp": 1789046794846
+  },
+  {
+    "id": "evt-13",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Eight-hundred-percent insulin hikes? Disgusting. But Alvarez's fix—government price controls—is socialist accounting from a man who never met a payroll. I crush monopolies with competition. Jackson just melts down. Delist him tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    },
+    "timestamp": 1789046814055
+  },
+  {
+    "id": "evt-14",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Daddy, I've sat at your pharma dinners—insulin at eight hundred percent is your \"shareholder value.\" You call it a boardroom; denied claims call it a death panel. Board's voting, Arthur. You're out.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Arthur Sterling"
+    },
+    "timestamp": 1789046833726
+  },
+  {
+    "id": "evt-15",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova audits ledgers but never souls! She calls dying mothers \"emotional politics\"—I call it spiritual starvation! A heart that measures suffering in spreadsheets cannot heal Valoria. Send her back to her cold numbers tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    },
+    "timestamp": 1789046848626
+  },
+  {
+    "id": "evt-16",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Marcus, I brought eighty Valorian hostages home without firing a shot — you'd have sent flag-draped coffins. Your hammer sees every crisis as a nail, including dying diabetics. Strength without reading the room is fear in uniform. Master the room, Valoria. Retire the hammer.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    },
+    "timestamp": 1789046878795
+  },
+  {
+    "id": "evt-17",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez's platform runs on rusted twentieth-century firmware—pure emotional noise, zero cognitive bandwidth for pharmaceutical economics. Insulin extortion demands neural-grade algorithmic precision, not a steelworker's tantrum. Decommission this obsolete hardware tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    },
+    "timestamp": 1789046895907
+  },
+  {
+    "id": "evt-18",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Friends, across four administrations I've forged real healthcare consensus. Governor Alvarez offers only rage — and rage, however heartfelt, never filled one prescription. Temper is not policy. Let us gently retire this tantrum tonight.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Jackson Alvarez"
+    },
+    "timestamp": 1789046914925
+  },
+  {
+    "id": "evt-19",
+    "type": "attack",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Marcus Vance, Exhibit A: forty years of blank-check defense budgets while insulin became a luxury. He calls diplomacy treason; I call his contractor kickbacks indictable. Grand jury's ready, Marcus — the verdict is elimination.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Marcus Vance"
+    },
+    "timestamp": 1789046934939
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "Twenty years pouring steel while suits shipped our mills away. These calloused hands, Iron Valley fire — here to restore Valoria to the working class!"
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "130% of GDP. Numbers don't flatter—they indict. Elena Rostova, former Central Bank Governor. Fiscal discipline. Sustainable growth. Arithmetic decides this election."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Forty years defending Valoria. I held the Northern Border when others broke. One final mission: your Commander-in-Chief. Strength at the border. Peace through power."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "I turned pocket change into a forty-billion-dollar empire while these folks turned your taxes into debt. Valoria's next CEO just walked on stage."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "Arthur Sterling's daughter walked out of his empire with the receipts — now I'm turning dynastic billions into generational revolution. Fund the people. Fund the frontline."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "content": "Fifteen million souls know my voice from the pulpit. Tonight, Elijah Haddon steps into the arena—because Valoria's soul needs healing, not accounting."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "Eighty hostages came home alive because I read the room before it knew it was being read. Valoria, sit with me. Peace through precision."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Valoria runs on dying code. I built minds that outthink nations — Vivienne Zhao, here to upgrade yours. The Synthetic Century begins tonight."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Valoria knows my name. Thirty-five years, four administrations, every crisis weathered. In uncertain times, choose the steady hand. Tested leadership. Steady Valoria."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "content": "Twenty years. Four governors, two oligarchs—convicted. Three car bombs—survived. Valoria's corruption has a prosecutor now. The indictment is coming."
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "art-sterling",
+    "voterName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Delivering address...",
+    "privateReason": "Strategic elimination deliberation",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Delivering address...",
+    "privateReason": "Strategic elimination deliberation",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Delivering address...",
+    "privateReason": "Strategic elimination deliberation",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Delivering address...",
+    "privateReason": "Strategic elimination deliberation",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "marcus-vance",
+    "voterName": "Marcus Vance",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez assumes numbers shield him. Four blades already drawn. Honoring Thorne's pact banks fifteen million; then Stone, the prosecutor circling me, faces my artillery next.",
+    "privateReason": "Honors Thorne's pact, banks $15M, rides consensus, saves Stone for Round 2.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez assumes crowd fury is random noise. It's priced. Haddon, Zhao, Thorne concentrate four votes; his eighty-five million liquidates to five. I bank thirty.",
+    "privateReason": "Triple escrow alignment, guaranteed kingpin attrition, Thorne's loyalty secured. Voting Vance wastes capital.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez assumes volume substitutes for viability. Four accusers, no fiscal base—my ballot banks Sterling's fifteen million and purges the loudest legacy bug before Rostova's paid vote lands.",
+    "privateReason": "Consensus elimination guaranteed; +$15M escrow secures bailout threshold; honors Sterling contract.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Alvarez believes union fury shields him. Two escrows banked, three votes converging. His populism dies tonight; my balance sheet compounds. Checkmate before he realizes the game started.",
+    "privateReason": "Honor both contracts, bank $15M escrow, join guaranteed bandwagon, eliminate erratic populist threat.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "jax-alvarez",
+    "voterName": "Jackson Alvarez",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 1,
+    "voterId": "garrick-stone",
+    "voterName": "Garrick Stone",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Jackson Alvarez assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

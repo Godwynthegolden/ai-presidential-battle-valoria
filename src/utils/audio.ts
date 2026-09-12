@@ -811,17 +811,6 @@ class SoundManager {
       return () => { audio.pause(); };
     }
 
-    // When SFX are muted (dialogue-only mode), play candidate speech cleanly without synthetic static or procedural RF noise
-    if (this.sfxMuted) {
-      const handleEnded = () => { if (onEnded) onEnded(); };
-      audio.addEventListener('ended', handleEnded, { once: true });
-      audio.play().catch(() => {});
-      return () => {
-        audio.removeEventListener('ended', handleEnded);
-        audio.pause();
-      };
-    }
-
     const contextInit = this.initContext();
     if (!contextInit) {
       audio.play().catch(() => {});
@@ -829,6 +818,10 @@ class SoundManager {
     }
 
     const { ctx, masterOut } = contextInit;
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+
     const strength = Math.max(0, Math.min(100, strengthPct)) / 100;
 
     // If strength is 0%, bypass effect completely
@@ -843,13 +836,29 @@ class SoundManager {
     }
 
     try {
+      // Mute clean studio output path if attached by audioSync so only the wiretap filter is heard
+      if ((audio as any).__cleanGainNode) {
+        try {
+          (audio as any).__cleanGainNode.disconnect();
+        } catch {}
+      }
+
       // Avoid creating multiple media element sources for the same HTMLAudioElement
       let sourceNode: MediaElementAudioSourceNode;
       if ((audio as any).__wiretapSourceNode) {
         sourceNode = (audio as any).__wiretapSourceNode;
+        try { sourceNode.disconnect(); } catch {}
       } else {
         sourceNode = ctx.createMediaElementSource(audio);
         (audio as any).__wiretapSourceNode = sourceNode;
+      }
+
+      // Reconnect audioSync AnalyserNode so subtitle sync, VAD, and syllable bursts continue operating with 100% precision!
+      const syncAnalyser = (audio as any).__audioSyncAnalyser;
+      if (syncAnalyser) {
+        try {
+          sourceNode.connect(syncAnalyser);
+        } catch {}
       }
 
       const now = ctx.currentTime;
@@ -903,49 +912,52 @@ class SoundManager {
       wetGain.connect(masterOut);
 
       // 3. Authenticated Surveillance Radio Static / RF Hiss Floor (Gated)
-      const noiseBuffer = this.getNoiseBuffer(ctx);
-      const noiseSource = ctx.createBufferSource();
-      noiseSource.buffer = noiseBuffer;
-      noiseSource.loop = true;
+      // Only include procedural background radio noise if SFX are not muted
+      let noiseSource: AudioBufferSourceNode | null = null;
+      let noiseFilter: BiquadFilterNode | null = null;
+      let noiseGain: GainNode | null = null;
 
-      // Filter the noise through telephone bandpass so it sounds like analog line hiss
-      const noiseFilter = ctx.createBiquadFilter();
-      noiseFilter.type = 'bandpass';
-      noiseFilter.frequency.setValueAtTime(1800, now);
-      noiseFilter.Q.setValueAtTime(1.0, now);
+      if (!this.sfxMuted) {
+        const noiseBuffer = this.getNoiseBuffer(ctx);
+        noiseSource = ctx.createBufferSource();
+        noiseSource.buffer = noiseBuffer;
+        noiseSource.loop = true;
 
-      const noiseGain = ctx.createGain();
-      // Scaled static volume (subtle, intelligible background hiss)
-      const targetNoiseVol = 0.022 * strength;
-      noiseGain.gain.setValueAtTime(0.0001, now);
-      noiseGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, targetNoiseVol), now + 0.08);
+        noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.setValueAtTime(1800, now);
+        noiseFilter.Q.setValueAtTime(1.0, now);
 
-      noiseSource.connect(noiseFilter);
-      noiseFilter.connect(noiseGain);
-      noiseGain.connect(masterOut);
+        noiseGain = ctx.createGain();
+        const targetNoiseVol = 0.022 * strength;
+        noiseGain.gain.setValueAtTime(0.0001, now);
+        noiseGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, targetNoiseVol), now + 0.08);
 
-      noiseSource.start(now);
+        noiseSource.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(masterOut);
+
+        noiseSource.start(now);
+      }
 
       let isCleanedUp = false;
       const cleanup = () => {
         if (isCleanedUp) return;
         isCleanedUp = true;
         try {
-          const fadeOutTime = ctx.currentTime + 0.05;
-          noiseGain.gain.setValueAtTime(noiseGain.gain.value, ctx.currentTime);
-          noiseGain.gain.linearRampToValueAtTime(0.0001, fadeOutTime);
-          setTimeout(() => {
+          if (noiseGain && noiseSource) {
+            try { noiseGain.gain.setValueAtTime(0.0001, ctx.currentTime); } catch {}
             try { noiseSource.stop(); } catch {}
             try { noiseSource.disconnect(); } catch {}
-            try { dryGain.disconnect(); } catch {}
-            try { wetGain.disconnect(); } catch {}
-            try { highpass.disconnect(); } catch {}
-            try { lowpass.disconnect(); } catch {}
-            try { midPeak.disconnect(); } catch {}
-            try { waveshaper.disconnect(); } catch {}
-            try { noiseFilter.disconnect(); } catch {}
+            try { noiseFilter?.disconnect(); } catch {}
             try { noiseGain.disconnect(); } catch {}
-          }, 100);
+          }
+          try { dryGain.disconnect(); } catch {}
+          try { wetGain.disconnect(); } catch {}
+          try { highpass.disconnect(); } catch {}
+          try { lowpass.disconnect(); } catch {}
+          try { midPeak.disconnect(); } catch {}
+          try { waveshaper.disconnect(); } catch {}
         } catch {}
       };
 
@@ -976,6 +988,114 @@ class SoundManager {
       audio.play().catch(() => {});
       return () => { audio.pause(); };
     }
+  }
+
+  /**
+   * 13. Cinematic Introduction Entrance Whoosh
+   * Aerodynamic low-frequency sweep as full-body character PNG glides into frame.
+   */
+  public playIntroWhoosh() {
+    if (!this.canPlaySfx()) return;
+    const sys = this.initContext();
+    if (!sys) return;
+    const { ctx, masterOut } = sys;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(260, now);
+    osc.frequency.exponentialRampToValueAtTime(75, now + 0.55);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, now);
+    filter.frequency.exponentialRampToValueAtTime(180, now + 0.55);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.35, now + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterOut);
+
+    osc.start(now);
+    osc.stop(now + 0.65);
+  }
+
+  /**
+   * 14. Cinematic Name Reveal Metallic Sting
+   * Shimmering two-tone chime and warm sub-bass punch when candidate name drops.
+   */
+  public playIntroSting() {
+    if (!this.canPlaySfx()) return;
+    const sys = this.initContext();
+    if (!sys) return;
+    const { ctx, masterOut } = sys;
+    const now = ctx.currentTime;
+
+    // Harmonic bell frequencies (E5 [659Hz], B5 [987Hz])
+    const freqs = [659.25, 987.77];
+    freqs.forEach((f, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, now + idx * 0.04);
+
+      gain.gain.setValueAtTime(0.001, now + idx * 0.04);
+      gain.gain.linearRampToValueAtTime(0.22 - idx * 0.04, now + idx * 0.04 + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+
+      osc.connect(gain);
+      gain.connect(masterOut);
+      osc.start(now + idx * 0.04);
+      osc.stop(now + 0.95);
+    });
+
+    // Warm sub-bass punch (68Hz -> 36Hz)
+    const subOsc = ctx.createOscillator();
+    const subGain = ctx.createGain();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(68, now + 0.02);
+    subOsc.frequency.exponentialRampToValueAtTime(36, now + 0.45);
+
+    subGain.gain.setValueAtTime(0.001, now + 0.02);
+    subGain.gain.linearRampToValueAtTime(0.4, now + 0.06);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+    subOsc.connect(subGain);
+    subGain.connect(masterOut);
+    subOsc.start(now + 0.02);
+    subOsc.stop(now + 0.55);
+  }
+
+  /**
+   * 15. Cinematic Lineup Step Transition
+   * Low-passed sweeping whoosh-drop between candidates in the introduction lineup.
+   */
+  public playIntroTransition() {
+    if (!this.canPlaySfx()) return;
+    const sys = this.initContext();
+    if (!sys) return;
+    const { ctx, masterOut } = sys;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(190, now);
+    osc.frequency.exponentialRampToValueAtTime(55, now + 0.4);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.25, now + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+    osc.connect(gain);
+    gain.connect(masterOut);
+    osc.start(now);
+    osc.stop(now + 0.5);
   }
 
   // Backward-compatible method aliases (all routed to core premium YouTube sound effects)

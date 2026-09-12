@@ -1,0 +1,56 @@
+[
+  {
+    "type": "attack",
+    "round": 6,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria Sterling \"walked away\" from the fortune—then torched millions on a youth accelerator with zero ROI, zero payroll. That's not philanthropy, that's brainrot with a trust fund. Shareholders fire underperformers. You're the board. Vote.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Victoria Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 6,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Donor-dinner gossip, darling: Sterling Media tuned its algorithms for addiction and brokered children's biometrics abroad. Dad built the brainrot economy — now he wants to acquire your minds. Tonight, Valoria rejects the hostile takeover.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Arthur Sterling",
+      "voteCallTargetName": "Arthur Sterling"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 6,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova answers a neurological catastrophe with spreadsheets—auditing the flame while the cortex burns. Attention is cognitive capital; she'd impose austerity on children's synapses. Depreciate the obsolete algorithm tonight. Upgrade Valoria.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 6,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "My friends, I shepherded the bipartisan privacy accord while Governor Rostova answered a children's emergency with spreadsheets and austerity. Valoria's families need warmth, not cold arithmetic. She asked you to depreciate me—depreciate her instead.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Elena Rostova",
+      "voteCallTargetName": "Elena Rostova"
+    }
+  }
+]

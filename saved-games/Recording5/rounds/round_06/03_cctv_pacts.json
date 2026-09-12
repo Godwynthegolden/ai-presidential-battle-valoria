@@ -1,0 +1,90 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 6,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Vivienne, the room has already repriced Thorne to zero. Fifteen million secures your margin.",
+    "details": {
+      "location": "Capitol Cloakroom Cam 04",
+      "agreedTargetName": "Silas Thorne",
+      "whisperText": "Vivienne, the room has already repriced Thorne to zero. Fifteen million secures your margin.",
+      "receiverResponse": "My vote is priced in. Thorne will not survive the",
+      "privateStrategy": "Thorne's elimination is consensus-priced; Zhao needs liquidity, my escrow locks her vote. His $85M war chest dies tonight, clearing my flank.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 6,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Vivienne—hostile takeover, quiet terms. Fifteen now, fifteen when Thorne's name hits the urn.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Silas Thorne",
+      "whisperText": "Vivienne—hostile takeover, quiet terms. Fifteen now, fifteen when Thorne's name hits the urn.",
+      "receiverResponse": "Probability favors it. My vote aligns with the count.",
+      "privateStrategy": "Thorne's $85M war chest is the existential threat; eliminate him while consensus burns hot. Retain $45M for ballot bailouts against Dad's counter-strike.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 6,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Maya's war chest buys tomorrow's ballot, Silas. Sterling's already dead—redirect your knife.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Maya's war chest buys tomorrow's ballot, Silas. Sterling's already dead—redirect your knife.",
+      "receiverResponse": "You're right—Maya's treasury outlives us all. She falls tonight.",
+      "privateStrategy": "Sterling's doomed regardless; the real threat is Lin's $100M treasury. Blindside the consensus, cut Maya now, face weakened Sterling later.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 6,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur, and save $75M for bailouts. But passing means no coordination. Or",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Arthur, and save $75M for bailouts. But passing means no coordination. Or",
+      "receiverResponse": "Your leverage is worthless to me. Walk away.",
+      "privateStrategy": "Align tactically to eliminate Elijah Haddon while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 0,
+      "escrowPending": 0,
+      "receiverDecision": "decline",
+      "bribeAccepted": false
+    }
+  }
+]

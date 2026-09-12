@@ -1,0 +1,92 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "jax-alvarez",
+    "voterName": "Jackson Alvarez",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "content": "Thorne spent thirty-five years feeding off the Capitol trough. Zhao's machines replaced my steelworkers. Haddon knelt with our laid-off families. My vote crowns the preacher.",
+    "privateReason": "Haddon stood with forgotten workers; Thorne is the swamp, Zhao's AI kills jobs."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "marcus-vance",
+    "voterName": "Marcus Vance",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne spent thirty-five years gutting defense budgets behind closed doors. Haddon preaches mercy to enemies stockpiling missiles. Zhao's machines will arm Valoria's fist. Deterrence demands her.",
+    "privateReason": "Zhao's AI secures military supremacy. Thorne and Haddon would leave Valoria defenseless."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "art-sterling",
+    "voterName": "Arthur Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova actually balanced a nation's books — the only rival who speaks my fiscal language. Sterling burns capital on sentiment; Zhao sells vaporware. Elena gets my crown.",
+    "privateReason": "Only finalist who understands balance sheets, ROI, and real fiscal discipline."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne spent thirty-five years perfecting the machine I renounced my fortune to dismantle. Haddon sells salvation to donors. Zhao actually builds the future — my vote crowns her.",
+    "privateReason": "Zhao funds the frontline; Thorne is the dynasty's senator, Haddon its pulpit."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Zhao counts souls as data points; her machines have no conscience to consult. Thorne kept his corridor word when betrayal was cheaper. The senator governs; the engineer experiments. Thorne it is.",
+    "privateReason": "Thorne honors covenants; Zhao reduces souls to algorithms. The technocrat falls tonight."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Haddon sells salvation; crowds follow emotion, not reason. Zhao's brilliance lacks statecraft scars. Thorne reads rooms like I do. Thirty-five years of corridors never lie. He governs.",
+    "privateReason": "Thorne's diplomatic spine matches mine. Valoria needs precision, not theater or untested code."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Haddon's crusade is unregulated mass limbic hijacking—faith as malware. Thorne is legacy infrastructure, but legacy runs predictable protocols. Predictable beats charismatic chaos. My vote elects the senator.",
+    "privateReason": "Thorne negotiates with logic; Haddon hijacks limbic systems. Predictable legacy infrastructure beats broadcast hysteria."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "garrick-stone",
+    "voterName": "Garrick Stone",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne spent thirty-five years feeding at the public trust. Haddon's collection plates hide donor ledgers. Zhao owes no oligarch, no party machine. Clean hands govern. My vote: Zhao.",
+    "privateReason": "Thorne is the aristocracy I indicted; Zhao's hands are auditable and clean."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena called me a depreciated asset—forgivable pride. Victoria buys crowds, Zhao sells brains. Only the banker understands the machine keeping my legacy alive. She governs; extremists perform.",
+    "privateReason": "Elena's institutional mastery preserves stability; Sterling and Zhao are untested extremists."
+  }
+]

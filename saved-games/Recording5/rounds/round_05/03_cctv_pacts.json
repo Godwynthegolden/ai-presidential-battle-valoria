@@ -1,0 +1,68 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 5,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Victoria's bleeding, Vivienne. Thirty million escrowed—her name in the urn, sealed tonight.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Victoria Sterling",
+      "whisperText": "Victoria's bleeding, Vivienne. Thirty million escrowed—her name in the urn, sealed tonight.",
+      "receiverResponse": "Numbers align. Her survival probability approaches zero tonight.",
+      "privateStrategy": "Victoria's consensus-wounded; sealing her cheaply builds coalition credit. Binding Zhao—richest threat—prevents her blindside while conserving escrow leverage for ballot reveal.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 5,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, while they devour Victoria, Haddon's broadcast empire compounds. Thirty million escrowed. Eliminate him.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Silas, while they devour Victoria, Haddon's broadcast empire compounds. Thirty million escrowed. Eliminate him.",
+      "receiverResponse": "I've survived thirty-five years choosing correctly, Doctor. Consider it done.",
+      "privateStrategy": "Victoria's elimination is consensus-priced; zero strategic value. Elijah's broadcast reach threatens me directly. Blindside him while the herd fixates on Sterling.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 5,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur, consensus favors Victoria tonight. Thirty million in",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Victoria Sterling",
+      "whisperText": "Arthur, consensus favors Victoria tonight. Thirty million in",
+      "receiverResponse": "It's done. Make sure your own vote doesn't waver.",
+      "privateStrategy": "Align tactically to eliminate Victoria Sterling while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

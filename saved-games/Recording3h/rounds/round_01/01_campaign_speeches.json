@@ -1,0 +1,72 @@
+[
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "Twenty years pouring steel, watched the mills go dark. I'm running so forgotten families take their country back. Restore Valoria to the Working Class!"
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Valoria's debt-to-GDP ratio: 127%. Emotional politics wrote that number. I balance ledgers. Fiscal discipline. Sustainable growth. Rostova. Audit me."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Marcus Vance. Forty years defending Valoria. I held the line when others wavered. Now, one final call: peace demands power. Power demands me."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "Twenty-five years. Three billion-dollar empires. Zero bankruptcies. Career politicians bankrupted Valoria—tonight, the boardroom takes the gavel. Sterling's open for business."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "I'm the heiress who burned the inheritance papers. I've dined with the oligarchs — now I'm funding their funeral. Break the empire. Fund the people."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "content": "Fifteen million souls gather weekly to hear Bishop Elijah Haddon preach. Tonight, all Valoria is my congregation — and I come to heal her soul."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "Eighty hostages. Zero bullets. Everyone came home. Peace isn't shouted—it's negotiated. I've mastered deadlier rooms than this one. Valoria—watch me work."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Democracy is legacy code. I wrote the neural lace; tonight, I begin debugging Valoria. Vivienne Zhao. Upgrade human potential. Lead the synthetic century."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Thirty-five years, four administrations, one unwavering hand. When storms tested Valoria, I kept her steady. Now that tested leadership seeks the highest office."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "content": "Four governors convicted. Two oligarchs imprisoned. Three car bombs couldn't stop me. Valoria—the indictment is coming, and no one is above the law."
+  }
+]

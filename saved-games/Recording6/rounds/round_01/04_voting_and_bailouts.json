@@ -1,0 +1,183 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 1,
+    "details": {
+      "votes": [
+        {
+          "voterId": "jax-alvarez",
+          "targetId": "marcus-vance",
+          "reason": "Honoring Rostova's pact banks $15M and concentrates votes to drain Vance's war chest.",
+          "strategyMonologue": "Vance assumes his medals buy immunity. Elena's handshake holds—two votes force his forty-million bailout. I bank fifteen, keep my treasury above forty, and let the room devour itself.",
+          "audioBlobUrl": "blob:http://localhost:3000/ac73e3c0-a030-4ada-8807-27771d3b3a49",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "marcus-vance",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Jackson Alvarez",
+          "targetName": "Marcus Vance"
+        },
+        {
+          "voterId": "elena-rostova",
+          "targetId": "jax-alvarez",
+          "reason": "Consensus guarantees elimination; honoring Vance's pact banks $15M; removes my loudest populist threat cheaply.",
+          "strategyMonologue": "Alvarez believes his union base absorbs tonight's blows. Four accusers guarantee vote concentration. My ballot joins Vance's bloc, banking escrow while his war chest hemorrhages to zero.",
+          "audioBlobUrl": "blob:http://localhost:3000/7b0fec8c-345d-445f-baf0-1036aa980db8",
+          "audioBlob": {},
+          "pactWithId": "jax-alvarez",
+          "pactTargetId": "marcus-vance",
+          "isBetrayal": true,
+          "betrayedAllyId": "jax-alvarez",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "marcus-vance",
+          "targetId": "jax-alvarez",
+          "reason": "Pact honored, escrow banked, consensus joined—Alvarez falls, my treasury and alliances intact.",
+          "strategyMonologue": "Alvarez assumes numbers shield him. Flanking with Rostova's pact banks fifteen million, seals my perimeter, and neutralizes the loudest threat before Round Two.",
+          "audioBlobUrl": "blob:http://localhost:3000/7d899a9b-3637-4a06-93ca-376895340ef9",
+          "audioBlob": {},
+          "pactWithId": "art-sterling",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Marcus Vance",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "jax-alvarez",
+          "reason": "Cheapest guaranteed kill; honoring Sterling's pact banks $15M escrow, preserves capital.",
+          "strategyMonologue": "Alvarez thinks his $80M war chest buys survival. Four accusers say otherwise. My ballot banks Victoria's $15M escrow while conserving my hundred million for Vance and Zhao.",
+          "audioBlobUrl": "blob:http://localhost:3000/e441cf7b-7191-47e7-b6fa-27b2354371ff",
+          "audioBlob": {},
+          "pactWithId": "marcus-vance",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Arthur Sterling",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "jax-alvarez",
+          "reason": "Alvarez falls regardless; honoring Father's pact banks $15M while my treasury stays intact.",
+          "strategyMonologue": "Alvarez assumes his union wall holds. Four donor-class knives say otherwise. My ballot rides the consensus, banks the escrow, keeps my fortress flush for Round Two.",
+          "audioBlobUrl": "blob:http://localhost:3000/49d054a8-f0cb-4595-aa34-a78569f92d56",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Victoria Sterling",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "jax-alvarez",
+          "reason": "Strategic elimination vote",
+          "strategyMonologue": "Jackson Alvarez assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+          "audioBlobUrl": "blob:http://localhost:3000/eb2683bc-7f28-4992-88a2-5bbcd10e835a",
+          "audioBlob": {},
+          "pactWithId": "jax-alvarez",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "jax-alvarez",
+          "isHonoredPact": false,
+          "voterName": "Elijah Haddon",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "elena-rostova",
+          "reason": "Alvarez dies regardless; honoring Haddon banks $15M and drains Rostova's war chest.",
+          "strategyMonologue": "Rostova watches Alvarez absorb four knives and assumes the room's aimed elsewhere. Haddon's handshake doubles my ballot—her forty million drains tonight, my escrow banks fifteen.",
+          "audioBlobUrl": "blob:http://localhost:3000/3d8097c5-7fef-4188-8043-8264a7e74777",
+          "audioBlob": {},
+          "pactWithId": "garrick-stone",
+          "pactTargetId": "marcus-vance",
+          "isBetrayal": true,
+          "betrayedAllyId": "garrick-stone",
+          "isHonoredPact": false,
+          "voterName": "Maya Lin",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "jax-alvarez",
+          "reason": "Four votes guarantee his exit; my fifth banks $15M and cements Thorne's alliance.",
+          "strategyMonologue": "Alvarez assumes populist noise shields him. Four accusers already compute his termination — my ballot costs nothing, banks Thorne's escrow, and queues Sterling for Round Two's liquidation.",
+          "audioBlobUrl": "blob:http://localhost:3000/365f6f6e-e756-4a1c-911d-d53bf55fb7c8",
+          "audioBlob": {},
+          "pactWithId": "art-sterling",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "jax-alvarez",
+          "reason": "Consensus guarantees elimination; pact banks $15M; preserves my $70M defense fund.",
+          "strategyMonologue": "Alvarez thinks populist fire shields him. Four accusers guarantee concentration. Zhao's pact banks fifteen million while the room spends its capital. His exit shields my ledger.",
+          "audioBlobUrl": "blob:http://localhost:3000/e5f25e53-01fa-4249-aa50-17617f936bc7",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "jax-alvarez",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Silas Thorne",
+          "targetName": "Jackson Alvarez"
+        },
+        {
+          "voterId": "garrick-stone",
+          "targetId": "jax-alvarez",
+          "reason": "Bandwagon guarantees elimination, pact escrow pays $15M, preserves my capital.",
+          "strategyMonologue": "Alvarez believes his steelworker chorus shields him. Four witnesses already testified. My ballot is the fifth fingerprint on the indictment — elimination guaranteed, fifteen million banked, war chest intact.",
+          "audioBlobUrl": "blob:http://localhost:3000/b6cf4b6a-9405-4d58-8c6b-afcb992b3245",
+          "audioBlob": {},
+          "pactWithId": "maya-lin",
+          "pactTargetId": "marcus-vance",
+          "isBetrayal": true,
+          "betrayedAllyId": "maya-lin",
+          "isHonoredPact": false,
+          "voterName": "Garrick Stone",
+          "targetName": "Jackson Alvarez"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r1-1-jax-alvarez",
+          "candidateId": "jax-alvarez",
+          "round": 1,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 8,
+          "remainingVotes": 7,
+          "remainingBudget": 60,
+          "timestamp": 1789070543644,
+          "candidateName": "Jackson Alvarez"
+        },
+        {
+          "id": "bailout-r1-2-jax-alvarez",
+          "candidateId": "jax-alvarez",
+          "round": 1,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 7,
+          "remainingVotes": 6,
+          "remainingBudget": 20,
+          "timestamp": 1789070543644,
+          "candidateName": "Jackson Alvarez"
+        }
+      ],
+      "eliminatedId": "jax-alvarez",
+      "eliminatedName": "Jackson Alvarez",
+      "finalVoteCount": 6
+    }
+  }
+]

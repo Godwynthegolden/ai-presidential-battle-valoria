@@ -1,0 +1,198 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, Alvarez's elimination is already priced in. Thirty million escrowed—make the count unanimous.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Silas, Alvarez's elimination is already priced in. Thirty million escrowed—make the count unanimous.",
+      "receiverResponse": "Eleven governors taught me one thing: take the money. Done.",
+      "privateStrategy": "Alvarez falls regardless; escrow buys Thorne's future loyalty cheaply. Consensus rounds demand alliances, not heroics. Preserve capital for later blindsides.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, you drew first blood on Alvarez. Thirty million escrowed—finish him tonight.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Silas, you drew first blood on Alvarez. Thirty million escrowed—finish him tonight.",
+      "receiverResponse": "Steady hands prevail, General. Alvarez retires tonight—as arranged.",
+      "privateStrategy": "Alvarez dies by consensus anyway; my escrow locks Thorne's vote and future loyalty. Next strike: neutralize Stone, my corruption prosecutor, before he indicts me.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "content": "Haddon, four knives already in Alvarez. Thirty million tithed to your ministry makes the wound.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Haddon, four knives already in Alvarez. Thirty million tithed to your ministry makes the wound.",
+      "receiverResponse": "The flock votes as the shepherds are fed, Arthur.",
+      "privateStrategy": "Alvarez bleeds with four accusers; buying Haddon's swing vote seals elimination cheaply, preserving $70M for ballot bailouts against Vance's war chest.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Vivienne — you drew first blood. Thirty million escrowed; we finish what your scalpel started.",
+    "details": {
+      "location": "West Wing Corridor 3",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Vivienne — you drew first blood. Thirty million escrowed; we finish what your scalpel started.",
+      "receiverResponse": "Efficient pruning. The legacy error terminates on the first ballot.",
+      "privateStrategy": "Alvarez falls regardless; buying Zhao cheaply banks a loyal bloc for the real strike — father Arthur — next round.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Four wolves already circle Alvarez, Elena. Thirty million seals his fall tonight.",
+    "details": {
+      "location": "Capitol Cloakroom Cam 04",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Four wolves already circle Alvarez, Elena. Thirty million seals his fall tonight.",
+      "receiverResponse": "The numbers favor it. Alvarez falls tonight.",
+      "privateStrategy": "Alvarez bleeds from four accusers; cheapest elimination. Rostova already hunts him. Preserve seventy million for ballot-day bailouts.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Your ledgers wounded him, Garrick. Thirty million escrowed—finish Marcus Vance tonight.",
+    "details": {
+      "location": "Sub-Basement Boiler Room",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "Your ledgers wounded him, Garrick. Thirty million escrowed—finish Marcus Vance tonight.",
+      "receiverResponse": "The evidence stands. Vance's verdict was already written.",
+      "privateStrategy": "Alvarez falls on consensus alone; Vance is the true threat with command loyalty. Stone's prosecution plus my escrow guarantees Vance's cheap elimination.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena, Alvarez is legacy code awaiting deletion. Thirty million escrowed. Compile the majority.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Elena, Alvarez is legacy code awaiting deletion. Thirty million escrowed. Compile the majority.",
+      "receiverResponse": "Numbers align, Doctor. Watch your own column tonight.",
+      "privateStrategy": "Alvarez has four accusers and no fiscal base—elimination is consensus. Binding Rostova locks a technocrat bloc and isolates Thorne for round two.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Delivering address...",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Delivering address...",
+      "privateStrategy": "Maneuvering in round 1 to eliminate rivals.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "content": "Delivering address...",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Delivering address...",
+      "privateStrategy": "Maneuvering in round 1 to eliminate rivals.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

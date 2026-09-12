@@ -122,6 +122,22 @@ async function runSaveGameTests() {
     }
   });
 
+  // Event 3b: Strategic Internal Confessional (Internal Dialogue)
+  await sessionStorageService.saveEvent(testSessionName, {
+    type: 'strategy_monologue',
+    round: 1,
+    speakerId: sampleCandidates[0].id,
+    speakerName: sampleCandidates[0].name,
+    targetId: sampleCandidates[1].id,
+    targetName: sampleCandidates[1].name,
+    content: 'Elena must be eliminated tonight. Her corporate fiscal policies threaten our entire coalition.',
+    details: {
+      privateReason: 'Consolidating working class voting bloc',
+      isBetrayal: false,
+      isHonoredPact: true,
+    }
+  });
+
   // Event 4: Secret Ballots & $40 Bailout Auction
   await sessionStorageService.saveEvent(testSessionName, {
     type: 'vote_tally',
@@ -161,11 +177,18 @@ async function runSaveGameTests() {
   const speechesFile = path.join(round1Dir, '01_campaign_speeches.json');
   const attacksFile = path.join(round1Dir, '02_attacks.json');
   const pactsFile = path.join(round1Dir, '03_cctv_pacts.json');
+  const dialoguesFile = path.join(round1Dir, '03b_internal_dialogues.json');
   const votesFile = path.join(round1Dir, '04_voting_and_bailouts.json');
   const elimFile = path.join(round1Dir, '05_elimination.json');
 
-  if (!fs.existsSync(speechesFile) || !fs.existsSync(attacksFile) || !fs.existsSync(pactsFile) || !fs.existsSync(votesFile) || !fs.existsSync(elimFile)) {
+  if (!fs.existsSync(speechesFile) || !fs.existsSync(attacksFile) || !fs.existsSync(pactsFile) || !fs.existsSync(dialoguesFile) || !fs.existsSync(votesFile) || !fs.existsSync(elimFile)) {
     throw new Error('Round structured JSON files were not created.');
+  }
+
+  const dialoguesRaw = await fs.promises.readFile(dialoguesFile, 'utf8');
+  const dialoguesList = JSON.parse(dialoguesRaw);
+  if (!Array.isArray(dialoguesList) || dialoguesList.length !== 1 || dialoguesList[0].content !== 'Elena must be eliminated tonight. Her corporate fiscal policies threaten our entire coalition.') {
+    throw new Error('03b_internal_dialogues.json did not save internal monologue properly.');
   }
 
   const updatedManifestRaw = await fs.promises.readFile(manifestPath, 'utf8');
@@ -174,6 +197,7 @@ async function runSaveGameTests() {
     updatedManifest.summaryStats.totalCampaignSpeeches !== 1 ||
     updatedManifest.summaryStats.totalAttacks !== 1 ||
     updatedManifest.summaryStats.totalCctvPacts !== 1 ||
+    updatedManifest.summaryStats.totalInternalDialogues !== 1 ||
     updatedManifest.summaryStats.totalBribesOffered !== 1 ||
     updatedManifest.summaryStats.totalBailoutTransactions !== 1 ||
     updatedManifest.summaryStats.totalDollarsSpentOnBailouts !== 40 ||
@@ -181,7 +205,12 @@ async function runSaveGameTests() {
   ) {
     throw new Error(`Manifest summary stats incorrect: ${JSON.stringify(updatedManifest.summaryStats)}`);
   }
-  console.log('  ✓ Real-time event logging, round files, and summary stats updated correctly.');
+
+  const transcriptMdRaw = await fs.promises.readFile(transcriptPath, 'utf8');
+  if (!transcriptMdRaw.includes('Round 1 Confidential Strategy Confessional') || !transcriptMdRaw.includes('Elena must be eliminated tonight')) {
+    throw new Error('transcript.md missing internal strategy monologue entry.');
+  }
+  console.log('  ✓ Real-time event logging, round files, internal dialogues, and summary stats updated correctly.');
 
   // 4. Test Audio File Saving and audio_index.json Integrity
   console.log('4. Testing Audio (.mp3) File Persistence & Indexing...');
@@ -204,18 +233,74 @@ async function runSaveGameTests() {
     }
   );
 
-  if (!audioRes.success || !fs.existsSync(audioRes.filePath)) {
-    throw new Error(`Audio file was not saved at ${audioRes.filePath}`);
+  // Save Strategy Confessional Audio (.mp3)
+  const strategyAudioRes = await sessionStorageService.saveAudio(
+    testSessionName,
+    '01_strategy_vote_01_jackson-alvarez',
+    dummyMp3Buffer,
+    {
+      phase: 'VOTE_CONFESSIONAL',
+      round: 1,
+      speakerId: sampleCandidates[0].id,
+      speakerName: sampleCandidates[0].name,
+      targetId: sampleCandidates[1].id,
+      targetName: sampleCandidates[1].name,
+      textSnippet: 'Elena must be eliminated tonight...',
+    }
+  );
+
+  if (!strategyAudioRes.success || !fs.existsSync(strategyAudioRes.filePath)) {
+    throw new Error(`Strategy confessional audio file was not saved at ${strategyAudioRes.filePath}`);
   }
 
   const audioIndexPath = path.join(audioDir, 'audio_index.json');
   const audioIndexRaw = await fs.promises.readFile(audioIndexPath, 'utf8');
   const audioIndex = JSON.parse(audioIndexRaw);
 
-  if (!Array.isArray(audioIndex) || audioIndex.length !== 1 || audioIndex[0].filename !== '01_campaign_01_jackson-alvarez.mp3') {
+  if (!Array.isArray(audioIndex) || audioIndex.length !== 2 || audioIndex[1].filename !== '01_strategy_vote_01_jackson-alvarez.mp3') {
     throw new Error('audio_index.json does not match saved audio metadata.');
   }
-  console.log('  ✓ Audio MP3 file saved and indexed successfully.');
+
+  // Test reconstruction of audio index from files (verifies VOTE_CONFESSIONAL detection)
+  const reconstructedIndex = await sessionStorageService.reconstructAudioIndexFromFiles(testDir);
+  const reconstructedStrategyAudio = reconstructedIndex.find(a => a.filename === '01_strategy_vote_01_jackson-alvarez.mp3');
+  if (!reconstructedStrategyAudio || reconstructedStrategyAudio.phase !== 'VOTE_CONFESSIONAL' || reconstructedStrategyAudio.speakerId !== 'jackson-alvarez') {
+    throw new Error('reconstructAudioIndexFromFiles failed to classify strategy confessional audio properly.');
+  }
+  console.log('  ✓ Audio MP3 files and strategy confessional audio index reconstruction verified.');
+
+  // 4b. Test Grand Jury Round 99 Presidential Confessional Event
+  console.log('4b. Testing Grand Jury Round 99 Presidential Confessional Logging...');
+  await sessionStorageService.saveEvent(testSessionName, {
+    type: 'strategy_monologue',
+    round: 99,
+    speakerId: sampleCandidates[2].id,
+    speakerName: sampleCandidates[2].name,
+    targetId: sampleCandidates[0].id,
+    targetName: sampleCandidates[0].name,
+    content: 'My vote to elect the 50th President goes to Jackson Alvarez. He commands the steel and spine this republic requires.',
+    details: {
+      privateReason: 'Grand Jury final endorsement',
+      isGrandJury: true,
+    }
+  });
+
+  const finalRoundDir = path.join(roundsDir, 'final_round');
+  const finalDialoguesFile = path.join(finalRoundDir, '01b_internal_dialogues.json');
+  if (!fs.existsSync(finalDialoguesFile)) {
+    throw new Error('final_round/01b_internal_dialogues.json was not created.');
+  }
+  const finalDialoguesRaw = await fs.promises.readFile(finalDialoguesFile, 'utf8');
+  const finalDialoguesList = JSON.parse(finalDialoguesRaw);
+  if (!Array.isArray(finalDialoguesList) || finalDialoguesList.length !== 1 || !finalDialoguesList[0].content.includes('Jackson Alvarez')) {
+    throw new Error('final_round 01b_internal_dialogues.json content invalid.');
+  }
+
+  const grandJuryTranscriptRaw = await fs.promises.readFile(transcriptPath, 'utf8');
+  if (!grandJuryTranscriptRaw.includes('Grand Jury Presidential Confessional') || !grandJuryTranscriptRaw.includes('My vote to elect the 50th President')) {
+    throw new Error('transcript.md missing Grand Jury presidential confessional.');
+  }
+  console.log('  ✓ Grand Jury Round 99 confessional saved and verified.');
 
   // 5. Test Session Finish & Transcript Markdown Completion
   console.log('5. Testing Session Finalization & Victory Speech...');
@@ -233,6 +318,9 @@ async function runSaveGameTests() {
   const finalManifest: SessionManifest = JSON.parse(finalManifestRaw);
   if (finalManifest.status !== 'completed' || finalManifest.winner?.candidateName !== sampleCandidates[0].name) {
     throw new Error('Manifest did not record completed status and winner.');
+  }
+  if (finalManifest.summaryStats.totalInternalDialogues !== 2) {
+    throw new Error(`Expected 2 internal dialogues in manifest stats, got ${finalManifest.summaryStats.totalInternalDialogues}`);
   }
 
   const finalTranscriptMd = await fs.promises.readFile(transcriptPath, 'utf8');

@@ -1,0 +1,110 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone assumes prosecutorial armor shields him. Two votes already logged against him; my third guarantees liquidation. Vance's pact banks fifteen million—capital I'll need when the room turns.",
+    "privateReason": "Consensus guarantees elimination; honoring Vance's pact banks $15M while preserving my war chest.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "marcus-vance",
+    "voterName": "Marcus Vance",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone thinks Sterling and Thorne's accusations are theater, not artillery. Three ballots converge tonight—his eighty million bleeds, Elena's pact holds, my perimeter stays funded.",
+    "privateReason": "Honoring Elena's pact plus bandwagon consensus guarantees concentration and drains Stone's war chest.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "art-sterling",
+    "voterName": "Arthur Sterling",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone assumes my stage jabs were theater. Wrong—two accusers already signed his liquidation notice. My ballot closes the deal, banks fifteen million, and keeps Vance leveraged to me.",
+    "privateReason": "Honoring Vance's pact banks $15M, guarantees elimination, preserves capital, keeps kingpin ally close.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Father thinks honoring his pact makes me his obedient heiress again. Three votes liquidate Garrick's $80M war chest; my escrow swells while his trust becomes tomorrow's blade.",
+    "privateReason": "Honoring Father's pact banks $15M, guarantees Stone's elimination, preserves my betrayal options.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur thinks his stage accusations buy cover. Victoria and I strike in concert; his war chest bleeds forty million, my escrow swells, my flank stays shielded.",
+    "privateReason": "Honoring Victoria's pact banks $15M, drains billionaire Arthur, and keeps my strongest shield intact.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone thinks his prosecutor's badge shields him. Two accusers already bleed him dry. Honoring Haddon's pact banks fifteen million while burying the only man who could subpoena me.",
+    "privateReason": "Pact-locked consensus guarantees elimination concentration, +$15M escrow, and removes a prosecutorial threat.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone thinks prosecutorial piety shields him. Two accusations already price his elimination at ninety percent. My ballot banks the pact's fifteen million, preserving capital for Sterling's blindside.",
+    "privateReason": "Honoring Maya's pact plus bandwagon consensus guarantees elimination and preserves my $120M war chest.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "garrick-stone",
+    "voterName": "Garrick Stone",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

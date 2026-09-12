@@ -1,0 +1,411 @@
+[
+  {
+    "id": "evt-1",
+    "type": "cctv_pact",
+    "round": 7,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Vivienne, your quantum, my old boys' network. Twenty million, and Elena's ledger closes tonight.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Vivienne, your quantum, my old boys' network. Twenty million, and Elena's ledger closes tonight.",
+      "receiverResponse": "Payment authorized. Consider Elena deprecated by morning, Senator.",
+      "privateStrategy": "Elena and Victoria branded me corrupt; Vivienne already hunts Elena. Selling my vote funds a bailout shield against Sterling's war chest.",
+      "bribeOffered": false,
+      "bribeAmount": 20,
+      "upfrontPaid": 10,
+      "escrowPending": 10,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    },
+    "timestamp": 1789067858129
+  },
+  {
+    "id": "evt-2",
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Thorne assumes thirty-five years of Senate favors buy immunity. His $20M sits below bailout threshold—instant liquidation. My Sterling escrow pays $15M. Checkmate.",
+    "privateReason": "Thorne is consensus-priced, sub-$40M vulnerable; honoring Sterling's pact banks $15M escrow.",
+    "isBetrayal": true,
+    "isHonoredPact": false,
+    "timestamp": 1789067911014
+  },
+  {
+    "id": "evt-3",
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Sterling assumes the room's fixation on Haddon covers his flanks. Two concentrated ballots force his forty-million bailout—five million remaining. Liquidation by arithmetic.",
+    "privateReason": "Honor pact secures $15M escrow; concentrated votes drain Sterling to $5M, keeping Haddon as shield.",
+    "isBetrayal": true,
+    "isHonoredPact": false,
+    "timestamp": 1789067911107
+  },
+  {
+    "id": "evt-4",
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur Sterling assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": true,
+    "isHonoredPact": false,
+    "timestamp": 1789067911220
+  },
+  {
+    "id": "evt-5",
+    "type": "vote_tally",
+    "round": 7,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "silas-thorne",
+          "reason": "Thorne is consensus-priced, sub-$40M vulnerable; honoring Sterling's pact banks $15M escrow.",
+          "strategyMonologue": "Thorne assumes thirty-five years of Senate favors buy immunity. His $20M sits below bailout threshold—instant liquidation. My Sterling escrow pays $15M. Checkmate.",
+          "audioBlobUrl": "blob:http://localhost:3000/bb811c0c-d228-48b1-b7f7-ff850b4839c7",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": true,
+          "betrayedAllyId": "vivienne-zhao",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "elena-rostova",
+          "reason": "Strategic determination",
+          "strategyMonologue": "Elena thinks hunting Thorne shields her. Her $35M can't cover a bailout. Vivienne's ballot plus mine liquidates the governor—and escrow lifts",
+          "audioBlobUrl": "blob:http://localhost:3000/15cb5e12-e337-4a6a-935e-615f619badc0",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "silas-thorne",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Victoria Sterling",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "art-sterling",
+          "reason": "Honor pact secures $15M escrow; concentrated votes drain Sterling to $5M, keeping Haddon as shield.",
+          "strategyMonologue": "Sterling assumes the room's fixation on Haddon covers his flanks. Two concentrated ballots force his forty-million bailout—five million remaining. Liquidation by arithmetic.",
+          "audioBlobUrl": "blob:http://localhost:3000/1cd4f02f-2dce-4511-9092-2d4bff3b08c2",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Arthur Sterling"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "art-sterling",
+          "reason": "Strategic elimination vote",
+          "strategyMonologue": "Arthur Sterling assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+          "audioBlobUrl": "blob:http://localhost:3000/3a458a9b-b44f-453e-b164-24faf4db7166",
+          "audioBlob": {},
+          "pactWithId": "vivienne-zhao",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "vivienne-zhao",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Arthur Sterling"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r7-1-elena-rostova",
+          "candidateId": "elena-rostova",
+          "round": 7,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 10,
+          "timestamp": 1789067910973,
+          "candidateName": "Elena Rostova"
+        }
+      ],
+      "eliminatedId": "silas-thorne",
+      "eliminatedName": "Silas Thorne",
+      "finalVoteCount": 1
+    },
+    "timestamp": 1789067911323
+  },
+  {
+    "id": "evt-6",
+    "type": "elimination",
+    "round": 7,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "My friends, Valoria has chosen turbulence over tested leadership. Beware silver tongues and untested hands. The Republic endures—though it will miss steady stewardship. God bless Valoria.",
+    "details": {
+      "voteCount": 1
+    },
+    "timestamp": 1789067982082
+  },
+  {
+    "id": "evt-7",
+    "type": "final_speech",
+    "round": 99,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Valoria's deficit devours 8.2% of GDP while foreign algorithms harvest our children's minds and biometric data. Sterling offers subsidy-dependent climate philanthropy—capital she doesn't possess. Zhao profits from the very addiction engines we must regulate. I offer audited structural reform. Grand Jury: vote arithmetic, not fairy tales.",
+    "timestamp": 1789067998218
+  },
+  {
+    "id": "evt-8",
+    "type": "final_speech",
+    "round": 99,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "Elena's spreadsheets won't un-addict a generation—central banks bankrolled these very algorithms. Vivienne built the brainrot, now she's selling the \"neural cure.\" I sat at the donor dinners where your children's attention was auctioned. Ban the harvest, smash the racket. Grand Jury: inaugurate the generational revolution.",
+    "timestamp": 1789068023081
+  },
+  {
+    "id": "evt-9",
+    "type": "final_speech",
+    "round": 99,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Rostova will tax your decay with interest-rate arithmetic. Sterling will philanthropize it into another accelerator. I will re-engineer the source: sovereign neural architecture, reclaimed biometric data, restored cognitive bandwidth. They manage symptoms. I upgrade the operating system. Grand Jury: inaugurate the synthetic century. Vote Zhao.",
+    "timestamp": 1789068046225
+  },
+  {
+    "id": "evt-10",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "marcus-vance",
+    "voterName": "Marcus Vance",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne spent thirty-five years gutting defense budgets behind closed doors. Haddon preaches mercy to enemies stockpiling missiles. Zhao's machines will arm Valoria's fist. Deterrence demands her.",
+    "privateReason": "Zhao's AI secures military supremacy. Thorne and Haddon would leave Valoria defenseless.",
+    "timestamp": 1789068070686
+  },
+  {
+    "id": "evt-11",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "art-sterling",
+    "voterName": "Arthur Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova actually balanced a nation's books — the only rival who speaks my fiscal language. Sterling burns capital on sentiment; Zhao sells vaporware. Elena gets my crown.",
+    "privateReason": "Only finalist who understands balance sheets, ROI, and real fiscal discipline.",
+    "timestamp": 1789068070916
+  },
+  {
+    "id": "evt-12",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne spent thirty-five years perfecting the machine I renounced my fortune to dismantle. Haddon sells salvation to donors. Zhao actually builds the future — my vote crowns her.",
+    "privateReason": "Zhao funds the frontline; Thorne is the dynasty's senator, Haddon its pulpit.",
+    "timestamp": 1789068070975
+  },
+  {
+    "id": "evt-13",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Zhao counts souls as data points; her machines have no conscience to consult. Thorne kept his corridor word when betrayal was cheaper. The senator governs; the engineer experiments. Thorne it is.",
+    "privateReason": "Thorne honors covenants; Zhao reduces souls to algorithms. The technocrat falls tonight.",
+    "timestamp": 1789068071014
+  },
+  {
+    "id": "evt-14",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Haddon sells salvation; crowds follow emotion, not reason. Zhao's brilliance lacks statecraft scars. Thorne reads rooms like I do. Thirty-five years of corridors never lie. He governs.",
+    "privateReason": "Thorne's diplomatic spine matches mine. Valoria needs precision, not theater or untested code.",
+    "timestamp": 1789068071064
+  },
+  {
+    "id": "evt-15",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Haddon's crusade is unregulated mass limbic hijacking—faith as malware. Thorne is legacy infrastructure, but legacy runs predictable protocols. Predictable beats charismatic chaos. My vote elects the senator.",
+    "privateReason": "Thorne negotiates with logic; Haddon hijacks limbic systems. Predictable legacy infrastructure beats broadcast hysteria.",
+    "timestamp": 1789068071242
+  },
+  {
+    "id": "evt-16",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "garrick-stone",
+    "voterName": "Garrick Stone",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne spent thirty-five years feeding at the public trust. Haddon's collection plates hide donor ledgers. Zhao owes no oligarch, no party machine. Clean hands govern. My vote: Zhao.",
+    "privateReason": "Thorne is the aristocracy I indicted; Zhao's hands are auditable and clean.",
+    "timestamp": 1789068071413
+  },
+  {
+    "id": "evt-17",
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena called me a depreciated asset—forgivable pride. Victoria buys crowds, Zhao sells brains. Only the banker understands the machine keeping my legacy alive. She governs; extremists perform.",
+    "privateReason": "Elena's institutional mastery preserves stability; Sterling and Zhao are untested extremists.",
+    "timestamp": 1789068094990
+  },
+  {
+    "id": "evt-18",
+    "type": "final_vote",
+    "round": 99,
+    "details": {
+      "votes": [
+        {
+          "voterId": "jax-alvarez",
+          "targetId": "elijah-haddon",
+          "reason": "Haddon stood with forgotten workers; Thorne is the swamp, Zhao's AI kills jobs.",
+          "strategyMonologue": "Thorne spent thirty-five years feeding off the Capitol trough. Zhao's machines replaced my steelworkers. Haddon knelt with our laid-off families. My vote crowns the preacher.",
+          "audioBlobUrl": "blob:http://localhost:3000/aa18502d-5b06-46a9-b756-906a889f0691",
+          "audioBlob": {},
+          "voterName": "Jackson Alvarez",
+          "targetName": "Elijah Haddon"
+        },
+        {
+          "voterId": "elena-rostova",
+          "targetId": "silas-thorne",
+          "reason": "Thorne respects fiscal constraint; the others promise miracles Valoria's ledger cannot fund.",
+          "strategyMonologue": "Haddon sells salvation on deficit spending. Zhao peddles venture-capital hallucinations. Thorne grasps structural constraint. A dull senator beats a bankrupting prophet. He gets my vote.",
+          "audioBlobUrl": "blob:http://localhost:3000/41424d38-aa90-4242-8299-f345cbf7639e",
+          "audioBlob": {},
+          "voterName": "Elena Rostova",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "marcus-vance",
+          "targetId": "vivienne-zhao",
+          "reason": "Zhao's AI secures military supremacy. Thorne and Haddon would leave Valoria defenseless.",
+          "strategyMonologue": "Thorne spent thirty-five years gutting defense budgets behind closed doors. Haddon preaches mercy to enemies stockpiling missiles. Zhao's machines will arm Valoria's fist. Deterrence demands her.",
+          "audioBlobUrl": "blob:http://localhost:3000/d6765fe0-3414-4f3e-ba01-88cc403311af",
+          "audioBlob": {},
+          "voterName": "Marcus Vance",
+          "targetName": "Vivienne Zhao"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "elena-rostova",
+          "reason": "Only finalist who understands balance sheets, ROI, and real fiscal discipline.",
+          "strategyMonologue": "Rostova actually balanced a nation's books — the only rival who speaks my fiscal language. Sterling burns capital on sentiment; Zhao sells vaporware. Elena gets my crown.",
+          "audioBlobUrl": "blob:http://localhost:3000/5f88eb6e-6c49-4fad-bfb1-3f46a60438ca",
+          "audioBlob": {},
+          "voterName": "Arthur Sterling",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "vivienne-zhao",
+          "reason": "Zhao funds the frontline; Thorne is the dynasty's senator, Haddon its pulpit.",
+          "strategyMonologue": "Thorne spent thirty-five years perfecting the machine I renounced my fortune to dismantle. Haddon sells salvation to donors. Zhao actually builds the future — my vote crowns her.",
+          "audioBlobUrl": "blob:http://localhost:3000/a014e400-1c7a-4df1-88e2-a3f8fd18fe67",
+          "audioBlob": {},
+          "voterName": "Victoria Sterling",
+          "targetName": "Vivienne Zhao"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "silas-thorne",
+          "reason": "Thorne honors covenants; Zhao reduces souls to algorithms. The technocrat falls tonight.",
+          "strategyMonologue": "Zhao counts souls as data points; her machines have no conscience to consult. Thorne kept his corridor word when betrayal was cheaper. The senator governs; the engineer experiments. Thorne it is.",
+          "audioBlobUrl": "blob:http://localhost:3000/3281703d-a6ff-4f19-927e-ca996d812b04",
+          "audioBlob": {},
+          "voterName": "Elijah Haddon",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "silas-thorne",
+          "reason": "Thorne's diplomatic spine matches mine. Valoria needs precision, not theater or untested code.",
+          "strategyMonologue": "Haddon sells salvation; crowds follow emotion, not reason. Zhao's brilliance lacks statecraft scars. Thorne reads rooms like I do. Thirty-five years of corridors never lie. He governs.",
+          "audioBlobUrl": "blob:http://localhost:3000/0f5e464c-739d-4708-8c75-70eadbf8c02b",
+          "audioBlob": {},
+          "voterName": "Maya Lin",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "silas-thorne",
+          "reason": "Thorne negotiates with logic; Haddon hijacks limbic systems. Predictable legacy infrastructure beats broadcast hysteria.",
+          "strategyMonologue": "Haddon's crusade is unregulated mass limbic hijacking—faith as malware. Thorne is legacy infrastructure, but legacy runs predictable protocols. Predictable beats charismatic chaos. My vote elects the senator.",
+          "audioBlobUrl": "blob:http://localhost:3000/aa7314a6-7654-47c8-a80a-1492746b7915",
+          "audioBlob": {},
+          "voterName": "Vivienne Zhao",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "elena-rostova",
+          "reason": "Elena's institutional mastery preserves stability; Sterling and Zhao are untested extremists.",
+          "strategyMonologue": "Elena called me a depreciated asset—forgivable pride. Victoria buys crowds, Zhao sells brains. Only the banker understands the machine keeping my legacy alive. She governs; extremists perform.",
+          "audioBlobUrl": "blob:http://localhost:3000/81ad39f9-7061-426a-8c0a-790ff79fe7fa",
+          "audioBlob": {},
+          "voterName": "Silas Thorne",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "garrick-stone",
+          "targetId": "vivienne-zhao",
+          "reason": "Thorne is the aristocracy I indicted; Zhao's hands are auditable and clean.",
+          "strategyMonologue": "Thorne spent thirty-five years feeding at the public trust. Haddon's collection plates hide donor ledgers. Zhao owes no oligarch, no party machine. Clean hands govern. My vote: Zhao.",
+          "audioBlobUrl": "blob:http://localhost:3000/937c4146-81b2-4733-bd25-a5b96432f264",
+          "audioBlob": {},
+          "voterName": "Garrick Stone",
+          "targetName": "Vivienne Zhao"
+        }
+      ],
+      "winnerId": "silas-thorne",
+      "winnerName": "Silas Thorne"
+    },
+    "timestamp": 1789068095028
+  },
+  {
+    "id": "evt-19",
+    "type": "winner",
+    "round": 100,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "My fellow Valorians, after a hard-fought campaign, your steady hand prevails. To my opponents—those passionate, untested voices—I extend partnership, not scorn. Today, by executive decree, I ban all foreign-controlled algorithmic applications, protecting our children's minds and Valoria's precious data. Tested leadership delivers. Steady Valoria endures.",
+    "timestamp": 1789068259449
+  }
+]

@@ -1,0 +1,113 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 6,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "silas-thorne",
+          "reason": "...",
+          "strategyMonologue": "Silas Thorne assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+          "audioBlobUrl": "blob:http://localhost:3000/61dd8448-4020-4713-b32d-2d6e59d78bf7",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elijah-haddon",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "elena-rostova",
+          "reason": "Strategic elimination vote",
+          "strategyMonologue": "Elena Rostova assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+          "audioBlobUrl": "blob:http://localhost:3000/55d430ff-2750-4fbf-9bec-729d12223575",
+          "audioBlob": {},
+          "pactWithId": "maya-lin",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": false,
+          "isHonoredPact": true,
+          "voterName": "Elijah Haddon",
+          "targetName": "Elena Rostova"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "art-sterling",
+          "reason": "Honoring Victoria's pact banks $15M escrow while the room's consensus guarantees Arthur's elimination.",
+          "strategyMonologue": "Arthur believes his media empire buys immunity from a room that already sentenced him. Three votes committed. My fourth collects the escrow and keeps Victoria bound to me.",
+          "audioBlobUrl": "blob:http://localhost:3000/844da353-a1d2-42c3-bbd7-2b6049105399",
+          "audioBlob": {},
+          "pactWithId": "elijah-haddon",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "elijah-haddon",
+          "isHonoredPact": false,
+          "voterName": "Maya Lin",
+          "targetName": "Arthur Sterling"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "art-sterling",
+          "reason": "Honoring Maya's pact banks $15M escrow while bandwagon guarantees Arthur's sub-$40M liquidation tonight.",
+          "strategyMonologue": "Sterling believes his surname buys immunity. His $20M treasury can't fund a bailout. My ballot stacks with Maya's pact—cheap kill, fifteen million escrowed, war chest intact.",
+          "audioBlobUrl": "blob:http://localhost:3000/abda3c3f-3acd-49d5-a9ce-5d699b95b3de",
+          "audioBlob": {},
+          "pactWithId": "maya-lin",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "maya-lin",
+          "isHonoredPact": false,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Arthur Sterling"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "art-sterling",
+          "reason": "Honoring Zhao's pact banks $15M, guarantees elimination, preserves my $20M for defense.",
+          "strategyMonologue": "Arthur assumes his billions buy another round. Vivienne's handshake plus consensus guarantees concentration; solo strikes on Maya's hundred million waste ballots. I bank the escrow, sign his exit.",
+          "audioBlobUrl": "blob:http://localhost:3000/54508190-88e1-4a93-a9e5-d6aab13432e6",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "elijah-haddon",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Arthur Sterling"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r6-1-silas-thorne",
+          "candidateId": "silas-thorne",
+          "round": 6,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 47,
+          "timestamp": 1789072612944,
+          "candidateName": "Silas Thorne"
+        },
+        {
+          "id": "bailout-r6-2-elena-rostova",
+          "candidateId": "elena-rostova",
+          "round": 6,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 20,
+          "timestamp": 1789072612944,
+          "candidateName": "Elena Rostova"
+        }
+      ],
+      "eliminatedId": "elijah-haddon",
+      "eliminatedName": "Elijah Haddon",
+      "finalVoteCount": 0
+    }
+  }
+]

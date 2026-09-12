@@ -18,6 +18,7 @@ import { CandidateRoster } from '@/components/CandidateRoster';
 import { DebateArena } from '@/components/DebateArena';
 import { BroadcastTimeline } from '@/components/BroadcastTimeline';
 import { EventTicker } from '@/components/EventTicker';
+import { StrategicConfessionalModal } from '@/components/StrategicConfessionalModal';
 import { tokenizeSpeech } from '@/utils/kineticSubtitles';
 import { 
   Play, 
@@ -43,7 +44,7 @@ export interface TimelineBlock {
 
 interface RenderEvent {
   id: string;
-  type: 'campaign_speech' | 'attack' | 'cctv_pact' | 'vote_tally' | 'elimination' | 'final_speech' | 'final_vote' | 'winner' | 'system';
+  type: 'campaign_speech' | 'attack' | 'cctv_pact' | 'strategy_monologue' | 'vote_tally' | 'elimination' | 'final_speech' | 'final_vote' | 'winner' | 'system';
   round?: number;
   speakerId?: string;
   speakerName?: string;
@@ -237,6 +238,13 @@ function RenderStageContent() {
       const match = audioIndex.find(a => 
         a.filename.includes('_cctv_') && 
         a.round === (currentEvent.round || 1) &&
+        (a.speakerId === currentEvent.speakerId || a.filename.includes(currentEvent.speakerId || ''))
+      );
+      if (match) return match;
+    } else if (currentEvent.type === 'strategy_monologue') {
+      const match = audioIndex.find(a => 
+        (a.filename.includes('_strategy_vote_') || a.filename.includes('_strategy_jury_') || a.filename.includes('_strategy_')) &&
+        (a.round === currentEvent.round || !a.round || currentEvent.round === 99) &&
         (a.speakerId === currentEvent.speakerId || a.filename.includes(currentEvent.speakerId || ''))
       );
       if (match) return match;
@@ -492,6 +500,7 @@ function RenderStageContent() {
       if (evt.type === 'campaign_speech') currentPhase = 'CAMPAIGN';
       else if (evt.type === 'attack') currentPhase = 'ATTACK';
       else if (evt.type === 'cctv_pact') currentPhase = 'CCTV_BACKROOM';
+      else if (evt.type === 'strategy_monologue') currentPhase = 'VOTE_CONFESSIONAL';
       else if (evt.type === 'vote_tally') currentPhase = 'VOTE_REVEAL';
       else if (evt.type === 'elimination') currentPhase = 'ELIMINATION';
       else if (evt.type === 'final_speech') currentPhase = 'FINAL_SPEECHES';
@@ -530,6 +539,7 @@ function RenderStageContent() {
         actionType: evt?.type === 'campaign_speech' ? 'speech' :
                     evt?.type === 'attack' ? 'attack' :
                     evt?.type === 'cctv_pact' ? 'pact' :
+                    evt?.type === 'strategy_monologue' ? 'vote' :
                     evt?.type === 'vote_tally' ? 'vote' :
                     evt?.type === 'elimination' ? 'eliminated' :
                     evt?.type === 'winner' ? 'winner' : 'speech',
@@ -537,6 +547,7 @@ function RenderStageContent() {
           evt?.type === 'campaign_speech' ? `Round ${currentRound}: Campaign Address` :
           evt?.type === 'attack' ? `Round ${currentRound} Clash: ${evt.speakerName || 'Contender'} vs ${evt.targetName || 'Rival'}` :
           evt?.type === 'cctv_pact' ? `Round ${currentRound} CCTV Surveillance Feed` :
+          evt?.type === 'strategy_monologue' ? (currentRound === 99 || evt.details?.isGrandJury ? `Grand Jury Presidential Confessional: ${evt.speakerName || 'Juror'}` : `Round ${currentRound} Strategy Confessional: ${evt.speakerName || 'Voter'}`) :
           evt?.type === 'vote_tally' ? `Round ${currentRound} Secret Ballots & Bailouts` :
           evt?.type === 'elimination' ? `Round ${currentRound} Concession Address` :
           evt?.type === 'winner' ? `Presidential Inauguration Address` : 'Republic of Valoria Live Feed'
@@ -805,6 +816,38 @@ function RenderStageContent() {
             />
           </div>
         </div>
+
+        {/* Strategic Confessional Overlay during VOTE_CONFESSIONAL */}
+        {currentGameState.phase === 'VOTE_CONFESSIONAL' && (() => {
+          const voterId = currentEvent.speakerId || (currentEvent as any).voterId;
+          const voter = CANDIDATE_MAP.get(voterId || '') || candidatesList.find(c => c.id === voterId);
+          if (!voter) return null;
+          const targetId = currentEvent.targetId;
+          const target = targetId ? (CANDIDATE_MAP.get(targetId) || candidatesList.find(c => c.id === targetId)) : null;
+          const isFinal = currentEvent.round === 99 || currentEvent.details?.isGrandJury;
+          
+          return (
+            <StrategicConfessionalModal
+              voter={voter}
+              target={target}
+              strategyMonologue={currentEvent.content || ''}
+              privateReason={currentEvent.details?.privateReason}
+              voterIndex={currentIndex}
+              totalVoters={events.filter(e => e.type === 'strategy_monologue' && e.round === currentEvent.round).length || 1}
+              round={currentEvent.round || currentGameState.round}
+              isSpeakingAudio={isSpeakingAudio}
+              voterBudget={currentGameState.candidateBudgets[voter.id] ?? 100}
+              targetBudget={target ? (currentGameState.candidateBudgets[target.id] ?? 100) : undefined}
+              isBetrayal={currentEvent.details?.isBetrayal}
+              isHonoredPact={currentEvent.details?.isHonoredPact}
+              isFinalVote={isFinal}
+              kineticSubtitlesEnabled={true}
+              kineticHighlightCriticalWords={true}
+              kineticDynamicBoxResize={true}
+              lineupCandidateIds={currentGameState.participatingCandidateIds || currentGameState.activeCandidateIds}
+            />
+          );
+        })()}
 
         {/* Floating Master Control Deck (Visible only in interactive browser preview, auto-hidden in headless recording) */}
         {!isHeadlessMode && (

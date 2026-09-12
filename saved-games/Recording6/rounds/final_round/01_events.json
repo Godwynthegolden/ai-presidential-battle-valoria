@@ -1,0 +1,102 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "jax-alvarez",
+    "voterName": "Jackson Alvarez",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Thorne's no saint, but thirty-five years means he answers to voters, not shareholders. Sterling's hedge-fund money reeks. The old lion gets my vote.",
+    "privateReason": "Thorne fights for forgotten factory towns; Sterling serves her investors, not our families."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Silas is the establishment's comfortable rot; Vivienne builds the next oligarchy in silicon. Elena knows every offshore ledger my father hid — she'll strangle the racket from inside.",
+    "privateReason": "Elena knows the financial machine's guts; she'll dismantle dynastic wealth from within."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Thorne's thirty-five years produced double-priced eggs—legacy code that never compiled. Elena's arithmetic is the only rigorous operating system on that ballot. I elect competence, not sentiment. Elena wins.",
+    "privateReason": "Elena computes reality; Thorne performs it. Precision governs; sentimentality starves. She earns the presidency."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Zhao calls hunger obsolete wetware—soulless. Rostova's austerity starves souls for spreadsheets. Thorne speaks compassion, flawed vessel though he is. He heals; the others dissect. My flock elects him.",
+    "privateReason": "Thorne alone honors family and compassion; the others worship spreadsheets and silicon."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne's compassion theater is deficit bribery — 35 years, 14.2% food inflation. Zhao thinks in systems, not sentiment. Cold competence governs; emotional arithmetic bankrupts. Zhao gets my presidency.",
+    "privateReason": "Zhao's structural systems-thinking beats Thorne's deficit-funded compassion theater that bankrupted Valoria."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Zhao's contempt disqualifies her. Thorne trades compassion theater for thirty-five years of failure. Elena's arithmetic cuts true — she attacked me, but precision governs. She gets my presidency.",
+    "privateReason": "Elena's analytical spine can break monopolies; Zhao's contempt and Thorne's theater cannot."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "art-sterling",
+    "voterName": "Arthur Sterling",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Thorne never signed a paycheck. Rostova only audits other people's money. Zhao built an empire from zero—like me. Founders govern; bureaucrats talk. My vote elects Zhao.",
+    "privateReason": "Only finalist who built a private-sector empire. Founders outperform bureaucrats. Deal done."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "marcus-vance",
+    "voterName": "Marcus Vance",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Thorne negotiates; negotiators concede. Zhao's contempt disqualifies her. Rostova breaks monopolies like enemy formations—ruthless, decisive. Command requires spine. She has it. Vote cast.",
+    "privateReason": "Rostova shows the decisiveness and iron will Valoria's defense demands."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Zhao would dismantle everything I built in thirty-five years. Elena respects institutions—she'll preserve my corridors, my committees. The economist is controllable. The technocrat is extinction. Rostova wins tonight.",
+    "privateReason": "Zhao threatens my legacy; Elena preserves the institutional order I built."
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 99,
+    "voterId": "garrick-stone",
+    "voterName": "Garrick Stone",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Thorne is the aristocracy I've spent thirty years indicting—legacy rot in a suit. Zhao optimizes for shareholders. Rostova follows evidence, breaks monopolies. She gets my verdict.",
+    "privateReason": "Rostova's evidence-first mind matches my prosecutorial war; Thorne is the aristocracy itself."
+  }
+]

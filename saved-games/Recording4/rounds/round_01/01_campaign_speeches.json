@@ -1,0 +1,72 @@
+[
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "Jackson Alvarez poured steel twenty years — no trust fund, no bankers' blessing. This governor's taking Valoria back for the working class!"
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Valoria's ledger bleeds red. I spent a decade guarding its currency; now I intend to balance its books. Rostova. Fiscal discipline. Sustainable growth."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Forty years in uniform. I held the Northern Border when others blinked. Weakness invited every crisis we face. No more watching. Command begins now."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "Billionaire. Dealmaker. Job creator. I built an empire from nothing—now I'm acquiring my biggest fixer-upper yet: Valoria itself. The boardroom just went national."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "I grew up watching billionaires buy Valoria over dessert. So I renounced my inheritance — and I'm spending it breaking their empire."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "content": "Every Sunday, fifteen million hearts hear me preach hope. Tonight, I preach it to a wounded nation—heal the soul of Valoria!"
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "Eighty hostages came home because I never raised my voice. Valoria now faces its most dangerous negotiation. I master rooms. Peace through precision."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Valoria runs on legacy code. I built the neural lace—now I'll recompile the state itself. Vivienne Zhao. Upgrade human potential."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Thirty-five years. Four administrations. One steady hand. Valoria needs a statesman, not a gamble. I've brokered peace abroad; I'll bring stability home."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "content": "Four governors convicted. Two oligarchs caged. Three car bombs survived. My biggest indictment yet: the presidency itself. No one is above the law."
+  }
+]

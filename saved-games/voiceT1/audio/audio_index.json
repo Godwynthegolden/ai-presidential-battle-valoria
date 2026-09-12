@@ -1,0 +1,52 @@
+[
+  {
+    "filename": "01_campaign_01_jax-alvarez.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "textSnippet": "Three mills shut. Groceries doubled. That’s not economics, that’s theft. I’m Jackson Alvarez. I’ll t",
+    "sizeBytes": 221099,
+    "timestamp": 1788381990244
+  },
+  {
+    "filename": "01_campaign_02_elena-rostova.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "textSnippet": "Fourteen percent inflation is a tax on the poor. I will slash the deficit, automate tax enforcement,",
+    "sizeBytes": 278777,
+    "timestamp": 1788382850778
+  },
+  {
+    "filename": "01_campaign_03_art-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "textSnippet": "Crippling inflation? I'll slash corporate taxes to 10%, privatize rail and energy, and unleash Valor",
+    "sizeBytes": 310960,
+    "timestamp": 1788382860179
+  },
+  {
+    "filename": "01_campaign_04_victoria-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "textSnippet": "Smash the donor-dinner racket and fund the frontline. I’ll tax dynastic billionaires at 90%, seed op",
+    "sizeBytes": 213576,
+    "timestamp": 1788382865351
+  },
+  {
+    "filename": "01_campaign_05_marcus-vance.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "textSnippet": "Foreign imports shuttered Iron Valley. I will seal the border, tax their goods, and rebuild our stee",
+    "sizeBytes": 264985,
+    "timestamp": 1788382873184
+  }
+]

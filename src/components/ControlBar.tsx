@@ -195,14 +195,39 @@ export const ControlBar: React.FC<ControlBarProps> = ({
       </div>
 
       {/* Center: Live Debate Timer / Round Indicator */}
-      <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs font-mono">
-        <span className="text-slate-400 font-bold uppercase tracking-wider">Status:</span>
-        <span className="font-bold text-white uppercase tracking-wider">
-          {phase.replace('_', ' ')}
-        </span>
-        <span className="text-slate-600">•</span>
-        <span className="text-cyan-400 font-bold">Round {gameState.round}</span>
-      </div>
+      {(() => {
+        const isEndgame = gameState.round === 99 || 
+          phase === 'FINAL_SPEECHES' || 
+          phase === 'FINAL_VOTE' || 
+          phase === 'FINAL_REVEAL' || 
+          phase === 'WINNER' ||
+          (phase === 'VOTE_CONFESSIONAL' && Boolean(gameState.finalVoteTally));
+
+        return (
+          <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-mono transition-colors ${
+            isEndgame
+              ? 'bg-amber-950/50 border-amber-500/50 text-amber-300 shadow-sm shadow-amber-500/20'
+              : 'bg-slate-950/90 border-slate-800 text-slate-300'
+          }`}>
+            <span className="text-slate-400 font-bold uppercase tracking-wider">Status:</span>
+            <span className={`font-bold uppercase tracking-wider ${isEndgame ? 'text-amber-200' : 'text-white'}`}>
+              {phase === 'FINAL_SPEECHES'
+                ? 'Final 3 Debate'
+                : (phase === 'FINAL_VOTE' || (phase === 'VOTE_CONFESSIONAL' && isEndgame))
+                ? 'Presidential Election'
+                : phase === 'FINAL_REVEAL'
+                ? 'Presidential Tally'
+                : phase === 'WINNER'
+                ? 'President Inauguration'
+                : phase.replace('_', ' ')}
+            </span>
+            <span className="text-slate-600">•</span>
+            <span className={`font-bold ${isEndgame ? 'text-amber-400' : 'text-cyan-400'}`}>
+              {isEndgame ? 'Grand Finale' : `Round ${gameState.round}`}
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Center-Right: Speed & Audio Controls */}
       <div className="flex items-center gap-2">

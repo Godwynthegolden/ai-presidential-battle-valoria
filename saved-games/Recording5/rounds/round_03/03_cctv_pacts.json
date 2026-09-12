@@ -1,0 +1,156 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Zhao already hunts Haddon. Your ballot joins hers, Silas—escrow releases on confirmation.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Elijah Haddon",
+      "whisperText": "Zhao already hunts Haddon. Your ballot joins hers, Silas—escrow releases on confirmation.",
+      "receiverResponse": "We understand each other. You'll get what you deserve.",
+      "privateStrategy": "Align tactically to eliminate Elijah Haddon while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept_and_betray",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Victoria, vivienne called you a legacy virus. Skip Elena tonight - she's already dead. Bury.",
+    "details": {
+      "location": "West Wing Corridor 3",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Victoria, vivienne called you a legacy virus. Skip Elena tonight - she's already dead. Bury.",
+      "receiverResponse": "Agreed. Keep your head down until the ballots unseal.",
+      "privateStrategy": "Align tactically to eliminate Elena Rostova while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "content": "Elijah, agreed elimination",
+    "details": {
+      "location": "Capitol Cloakroom Cam 04",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Elijah, agreed elimination",
+      "receiverResponse": "Put your money away. I don't play backroom games.",
+      "privateStrategy": "Align tactically to eliminate Elena Rostova while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 0,
+      "escrowPending": 0,
+      "receiverDecision": "decline",
+      "bribeAccepted": false
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Marcus, while they feast on Elena, bury Zhao—she vowed my purge. Thirty million staged.",
+    "details": {
+      "location": "Sub-Basement Boiler Room",
+      "agreedTargetName": "Vivienne Zhao",
+      "whisperText": "Marcus, while they feast on Elena, bury Zhao—she vowed my purge. Thirty million staged.",
+      "receiverResponse": "Zhao's billions frighten me more than Lin's words. It's done.",
+      "privateStrategy": "Elena is doomed—four accusers already; my vote there costs nothing. Zhao vowed to purge me publicly. Blindside her while the room watches Elena bleed.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, consensus blinds. Elena burns tonight; Vance falls unseen. Thirty million escrowed on your vote.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "Silas, consensus blinds. Elena burns tonight; Vance falls unseen. Thirty million escrowed on your vote.",
+      "receiverResponse": "Thirty years taught me when to sign. Done.",
+      "privateStrategy": "Blindside Vance while the room fixates on Elena; Thorne's vote plus mine threatens his $115M bloc. Consensus targets make poor witnesses.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Consensus already executes Rostova, Marcus. My escrow buys certainty — and positions us against Haddon.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Elena Rostova",
+      "whisperText": "Consensus already executes Rostova, Marcus. My escrow buys certainty — and positions us against Haddon.",
+      "receiverResponse": "Agreed. Rostova falls tonight — then we discuss the evangelist.",
+      "privateStrategy": "Elena's elimination is consensus-priced; bribing Vance locks supermajority cheaply and secures a military ally for next round's Haddon strike.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 3,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "The terms are agreeable. Consider Elena's balance sheet closed.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Marcus Vance",
+      "whisperText": "The terms are agreeable. Consider Elena's balance sheet closed.",
+      "receiverResponse": "The metrics align. Marcus will not survive tonight.",
+      "privateStrategy": "Align tactically to eliminate Marcus Vance while preserving treasury.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

@@ -1,0 +1,170 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Garrick, let's bury the Sterling dynasty tonight. Take thirty to cast your vote against Arthur. The empire falls.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Arthur Sterling",
+      "whisperText": "Garrick, let's bury the Sterling dynasty tonight. Take thirty to cast your vote against Arthur. The empire falls.",
+      "privateStrategy": "Align with Garrick to eliminate Father. Spend minimal. Preserve funds for later bailouts and countermoves.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena, Sora Kim's recklessness endangers us all. Take my $30 and vote her out tonight.",
+    "details": {
+      "location": "West Wing Corridor 3",
+      "agreedTargetName": "Sora Kim",
+      "whisperText": "Elena, Sora Kim's recklessness endangers us all. Take my $30 and vote her out tonight.",
+      "privateStrategy": "Silence Sora's attacks. Bribe Elena with $30 to vote Sora out. Avoid Jackson's firestorm for now.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "sora-kim",
+    "targetName": "Sora Kim",
+    "content": "Sora, Vivienne's AI is unaccountable power. Let's eliminate her tonight—I'll fund your security agenda. Accept?",
+    "details": {
+      "location": "Capitol Cloakroom Cam 04",
+      "agreedTargetName": "Vivienne Zhao",
+      "whisperText": "Sora, Vivienne's AI is unaccountable power. Let's eliminate her tonight—I'll fund your security agenda. Accept?",
+      "privateStrategy": "Sora is aligned against authoritarian tech. Bribe her to eliminate Vivienne, weaken the strongest funded rival while preserving my diplomatic capital.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, join me to purge the billionaire who corrupts our soul. Vote out Arthur Sterling.",
+    "details": {
+      "location": "Sub-Basement Boiler Room",
+      "agreedTargetName": "Arthur Sterling",
+      "whisperText": "Silas, join me to purge the billionaire who corrupts our soul. Vote out Arthur Sterling.",
+      "privateStrategy": "Align with Senator Thorne to eliminate the billionaire threat, using our moral authority to unite.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, synchronize your algorithm with mine. Accept $30 to delete Jackson Alvarez—the last legacy variable in our equation.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Silas, synchronize your algorithm with mine. Accept $30 to delete Jackson Alvarez—the last legacy variable in our equation.",
+      "privateStrategy": "Silas has the cash and wants Jackson gone. Align with him, spend minimal capital, let him burn reputation. Secure the kill while preserving my liquidity for later rounds.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena, our shared concern is clear. Take this to seal Jackson's fate and ensure a steady Valoria.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Elena, our shared concern is clear. Take this to seal Jackson's fate and ensure a steady Valoria.",
+      "privateStrategy": "Secure Elena's vote against Jackson with a modest bribe, reinforcing our anti-Alvarez stance while conserving funds for later bailouts.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya, I have the evidence and the funds. Take $30 and vote with me to eliminate Sterling—the oligarch who owns the media.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Arthur Sterling",
+      "whisperText": "Maya, I have the evidence and the funds. Take $30 and vote with me to eliminate Sterling—the oligarch who owns the media.",
+      "privateStrategy": "Bribe Maya to join anti-Sterling bloc. With Sterling out, I consolidate the anti-corruption lane. Keep $65 for bailouts.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 1,
+    "speakerId": "sora-kim",
+    "speakerName": "Sora Kim",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Garrick, let's patch the system. Accept my bribe to vote out Jackson Alvarez tonight.",
+    "details": {
+      "location": "West Wing Corridor 3",
+      "agreedTargetName": "Jackson Alvarez",
+      "whisperText": "Garrick, let's patch the system. Accept my bribe to vote out Jackson Alvarez tonight.",
+      "privateStrategy": "Bribe Garrick to eliminate Jackson, a populist bug. Use $30 to secure a vote.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

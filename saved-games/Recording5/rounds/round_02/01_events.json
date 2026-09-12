@@ -1,0 +1,74 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone believes his prosecutor's badge deters me. Three ballots already bleed him dry. Mine lands free, banks fifteen million, keeps my treasury armored for Vance next round.",
+    "privateReason": "Consensus plus Arthur's pact guarantees Stone's elimination; my vote costs nothing and banks escrow.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "elijah-haddon",
+    "voterName": "Elijah Haddon",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone believes his prosecutor's files shield him. Two votes already stain his ledger; mine is the third nail. Sterling's pact banks fifteen million while her fortune guards my flank.",
+    "privateReason": "Honoring Sterling's pact banks escrow; consensus guarantees Stone's elimination while preserving my capital.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone assumes the prosecutor's badge shields him. Two votes already bleed him; Haddon's pact adds my third. Cheap elimination, escrow banked, treasury hidden for Vance next round.",
+    "privateReason": "Honor the pact, bank escrow, join consensus—cheap elimination preserves my hidden capital.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Stone assumes his prosecutor's halo deters ballots. Probability of three-vote convergence: ninety percent. I join it, bank the escrow, and delete the one man who could audit my ledger.",
+    "privateReason": "Honors the Lin pact, banks escrow, eliminates the prosecutor threatening my empire's audit trail.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova assumes the room piles onto Stone. Wrong. With Zhao's ballot, two votes liquidate eighty million, stranding her at twenty. I bank fifteen and keep Stone absorbing fire.",
+    "privateReason": "Zhao's pact doubles votes, drains Rostova eighty million, banks fifteen million, keeps Stone as shield.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 2,
+    "voterId": "garrick-stone",
+    "voterName": "Garrick Stone",
+    "targetId": "victoria-sterling",
+    "targetName": "Victoria Sterling",
+    "content": "Thorne's pact targeted me — a rigged contract, void on its face. Arthur grandstanded; Victoria funds the machine. My ballot indicts the deepest war chest. Follow the money.",
+    "privateReason": "Both pact and bandwagon target me; I strike the richest Sterling war chest instead.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

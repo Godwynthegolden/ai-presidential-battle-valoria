@@ -1,0 +1,72 @@
+[
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "content": "Twenty years I poured steel till the mills went dark. Now Governor of Iron Valley—and I'm taking Valoria back for the working class!"
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "content": "Numbers don't lie. Politicians do. I'm Elena Rostova — the economist who balances impossible books. Valoria needs surgery, not showmanship. Fiscal discipline. Sustainable growth."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "content": "Thirty years defending this nation taught me one truth: peace belongs to the strong. Politicians sold our borders. I'm here to take them back."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "content": "Career politicians couldn't balance a checkbook. I turned a thousand dollars into ten billion. Valoria just landed its first CEO — and business is booming."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "content": "The heiress who burned her inheritance to fund the frontline. Daddy's country club taught me their dirty tricks—tonight, I break the family empire."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "content": "Fifteen million souls gather around my pulpit weekly—tonight, all Valoria is my congregation. I've come to heal our fractured land. Faith! Family! Restoration!"
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "content": "Maya Lin. Eighty hostages came home without one bullet fired. Tonight, Valoria itself is the hostage. I negotiate. I never gamble."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "content": "Taught silicon to speak with the human mind. Now I intend to teach Valoria's government to think."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "content": "Republics aren't saved by loud promises—they're steadied by practiced hands. Mine. Thirty-five years, four administrations, zero surprises. Tested leadership. A steady Valoria."
+  },
+  {
+    "type": "campaign_speech",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "content": "Four governors convicted. Two oligarchs caged. Three car bombs—they failed. I've read the Capitol Island ledgers. The indictment is coming. So am I."
+  }
+]

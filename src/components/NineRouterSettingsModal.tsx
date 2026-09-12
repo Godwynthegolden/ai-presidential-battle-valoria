@@ -54,6 +54,8 @@ export interface NineRouterConfigState {
   // Automatic Next Mode for OBS / YouTube recording
   autoNextMode?: boolean;
   autoNextDelay?: number; // In seconds (default 0.75s)
+  // Introduction Motion Graphic Showcase Delay
+  introShowcaseDelay?: number; // In seconds (default 3.0s)
 }
 
 interface NineRouterSettingsModalProps {
@@ -81,6 +83,10 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
   const [autoNextMode, setAutoNextMode] = useState<boolean>(currentConfig.autoNextMode ?? false);
   const [autoNextDelay, setAutoNextDelay] = useState<number>(
     typeof currentConfig.autoNextDelay === 'number' ? currentConfig.autoNextDelay : 0.75
+  );
+  // Introduction Motion Graphic Showcase Delay (3.0s default)
+  const [introShowcaseDelay, setIntroShowcaseDelay] = useState<number>(
+    typeof currentConfig.introShowcaseDelay === 'number' ? currentConfig.introShowcaseDelay : 3.0
   );
 
   // Ballot Live Feed settings
@@ -159,6 +165,7 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
       setKineticFontSize(currentConfig.kineticFontSize || 'large');
       setAutoNextMode(currentConfig.autoNextMode ?? false);
       setAutoNextDelay(typeof currentConfig.autoNextDelay === 'number' ? currentConfig.autoNextDelay : 0.75);
+      setIntroShowcaseDelay(typeof currentConfig.introShowcaseDelay === 'number' ? currentConfig.introShowcaseDelay : 3.0);
       setPreviewSpeaking(true);
       setStatusMessage({ type: 'idle', text: '' });
       setTtsTestSuccess(false);
@@ -327,6 +334,7 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
       kineticFontSize,
       autoNextMode,
       autoNextDelay: Number(autoNextDelay) || 0.75,
+      introShowcaseDelay: Number(introShowcaseDelay) || 3.0,
     });
     onClose();
   };
@@ -1256,6 +1264,77 @@ export const NineRouterSettingsModal: React.FC<NineRouterSettingsModalProps> = (
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border transition cursor-pointer ${
                       Math.abs(autoNextDelay - preset.val) < 0.01
                         ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-xs'
+                        : 'bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 2.5 Introduction Motion Graphic Showcase Delay */}
+            <div className="p-4 rounded-2xl bg-slate-900 border border-cyan-500/30 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                  Introduction Graphic Showcase Delay
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-black text-cyan-400 px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40">
+                    {introShowcaseDelay.toFixed(1)}s Delay
+                  </span>
+                  <input
+                    type="number"
+                    min="0.5"
+                    max="10.0"
+                    step="0.5"
+                    value={introShowcaseDelay}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val)) setIntroShowcaseDelay(Math.min(10.0, Math.max(0.5, val)));
+                    }}
+                    className="w-16 px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-cyan-300 text-xs font-mono font-bold text-center focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-400 font-mono leading-relaxed">
+                Showcase duration holding the candidate's full-body art, codename, title role, and credentials before dialogue audio and kinetic subtitles begin playing.
+              </p>
+
+              {/* Range Slider */}
+              <div className="flex items-center gap-3 pt-1">
+                <span className="text-[10px] font-mono text-slate-500">0.5s</span>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="8.0"
+                  step="0.5"
+                  value={introShowcaseDelay}
+                  onChange={e => setIntroShowcaseDelay(parseFloat(e.target.value))}
+                  className="flex-1 accent-cyan-400 cursor-pointer"
+                />
+                <span className="text-[10px] font-mono text-slate-500">8.0s</span>
+              </div>
+
+              {/* Quick Presets */}
+              <div className="flex items-center gap-2 pt-1 flex-wrap">
+                <span className="text-[10px] font-mono text-slate-500 uppercase font-bold">Presets:</span>
+                {[
+                  { label: '1.5s (Fast)', val: 1.5 },
+                  { label: '2.0s (Snappy)', val: 2.0 },
+                  { label: '3.0s (Default)', val: 3.0 },
+                  { label: '4.0s (Cinematic)', val: 4.0 },
+                  { label: '5.0s (Grand)', val: 5.0 },
+                ].map(preset => (
+                  <button
+                    key={preset.val}
+                    type="button"
+                    onClick={() => setIntroShowcaseDelay(preset.val)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border transition cursor-pointer ${
+                      Math.abs(introShowcaseDelay - preset.val) < 0.1
+                        ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-black shadow-xs'
                         : 'bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
                     }`}
                   >

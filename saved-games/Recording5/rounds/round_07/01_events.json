@@ -1,0 +1,38 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Thorne assumes thirty-five years of Senate favors buy immunity. His $20M sits below bailout threshold—instant liquidation. My Sterling escrow pays $15M. Checkmate.",
+    "privateReason": "Thorne is consensus-priced, sub-$40M vulnerable; honoring Sterling's pact banks $15M escrow.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Sterling assumes the room's fixation on Haddon covers his flanks. Two concentrated ballots force his forty-million bailout—five million remaining. Liquidation by arithmetic.",
+    "privateReason": "Honor pact secures $15M escrow; concentrated votes drain Sterling to $5M, keeping Haddon as shield.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 7,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur Sterling assumed their treasury gave them breathing room tonight. Striking now forces their liquidation before they can consolidate a voting bloc.",
+    "privateReason": "Strategic elimination vote",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  }
+]

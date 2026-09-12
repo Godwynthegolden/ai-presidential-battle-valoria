@@ -1,0 +1,144 @@
+[
+  {
+    "type": "vote_tally",
+    "round": 4,
+    "details": {
+      "votes": [
+        {
+          "voterId": "elena-rostova",
+          "targetId": "silas-thorne",
+          "reason": "Honor pact, bank $15M escrow, drain the richest kingpin's war chest.",
+          "strategyMonologue": "Silas assumes his $95M fortress deters aggression while the room hunts me. Stacking votes forces his $80M attrition; the escrow lifts me to $55M. Checkmate.",
+          "audioBlobUrl": "blob:http://localhost:3000/d1ffea53-3603-439d-ab2e-75a87b02328f",
+          "audioBlob": {},
+          "pactWithId": "maya-lin",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": true,
+          "betrayedAllyId": "maya-lin",
+          "isHonoredPact": false,
+          "voterName": "Elena Rostova",
+          "targetName": "Silas Thorne"
+        },
+        {
+          "voterId": "art-sterling",
+          "targetId": "victoria-sterling",
+          "reason": "Honor the pact: bank $15M, cripple a kingpin, keep Vance as my meat shield.",
+          "strategyMonologue": "Sterling assumes her eighty million buys immunity. Wrong. Two pact votes force full liquidation, I bank fifteen million escrow, and Vance stays my shield. Perfect ROI.",
+          "audioBlobUrl": "blob:http://localhost:3000/3f47201b-3e77-4114-8c57-a9008198a8a4",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Arthur Sterling",
+          "targetName": "Victoria Sterling"
+        },
+        {
+          "voterId": "victoria-sterling",
+          "targetId": "marcus-vance",
+          "reason": "Pact escrow plus bandwagon concentration guarantees elimination while conserving my $80M.",
+          "strategyMonologue": "Marcus believes his medals buy immunity. Three knives already gleam in his back—mine banks Father's fifteen million. The general falls; my war chest compounds to ninety-five.",
+          "audioBlobUrl": "blob:http://localhost:3000/6791d251-762d-4bd4-883d-c13a6e0493a5",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Victoria Sterling",
+          "targetName": "Marcus Vance"
+        },
+        {
+          "voterId": "elijah-haddon",
+          "targetId": "marcus-vance",
+          "reason": "Honoring Victoria's pact banks $15M, joins three accusers, guarantees Vance's fall cheaply.",
+          "strategyMonologue": "Vance thinks his medals and sixty million buy mercy. Three accusers already preach his fall. My ballot joins their choir, banks Victoria's fifteen million, keeps Thorne in my debt.",
+          "audioBlobUrl": "blob:http://localhost:3000/8e78a69f-db69-4252-ba32-66a2f7fad841",
+          "audioBlob": {},
+          "pactWithId": "maya-lin",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "maya-lin",
+          "isHonoredPact": false,
+          "voterName": "Elijah Haddon",
+          "targetName": "Marcus Vance"
+        },
+        {
+          "voterId": "maya-lin",
+          "targetId": "marcus-vance",
+          "reason": "Pact-locked consensus guarantees elimination, banks escrow cash, removes my strongest military rival.",
+          "strategyMonologue": "Vance believes his medals shield him. Three accusers already aim at his chest. My ballot honors Haddon's pact, banks fifteen million, and buries my gravest rival tonight.",
+          "audioBlobUrl": "blob:http://localhost:3000/1d368e8b-c3f1-4764-b5bd-6f11f875a1d2",
+          "audioBlob": {},
+          "pactWithId": "elena-rostova",
+          "pactTargetId": "victoria-sterling",
+          "isBetrayal": true,
+          "betrayedAllyId": "elena-rostova",
+          "isHonoredPact": false,
+          "voterName": "Maya Lin",
+          "targetName": "Marcus Vance"
+        },
+        {
+          "voterId": "vivienne-zhao",
+          "targetId": "marcus-vance",
+          "reason": "Three accusers guarantee his fall; my vote honors the pact and banks $15M.",
+          "strategyMonologue": "Marcus assumes his medals buy mercy. Three accusers already signed his liquidation order. My ballot merely executes the algorithm—and Maya's escrow funds my next blindside.",
+          "audioBlobUrl": "blob:http://localhost:3000/10f5b413-9965-494a-97b6-2c992ca40188",
+          "audioBlob": {},
+          "pactWithId": "silas-thorne",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "silas-thorne",
+          "isHonoredPact": false,
+          "voterName": "Vivienne Zhao",
+          "targetName": "Marcus Vance"
+        },
+        {
+          "voterId": "silas-thorne",
+          "targetId": "marcus-vance",
+          "reason": "Consensus plus Zhao's pact guarantees elimination and banks $15M escrow for survival.",
+          "strategyMonologue": "Vance believes his sixty million and medals shield him. Three accusers plus Zhao's pact guarantee concentration. My escrow pays fifteen million—survival math trumps sentiment. Checkmate.",
+          "audioBlobUrl": "blob:http://localhost:3000/0cd2a5e6-67d5-44eb-a343-bbf5e30269bd",
+          "audioBlob": {},
+          "pactWithId": "art-sterling",
+          "pactTargetId": "elena-rostova",
+          "isBetrayal": true,
+          "betrayedAllyId": "art-sterling",
+          "isHonoredPact": false,
+          "voterName": "Silas Thorne",
+          "targetName": "Marcus Vance"
+        }
+      ],
+      "bailoutTransactions": [
+        {
+          "id": "bailout-r4-1-silas-thorne",
+          "candidateId": "silas-thorne",
+          "round": 4,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 70,
+          "timestamp": 1789071930833,
+          "candidateName": "Silas Thorne"
+        },
+        {
+          "id": "bailout-r4-2-victoria-sterling",
+          "candidateId": "victoria-sterling",
+          "round": 4,
+          "cost": 40,
+          "votesRemoved": 1,
+          "initialVotes": 1,
+          "remainingVotes": 0,
+          "remainingBudget": 65,
+          "timestamp": 1789071930833,
+          "candidateName": "Victoria Sterling"
+        }
+      ],
+      "eliminatedId": "art-sterling",
+      "eliminatedName": "Arthur Sterling",
+      "finalVoteCount": 0
+    }
+  }
+]

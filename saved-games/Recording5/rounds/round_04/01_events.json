@@ -1,0 +1,74 @@
+[
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "elena-rostova",
+    "voterName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Thorne assumes his $190M fortress deters retaliation for slandering me onstage. Two concentrated ballots force $80M attrition; my escrow clears the $40M solvency line. Checkmate.",
+    "privateReason": "Honor Vance pact, bank $15M escrow, drain the kingpin who slandered me.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "art-sterling",
+    "voterName": "Arthur Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova believes her technocrat credentials shield her. Three votes already stack against her $30M balance. My ballot honors Sterling's pact, banks fifteen million, and liquidates her tonight.",
+    "privateReason": "Elena's $30M can't survive concentrated votes; Sterling pact banks $15M escrow, hitting survival threshold.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "victoria-sterling",
+    "voterName": "Victoria Sterling",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas counts his $190M like a moat. He assumes dynasty money buys immunity. Maya's vote plus mine forces eighty million into liquidation. Checkmate, Senator.",
+    "privateReason": "Honor Maya's pact, bank $15M, drain Thorne's war chest while Elena absorbs the room's votes.",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "maya-lin",
+    "voterName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance reads his war chest as armor. Three blades plus Haddon's handshake corner him tonight; my capital stays sheathed, my escrow fills.",
+    "privateReason": "Consensus guarantees elimination; honoring Haddon's pact banks escrow while my treasury stays hidden.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "vivienne-zhao",
+    "voterName": "Vivienne Zhao",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance assumes his $115M war chest buys coalition immunity. Four concentrated votes liquidate him; Maya's escrow banks me $135M. The general's perimeter collapses via pure Bayesian arithmetic.",
+    "privateReason": "Strategic determination",
+    "isBetrayal": true,
+    "isHonoredPact": false
+  },
+  {
+    "type": "strategy_monologue",
+    "round": 4,
+    "voterId": "silas-thorne",
+    "voterName": "Silas Thorne",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Vance assumes his war chest deters coalitions. Three debate wounds prove otherwise. Zhao's pact banks me fifteen million while the room finishes him. Checkmate.",
+    "privateReason": "Pact honored, bandwagon joined, +$15M escrow banked; Vance's elimination unites my coalition cheaply.",
+    "isBetrayal": false,
+    "isHonoredPact": true
+  }
+]

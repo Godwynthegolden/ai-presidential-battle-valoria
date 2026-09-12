@@ -112,20 +112,32 @@ class AudioSyncService {
             (audio as any).__wiretapSourceNode = source;
           }
 
+          // Dedicated clean speech gain node for standard studio audio output
+          // (Disconnected by playSpeechWithWiretap if surveillance filter is applied)
+          let cleanGain: GainNode = (audio as any).__cleanGainNode;
+          if (!cleanGain) {
+            cleanGain = ctx.createGain();
+            cleanGain.gain.setValueAtTime(1.0, ctx.currentTime);
+            (audio as any).__cleanGainNode = cleanGain;
+          }
+          try {
+            source.connect(cleanGain);
+            cleanGain.connect(masterOut);
+          } catch {
+            // Already connected
+          }
+
+          // Acoustic measurement tap (Leaf node: Analyzes speech frequencies with zero output leakage)
           const analyser = ctx.createAnalyser();
           analyser.fftSize = 256; // 128 frequency bins, ultra-fast 2.5ms response
           analyser.smoothingTimeConstant = 0.25; // responsive vocal envelope tracking
-          source.connect(analyser);
-
-          // Route to master output so audio plays with studio mastering warmth
           try {
-            analyser.connect(masterOut);
-          } catch {
-            // Destination already connected or handled
-          }
+            source.connect(analyser);
+          } catch {}
 
           this.analyser = analyser;
           this.dataArray = new Uint8Array(analyser.frequencyBinCount);
+          (audio as any).__audioSyncAnalyser = analyser;
         }
       } catch (err) {
         console.warn('[AudioSyncService] Web Audio Analyser setup note:', err);
@@ -324,6 +336,12 @@ class AudioSyncService {
       }
       this.analyser = null;
     }
+    if (this.activeAudio && (this.activeAudio as any).__cleanGainNode) {
+      try {
+        (this.activeAudio as any).__cleanGainNode.disconnect();
+      } catch {}
+      (this.activeAudio as any).__cleanGainNode = null;
+    }
     this.dataArray = null;
     this.activeAudio = null;
     this.activeText = '';
@@ -347,6 +365,13 @@ class AudioSyncService {
       isPeak: false,
       peakCount: 0,
     });
+  }
+
+  /**
+   * Exposes active AnalyserNode for external acoustic taps / filters
+   */
+  public getAnalyser(): AnalyserNode | null {
+    return this.analyser;
   }
 
   /**

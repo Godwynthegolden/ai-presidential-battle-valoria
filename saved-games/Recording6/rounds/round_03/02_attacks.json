@@ -1,0 +1,95 @@
+[
+  {
+    "type": "attack",
+    "round": 3,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "targetId": "maya-lin",
+    "targetName": "Maya Lin",
+    "content": "Maya Lin calls price-gougers to a table. Cartels don't fear diplomats—they feast on them. Our families are hostages now, and her \"precision\" is appeasement. I don't negotiate with cartels. I break them.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Maya Lin"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 3,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Rostova \"governs the arithmetic\"—great, my arithmetic says she's never signed a paycheck, never moved a carton of eggs. Austerity economist, zero ROI. Families want dinner, not a lecture. Short Rostova stock tonight!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 3,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Monetary arson? Darling, my dividends are funded by taxing Daddy's yacht club—not printing presses. Elena Rostova \"governs the arithmetic\" while families starve; her austerity is famine in a blazer. Send her home.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Elena Rostova",
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 3,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Beloved, Elena Rostova says sentiment isn't a budget—tell that to the mother weeping over twelve-dollar eggs! She worships the ledger and starves the soul. Valoria needs a shepherd, not an accountant of suffering!",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 3,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "marcus-vance",
+    "targetName": "Marcus Vance",
+    "content": "Appeasement? I freed eighty hostages without firing a bullet. Vance's only tool is a hammer—so every grocery shelf becomes a nail. Families need dinner, not a warlord. His bluster is his tell. Retire it.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Marcus Vance",
+      "voteCallTargetName": "Marcus Vance"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 3,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "elijah-haddon",
+    "targetName": "Elijah Haddon",
+    "content": "Haddon prays over twelve-dollar eggs from a luxury jet at forty thousand feet. Faith is not food policy—it's a placebo for famine. His sermons soothe souls while stomachs stay empty. Delete the shepherd.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elijah Haddon"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 3,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Colleagues, thirty-five years of statecraft taught me: consensus feeds nations. Rostova's cold austerity arithmetic starves them. Her spreadsheet extremism has no seat at Valoria's dinner table. Let us bid her a graceful goodbye.",
+    "details": {
+      "isRebuttal": false,
+      "voteCallTargetName": "Elena Rostova"
+    }
+  }
+]

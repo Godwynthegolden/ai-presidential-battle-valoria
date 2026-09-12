@@ -1,0 +1,178 @@
+[
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas — consensus prices Stone at zero. Thirty million escrowed; cast the fatal vote.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Silas — consensus prices Stone at zero. Thirty million escrowed; cast the fatal vote.",
+      "receiverResponse": "Committee debts remember friends, Governor. Stone's count is certain.",
+      "privateStrategy": "Stone bleeds at $80M with two accusers; joining consensus is cheapest survival. Preserve $70M war chest for next ballot's real threat—Sterling.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas, Stone's a distressed asset. Thirty million escrowed—we liquidate the prosecutor tonight.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Silas, Stone's a distressed asset. Thirty million escrowed—we liquidate the prosecutor tonight.",
+      "receiverResponse": "The prosecutor's file closes tonight. Keep your end clean, Arthur.",
+      "privateStrategy": "Stone attacked me publicly and holds the smallest war chest. Riding consensus eliminates my attacker cheaply while Silas burns political capital, not mine.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "targetId": "garrick-stone",
+    "targetName": "Garrick Stone",
+    "content": "Everyone is circling you, Garrick. Flip the blade — my father falls tonight, war chest.",
+    "details": {
+      "location": "West Wing Corridor 3",
+      "agreedTargetName": "Arthur Sterling",
+      "whisperText": "Everyone is circling you, Garrick. Flip the blade — my father falls tonight, war chest.",
+      "receiverResponse": "Sterling's indictment was overdue. Your money seals his fate.",
+      "privateStrategy": "Consensus hunts Garrick; I flip the prosecutor against Father. Arthur's delegates scatter, the dynasty breaks, and I own the anti-establishment lane.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "targetId": "art-sterling",
+    "targetName": "Arthur Sterling",
+    "content": "Arthur, Stone's judgment hour has come. Thirty-five million, and my vote seals his fall.",
+    "details": {
+      "location": "Capitol Cloakroom Cam 04",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Arthur, Stone's judgment hour has come. Thirty-five million, and my vote seals his fall.",
+      "receiverResponse": "Agreed, preacher. The prosecutor's subpoena era ends tonight.",
+      "privateStrategy": "Stone is doomed regardless; selling my consensus vote extracts",
+      "bribeOffered": false,
+      "bribeAmount": 35,
+      "upfrontPaid": 17,
+      "escrowPending": 18,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Silas. Stone is bleeding eighty million and two knives. Thirty escrowed — cast the fatal.",
+    "details": {
+      "location": "Sub-Basement Boiler Room",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Silas. Stone is bleeding eighty million and two knives. Thirty escrowed — cast the fatal.",
+      "receiverResponse": "He's finished already. My vote merely closes the file.",
+      "privateStrategy": "Stone is the consensus kill; joining costs least and Thorne's alignment makes betrayal illogical. Keep $85M as bailout insurance against reveal-night ambushes.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena, Victoria's war chest outbids us both. Thirty million staged—bury her tonight.",
+    "details": {
+      "location": "Executive VIP Skybox",
+      "agreedTargetName": "Victoria Sterling",
+      "whisperText": "Elena, Victoria's war chest outbids us both. Thirty million staged—bury her tonight.",
+      "receiverResponse": "Understood. Her fortune won't save her from the count.",
+      "privateStrategy": "Garrick's already dead; consensus votes pile there. Blindside Victoria—richest rival—while the room watches Stone. Elena's $85M makes her hungry for my escrow.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Elena, consensus favors the prosecutor's exit. Thirty million in escrow — make it unanimous.",
+    "details": {
+      "location": "Service Elevator B",
+      "agreedTargetName": "Garrick Stone",
+      "whisperText": "Elena, consensus favors the prosecutor's exit. Thirty million in escrow — make it unanimous.",
+      "receiverResponse": "The numbers align. Stone falls; my vote is committed.",
+      "privateStrategy": "Stone is bleeding and consensus-formed; buying Elena locks the majority cheaply. Preserve remaining $85M for ballot-defense against Sterling wealth blindsides later.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  },
+  {
+    "type": "cctv_pact",
+    "round": 2,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "Sterling's grocery shells funded tonight's consensus, Elena. Thirty million staged. Indict him at the ballot.",
+    "details": {
+      "location": "Underground Parking Cam 09",
+      "agreedTargetName": "Arthur Sterling",
+      "whisperText": "Sterling's grocery shells funded tonight's consensus, Elena. Thirty million staged. Indict him at the ballot.",
+      "receiverResponse": "The numbers align, Prosecutor. Sterling won't survive the count.",
+      "privateStrategy": "Sterling leads my elimination consensus. Rostova bleeds capital at $85M; $30M secures her ballot. Killing Sterling fractures the anti-Stone bloc.",
+      "bribeOffered": true,
+      "bribeAmount": 30,
+      "upfrontPaid": 15,
+      "escrowPending": 15,
+      "receiverDecision": "accept",
+      "bribeAccepted": true
+    }
+  }
+]

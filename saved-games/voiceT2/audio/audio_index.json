@@ -1,0 +1,136 @@
+[
+  {
+    "filename": "01_campaign_01_jax-alvarez.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "jax-alvarez",
+    "speakerName": "Jackson Alvarez",
+    "textSnippet": "They hiked lifesaving drugs 400% and shut down your hospitals. I'll break the cartels, cap prices, a",
+    "sizeBytes": 162167,
+    "timestamp": 1788386629841
+  },
+  {
+    "filename": "01_campaign_02_elena-rostova.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "textSnippet": "400% price gouging is market failure. My plan: break cartels with antitrust enforcement, audit hospi",
+    "sizeBytes": 251610,
+    "timestamp": 1788386683417
+  },
+  {
+    "filename": "01_campaign_03_art-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "textSnippet": "This crisis is a balance sheet failure. My plan? Break the cartels, slash taxes to 10%, and let mark",
+    "sizeBytes": 333112,
+    "timestamp": 1788386695377
+  },
+  {
+    "filename": "01_campaign_04_victoria-sterling.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "victoria-sterling",
+    "speakerName": "Victoria Sterling",
+    "textSnippet": "I'll tax billionaire pharma looters, reopen rural hospitals, and give youth the power to heal Valori",
+    "sizeBytes": 131238,
+    "timestamp": 1788386721039
+  },
+  {
+    "filename": "01_campaign_05_marcus-vance.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "marcus-vance",
+    "speakerName": "Marcus Vance",
+    "textSnippet": "Cartels and monopolies prey on the weak. I will deploy military medics to rural trauma zones, seize ",
+    "sizeBytes": 226950,
+    "timestamp": 1788386724961
+  },
+  {
+    "filename": "01_campaign_06_maya-lin.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "textSnippet": "I freed eighty hostages without a bullet. Now I will free Valoria from cartel extortion. Calibrated ",
+    "sizeBytes": 242415,
+    "timestamp": 1788386730507
+  },
+  {
+    "filename": "01_campaign_07_elijah-haddon.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "elijah-haddon",
+    "speakerName": "Elijah Haddon",
+    "textSnippet": "Valoria bleeds while cartels count their silver. I will break this greed with righteous conviction, ",
+    "sizeBytes": 226114,
+    "timestamp": 1788386734111
+  },
+  {
+    "filename": "01_campaign_08_vivienne-zhao.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "textSnippet": "Your biology is a bottleneck; my neural-lace telemedicine and algorithmic pricing grid will dissolve",
+    "sizeBytes": 244087,
+    "timestamp": 1788386746592
+  },
+  {
+    "filename": "01_campaign_09_silas-thorne.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "textSnippet": "As President, I will forge a bipartisan compact: emergency price caps on essential medicines and a r",
+    "sizeBytes": 306363,
+    "timestamp": 1788386761751
+  },
+  {
+    "filename": "01_campaign_10_garrick-stone.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "garrick-stone",
+    "speakerName": "Garrick Stone",
+    "textSnippet": "A dying rural child denied insulin while cartel CEOs hoard billions. As President, I will subpoena e",
+    "sizeBytes": 252028,
+    "timestamp": 1788386772365
+  },
+  {
+    "filename": "01_campaign_11_sora-kim.mp3",
+    "phase": "CAMPAIGN",
+    "round": 1,
+    "speakerId": "sora-kim",
+    "speakerName": "Sora Kim",
+    "textSnippet": "The pharma cartel runs zero-day exploits on your lives—400% price spikes, closed trauma centers. I'l",
+    "sizeBytes": 295078,
+    "timestamp": 1788386785602
+  },
+  {
+    "filename": "02_round1_attack_02_elena-rostova_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "elena-rostova",
+    "speakerName": "Elena Rostova",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "Jackson Alvarez, your \"restore\" is a myth. Your tariffs protect cartels, not rural trauma centers. A",
+    "sizeBytes": 218173,
+    "timestamp": 1788386803424
+  },
+  {
+    "filename": "02_round1_attack_03_art-sterling_vs_jax-alvarez.mp3",
+    "phase": "ATTACK",
+    "round": 1,
+    "speakerId": "art-sterling",
+    "speakerName": "Arthur Sterling",
+    "targetId": "jax-alvarez",
+    "targetName": "Jackson Alvarez",
+    "textSnippet": "Jackson Alvarez talks restoring the working class while his failed policies let cartels gouge you. H",
+    "sizeBytes": 197275,
+    "timestamp": 1788386810175
+  }
+]

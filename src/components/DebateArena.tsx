@@ -36,7 +36,7 @@ interface DebateArenaProps {
   onRestart: () => void;
   onNextStep?: () => void;
   onSelectCCTVFeed?: (feedIndex: number) => void;
-  onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string) => void;
+  onPlaySpeechAudio?: (text: string, voiceId?: string, speakerCandidateId?: string, options?: { isCCTV?: boolean }) => void;
   onPlayCCTVPactAudio?: (pact: BackroomPact) => void;
   isSpeakingAudio?: boolean;
   isBufferingLookahead?: boolean;
@@ -135,7 +135,7 @@ export const DebateArena: React.FC<DebateArenaProps> = ({
         eliminatedId={null}
         winnerId={winnerId}
         candidateBudgets={gameState.candidateBudgets}
-        activeCandidateIds={gameState.participatingCandidateIds || gameState.activeCandidateIds}
+        activeCandidateIds={gameState.activeCandidateIds}
         defaultSpeed={ballotSpeed}
         defaultAutoPlay={ballotAutoPlay}
         onComplete={onNextStep}

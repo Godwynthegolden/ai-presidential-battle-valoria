@@ -1,0 +1,44 @@
+[
+  {
+    "type": "attack",
+    "round": 7,
+    "speakerId": "maya-lin",
+    "speakerName": "Maya Lin",
+    "targetId": "vivienne-zhao",
+    "targetName": "Vivienne Zhao",
+    "content": "Zhao calls your hunger \"obsolete wetware.\" I read her tell plainly: contempt for anyone who budgets for eggs instead of neural lace. In my negotiation room, contempt ends talks. Tonight, end hers.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Elena Rostova",
+      "voteCallTargetName": "Vivienne Zhao"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 7,
+    "speakerId": "vivienne-zhao",
+    "speakerName": "Vivienne Zhao",
+    "targetId": "silas-thorne",
+    "targetName": "Silas Thorne",
+    "content": "Thirty-five years, Silas, and eggs cost double. Your \"tested leadership\" is legacy code that failed to compile—backroom consensus optimizing billionaire margins while families starve. Deprecate the senator. Upgrade the system.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Maya Lin",
+      "voteCallTargetName": "Silas Thorne"
+    }
+  },
+  {
+    "type": "attack",
+    "round": 7,
+    "speakerId": "silas-thorne",
+    "speakerName": "Silas Thorne",
+    "targetId": "elena-rostova",
+    "targetName": "Elena Rostova",
+    "content": "My colleagues, as families face $12 eggs, Elena Rostova offers only cold arithmetic and painful austerity. Her spreadsheets never fed one child. Valoria deserves steady leadership, not a calculator. Let's retire her tonight.",
+    "details": {
+      "isRebuttal": true,
+      "rebuttalAgainstName": "Vivienne Zhao",
+      "voteCallTargetName": "Elena Rostova"
+    }
+  }
+]
