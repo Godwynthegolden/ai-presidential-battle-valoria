@@ -96,7 +96,8 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
   // Audio elements & timers
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
   const activeAudioUrlRef = useRef<string | null>(null);
-  const preloadedAudioCacheRef = useRef<Map<string, string>>(new Map());
+  // Persist raw Blobs in memory so generating fresh Object URLs works on replay and subsequent runs
+  const preloadedAudioBlobCacheRef = useRef<Map<string, Blob>>(new Map());
   
   const speechFallbackTimerRef = useRef<NodeJS.Timeout | null>(null);
   const postSpeechAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -155,10 +156,10 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
     setAudioWaveProgress(0);
   }, []);
 
-  // Pre-buffer TTS audio for candidate
+  // Pre-buffer TTS audio for candidate (stores durable Blob in memory)
   const preloadCandidateAudio = useCallback(async (candidate: Candidate) => {
     if (!nineRouterConfig?.fishAudioEnabled || !nineRouterConfig?.fishAudioApiKey) return;
-    if (preloadedAudioCacheRef.current.has(candidate.id)) return;
+    if (preloadedAudioBlobCacheRef.current.has(candidate.id)) return;
 
     try {
       const dialogue = candidate.introductionDialogue || getDefaultIntroductionDialogue(candidate);
@@ -175,8 +176,7 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
       });
       if (res.ok) {
         const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        preloadedAudioCacheRef.current.set(candidate.id, url);
+        preloadedAudioBlobCacheRef.current.set(candidate.id, blob);
       }
     } catch (err) {
       console.warn(`[Failed to preload TTS audio for ${candidate.name}]:`, err);
@@ -291,8 +291,8 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
     // Attempt to play Fish.Audio TTS audio if available & unmuted
     if (!isMuted && nineRouterConfig?.fishAudioEnabled) {
       try {
-        let audioUrl = preloadedAudioCacheRef.current.get(candidate.id);
-        if (!audioUrl) {
+        let blob = preloadedAudioBlobCacheRef.current.get(candidate.id);
+        if (!blob) {
           const res = await fetch('/api/tts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -305,12 +305,14 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
             }),
           });
           if (res.ok) {
-            const blob = await res.blob();
-            audioUrl = URL.createObjectURL(blob);
+            blob = await res.blob();
+            preloadedAudioBlobCacheRef.current.set(candidate.id, blob);
           }
         }
 
-        if (audioUrl) {
+        if (blob) {
+          // Generate a fresh, valid object URL for this playback instance
+          const audioUrl = URL.createObjectURL(blob);
           activeAudioUrlRef.current = audioUrl;
           const audio = new Audio(audioUrl);
           activeAudioRef.current = audio;
@@ -475,19 +477,20 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
         <div className="absolute top-0 left-1/4 right-1/4 h-36 bg-gradient-to-b from-cyan-500/12 to-transparent blur-3xl" />
       </div>
 
-      {/* Cinematic Anamorphic Beam Wipe on Candidate Change */}
+      {/* Crisp Zero-Blur Broadcast Laser Wipe on Candidate Transition */}
       {transitionKey > 0 && (
         <div 
           key={transitionKey}
-          className="absolute inset-0 pointer-events-none z-40 overflow-hidden"
+          className="absolute inset-0 pointer-events-none z-50 overflow-hidden"
         >
+          {/* Razor-Sharp Vertical Laser Blade */}
           <div 
-            className="absolute -inset-y-20 w-48 animate-holo-wipe"
+            className="absolute inset-y-0 w-2.5 animate-laser-sweep"
             style={{
-              background: currentCandidate 
-                ? `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.85) 45%, ${currentCandidate.color.primary} 60%, transparent 100%)`
-                : 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.85) 50%, transparent 100%)',
-              filter: 'blur(4px)',
+              background: '#ffffff',
+              boxShadow: currentCandidate 
+                ? `0 0 20px 4px ${currentCandidate.color.primary}, 0 0 50px 15px ${currentCandidate.color.primary}99, -40px 0 60px 10px ${currentCandidate.color.primary}44`
+                : '0 0 25px 6px #06b6d4, 0 0 60px 20px rgba(6, 182, 212, 0.6)',
             }}
           />
         </div>
@@ -603,6 +606,21 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
         {currentCandidate && (
           <div className="relative z-20 w-full h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 items-center gap-6 lg:gap-12">
             
+            {/* Colossal Watermark Stencil Typography across the background */}
+            <div 
+              key={`watermark-${currentCandidate.id}`}
+              className="absolute inset-0 flex items-center justify-end pr-2 lg:pr-8 pointer-events-none select-none overflow-hidden -z-10"
+            >
+              <span 
+                className="text-[18vw] font-black uppercase tracking-tighter text-white/[0.035] leading-none transition-all duration-1000 transform translate-x-8 translate-y-6"
+                style={{
+                  WebkitTextStroke: `1px ${currentCandidate.color.primary}20`,
+                }}
+              >
+                {currentCandidate.name.split(' ').slice(-1)[0]}
+              </span>
+            </div>
+
             {/* LEFT HALF (Cols 1-7): Upper-Left Identity & Lower-Left Kinetic Dialogue */}
             <div className="lg:col-span-7 h-full flex flex-col justify-between py-2 sm:py-6 z-20 order-2 lg:order-1">
               
@@ -610,8 +628,8 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
               <div 
                 className={`flex flex-col gap-3 transition-all duration-700 ${
                   animStage === 'entering' 
-                    ? 'opacity-0 -translate-x-12 blur-sm' 
-                    : 'opacity-100 translate-x-0 blur-0'
+                    ? 'opacity-0 -translate-x-8' 
+                    : 'opacity-100 translate-x-0'
                 }`}
               >
                 {/* Header Pills: Candidate Index & Codename */}
@@ -644,19 +662,44 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
                   </span>
                 </div>
 
-                {/* Candidate Giant Headline Name */}
+                {/* Candidate Giant Headline Name with Profile Tag & Dynamic Laser Spark */}
                 <div className="relative mt-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span 
+                      className="text-[10px] font-mono font-black uppercase tracking-[0.25em] px-2 py-0.5 rounded bg-slate-900/90 border"
+                      style={{ 
+                        color: currentCandidate.color.primary, 
+                        borderColor: `${currentCandidate.color.primary}44` 
+                      }}
+                    >
+                      VALORIA CANDIDATE PROFILE
+                    </span>
+                    <span className="h-px flex-1 max-w-[80px] bg-slate-800" />
+                  </div>
+
                   <h2 
                     className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-black font-display tracking-tight text-white uppercase leading-[1.05] drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]"
                   >
                     {currentCandidate.name}
                   </h2>
-                  <div 
-                    className="h-1.5 w-36 sm:w-48 mt-2 rounded-full transition-all duration-700"
-                    style={{
-                      background: `linear-gradient(to right, ${currentCandidate.color.primary}, transparent)`
-                    }}
-                  />
+
+                  {/* Dynamic Laser Spark Underline */}
+                  <div className="relative h-1.5 w-48 sm:w-64 mt-2.5 rounded-full overflow-hidden bg-slate-900 border border-slate-800">
+                    <div 
+                      className="h-full w-full rounded-full transition-all duration-700"
+                      style={{
+                        background: `linear-gradient(to right, ${currentCandidate.color.primary}, ${currentCandidate.color.secondary || currentCandidate.color.primary}88)`
+                      }}
+                    />
+                    {/* High-speed glowing laser spark travelling across */}
+                    <div 
+                      className="absolute inset-y-0 w-8 animate-laser-spark"
+                      style={{
+                        background: 'linear-gradient(to right, transparent, #ffffff, transparent)',
+                        boxShadow: '0 0 10px #ffffff'
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* Candidate Role & Campaign Slogan */}
@@ -669,39 +712,58 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
                   </span>
                 </div>
 
-                {/* High-Tech Telemetry HUD Bar during Showcase Hold Window */}
+                {/* High-Tech 10-Segment Cyber Countdown Meter during Showcase Hold Window */}
                 {animStage === 'name_revealed' && showcaseCountdownSec > 0 && (
-                  <div className="flex flex-col gap-1.5 mt-3 max-w-md animate-fade-in">
+                  <div className="flex flex-col gap-2 mt-3.5 max-w-md p-3.5 rounded-2xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-md animate-fade-in shadow-xl">
                     <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-cyan-400 font-bold flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 animate-spin" />
-                        VOCAL FEED CONNECTING
+                      <span className="text-cyan-400 font-bold flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                        TRANSMISSION SYNCHRONIZING
                       </span>
-                      <span className="text-slate-300 font-black">
+                      <span className="text-slate-300 font-black tracking-wider">
                         {showcaseCountdownSec.toFixed(1)}s
                       </span>
                     </div>
-                    <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                      <div 
-                        className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-100"
-                        style={{
-                          width: `${Math.min(100, Math.max(0, ((showcaseDelay - showcaseCountdownSec) / showcaseDelay) * 100))}%`
-                        }}
-                      />
+
+                    {/* 10-Segment LED Meter */}
+                    <div className="grid grid-cols-10 gap-1.5 h-2">
+                      {Array.from({ length: 10 }).map((_, idx) => {
+                        const progress = Math.min(100, Math.max(0, ((showcaseDelay - showcaseCountdownSec) / showcaseDelay) * 100));
+                        const segmentThreshold = (idx + 1) * 10;
+                        const isFilled = progress >= segmentThreshold;
+                        return (
+                          <div 
+                            key={idx}
+                            className={`h-full rounded-sm transition-all duration-150 ${
+                              isFilled 
+                                ? 'shadow-[0_0_8px_rgba(6,182,212,0.8)]' 
+                                : 'bg-slate-900 border border-slate-800/60'
+                            }`}
+                            style={{
+                              backgroundColor: isFilled ? (currentCandidate.color.primary || '#06b6d4') : undefined
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+                      <span>Neural Link Active</span>
+                      <span>Signal 100% Locked</span>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* LOWER LEFT: Animated Kinetic Subtitles & Audio Waveform */}
+              {/* LOWER LEFT: Animated Kinetic Subtitles & Presidential Dialogue Chassis */}
               <div 
                 className={`flex flex-col gap-3 mt-auto pt-6 transition-all duration-700 ease-out ${
                   animStage === 'entering' || animStage === 'name_revealed'
-                    ? 'opacity-0 translate-y-8 blur-sm pointer-events-none'
-                    : 'opacity-100 translate-y-0 blur-0'
+                    ? 'opacity-0 translate-y-8 pointer-events-none'
+                    : 'opacity-100 translate-y-0'
                 }`}
               >
-                {/* Audio Delivery Status & Waveform Equalizer */}
+                {/* Audio Delivery Status Ribbon */}
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-mono shadow-sm">
                     <Volume2 
@@ -733,15 +795,53 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
                   )}
                 </div>
 
-                {/* Subtitle Dialogue Speech Box with Glowing Signature Border */}
+                {/* Subtitle Dialogue Speech Box with Cyber Corner Accents */}
                 <div 
-                  className="relative p-5 sm:p-6 rounded-3xl backdrop-blur-2xl border shadow-2xl transition-all duration-500 max-w-2xl"
+                  className="relative p-5 sm:p-6 rounded-2xl backdrop-blur-2xl border shadow-2xl transition-all duration-500 max-w-2xl overflow-hidden group"
                   style={{
-                    backgroundColor: 'rgba(6, 9, 18, 0.90)',
+                    backgroundColor: 'rgba(5, 8, 16, 0.92)',
                     borderColor: `${currentCandidate.color.primary}66`,
-                    boxShadow: `0 12px 40px -10px ${currentCandidate.color.primary}25`
+                    boxShadow: `0 16px 45px -12px ${currentCandidate.color.primary}33, inset 0 1px 0 rgba(255,255,255,0.08)`
                   }}
                 >
+                  {/* Cyber Corner Accents */}
+                  <div 
+                    className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2" 
+                    style={{ borderColor: currentCandidate.color.primary }} 
+                  />
+                  <div 
+                    className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2" 
+                    style={{ borderColor: currentCandidate.color.primary }} 
+                  />
+                  <div 
+                    className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2" 
+                    style={{ borderColor: currentCandidate.color.primary }} 
+                  />
+                  <div 
+                    className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2" 
+                    style={{ borderColor: currentCandidate.color.primary }} 
+                  />
+
+                  {/* Header Ribbon inside Dialogue Chassis */}
+                  <div className="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-800/80">
+                    <div className="flex items-center gap-2">
+                      <span 
+                        className="w-2 h-2 rounded-full animate-pulse" 
+                        style={{ backgroundColor: currentCandidate.color.primary }} 
+                      />
+                      <span className="text-[10px] font-mono font-black uppercase tracking-wider text-slate-300">
+                        OFFICIAL CAMPAIGN ADDRESS // {currentCandidate.codename}
+                      </span>
+                    </div>
+
+                    {isSpeakingSpeech && (
+                      <span className="text-[9px] font-mono font-bold uppercase text-cyan-400 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                        LIVE BROADCAST FEED
+                      </span>
+                    )}
+                  </div>
+
                   <KineticDialogueBox
                     text={currentCandidate.introductionDialogue || getDefaultIntroductionDialogue(currentCandidate)}
                     isSpeaking={animStage === 'speaking'}
@@ -758,7 +858,7 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
               </div>
             </div>
 
-            {/* RIGHT HALF (Cols 8-12): Full-Body Transparent PNG Portrait */}
+            {/* RIGHT HALF (Cols 8-12): Full-Body Transparent PNG Portrait on Holographic Dais */}
             <div className="lg:col-span-5 h-full flex items-center justify-center relative order-1 lg:order-2">
               
               {/* Dynamic Volumetric Dual-Ring Aura Spot behind character */}
@@ -771,27 +871,64 @@ export const IntroductionMotionGraphicModal: React.FC<IntroductionMotionGraphicM
                 style={{ backgroundColor: `${currentCandidate.color.primary}bb` }}
               />
 
-              {/* Character Full-Body Image with Kinetic Power Slam & Ambient Breathing Float */}
+              {/* Ambient Top Spotlight Cone */}
               <div 
-                className={`relative w-full h-[380px] sm:h-[480px] md:h-[560px] xl:h-[640px] flex items-center justify-center transition-all duration-700 ease-out ${
+                className="absolute -top-12 w-64 sm:w-80 h-96 opacity-20 pointer-events-none blur-3xl"
+                style={{
+                  background: `radial-gradient(ellipse at top, ${currentCandidate.color.primary}, transparent 70%)`
+                }}
+              />
+
+              {/* 3D Perspective Holographic Dais / Presidential Pedestal */}
+              <div 
+                className="absolute bottom-2 sm:bottom-4 md:bottom-6 w-72 sm:w-88 md:w-96 h-28 pointer-events-none flex items-center justify-center z-10"
+                style={{ perspective: '700px' }}
+              >
+                <div 
+                  className="relative w-full h-full flex items-center justify-center"
+                  style={{ transform: 'rotateX(72deg)' }}
+                >
+                  {/* Outer Rotating Dashed Neon Ring */}
+                  <div 
+                    className="absolute inset-0 rounded-full border-2 border-dashed animate-dais-spin opacity-60"
+                    style={{ borderColor: currentCandidate.color.primary }}
+                  />
+                  {/* Middle Counter-Rotating Pulse Ring */}
+                  <div 
+                    className="absolute inset-4 rounded-full border border-dotted opacity-40 animate-pulse"
+                    style={{ borderColor: currentCandidate.color.primary }}
+                  />
+                  {/* Glowing Energy Core Center */}
+                  <div 
+                    className="absolute inset-10 rounded-full blur-md opacity-45"
+                    style={{ backgroundColor: `${currentCandidate.color.primary}` }}
+                  />
+                  {/* Realistic Ground Floor Contact Shadow under shoes */}
+                  <div className="absolute inset-x-8 inset-y-4 bg-black/90 rounded-full blur-md" />
+                </div>
+              </div>
+
+              {/* Character Full-Body Image with Kinetic Broadcast Slam & Ambient Breathing Float */}
+              <div 
+                className={`relative w-full h-[440px] sm:h-[540px] md:h-[640px] xl:h-[720px] flex items-center justify-center transition-all duration-700 ease-out z-20 ${
                   animStage === 'entering' 
-                    ? 'opacity-0 translate-x-16 scale-105 blur-sm' 
-                    : 'opacity-100 translate-x-0 scale-100 blur-0'
+                    ? 'opacity-0 translate-x-12' 
+                    : 'opacity-100 translate-x-0'
                 }`}
               >
                 {currentCandidate.fullBodyImageUrl ? (
                   <div className="relative h-full flex items-center justify-center animate-candidate-float">
                     {/* Holographic Scanline Sweep passing vertically */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 z-10">
-                      <div className="w-full h-12 bg-gradient-to-b from-transparent via-cyan-400/25 to-transparent animate-scanline-sweep" />
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30 z-10">
+                      <div className="w-full h-10 bg-gradient-to-b from-transparent via-cyan-300/30 to-transparent animate-scanline-sweep" />
                     </div>
 
                     <img
                       src={currentCandidate.fullBodyImageUrl}
                       alt={currentCandidate.name}
-                      className="h-full w-auto max-w-full object-contain filter select-none transition-all duration-500 hover:scale-[1.02] animate-power-slam"
+                      className="h-full w-auto max-w-full object-contain filter select-none transition-all duration-500 hover:scale-[1.02] animate-broadcast-slam"
                       style={{
-                        filter: `drop-shadow(0 0 35px ${currentCandidate.color.primary}55) drop-shadow(0 15px 25px rgba(0,0,0,0.9))`
+                        filter: `drop-shadow(0 0 35px ${currentCandidate.color.primary}45) drop-shadow(0 20px 30px rgba(0,0,0,0.95))`
                       }}
                     />
                   </div>
